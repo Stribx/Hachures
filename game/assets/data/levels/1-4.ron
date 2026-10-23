@@ -1,0 +1,53 @@
+// Monde 1, boss (docs, section 6): La Grande Chaîne, commanded by Gast, comes for the Moulin des Noms.
+// The Refuge stands where 1-3's choice put it: `R` beside the Moulin, or `W` in the Bois.
+// Map legend: see 1-1.ron.
+(
+    world: 1,
+    name: "1-4 · La Grande Chaîne",
+    sepia: 120,
+    tools: ["barricade", "boue", "ronces", "arbalète", "mortier", "harpon"],
+    events: [4],
+    alt_refuge: Some("refuge=bois"),
+    challenge: Some((text: "Aucun Fuyard blessé", rule: NoFuyardHurt)),
+    // Notes: see 1-1.ron. Gast's line, the twist, Nève's borne line, the Bois consequence
+    // and the closing transition are from the docs; the others are drafts.
+    notes: [
+        (on: Start, text: "Gast : « Borne quatre ! Plantez ! Le reste suivra. »"),
+        (on: Boss("Le Levé"), text: "La Grande Chaîne suit un levé. Le mien, dix ans plus tôt, borne pour borne."),
+        (on: Boss("Le Bornage"), text: "C'est ma main sur la borne. Dix ans, et l'encre n'a pas pâli."),
+        (
+            on: Boss("Le Bornage"),
+            when: Some("refuge=bois"),
+            text: "Le Moulin est à découvert. L'Empire grave sa propre borne sur la meule : un Nom s'efface du Rôle.",
+            names: -1,
+        ),
+        (on: Boss("La Chaîne rompue"), text: "Les bœufs paniquent. Elle fuit les tours : on peut la rabattre."),
+        (on: FuyardHurt, text: "Ils traversent la zone de tir. Je le savais en posant le Refuge ici."),
+        (on: Won, text: "La Grande Chaîne s'effondre dans le bief. Dans ses coffres, un ordre de marche vers les Cols, signé « C. Vass »."),
+        (on: Won, text: "Il a gardé ma façon de faire les V."),
+        (on: Won, when: Some("refuge=moulin"), text: "Oudine a vu passer chacun d'eux. Elle parlera, plus tard."),
+        (on: Won, when: Some("refuge=bois"), text: "Oudine se tait. Elle ne dit plus rien du Rôle."),
+    ],
+    map: [
+        "^^^^^^^^^^^^^^^^^^",
+        "S......rr........F",
+        ".......rr..,,,....",
+        "..bb.......,,,..rr",
+        "~~~~~g~~~.~~~~g~~~",
+        "~~~~~g~~~.~~~~g~~~",
+        "W.,,,.............",
+        "..,,,..rr..B......",
+        ".......rr......RM.",
+        "^^^^^^^^^^^^^^^^^^",
+    ],
+    waves: [
+        [("chaineur", 8), ("fuyard", 3)],
+        [("jalonneur", 6), ("chaineur", 6)],
+        [("echassier", 6), ("chaineur", 6), ("fuyard", 4)],
+        [("chaineur", 10), ("jalonneur", 6)],
+        [("echassier", 8), ("chaineur", 8), ("fuyard", 4)],
+        [("chaineur", 12), ("jalonneur", 8)],
+        [("chaineur", 12), ("echassier", 8), ("fuyard", 5)],
+        [("grande_chaine", 1), ("jalonneur", 8), ("chaineur", 10), ("fuyard", 4)],
+    ],
+)

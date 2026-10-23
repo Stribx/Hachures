@@ -1,0 +1,4 @@
+/target
+# Built by scripts/build-web.sh
+/website/play/hachures*
+/website/play/assets/

@@ -1,0 +1,53 @@
+// Monde 1, niveau 1-3 (docs, section 6): hold the Moulin des Noms while Oudine engraves the Rôle.
+// Unlocks the harpon. Ends with the choice of the Refuge (docs), which shapes the boss level, 1-4.
+// Map legend: see 1-1.ron.
+(
+    world: 1,
+    name: "1-3 · Le Moulin des Noms",
+    sepia: 120,
+    tools: ["barricade", "boue", "ronces", "arbalète", "mortier", "harpon"],
+    events: [5, 9],
+    challenge: Some((text: "Garder tout le Rôle", rule: KeepRole(10))),
+    // Notes: see 1-1.ron. Oudine's line and the lullaby (wave 9) are from the docs.
+    notes: [
+        (on: Start, text: "Oudine : « Ce champ s'appelle Pain-Perdu parce qu'on l'a perdu deux fois. Mets-le sur ta carte, ou je te le répète jusqu'à l'hiver. »"),
+        (on: Wave(9), text: "Un Échassier fredonne. Je connais cet air : la berceuse d'Oudine."),
+        (on: FuyardHurt, text: "Pas eux. Pas sous mes tours."),
+        (on: Won, text: "Le Rôle est gravé. Reste à savoir où mettre ceux qui fuient."),
+    ],
+    choice: Some((
+        id: "refuge",
+        prompt: "Où placer le Refuge ?",
+        options: [
+            ("moulin", "Au Moulin : les Fuyards traversent la zone de tir, mais chacun qui arrive garde un Nom."),
+            ("bois", "Dans le Bois : un chemin sûr, mais le Moulin reste à découvert."),
+        ],
+    )),
+    map: [
+        "^^^^^^^^^^^^^^^^^^",
+        "S......rr........F",
+        ".......rr..,,,....",
+        "..bb.......,,,..rr",
+        "~~~~~g~~~.~~~~g~~~",
+        "~~~~~g~~~.~~~~g~~~",
+        "..,,,.............",
+        "..,,,..rr..B...R..",
+        ".......rr.......M.",
+        "^^^^^^^^^^^^^^^^^^",
+    ],
+    waves: [
+        [("chaineur", 8), ("jalonneur", 2)],
+        [("chaineur", 6), ("echassier", 4)],
+        [("jalonneur", 6), ("chaineur", 6), ("fuyard", 3)],
+        [("chaineur", 10), ("echassier", 4)],
+        [("echassier", 8), ("chaineur", 6), ("fuyard", 4)],
+        [("chaineur", 10), ("jalonneur", 6)],
+        [("chaineur", 12), ("echassier", 6), ("fuyard", 4)],
+        [("jalonneur", 10), ("chaineur", 8)],
+        // Docs: an Échassier hums Oudine's lullaby here (a margin note until there is a sound).
+        [("echassier", 10), ("chaineur", 10), ("fuyard", 4)],
+        [("chaineur", 14), ("jalonneur", 8)],
+        [("chaineur", 14), ("echassier", 8), ("jalonneur", 6), ("fuyard", 5)],
+        [("chaineur", 16), ("echassier", 8), ("jalonneur", 8)],
+    ],
+)

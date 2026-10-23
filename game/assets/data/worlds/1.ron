@@ -1,0 +1,50 @@
+// Monde 1 : Les Marches de Saule (docs, section 6). Levels 1-1 to 1-4.
+(
+    defends: "le Moulin",
+    // La Crue [T]: during a wave, low ground (Sol bas, Gué) turns to water, except under barricades and towers.
+    event: (
+        cells: [SolBas, Gue],
+        becomes: Eau,
+        spares: [Barricade, Tour],
+        lasts: 1,
+        announce: "Les hachures frissonnent : la prochaine vague amène la crue.",
+        during: "La Crue : le sol bas est sous l'eau.",
+        refuse_next: "la crue fermerait la carte",
+        refuse_after: "la carte serait close après la crue",
+        color: (0.2, 0.4, 0.9),
+    ),
+    // La Grande Chaîne, commanded by Gast. It spawns when a wave sends the first phase's species;
+    // each phase lasts until its HP fraction drops to `until`. HP, speed and loot are in species.ron.
+    boss: Some((
+        name: "La Grande Chaîne",
+        // Rôle lost if it reaches the Moulin.
+        breach: 5,
+        // HP of a borne, relative to the Chaîneur's 100.
+        borne_hp: 1.5,
+        phases: [
+            (
+                name: "Le Levé",
+                until: 0.66,
+                species: "grande_chaine",
+                // Lays Chaussée on every third cell it leaves [T]; three arbalète hits stun it.
+                chaussee_every: 3,
+                stun_hits: 3,
+                stun: 2.0,
+            ),
+            (
+                name: "Le Bornage",
+                until: 0.33,
+                species: "grande_chaine",
+                // Plants a borne every other cell, three in all: each one draws the Jalonneurs [S].
+                bornes: 3,
+            ),
+            (
+                name: "La Chaîne rompue",
+                until: 0.0,
+                // The oxen panic: it reads l'Ombre and flees the towers [P]; a harpoon holds it.
+                species: "grande_chaine_rompue",
+                pinnable: true,
+            ),
+        ],
+    )),
+)

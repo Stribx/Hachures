@@ -1,0 +1,11 @@
+// Tower combat stats. Not in the docs (only costs are): starting values, tune here.
+// `range` and `splash` in tiles, `cooldown` in seconds, `pin` = seconds the target is held in place,
+// `slow` = seconds it walks at half speed.
+// Damage is doubled against a species `weak_to` that weapon.
+{
+    Arbalete: (damage: 30.0, range: 3.0, cooldown: 0.8, splash: 0.0, pin: 0.0),
+    Mortier: (damage: 45.0, range: 4.0, cooldown: 2.5, splash: 1.2, pin: 0.0),
+    Harpon: (damage: 35.0, range: 3.0, cooldown: 2.0, splash: 0.0, pin: 1.5),
+    // World 2: blinds the Gens du Col (weak to it) and slows whoever it lights.
+    Lanterne: (damage: 15.0, range: 3.0, cooldown: 1.0, splash: 0.0, pin: 0.0, slow: 1.5),
+}

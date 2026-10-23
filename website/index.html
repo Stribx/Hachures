@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hachures</title>
+  <meta name="description" content="Hachures, un tower defense cartographique : on ne bloque pas les légions, on leur redessine le chemin.">
+  <style>
+    @font-face { font-family: "IM Fell English"; src: url("play/assets/fonts/IMFellEnglish-Regular.ttf"); }
+    @font-face { font-family: "IM Fell English"; font-style: italic; src: url("play/assets/fonts/IMFellEnglish-Italic.ttf"); }
+
+    :root {
+      --paper: #efe6d2;
+      --paper-deep: #e4d7bb;
+      --ink: #2b241b;
+      --ink-soft: #5d5040;
+      --sepia: #7a4a22;
+      --water: #3f6f8f;
+      --rule: rgba(43, 36, 27, 0.18);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --paper: #1f1b16;
+        --paper-deep: #29241d;
+        --ink: #ece2cb;
+        --ink-soft: #b8aa90;
+        --sepia: #d49a62;
+        --water: #8fb6d1;
+        --rule: rgba(236, 226, 203, 0.16);
+      }
+    }
+    :root[data-theme="dark"] {
+      --paper: #1f1b16; --paper-deep: #29241d; --ink: #ece2cb; --ink-soft: #b8aa90;
+      --sepia: #d49a62; --water: #8fb6d1; --rule: rgba(236, 226, 203, 0.16);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font: 1.15rem/1.6 "IM Fell English", Georgia, serif;
+    }
+    main { max-width: 46rem; margin: 0 auto; padding: 0 16px 4rem; }
+
+    /* The hachures: short slanted strokes, like relief on an old map. */
+    .hachures {
+      height: 14px;
+      background: repeating-linear-gradient(115deg, var(--ink-soft) 0 1px, transparent 1px 7px);
+      opacity: 0.55;
+    }
+
+    header { text-align: center; padding: 4.5rem 0 2.5rem; }
+    h1 { font-size: clamp(3rem, 12vw, 5.5rem); font-weight: normal; letter-spacing: 0.06em; margin: 0; }
+    .tagline { font-style: italic; color: var(--sepia); font-size: 1.4rem; margin: 0.25rem 0 2rem; }
+    .play {
+      display: inline-block;
+      padding: 0.7rem 1.8rem;
+      border: 1.5px solid var(--ink);
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 1.25rem;
+      background: var(--paper-deep);
+      transition: background 0.15s, color 0.15s;
+    }
+    .play:hover, .play:focus-visible { background: var(--ink); color: var(--paper); }
+    .note { font-size: 0.95rem; color: var(--ink-soft); font-style: italic; margin-top: 0.8rem; }
+
+    h2 { font-weight: normal; font-size: 1.7rem; margin: 3rem 0 0.8rem; border-bottom: 1px solid var(--rule); }
+    p { margin: 0 0 1rem; }
+    .margin {
+      font-style: italic;
+      color: var(--sepia);
+      border-left: 2px solid var(--sepia);
+      padding-left: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .readings { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 1rem; }
+    .reading { background: var(--paper-deep); padding: 1rem 1.1rem; border-top: 3px solid var(--sepia); }
+    .reading strong { display: block; font-weight: normal; font-size: 1.25rem; }
+    .reading:nth-child(2) { border-top-color: var(--ink-soft); }
+    .reading:nth-child(3) { border-top-color: var(--water); }
+
+    table { width: 100%; border-collapse: collapse; font-size: 1.05rem; }
+    th, td { text-align: left; padding: 0.35rem 0.6rem 0.35rem 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+    th { font-weight: normal; white-space: nowrap; color: var(--sepia); }
+    kbd { font-family: inherit; border: 1px solid var(--rule); padding: 0 0.35rem; background: var(--paper-deep); }
+
+    ol { padding-left: 1.4rem; }
+    footer { font-size: 0.95rem; color: var(--ink-soft); }
+    footer a, main a:not(.play) { color: var(--sepia); }
+  </style>
+</head>
+<body>
+  <div class="hachures"></div>
+  <main>
+    <header>
+      <h1>Hachures</h1>
+      <p class="tagline">Qui trace la frontière ?</p>
+      <a class="play" href="play/">Jouer dans le navigateur</a>
+      <p class="note">Chapitre 1 jouable · clavier et souris · ordinateur conseillé</p>
+    </header>
+
+    <p>Dans les Marches, une carte tracée à l'encre de terre et vue par des témoins devient le paysage : la rivière se déplace, la haie pousse, le village s'efface.</p>
+    <p>Nève Achard a levé ces terres pour l'Empire du Registre. Quand les légions arrivent pour sceller le Dernier Cadastre, qui fixera chaque frontière pour toujours, elle déserte avec son carnet et sa plume.</p>
+    <p>Elle ne les arrête pas. Elle leur redessine le chemin.</p>
+    <p class="margin">« Je ne me souviens plus du nom. C'est ça, le prix. »</p>
+
+    <h2>Les trois lectures</h2>
+    <p>Chaque peuple lit le relief à sa manière. Une même vallée n'est pas la même vallée pour tous.</p>
+    <div class="readings">
+      <div class="reading"><strong>La Pente</strong>Les Chaîneurs suivent la route la plus sèche ; les Échassiers aiment la boue et le gué.</div>
+      <div class="reading"><strong>Le But</strong>Les Jalonneurs ne voient que la Borne-Mère à voler. Les Fuyards cherchent le Refuge.</div>
+      <div class="reading"><strong>L'Ombre</strong>Certains fuient les tours. On peut alors les rabattre.</div>
+    </div>
+
+    <h2>Tracer, sans fermer</h2>
+    <p>Barricades, boue, ronces, arbalètes, mortiers, harpons : chaque trait d'encre change la carte, et un trait de crayon en pointillé montre le détour avant de le poser.</p>
+    <p>Mais une carte qui ne laisse passer personne est une <em>carte close</em> : la terre la rejette. C'est le Droit de Passage, et même l'Empire le respecte. Il vaut aussi pour la carte de demain : quand les hachures frissonnent en bleu, la Crue arrive à la vague suivante, et le sol bas sera sous l'eau.</p>
+    <p>Dans la marge, le carnet de Nève s'écrit au fil de la partie.</p>
+
+    <h2>Le chapitre 1 : les Marches de Saule</h2>
+    <ol>
+      <li>Le Gué-aux-Mères : lire la pente.</li>
+      <li>Les Haies de Pain-Perdu : lire le but, et protéger les Fuyards.</li>
+      <li>Le Moulin des Noms : tenir pendant qu'Oudine grave le Rôle, puis choisir où placer le Refuge.</li>
+      <li>La Grande Chaîne : le boss, en trois phases.</li>
+    </ol>
+    <p>Chaque niveau rapporte deux sceaux, l'un pour la victoire et l'autre pour un défi de lecture, à dépenser dans l'arbre des sceaux.</p>
+
+    <h2>Commandes</h2>
+    <table>
+      <tr><th>Clic gauche</th><td>Encrer l'outil choisi sur la case</td></tr>
+      <tr><th><kbd>1</kbd> à <kbd>6</kbd></th><td>Barricade, boue, ronces, arbalète, mortier, harpon (selon le niveau)</td></tr>
+      <tr><th><kbd>Espace</kbd></th><td>Envoyer la vague suivante</td></tr>
+      <tr><th><kbd>Tab</kbd></th><td>Changer l'espèce dont on suit la route</td></tr>
+      <tr><th><kbd>F1</kbd></th><td>Le Calque : la carte telle que chaque espèce la lit</td></tr>
+      <tr><th><kbd>A</kbd></th><td>L'arbre des sceaux</td></tr>
+      <tr><th><kbd>Entrée</kbd></th><td>Niveau suivant, ou recommencer</td></tr>
+    </table>
+  </main>
+  <div class="hachures"></div>
+  <main>
+    <footer>
+      <p>Fait avec <a href="https://bevyengine.org">Bevy</a>. Modèles 3D : <a href="https://kenney.nl">Kenney</a> (CC0). Police : IM FELL English, Igino Marini (SIL Open Font License). Musique : <em>Lonelyhood</em>, yd, sur OpenGameArt (CC0). Le détail est dans <a href="play/assets/CREDITS.md">CREDITS.md</a>.</p>
+    </footer>
+  </main>
+</body>
+</html>

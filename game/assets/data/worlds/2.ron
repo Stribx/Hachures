@@ -1,0 +1,17 @@
+// Monde 2 : Les Cols de Verre (docs, section 6). Level 2-1 so far.
+(
+    defends: "le Refuge Sarre",
+    // Le Gel [T]: for two waves, water turns to ice. A road for the Gens du Col, a shortcut for the others.
+    event: (
+        cells: [Eau],
+        becomes: Glace,
+        lasts: 2,
+        announce: "Le givre court sur les hachures : la prochaine vague amène le gel.",
+        during: "Le Gel : les lacs sont pris.",
+        refuse_next: "le gel fermerait la carte",
+        refuse_after: "la carte serait close au dégel",
+        color: (0.75, 0.9, 1.0),
+    ),
+    // Le Théodolite de Givre comes with level 2-4.
+    boss: None,
+)

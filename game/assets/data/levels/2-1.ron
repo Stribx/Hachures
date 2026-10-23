@@ -1,0 +1,47 @@
+// Monde 2, niveau 2-1 (docs, section 6): learn l'Ombre with the Hardes, and the Lanterne.
+// Map: . sol  ~ eau  b boue  r ronces  # barricade  ^ roc   S spawn  M the Refuge Sarre (the Cible)
+// One road climbs around the lake to the Refuge. During Le Gel the lake becomes a road of its own: cheap for the
+// Gens du Col (ice 1), dear for the Chaîneurs (ice 2), and open to the Hardes wherever no tower looks.
+(
+    world: 2,
+    name: "2-1 · La Combe aux Sonnailles",
+    // Above the docs' 120: world 2 HP is ×1.5 for the same loot (set with the balance bot).
+    sepia: 180,
+    tools: ["barricade", "boue", "ronces", "arbalète", "mortier", "harpon", "lanterne"],
+    // Le Gel lasts two waves: 4-5 and 9-10.
+    events: [4, 9],
+    challenge: Some((text: "Sans mortier : la Lanterne suffit", rule: Without("mortier"))),
+    notes: [
+        // Hesse's line is from the docs; the others are drafts.
+        (on: Start, text: "Hesse : « Tu veux savoir qui est l'ennemi ? Regarde qui a froid aux pieds dans les deux colonnes. »"),
+        (on: Wave(1), text: "Les Gens du Col grimpent ce que les Chaîneurs contournent. Deux lectures pour une même pente."),
+        (on: Wave(2), text: "Les Hardes ne lisent pas la pente. Elles lisent mes tours, et passent où je ne regarde pas."),
+        (on: Wave(3), text: "Le givre court sur le lac. Demain, il portera."),
+        (on: Event, text: "Le Gel. Le lac devient une route, et ce ne sont pas les nôtres qui l'empruntent."),
+        (on: Won, text: "Le Refuge tient. Hesse compte ses gens, puis les miens, et ne dit rien."),
+    ],
+    map: [
+        "^^^^^^^^^^^^^^^^^^",
+        "^................^",
+        "^................^",
+        "^..~~~~~~~~~~~...^",
+        "S..~~~~~~~~~~~...^",
+        "^..~~~~~~~~~~~...M",
+        "^..~~~~~~~~~~~...^",
+        "^^^^^^^^^^^^^^^^^^",
+    ],
+    waves: [
+        [("chaineur", 4)],
+        [("chaineur", 4), ("harde", 1)],
+        [("gens_du_col", 3), ("chaineur", 4)],
+        [("gens_du_col", 4), ("chaineur", 3)],
+        [("harde", 2), ("gens_du_col", 2)],
+        [("chaineur", 6), ("harde", 2)],
+        [("gens_du_col", 5), ("chaineur", 4)],
+        [("harde", 3), ("chaineur", 5)],
+        [("gens_du_col", 5), ("harde", 2)],
+        [("gens_du_col", 5), ("chaineur", 5)],
+        [("harde", 3), ("chaineur", 6)],
+        [("gens_du_col", 5), ("harde", 2), ("chaineur", 5)],
+    ],
+)

@@ -1,0 +1,45 @@
+// Monde 1, niveau 1-2 (docs, section 6): learn le But. Jalonneurs go for the Borne-Mère,
+// the first Fuyards (wave 4) head for the Refuge. Unlocks ronces and mortier.
+// Map legend: see 1-1.ron.
+(
+    world: 1,
+    name: "1-2 · Les Haies de Pain-Perdu",
+    sepia: 120,
+    tools: ["barricade", "boue", "ronces", "arbalète", "mortier"],
+    events: [7, 11],
+    challenge: Some((text: "Aucun Fuyard blessé", rule: NoFuyardHurt)),
+    // Notes: see 1-1.ron. Drafts, except the wave 4 Fuyards, which are in the docs.
+    notes: [
+        (on: Start, text: "Les Jalonneurs ne regardent pas la pente. Ils regardent la Borne-Mère."),
+        (on: Wave(4), text: "Des gens du bocage, leurs vaches devant. Ils cherchent le Refuge. Chacun porte un nom."),
+        (on: FuyardSaved, text: "Un nom de plus dans le Rôle d'Oudine."),
+        (on: FuyardHurt, text: "Le mortier ne fait pas la différence entre un sceau et un tablier."),
+        (on: Event, text: "La crue encore. Les Échassiers rient dans l'eau."),
+    ],
+    map: [
+        "^^^^^^^^^^^^^^^^^^",
+        "S...rr.....rr....F",
+        "....rr.....rr.....",
+        "....rr..bb.rr..,,.",
+        "~~~~g~~~~~.~~~~~g~",
+        "~~~~g~~~~~.~~~~~g~",
+        ".,,,,.....rr......",
+        ".,,,,....Brr...R..",
+        "...........rr...M.",
+        "^^^^^^^^^^^^^^^^^^",
+    ],
+    waves: [
+        [("chaineur", 6), ("jalonneur", 2)],
+        [("chaineur", 6), ("echassier", 2), ("jalonneur", 2)],
+        [("jalonneur", 5), ("chaineur", 5)],
+        [("chaineur", 6), ("fuyard", 4), ("echassier", 3)],
+        [("chaineur", 8), ("jalonneur", 4), ("fuyard", 3)],
+        [("echassier", 6), ("fuyard", 4), ("chaineur", 6)],
+        [("chaineur", 8), ("jalonneur", 6), ("fuyard", 3)],
+        [("chaineur", 10), ("echassier", 5), ("fuyard", 4)],
+        [("jalonneur", 8), ("chaineur", 8), ("fuyard", 3)],
+        [("chaineur", 12), ("echassier", 6), ("fuyard", 4)],
+        [("jalonneur", 8), ("echassier", 6), ("chaineur", 8), ("fuyard", 4)],
+        [("chaineur", 14), ("echassier", 8), ("jalonneur", 6), ("fuyard", 5)],
+    ],
+)

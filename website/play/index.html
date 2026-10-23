@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hachures — jouer</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #1d1b17; color: #e8dfc8; font-family: Georgia, serif; }
+    canvas { display: block; width: 100%; height: 100%; outline: none; }
+    #loading { position: fixed; inset: 0; display: grid; place-items: center; font-style: italic; }
+  </style>
+</head>
+<body>
+  <p id="loading">La carte se déplie…</p>
+  <script type="module">
+    import init from './hachures.js';
+    init().catch((err) => {
+      // Bevy ends its loop by throwing a control-flow "error": only report real ones.
+      if (!String(err).includes('Using exceptions for control flow')) {
+        document.getElementById('loading').textContent = 'Le jeu n’a pas pu démarrer : ' + err;
+      }
+    });
+    new MutationObserver(() => {
+      if (document.querySelector('canvas')) document.getElementById('loading')?.remove();
+    }).observe(document.body, { childList: true });
+  </script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+// Monde 1, niveau 1-1 (docs, section 6): learn la Pente. Chaîneurs and Échassiers only.
+// Map: . sol  , sol bas  b boue  r ronces  ~ eau  g gué  # barricade  ^ roc
+//      S spawn  F Fuyards' start  M Moulin  B Borne-Mère  R Refuge
+// The bridge (the `.` in the river) stays dry during La Crue; the fords drown.
+(
+    world: 1,
+    name: "1-1 · Le Gué-aux-Mères",
+    sepia: 120,
+    tools: ["barricade", "boue", "arbalète"],
+    // Docs: first flood at wave 6.
+    events: [6, 10],
+    challenge: Some((text: "Sans barricade : lire la pente, pas la fermer", rule: Without("barricade"))),
+    // Notes: Nève's notebook in the margin (docs, section 9). Triggers: Start, Wave(n), Event (the world event starts), Boss("phase"),
+    // FuyardHurt, FuyardSaved, Won. `when: Some("id=option")` keeps a note to one choice; `names` changes the Rôle.
+    notes: [
+        // Oudine's line is from the docs; the others are drafts.
+        (on: Start, text: "Oudine : « Le gué ne s'appelle pas \"gué\". Il s'appelle comme celles qui l'ont passé avec un enfant sur la hanche. »"),
+        (on: Wave(1), text: "Ils suivent la route la plus sèche. Toujours. C'est moi qui le leur ai appris."),
+        (on: Wave(5), text: "Les hachures frissonnent au bord du bief. La prochaine fois, la terre hésitera."),
+        (on: Event, text: "La crue. Deux cartes tirent ce gué chacune de son côté, et c'est l'eau qui tranche."),
+    ],
+    map: [
+        "^^^^^^^^^^^^^^^^^^",
+        "S.....rr..........",
+        "......rr....,,,...",
+        "..bb........,,,...",
+        "~~~~~~~g~~~.~~~g~~",
+        "~~~~~~~g~~~.~~~g~~",
+        ".....,,,,.........",
+        ".....,,,,...rr....",
+        "...........rr....M",
+        "^^^^^^^^^^^^^^^^^^",
+    ],
+    // One list per wave: (species, count); the groups spawn interleaved.
+    waves: [
+        [("chaineur", 5)],
+        [("chaineur", 7)],
+        [("chaineur", 6), ("echassier", 2)],
+        [("chaineur", 8), ("echassier", 2)],
+        [("echassier", 4), ("chaineur", 6)],
+        [("chaineur", 8), ("echassier", 4)],
+        [("chaineur", 10), ("echassier", 3)],
+        [("echassier", 6), ("chaineur", 8)],
+        [("chaineur", 10), ("echassier", 3)],
+        [("chaineur", 8), ("echassier", 5)],
+        [("chaineur", 11), ("echassier", 4)],
+        [("chaineur", 10), ("echassier", 6)],
+    ],
+)
