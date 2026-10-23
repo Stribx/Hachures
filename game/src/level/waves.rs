@@ -81,7 +81,8 @@ impl Level {
     /// alone (the boss) are left as they are.
     fn mix(&self, queue: &mut [usize]) {
         let count = |k: usize| queue.iter().filter(|&&s| s == k).count();
-        let mut kinds: Vec<usize> = queue.iter().copied().filter(|&s| self.species[s].hostile && count(s) > 1).collect();
+        let mut kinds: Vec<usize> =
+            queue.iter().copied().filter(|&s| self.species[s].hostile && count(s) > 1).collect();
         kinds.sort_unstable();
         kinds.dedup();
         let Some(&common) = kinds.iter().max_by_key(|&&k| count(k)) else { return };

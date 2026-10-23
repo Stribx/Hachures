@@ -3,7 +3,7 @@
 use bevy::prelude::*;
 
 use super::Enemy;
-use super::boss::{Boss, Borne};
+use super::boss::{Borne, Boss};
 use crate::campaign::save::Save;
 use crate::level::story::Trigger;
 use crate::level::{Level, LevelEntity};
@@ -33,11 +33,7 @@ pub fn setup(
 ) {
     commands.insert_resource(EnemyLook {
         mesh: meshes.add(Sphere::new(0.2)),
-        materials: level
-            .species
-            .iter()
-            .map(|s| materials.add(Color::srgb(s.color.0, s.color.1, s.color.2)))
-            .collect(),
+        materials: level.species.iter().map(|s| materials.add(Color::srgb(s.color.0, s.color.1, s.color.2))).collect(),
         borne_mesh: meshes.add(Cylinder::new(0.1, 0.6)),
         borne_material: materials.add(Color::srgb(0.85, 0.82, 0.7)),
     });

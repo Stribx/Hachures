@@ -85,10 +85,9 @@ fn change(edit: impl Fn(&mut Settings) + Send + Sync + 'static) -> impl Fn(On<Ac
 fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
     commands.spawn(page(Screen::Settings, VEIL)).with_children(|p| {
         p.spawn(text(&assets, "Réglages", 56.0));
-        for (field, volume) in [
-            (Field::Music, (|s| &mut s.music) as fn(&mut Settings) -> &mut u32),
-            (Field::Effects, |s| &mut s.effects),
-        ] {
+        for (field, volume) in
+            [(Field::Music, (|s| &mut s.music) as fn(&mut Settings) -> &mut u32), (Field::Effects, |s| &mut s.effects)]
+        {
             p.spawn(Node { column_gap: px(14), align_items: AlignItems::Center, ..default() }).with_children(|row| {
                 row.spawn(button(label(&assets, "−"))).observe(change(move |s| {
                     let v = volume(s);
@@ -102,9 +101,8 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
             });
         }
         p.spawn(button((label(&assets, ""), Field::Fullscreen))).observe(change(|s| s.fullscreen = !s.fullscreen));
-        p.spawn(button(label(&assets, "Retour"))).observe(
-            |_: On<Activate>, from: Res<SettingsFrom>, mut next: ResMut<NextState<Screen>>| next.set(from.0),
-        );
+        p.spawn(button(label(&assets, "Retour")))
+            .observe(|_: On<Activate>, from: Res<SettingsFrom>, mut next: ResMut<NextState<Screen>>| next.set(from.0));
     });
 }
 

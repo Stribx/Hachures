@@ -2,25 +2,23 @@
 
 pub mod boss;
 pub mod enemies;
-pub mod towers;
 #[cfg(test)]
 mod tests;
+pub mod towers;
 
 use bevy::prelude::*;
 
 use crate::Step;
 
 pub fn plugin(app: &mut App) {
-    app.init_resource::<Shots>()
-        .add_systems(Startup, enemies::setup)
-        .add_systems(
-            Update,
-            (
-                enemies::start_waves.in_set(Step::Input),
-                (enemies::spawn_enemies, enemies::walk, towers::fire, boss::boss_phases).chain().in_set(Step::Simulate),
-                draw.in_set(Step::Render),
-            ),
-        );
+    app.init_resource::<Shots>().add_systems(Startup, enemies::setup).add_systems(
+        Update,
+        (
+            enemies::start_waves.in_set(Step::Input),
+            (enemies::spawn_enemies, enemies::walk, towers::fire, boss::boss_phases).chain().in_set(Step::Simulate),
+            draw.in_set(Step::Render),
+        ),
+    );
 }
 
 /// Anything the towers shoot at: walking enemies, the boss, and the bornes it plants.

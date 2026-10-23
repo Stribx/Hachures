@@ -29,21 +29,30 @@ const fn node(skill: Skill, name: &'static str, cost: u32, effect: &'static str)
 
 /// (branch, its nodes in buying order).
 pub const BRANCHES: [(&str, [Node; 3]); 3] = [
-    ("Le Trait", [
-        node(Skill::MineDePlomb, "Mine de plomb", 1, "arbalète −10 %"),
-        node(Skill::Equerre, "Équerre", 2, "+1 de portée pour deux tours côte à côte"),
-        node(Skill::ContreVisee, "Contre-visée", 3, "mortier +25 % contre les boss"),
-    ]),
-    ("Le Relief", [
-        node(Skill::BoueProfonde, "Boue profonde", 1, "+1 au coût de la boue pour les hostiles"),
-        node(Skill::RoncesMeres, "Ronces-mères", 2, "les ronces gagnent une case par vague"),
-        node(Skill::Fascines, "Fascines", 3, "barricade −30 %"),
-    ]),
-    ("La Légende", [
-        node(Skill::LectureFine, "Lecture fine", 1, "le trait de crayon affiche les coûts"),
-        node(Skill::SceauxBrises, "Sceaux brisés", 2, "+15 % de sépia"),
-        node(Skill::OmbrePortee, "Ombre portée", 3, "les tours comptent ×1,5 pour les lecteurs d'Ombre"),
-    ]),
+    (
+        "Le Trait",
+        [
+            node(Skill::MineDePlomb, "Mine de plomb", 1, "arbalète −10 %"),
+            node(Skill::Equerre, "Équerre", 2, "+1 de portée pour deux tours côte à côte"),
+            node(Skill::ContreVisee, "Contre-visée", 3, "mortier +25 % contre les boss"),
+        ],
+    ),
+    (
+        "Le Relief",
+        [
+            node(Skill::BoueProfonde, "Boue profonde", 1, "+1 au coût de la boue pour les hostiles"),
+            node(Skill::RoncesMeres, "Ronces-mères", 2, "les ronces gagnent une case par vague"),
+            node(Skill::Fascines, "Fascines", 3, "barricade −30 %"),
+        ],
+    ),
+    (
+        "La Légende",
+        [
+            node(Skill::LectureFine, "Lecture fine", 1, "le trait de crayon affiche les coûts"),
+            node(Skill::SceauxBrises, "Sceaux brisés", 2, "+15 % de sépia"),
+            node(Skill::OmbrePortee, "Ombre portée", 3, "les tours comptent ×1,5 pour les lecteurs d'Ombre"),
+        ],
+    ),
 ];
 
 impl Skill {

@@ -15,8 +15,7 @@ use crate::map::hover;
 use crate::ui::TreeOpen;
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins(overlay::plugin)
-        .add_systems(Update, inking.in_set(Step::Input).after(hover).after(load_level));
+    app.add_plugins(overlay::plugin).add_systems(Update, inking.in_set(Step::Input).after(hover).after(load_level));
 }
 
 pub struct Tool {
@@ -129,11 +128,16 @@ impl Level {
             Some("le relief va changer ici")
         } else if !can_place(&self.grid, &self.species, &self.present, i, tile, &self.walkers) {
             Some("carte close : l'encre ne prend pas")
-        } else if self.event_next && !self.event_on && !can_place(&self.base.under(event), &self.species, &self.present, i, tile, &[]) {
+        } else if self.event_next
+            && !self.event_on
+            && !can_place(&self.base.under(event), &self.species, &self.present, i, tile, &[])
+        {
             Some(&event.refuse_next)
         } else if self.event_on && !can_place(&self.base, &self.species, &self.present, i, tile, &[]) {
             Some(&event.refuse_after)
-        } else if !self.changes.is_empty() && !can_place(&self.after_changes(), &self.species, &self.present, i, tile, &[]) {
+        } else if !self.changes.is_empty()
+            && !can_place(&self.after_changes(), &self.species, &self.present, i, tile, &[])
+        {
             // ponytail: checks the map after the changes, not after the changes under the event too.
             Some("le relief à venir fermerait la carte")
         } else {
@@ -204,7 +208,11 @@ mod tests {
         level.waves = vec![vec![]];
         level.changes = vec![crate::level::data::Change { wave: 1, at: vec![(2, 0)], becomes: Tile::Roc }];
         assert_eq!(level.refusal(2), Some("le relief va changer ici"));
-        assert_eq!(level.refusal(12), Some("le relief à venir fermerait la carte"), "the bottom road will be the only one");
+        assert_eq!(
+            level.refusal(12),
+            Some("le relief à venir fermerait la carte"),
+            "the bottom road will be the only one"
+        );
         level.start_wave();
         assert_eq!(level.base.tiles[2], Tile::Roc);
         assert!(level.changes.is_empty());

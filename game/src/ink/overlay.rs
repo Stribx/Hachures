@@ -13,14 +13,7 @@ struct Pencil;
 pub fn plugin(app: &mut App) {
     app.insert_gizmo_config(
         Pencil,
-        GizmoConfig {
-            line: GizmoLineConfig {
-                style: GizmoLineStyle::Dotted,
-                width: 4.0,
-                ..default()
-            },
-            ..default()
-        },
+        GizmoConfig { line: GizmoLineConfig { style: GizmoLineStyle::Dotted, width: 4.0, ..default() }, ..default() },
     )
     .add_systems(Update, draw.in_set(Step::Render));
 }

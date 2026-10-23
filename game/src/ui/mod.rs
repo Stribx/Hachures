@@ -10,16 +10,14 @@ use crate::level::Level;
 use crate::menu::Screen;
 
 pub fn plugin(app: &mut App) {
-    app.init_resource::<TreeOpen>()
-        .add_systems(Startup, setup)
-        .add_systems(
-            Update,
-            (
-                toggles.in_set(Step::Input).before(between_levels),
-                (hud::update_label, update_margin).in_set(Step::Render),
-                show_during_play.run_if(state_changed::<Screen>),
-            ),
-        );
+    app.init_resource::<TreeOpen>().add_systems(Startup, setup).add_systems(
+        Update,
+        (
+            toggles.in_set(Step::Input).before(between_levels),
+            (hud::update_label, update_margin).in_set(Step::Render),
+            show_during_play.run_if(state_changed::<Screen>),
+        ),
+    );
 }
 
 /// The label and the margin only show during play, not behind the menus.
@@ -56,10 +54,7 @@ fn setup(mut commands: Commands, assets: Res<AssetServer>) {
             font_size: FontSize::Px(24.0),
             ..default()
         },
-        Node {
-            margin: UiRect::all(Val::Px(16.0)),
-            ..default()
-        },
+        Node { margin: UiRect::all(Val::Px(16.0)), ..default() },
     ));
     commands.spawn((
         Margin,

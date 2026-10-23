@@ -42,7 +42,15 @@ fn main() {
         .add_plugins(steps)
         .insert_resource(level)
         .insert_resource(save)
-        .add_plugins((map::plugin, ink::plugin, campaign::plugin, level::plugin, combat::plugin, ui::plugin, menu::plugin))
+        .add_plugins((
+            map::plugin,
+            ink::plugin,
+            campaign::plugin,
+            level::plugin,
+            combat::plugin,
+            ui::plugin,
+            menu::plugin,
+        ))
         .add_systems(Startup, setup)
         .run();
 }
@@ -65,10 +73,7 @@ fn steps(app: &mut App) {
 fn setup(mut commands: Commands, assets: Res<AssetServer>, save: Res<Save>) {
     // Placed over the map by `map::redraw_cells`.
     commands.spawn(Camera3d::default());
-    commands.spawn((
-        DirectionalLight::default(),
-        Transform::from_xyz(3.0, 5.0, 2.0).looking_at(Vec3::ZERO, Vec3::Y),
-    ));
+    commands.spawn((DirectionalLight::default(), Transform::from_xyz(3.0, 5.0, 2.0).looking_at(Vec3::ZERO, Vec3::Y)));
     commands.spawn((
         Music,
         AudioPlayer::new(assets.load("audio/music/lonelyhood.ogg")),

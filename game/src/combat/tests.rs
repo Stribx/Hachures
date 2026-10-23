@@ -3,7 +3,7 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 
-use super::boss::{Boss, Borne, boss_phases};
+use super::boss::{Borne, Boss, boss_phases};
 use super::enemies::{EnemyLook, spawn_enemies, walk};
 use super::towers::{Tower, Weapon, fire};
 use super::{Enemy, Shots};
@@ -54,7 +54,10 @@ fn arbalete_spares_fuyards() {
     let (chaineur, fuyard) = (walker(&level, "chaineur", 100.0), walker(&level, "fuyard", 100.0));
 
     let mut app = app_with(level);
-    app.world_mut().spawn((Tower { cell: tower_cell, weapon: Weapon::Arbalete, ready_in: 0.0 }, Transform::from_translation(tower_at)));
+    app.world_mut().spawn((
+        Tower { cell: tower_cell, weapon: Weapon::Arbalete, ready_in: 0.0 },
+        Transform::from_translation(tower_at),
+    ));
     app.world_mut().spawn(chaineur);
     app.world_mut().spawn(fuyard);
     run(&mut app, 10);
@@ -72,7 +75,8 @@ fn lanterne_slows() {
     let gens = walker(&level, "gens_du_col", 100.0);
     let tower_at = cell_pos(&level.grid, 1);
     let mut app = app_with(level);
-    app.world_mut().spawn((Tower { cell: 1, weapon: Weapon::Lanterne, ready_in: 0.0 }, Transform::from_translation(tower_at)));
+    app.world_mut()
+        .spawn((Tower { cell: 1, weapon: Weapon::Lanterne, ready_in: 0.0 }, Transform::from_translation(tower_at)));
     let gens = app.world_mut().spawn(gens).id();
     app.update();
     let enemy = app.world().get::<Enemy>(gens).unwrap();
@@ -159,7 +163,10 @@ fn balance() {
         }
         let level = app.world().resource::<Level>();
         let won = if level.won() { "oui" } else { &format!("v{}", level.wave.number) };
-        println!("{:<32} {:>5} {:>5} {:>5} {:>7} {:>6}", level.name, won, level.lives, level.names, towers, level.sepia);
+        println!(
+            "{:<32} {:>5} {:>5} {:>5} {:>7} {:>6}",
+            level.name, won, level.lives, level.names, towers, level.sepia
+        );
         println!("    Rôle lost (wave, lost): {losses:?}");
     }
 }

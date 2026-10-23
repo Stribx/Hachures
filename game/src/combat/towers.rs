@@ -6,7 +6,7 @@ use std::f32::consts::PI;
 use bevy::prelude::*;
 use serde::Deserialize;
 
-use super::boss::{Boss, Borne};
+use super::boss::{Borne, Boss};
 use super::{Enemy, Shots};
 use crate::campaign::skills::Skill;
 use crate::level::story::Trigger;
@@ -53,7 +53,8 @@ pub struct Tower {
 impl Level {
     /// Reach of the tower at `cell`; Équerre adds 1 when another tower stands beside it.
     pub fn range(&self, cell: usize, weapon: Weapon) -> f32 {
-        let paired = self.has(Skill::Equerre) && self.base.neighbours(cell).any(|n| self.towers.iter().any(|t| t.0 == n));
+        let paired =
+            self.has(Skill::Equerre) && self.base.neighbours(cell).any(|n| self.towers.iter().any(|t| t.0 == n));
         self.tower_stats[&weapon].range + if paired { 1.0 } else { 0.0 }
     }
 }
@@ -82,7 +83,8 @@ pub fn spawn_tower(commands: &mut Commands, assets: &AssetServer, grid: &Grid, i
 }
 
 /// What a tower can hit: enemies, the boss, its bornes.
-type Targets<'w, 's> = Query<'w, 's, (Entity, &'static mut Enemy, &'static Transform, Option<&'static mut Boss>, Has<Borne>)>;
+type Targets<'w, 's> =
+    Query<'w, 's, (Entity, &'static mut Enemy, &'static Transform, Option<&'static mut Boss>, Has<Borne>)>;
 
 pub(super) fn fire(
     time: Res<Time>,
@@ -118,7 +120,8 @@ pub(super) fn fire(
 
         // A mortar shell hits everyone in the splash, Fuyards included.
         for (entity, mut enemy, t, mut boss, _) in &mut enemies {
-            let hit = if stats.splash > 0.0 { t.translation.distance(target_pos) <= stats.splash } else { entity == target };
+            let hit =
+                if stats.splash > 0.0 { t.translation.distance(target_pos) <= stats.splash } else { entity == target };
             if !hit {
                 continue;
             }

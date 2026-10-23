@@ -76,15 +76,11 @@ pub fn can_place(
     }
     let mut next = grid.clone();
     next.tiles[i] = tile;
-    present
-        .iter()
-        .map(|&k| (k, &species[k]))
-        .filter(|(_, s)| next.goals.contains_key(&s.goal))
-        .all(|(k, s)| {
-            let field = FlowField::new(&next, s);
-            let walking = walkers.iter().filter(|w| w.0 == k).map(|w| w.1);
-            next.spawns_for(s).iter().copied().chain(walking).all(|c| field.dist[c].is_finite())
-        })
+    present.iter().map(|&k| (k, &species[k])).filter(|(_, s)| next.goals.contains_key(&s.goal)).all(|(k, s)| {
+        let field = FlowField::new(&next, s);
+        let walking = walkers.iter().filter(|w| w.0 == k).map(|w| w.1);
+        next.spawns_for(s).iter().copied().chain(walking).all(|c| field.dist[c].is_finite())
+    })
 }
 
 #[cfg(test)]
@@ -123,7 +119,10 @@ mod tests {
         );
         let walker = (chaineur, pocket.width + 2);
         assert!(can_place(&pocket, &species, &all, 2, Tile::Tour, &[]));
-        assert!(!can_place(&pocket, &species, &all, 2, Tile::Tour, &[walker]), "a walker already on the map keeps a way out");
+        assert!(
+            !can_place(&pocket, &species, &all, 2, Tile::Tour, &[walker]),
+            "a walker already on the map keeps a way out"
+        );
 
         // Flow field leads the Chaîneur from the spawn to the Moulin through the gap.
         let field = FlowField::new(&grid, &species[chaineur]);

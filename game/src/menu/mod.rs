@@ -150,7 +150,9 @@ fn navigate(
         || (keys.just_pressed(KeyCode::Tab) && !shift)
     {
         1
-    } else if keys.any_just_pressed([KeyCode::ArrowUp, KeyCode::ArrowLeft]) || (keys.just_pressed(KeyCode::Tab) && shift) {
+    } else if keys.any_just_pressed([KeyCode::ArrowUp, KeyCode::ArrowLeft])
+        || (keys.just_pressed(KeyCode::Tab) && shift)
+    {
         -1
     } else {
         return;

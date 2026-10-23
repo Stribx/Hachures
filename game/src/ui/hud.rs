@@ -41,7 +41,8 @@ pub fn update_label(level: Res<Level>, save: Res<Save>, tree: Res<TreeOpen>, mut
     }
     if level.finished {
         let challenge = if level.challenge_met() { "réussi, second sceau gagné" } else { "manqué" };
-        text += &format!("\nVictoire : {} tient. Sceau de la victoire gagné ; défi {challenge}.", level.world().defends);
+        text +=
+            &format!("\nVictoire : {} tient. Sceau de la victoire gagné ; défi {challenge}.", level.world().defends);
         if let Some(choice) = &level.choice {
             text += &format!("\n{}", choice.prompt);
             for (k, (option, label)) in choice.options.iter().enumerate() {
@@ -83,7 +84,14 @@ pub fn update_label(level: Res<Level>, save: Res<Save>, tree: Res<TreeOpen>, mut
             let costs: Vec<String> = level
                 .present
                 .iter()
-                .map(|&k| format!("{} {} (but à {})", level.species[k].name, level.species[k].cost(tile), level.fields[k].dist[i]))
+                .map(|&k| {
+                    format!(
+                        "{} {} (but à {})",
+                        level.species[k].name,
+                        level.species[k].cost(tile),
+                        level.fields[k].dist[i]
+                    )
+                })
                 .collect();
             text += &format!("\nCalque — {tile:?} : {}", costs.join(", "));
         }
@@ -92,12 +100,13 @@ pub fn update_label(level: Res<Level>, save: Res<Save>, tree: Res<TreeOpen>, mut
 }
 
 fn tree_text(save: &Save, can_buy: bool) -> String {
-    let mut text = format!(
-        "Arbre des sceaux : {} à dépenser    Rôle des Noms : {}    A : fermer\n",
-        save.sceaux(),
-        save.names()
-    );
-    text += if can_buy { "[1] [2] [3] : acheter le nœud suivant de la branche\n" } else { "On achète entre deux niveaux.\n" };
+    let mut text =
+        format!("Arbre des sceaux : {} à dépenser    Rôle des Noms : {}    A : fermer\n", save.sceaux(), save.names());
+    text += if can_buy {
+        "[1] [2] [3] : acheter le nœud suivant de la branche\n"
+    } else {
+        "On achète entre deux niveaux.\n"
+    };
     for (b, (branch, nodes)) in BRANCHES.iter().enumerate() {
         text += &format!("\n[{}] {branch}\n", b + 1);
         for node in nodes {
