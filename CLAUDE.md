@@ -53,12 +53,12 @@ screenshots/, .taste-skill/, .impeccable/   local only, ignored by git
 | `audio/` | runtime | `music/`, `sfx/impact/`, `sfx/foley/` |
 | `fonts/` | runtime | IM Fell English, Atkinson Hyperlegible Next, their OFL texts |
 | `shaders/` | runtime | `hachure.wesl` (the engraving material), `paper.wesl` (the paper pass) |
-| `ui/` | runtime | drawn 2D art: the travel clouds; the HUD icons `icon-{sepia,cible,noms,vague}.png` are not drawn yet and the HUD falls back until they are |
+| `ui/` | runtime | drawn 2D art: the travel clouds (AI-generated) and the counter icons `icon-{sepia,cible,noms,vague}.png` (vector, sources in the asset library); a missing image falls back to plain text or paper |
 
 ## Design source of truth
 
 - `docs/bible.md` (French) is the game design: story, worlds, rules, bestiary, numbers. **When the code and the bible disagree, the bible wins**: the code has a bug. A rule changes in the bible first, and only with the owner's say. Code comments cite it as "docs, section N".
-- `docs/direction-artistique.md`: the art direction (a relief model filmed like a miniature). `docs/3d-assets.md`: when a board object is built in code and when it is an asset. `docs/art-prompts.md`: the prompts for every image in `game/assets/ui/`, which are AI-generated; until a file exists the game draws a plain fallback.
+- `docs/direction-artistique.md`: the art direction (a relief model filmed like a miniature). `docs/3d-assets.md`: when a board object is built in code and when it is an asset. `docs/art-prompts.md`: the prompts for every image in `game/assets/ui/`; until a file exists the game draws a plain fallback.
 
 ## Game data
 

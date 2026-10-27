@@ -36,6 +36,8 @@ engraving, etching, woodcut, antique, vintage, aged paper, parchment, stains, or
 No longer drawn: each tool's piece is filmed in a little studio off the board and the bar shows the picture (`game/src/ui/studio.rs`), so an icon is always its piece. See `docs/direction-artistique.md`, phase 3.
 
 ## 2. Counter icons: `game/assets/ui/icon-<name>.png`
+Done: drawn as vector pictograms (sources `icon-<name>.svg` in `../Hachures-asset-library/ui/`) and rasterised with `magick -background none -density 384 icon-<name>.svg -resize 60x60 -gravity center -extent 64x64 icon-<name>.png`. The prompt below stays for a generated set.
+
 - **Final:** 64 × 64, shown at **28 px** next to a number in the top bar. At that size only one shape reads, so leave the hatching out.
 - **Ratio** 1:1 · **Remove background:** on · `ref_image`: one of your approved tool icons
 - **Fit:** `magick raw.png -fuzz 5% -trim +repage -resize 60x60 -background none -gravity center -extent 64x64 game/assets/ui/icon-<name>.png`

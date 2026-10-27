@@ -58,8 +58,8 @@ mod tests {
     #[test]
     fn every_credited_asset_is_read() {
         let rows = rows(include_str!("../../assets/CREDITS.md"));
-        assert_eq!(rows.len(), 7);
+        assert_eq!(rows.len(), 8);
         assert_eq!(rows[3], ("Lonelyhood", "yd", "CC0"));
-        assert_eq!(rows[5], ("The travel clouds", "AI-generated for Hachures", "CC0"));
+        assert_eq!(rows[6], ("The travel clouds", "AI-generated for Hachures", "CC0"));
     }
 }

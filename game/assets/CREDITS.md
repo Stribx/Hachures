@@ -7,6 +7,7 @@
 | `audio/sfx/impact/`, `audio/sfx/foley/` | Impact Sounds | Kenney | CC0 | https://kenney.nl/assets/impact-sounds |
 | `audio/music/lonelyhood.ogg` | Lonelyhood | yd | CC0 | https://opengameart.org/content/lonelyhood |
 | `fonts/IMFellEnglish-*.ttf` | IM FELL English Roman / Italic | Igino Marini | SIL OFL 1.1 (`fonts/OFL.txt`) | https://github.com/google/fonts/tree/main/ofl/imfellenglish |
+| `ui/icon-*.png` | The counter icons (sépia, Cible, Names, wave) | Drawn for Hachures (vector; sources in the asset library's `ui/`) | CC0 | `docs/art-prompts.md`, section 2 |
 | `ui/cloud-*.png` | The travel clouds | AI-generated for Hachures | CC0 | Prompts in `docs/art-prompts.md` |
 | `fonts/AtkinsonHyperlegibleNext-*.ttf` | Atkinson Hyperlegible Next (the readable font setting) | Braille Institute, Applied Design Works | SIL OFL 1.1 (`fonts/OFL-AtkinsonHyperlegibleNext.txt`) | https://github.com/google/fonts/tree/main/ofl/atkinsonhyperlegiblenext |
 

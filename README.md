@@ -42,4 +42,4 @@ The web build needs `rustup target add wasm32-unknown-unknown` and the `wasm-bin
 
 The code is dual-licensed under [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at your option. The assets keep
 their own licences, listed in [`game/assets/CREDITS.md`](game/assets/CREDITS.md): Kenney models and sounds (CC0),
-the music (CC0), the fonts (SIL OFL 1.1), and the AI-generated 2D art (CC0).
+the music (CC0), the fonts (SIL OFL 1.1), and the 2D art (CC0).
