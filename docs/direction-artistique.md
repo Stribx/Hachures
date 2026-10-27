@@ -87,7 +87,7 @@ On ne passe à la phase suivante que quand le critère « fini quand » tient su
 - ✓ **Correctif :** `Tonemapping::None` désactivait en silence le tramage (`DebandDither`) que les commentaires promettaient. `Tonemapping::Linear` garde les couleurs et trame quand même.
 - **Fini quand :** l'eau se lit comme une carte gravée et l'œil sent d'où vient la lumière. ✓ Atteint sur le plateau et le Grand Plan. Les plis restent discrets sur les pièces Kenney.
 
-### Phase 6 : la maquette vivante (à faire)
+### Phase 6 : la maquette vivante (faite, sauf le son)
 La maquette reste une gravure, mais **enluminée** : des lavis d'aquarelle sous les hachures, comme une carte de Cassini coloriée à la main. Le plateau devient un **bocage en patchwork** : de petits champs en feutre et en tissu, verts, blonds et ocre, cousus entre eux, bordés de haies, et qui bougent avec le vent. Spécification et tickets : `.scratch/maquette-vivante/`.
 
 - **Couleur.** La fonte vers le papier se règle par matière : légère sur la terre, gardée sur les traits d'encre. La palette gagne les couleurs du bocage (pâture, pré, blé, jachère, lin, haie, ciel), et le brouillard et le vignettage se réchauffent.
@@ -101,6 +101,7 @@ La maquette reste une gravure, mais **enluminée** : des lavis d'aquarelle sous 
 - **La vie.** Des vols d'oiseaux en papier passent de temps en temps, des papillons volent au-dessus des fleurs, et les ombres des nuages glissent. La pluie vient avec la Crue et la neige avec le Gel, et la lumière se réchauffe de vague en vague. Des sons d'ambiance CC0 portent le tout.
   - **Fini quand :** le plateau vit même sans vague.
 - **Budget.** Tout tourne aussi dans le navigateur, en suivant le préréglage graphique (Bas : peu d'herbe, pas d'oiseaux). Le préréglage Haut prend au plus 2 ms de GPU de plus qu'avant cette phase.
+  - **Mesuré** (`HACHURES_FPS=1`, 1-1, build de debug, fenêtre 1568 × 1689, total des passes GPU) : Bas 6,8 ms avant, 6,3 à 6,7 après ; Haut 8,9 avant, 10,6 à 10,7 après (+1,8 ms) ; Ultra 10,5 avant, 12,4 à 12,6 après (+2 ms). Le surcoût vient surtout de la passe opaque (l'herbe, les haies) et des ombres. Le web compile ; il reste à le lancer dans un navigateur.
 
 ## Revues (grille taste-skill, `references/critique.md`)
 
@@ -186,6 +187,18 @@ Trois problèmes :
 1. La plaine est verte mais unie : rien ne la découpe encore en champs → ticket 03 (les champs du plateau).
 2. Rien ne bouge en dehors de l'eau → tickets 01 et 04 (le vent, l'herbe).
 3. Le blé derrière le plateau et les crêtes de pierre sont proches en valeur : à surveiller quand les champs du Grand Plan arrivent (ticket 05).
+```
+
+```
+ROUND 8 (phase 6 finie, sauf le son)
+Vu en une seconde : un bocage coloré, cousu et bordé de haies, où l'herbe, le blé, les fleurs et les arbres bougent avec le vent ; des papillons au-dessus du pré, l'ombre d'un nuage qui passe.
+Idée : la maquette vivante, une gravure enluminée qui respire, sans qu'une case perde sa lecture.
+Scores : design 8 · utilisabilité 8 · créativité 8,5 · contenu 7,5 → 8
+Plafonds : filets de l'interface (boutons 1 px, repères de coin) → 6,5 au plus tant qu'ils restent
+Trois problèmes :
+1. Les filets de l'interface plafonnent toujours la note : c'est le chantier suivant.
+2. Les plateaux des Cols poussent du blé comme le bocage : des fleurs d'alpage y iraient mieux.
+3. Le son manque encore (ticket 11, après l'accord sur la liste CC0), et le web reste à voir tourner dans un navigateur.
 ```
 
 **Cible :** environ 7,5. Atteinte à l'arrondi près, hors plafond. La feuille de route du plateau est finie ; le prochain chantier est l'interface.
