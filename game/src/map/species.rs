@@ -17,6 +17,20 @@ pub enum Reading {
     Ombre,
 }
 
+/// The silhouette a species is drawn with (docs, section 9: one template, told apart by silhouette and colour).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default, Deserialize)]
+pub enum Shape {
+    /// On foot.
+    #[default]
+    Pied,
+    /// On stilts: the Échassiers.
+    Echasses,
+    /// A pack beast: the Hardes.
+    Bete,
+    /// A wagon: the Grande Chaîne, the convoy.
+    Chariot,
+}
+
 /// What a species walks towards.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Deserialize)]
 pub enum Goal {
@@ -30,8 +44,11 @@ pub enum Goal {
 
 #[derive(Deserialize)]
 pub struct Species {
+    /// Its key in `species.ron`, which the code and the level files use.
     #[serde(skip)]
     pub name: String,
+    /// What the player reads, in French.
+    pub label: String,
     pub goal: Goal,
     #[serde(default)]
     pub reading: Reading,
@@ -44,6 +61,8 @@ pub struct Species {
     pub loot: u32,
     pub weak_to: Option<Weapon>,
     pub color: (f32, f32, f32),
+    #[serde(default)]
+    pub shape: Shape,
     pub costs: HashMap<Tile, f32>,
 }
 

@@ -1,18 +1,13 @@
-//! The campaign save: levels reached, sceaux, skills, choices and Names, and the player's settings.
-//! One RON file in the user's data folder (localStorage in the browser), rewritten whole on every change.
-
-use std::collections::BTreeMap;
-#[cfg(not(target_arch = "wasm32"))]
-use std::{
-    fs, io,
-    path::{Path, PathBuf},
-};
+//! The campaign save: levels reached, sceaux, skills, choices and Names.
+//! One RON file (`storage`) in the user's data folder (localStorage in the browser), rewritten whole on every change.
 
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 
 use super::skills::Skill;
-use crate::menu::Settings;
+use crate::i18n::french_key;
+use crate::storage;
 
 /// What a level left in the campaign.
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
@@ -23,11 +18,18 @@ pub struct Record {
     pub challenge: bool,
     /// Names kept in the Rôle on the last run.
     pub names: i32,
+    /// The places whose names were scratched out on the last run, by key (`place.pont_du_bief`).
+    #[serde(default)]
+    pub erased: Vec<String>,
 }
 
-#[derive(Resource, Default, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Resource, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct Save {
+    /// 0 for a save written before the prologue (its levels count from 1-1); see `upgrade`.
+    /// A missing field reads as 0, a new save is `VERSION`.
+    #[serde(default)]
+    pub version: u32,
     /// Furthest level unlocked (index in `LEVELS`).
     pub reached: usize,
     /// One record per level, by index.
@@ -35,10 +37,40 @@ pub struct Save {
     pub skills: Vec<Skill>,
     /// Choice id -> option picked, e.g. "refuge" -> "moulin".
     pub choices: BTreeMap<String, String>,
-    pub settings: Settings,
+}
+
+/// The save's layout: 1 counts the prologue as level 0; 2 keeps the names scratched out by key, not in French.
+const VERSION: u32 = 2;
+
+impl Default for Save {
+    fn default() -> Save {
+        Save { version: VERSION, reached: 0, levels: Vec::new(), skills: Vec::new(), choices: BTreeMap::new() }
+    }
 }
 
 impl Save {
+    /// Its name in `storage`: `save.ron`, or `hachures-save` in the browser.
+    pub const FILE: &str = "save";
+
+    /// A save read from before the prologue moves up one level, the prologue counted as won.
+    /// One holding only the settings starts with the prologue.
+    /// One from before the language files has its scratched-out names in French: they become their keys.
+    pub fn upgrade(mut self) -> Save {
+        if self.version == 0 && (self.reached > 0 || !self.levels.is_empty()) {
+            self.reached += 1;
+            self.levels.insert(0, Record { won: true, ..default() });
+        }
+        if self.version < 2 {
+            for name in self.levels.iter_mut().flat_map(|r| &mut r.erased) {
+                if let Some(key) = french_key("place.", name) {
+                    *name = key.to_string();
+                }
+            }
+        }
+        self.version = VERSION;
+        self
+    }
+
     pub fn sceaux(&self) -> u32 {
         let earned: usize = self.levels.iter().map(|r| r.won as usize + r.challenge as usize).sum();
         // Saturating: a hand-edited save may have spent more than it earned.
@@ -57,96 +89,13 @@ impl Save {
         &mut self.levels[level]
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
     pub fn load() -> Save {
-        path().map(|p| Save::read(&p)).unwrap_or_default()
+        storage::load(Save::FILE).map(Save::upgrade).unwrap_or_default()
     }
 
-    /// Writes the save, logging failures: losing a write must not stop the game.
-    #[cfg(not(target_arch = "wasm32"))]
     pub fn store(&self) {
-        if let Some(path) = path()
-            && let Err(err) = self.write(&path)
-        {
-            error!("could not save to {}: {err}", path.display());
-        }
+        storage::store(Save::FILE, self);
     }
-
-    #[cfg(target_arch = "wasm32")]
-    pub fn load() -> Save {
-        let Some(storage) = web_storage() else { return Save::default() };
-        let Some(text) = storage.get_item(WEB_KEY).ok().flatten() else { return Save::default() };
-        ron::from_str(&text).unwrap_or_else(|err| {
-            // Keep the unreadable save aside rather than overwrite it on the next write.
-            warn!("unreadable save: {err}; kept as {WEB_KEY}.bak");
-            let _ = storage.set_item(&format!("{WEB_KEY}.bak"), &text);
-            Save::default()
-        })
-    }
-
-    #[cfg(target_arch = "wasm32")]
-    pub fn store(&self) {
-        let text = ron::ser::to_string_pretty(self, ron::ser::PrettyConfig::default());
-        match (web_storage(), text) {
-            (Some(storage), Ok(text)) => {
-                if storage.set_item(WEB_KEY, &text).is_err() {
-                    error!("could not save: localStorage refused the write");
-                }
-            }
-            _ => error!("could not save: no localStorage"),
-        }
-    }
-
-    #[cfg(not(target_arch = "wasm32"))]
-    fn read(path: &Path) -> Save {
-        let parsed = match fs::read_to_string(path) {
-            Err(err) if err.kind() == io::ErrorKind::NotFound => return Save::default(),
-            Err(err) => Err(err.to_string()),
-            Ok(text) => ron::from_str(&text).map_err(|err| err.to_string()),
-        };
-        parsed.unwrap_or_else(|err| {
-            // Keep the unreadable file aside rather than overwrite it on the next write.
-            let backup = path.with_extension("ron.bak");
-            warn!("unreadable save {}: {err}; kept as {}", path.display(), backup.display());
-            let _ = fs::rename(path, &backup);
-            Save::default()
-        })
-    }
-
-    /// Written to a temporary file first, then renamed: a crash mid-write leaves the old save whole.
-    #[cfg(not(target_arch = "wasm32"))]
-    fn write(&self, path: &Path) -> io::Result<()> {
-        if let Some(dir) = path.parent() {
-            fs::create_dir_all(dir)?;
-        }
-        let text = ron::ser::to_string_pretty(self, ron::ser::PrettyConfig::default()).map_err(io::Error::other)?;
-        let tmp = path.with_extension("ron.tmp");
-        fs::write(&tmp, text)?;
-        fs::rename(&tmp, path)
-    }
-}
-
-/// `$XDG_DATA_HOME` or `~/.local/share` on Linux, `%APPDATA%` on Windows,
-/// `~/Library/Application Support` on macOS.
-#[cfg(not(target_arch = "wasm32"))]
-fn path() -> Option<PathBuf> {
-    let home = || std::env::var_os("HOME").map(PathBuf::from);
-    let base = if cfg!(target_os = "windows") {
-        std::env::var_os("APPDATA").map(PathBuf::from)
-    } else if cfg!(target_os = "macos") {
-        home().map(|h| h.join("Library/Application Support"))
-    } else {
-        std::env::var_os("XDG_DATA_HOME").map(PathBuf::from).or_else(|| home().map(|h| h.join(".local/share")))
-    };
-    Some(base?.join("hachures").join("save.ron"))
-}
-
-#[cfg(target_arch = "wasm32")]
-const WEB_KEY: &str = "hachures-save";
-
-#[cfg(target_arch = "wasm32")]
-fn web_storage() -> Option<web_sys::Storage> {
-    web_sys::window()?.local_storage().ok()?
 }
 
 #[cfg(test)]
@@ -157,22 +106,34 @@ mod tests {
     fn round_trip_and_unreadable_save_kept() {
         let dir = std::env::temp_dir().join(format!("hachures-test-{}", std::process::id()));
         let path = dir.join("save.ron");
-        let _ = fs::remove_dir_all(&dir);
-        assert_eq!(Save::read(&path), Save::default(), "no save yet");
+        let _ = std::fs::remove_dir_all(&dir);
+        assert_eq!(storage::read::<Save>(&path), None, "no save yet");
 
         let mut save = Save { reached: 2, skills: vec![Skill::MineDePlomb], ..default() };
-        *save.record(1) = Record { won: true, challenge: true, names: 3 };
+        *save.record(1) = Record { won: true, challenge: true, names: 3, erased: vec!["place.pre_commun".into()] };
         save.choices.insert("refuge".into(), "bois".into());
-        save.settings = Settings { music: 40, effects: 0, fullscreen: true };
-        save.write(&path).unwrap();
-        assert_eq!(Save::read(&path), save);
+        storage::write(&path, &save).unwrap();
+        assert_eq!(storage::read(&path).as_ref(), Some(&save));
         assert_eq!(save.sceaux(), 1, "2 earned, 1 spent");
-        let older: Save = ron::from_str("(reached: 1)").unwrap();
-        assert_eq!(older.settings, Settings::default(), "a save from before the settings loads with the defaults");
 
-        fs::write(&path, "not a save").unwrap();
-        assert_eq!(Save::read(&path), Save::default());
-        assert_eq!(fs::read_to_string(dir.join("save.ron.bak")).unwrap(), "not a save", "kept aside, not lost");
-        let _ = fs::remove_dir_all(&dir);
+        let old: Save = ron::from_str(
+            "(reached: 2, levels: [(won: true, challenge: false, names: 0), (won: true, challenge: true, names: 0)])",
+        )
+        .unwrap();
+        let old = old.upgrade();
+        assert_eq!((old.reached, old.levels.len(), old.sceaux()), (3, 3, 4), "before the prologue: one level up");
+        let settings_only: Save = ron::from_str("(settings: (music: 40))").unwrap();
+        assert_eq!(settings_only.upgrade().reached, 0, "not started: the prologue comes first");
+        assert_eq!(Save::default().upgrade(), Save::default(), "a new save is never moved");
+        let french: Save = ron::from_str(
+            "(version: 1, reached: 2, levels: [(won: true, challenge: false, names: 0, erased: [\"le Pont du Bief\"])])",
+        )
+        .unwrap();
+        assert_eq!(french.upgrade().levels[0].erased, ["place.pont_du_bief"], "the French name becomes its key");
+
+        std::fs::write(&path, "not a save").unwrap();
+        assert_eq!(storage::read::<Save>(&path), None);
+        assert_eq!(std::fs::read_to_string(dir.join("save.ron.bak")).unwrap(), "not a save", "kept aside, not lost");
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }

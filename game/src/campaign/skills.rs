@@ -3,6 +3,8 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::i18n::n_;
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub enum Skill {
     MineDePlomb,
@@ -30,27 +32,27 @@ const fn node(skill: Skill, name: &'static str, cost: u32, effect: &'static str)
 /// (branch, its nodes in buying order).
 pub const BRANCHES: [(&str, [Node; 3]); 3] = [
     (
-        "Le Trait",
+        n_("skill.trait"),
         [
-            node(Skill::MineDePlomb, "Mine de plomb", 1, "arbalète −10 %"),
-            node(Skill::Equerre, "Équerre", 2, "+1 de portée pour deux tours côte à côte"),
-            node(Skill::ContreVisee, "Contre-visée", 3, "mortier +25 % contre les boss"),
+            node(Skill::MineDePlomb, n_("skill.mine_de_plomb.name"), 1, n_("skill.mine_de_plomb.effect")),
+            node(Skill::Equerre, n_("skill.equerre.name"), 2, n_("skill.equerre.effect")),
+            node(Skill::ContreVisee, n_("skill.contre_visee.name"), 3, n_("skill.contre_visee.effect")),
         ],
     ),
     (
-        "Le Relief",
+        n_("skill.relief"),
         [
-            node(Skill::BoueProfonde, "Boue profonde", 1, "+1 au coût de la boue pour les hostiles"),
-            node(Skill::RoncesMeres, "Ronces-mères", 2, "les ronces gagnent une case par vague"),
-            node(Skill::Fascines, "Fascines", 3, "barricade −30 %"),
+            node(Skill::BoueProfonde, n_("skill.boue_profonde.name"), 1, n_("skill.boue_profonde.effect")),
+            node(Skill::RoncesMeres, n_("skill.ronces_meres.name"), 2, n_("skill.ronces_meres.effect")),
+            node(Skill::Fascines, n_("skill.fascines.name"), 3, n_("skill.fascines.effect")),
         ],
     ),
     (
-        "La Légende",
+        n_("skill.legende"),
         [
-            node(Skill::LectureFine, "Lecture fine", 1, "le trait de crayon affiche les coûts"),
-            node(Skill::SceauxBrises, "Sceaux brisés", 2, "+15 % de sépia"),
-            node(Skill::OmbrePortee, "Ombre portée", 3, "les tours comptent ×1,5 pour les lecteurs d'Ombre"),
+            node(Skill::LectureFine, n_("skill.lecture_fine.name"), 1, n_("skill.lecture_fine.effect")),
+            node(Skill::SceauxBrises, n_("skill.sceaux_brises.name"), 2, n_("skill.sceaux_brises.effect")),
+            node(Skill::OmbrePortee, n_("skill.ombre_portee.name"), 3, n_("skill.ombre_portee.effect")),
         ],
     ),
 ];

@@ -1,55 +1,50 @@
-//! The screens around the game: splash, title, settings and pause, and the widgets they share.
+//! The screens around the game: splash, title, pause, settings, sceaux, carnet, controls and credits.
 
+mod carnet;
+mod controls;
+mod credits;
 mod pause;
-mod settings;
+mod sceaux;
+mod settings_page;
 mod splash;
 mod title;
 
+use bevy::input::keyboard::Key;
 use bevy::input_focus::{FocusCause, InputFocus};
-use bevy::picking::hover::Hovered;
 use bevy::prelude::*;
-use bevy::ui::{Pressed, UiGlobalTransform};
+use bevy::ui::UiGlobalTransform;
 use bevy::ui_widgets::{Activate, Button};
 
-pub use settings::{Music, Settings};
+pub use carnet::open_carnet;
+pub use sceaux::open_sceaux;
 
-/// Which screen is up. The game's input and simulation only run while `Playing`.
-#[derive(States, Default, Clone, Copy, PartialEq, Eq, Hash, Debug)]
-pub enum Screen {
-    #[default]
-    Splash,
-    Title,
-    /// "Erase the campaign?" before a new game.
-    ConfirmNew,
-    /// Replay any level reached.
-    Chapters,
-    Settings,
-    Playing,
-    Paused,
-}
+// The pages build with the shared widgets; `super::{text, ..}` reaches them from here.
+use crate::schedule::Screen;
+use crate::theme::{PAPER, SUBTITLE_SIZE};
+use crate::ui::widgets::{Panel, Rise, framed, primary, text};
 
 pub fn plugin(app: &mut App) {
-    app.init_state::<Screen>()
-        .add_plugins((splash::plugin, title::plugin, pause::plugin, settings::plugin))
-        .add_systems(OnEnter(Screen::Playing), reset_input)
-        .add_systems(
-            Update,
-            (
-                escape,
-                clear_focus.run_if(state_changed::<Screen>),
-                navigate.run_if(not(in_state(Screen::Playing))),
-                button_look,
-            ),
-        );
+    app.add_plugins((
+        splash::plugin,
+        title::plugin,
+        pause::plugin,
+        settings_page::plugin,
+        sceaux::plugin,
+        carnet::plugin,
+        controls::plugin,
+        credits::plugin,
+    ))
+    .add_systems(OnEnter(Screen::Playing), reset_input)
+    .add_systems(
+        Update,
+        (
+            escape,
+            clear_focus.run_if(state_changed::<Screen>),
+            // On the Grand Plan the arrows walk Nève.
+            navigate.run_if(not(in_state(Screen::Playing))).run_if(not(in_state(Screen::Plan))),
+        ),
+    );
 }
-
-const INK: Color = Color::srgb(0.22, 0.14, 0.08);
-/// Paper laid over the map: title, settings and pause.
-const VEIL: Color = Color::srgba(0.93, 0.88, 0.76, 0.88);
-/// Opaque paper: the splash.
-const PAPER: Color = Color::srgb(0.93, 0.88, 0.76);
-const LIT: Color = Color::srgba(0.55, 0.4, 0.22, 0.25);
-const PRESSED: Color = Color::srgba(0.55, 0.4, 0.22, 0.5);
 
 /// A full-screen page shown while in `screen`, its content in a centered column.
 fn page(screen: Screen, background: Color) -> impl Bundle {
@@ -68,52 +63,67 @@ fn page(screen: Screen, background: Color) -> impl Bundle {
     )
 }
 
-/// Ink text in the game's font.
-fn text(assets: &AssetServer, text: impl Into<String>, size: f32) -> impl Bundle {
-    (
-        Text::new(text),
-        TextFont {
-            font: assets.load("fonts/IMFellEnglish-Regular.ttf").into(),
-            font_size: FontSize::Px(size),
-            ..default()
-        },
-        TextColor(INK),
-    )
-}
-
 /// A button's label.
 fn label(assets: &AssetServer, label: impl Into<String>) -> impl Bundle {
-    text(assets, label, 28.0)
+    text(assets, label, SUBTITLE_SIZE)
 }
+
+/// How wide a page's buttons are, framed or primary.
+pub(crate) const BUTTON_WIDTH: f32 = 320.0;
 
 /// A framed button around `label`; attach its action with `.observe(|_: On<Activate>, ..| ..)`.
 fn button(label: impl Bundle) -> impl Bundle {
-    (
-        Button,
-        Hovered::default(),
-        Node {
-            min_width: px(320),
-            padding: UiRect::axes(px(16), px(6)),
-            border: UiRect::all(px(2)),
-            justify_content: JustifyContent::Center,
-            ..default()
-        },
-        BorderColor::all(INK),
-        BackgroundColor(Color::NONE),
-        children![label],
-    )
+    framed(BUTTON_WIDTH, label)
 }
+
+/// A button the keyboard focus passes over: the small arrows beside a settings row, reached by ← → instead.
+#[derive(Component)]
+pub(crate) struct NoNav;
 
 /// Button action: go to `screen`.
 fn go(screen: Screen) -> impl Fn(On<Activate>, ResMut<NextState<Screen>>) {
     move |_, mut next| next.set(screen)
 }
 
+/// Where the settings, sceaux, carnet, controls and credits pages go back to.
+#[derive(Resource)]
+pub struct BackTo(pub Screen);
+
+/// Button action: open `page`, coming back to `from`.
+fn open(page: Screen, from: Screen) -> impl Fn(On<Activate>, Commands, ResMut<NextState<Screen>>) {
+    move |_, mut commands, mut next| {
+        commands.insert_resource(BackTo(from));
+        next.set(page);
+    }
+}
+
+/// Button action: back to where the page was opened from.
+fn back(_: On<Activate>, from: Res<BackTo>, mut next: ResMut<NextState<Screen>>) {
+    next.set(from.0);
+}
+
+/// A page's sheet of paper, rising as it comes in, its content in a centered column.
+fn sheet() -> impl Bundle {
+    (
+        Node {
+            flex_direction: FlexDirection::Column,
+            align_items: AlignItems::Center,
+            row_gap: px(14),
+            padding: UiRect::axes(px(40), px(28)),
+            ..default()
+        },
+        BackgroundColor(PAPER),
+        Panel,
+        UiTransform::IDENTITY,
+        Rise::default(),
+    )
+}
+
 /// Esc: pause, resume, or back from a page.
 fn escape(
     keys: Res<ButtonInput<KeyCode>>,
     screen: Res<State<Screen>>,
-    from: Option<Res<settings::SettingsFrom>>,
+    from: Option<Res<BackTo>>,
     mut next: ResMut<NextState<Screen>>,
 ) {
     if !keys.just_pressed(KeyCode::Escape) {
@@ -122,15 +132,22 @@ fn escape(
     match screen.get() {
         Screen::Playing => next.set(Screen::Paused),
         Screen::Paused => next.set(Screen::Playing),
-        Screen::Settings => next.set(from.map_or(Screen::Title, |f| f.0)),
-        Screen::ConfirmNew | Screen::Chapters => next.set(Screen::Title),
+        Screen::Settings | Screen::Sceaux | Screen::Carnet | Screen::Controls | Screen::Credits => {
+            next.set(from.map_or(Screen::Title, |f| f.0))
+        }
+        Screen::ConfirmNew | Screen::Plan => next.set(Screen::Title),
         Screen::Splash | Screen::Title => {}
     }
 }
 
 /// The key or click that started play must not also act in the game.
-fn reset_input(mut keys: ResMut<ButtonInput<KeyCode>>, mut mouse: ResMut<ButtonInput<MouseButton>>) {
+fn reset_input(
+    mut keys: ResMut<ButtonInput<KeyCode>>,
+    mut letters: ResMut<ButtonInput<Key>>,
+    mut mouse: ResMut<ButtonInput<MouseButton>>,
+) {
     keys.reset_all();
+    letters.reset_all();
     mouse.reset_all();
 }
 
@@ -138,19 +155,26 @@ fn clear_focus(mut focus: ResMut<InputFocus>) {
     focus.clear();
 }
 
+/// The buttons the keyboard focus goes through.
+type Navigable = (With<Button>, Without<NoNav>);
+
 /// Arrows or Tab move the keyboard focus through the page's buttons, in reading order;
-/// Enter or Space presses the focused one.
+/// Enter or Space presses the focused one. On the settings page ← → change a setting instead.
 fn navigate(
     keys: Res<ButtonInput<KeyCode>>,
-    buttons: Query<(Entity, &UiGlobalTransform), With<Button>>,
+    screen: Res<State<Screen>>,
+    buttons: Query<(Entity, &UiGlobalTransform), Navigable>,
     mut focus: ResMut<InputFocus>,
 ) {
     let shift = keys.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]);
-    let step = if keys.any_just_pressed([KeyCode::ArrowDown, KeyCode::ArrowRight])
+    let sideways = *screen.get() != Screen::Settings;
+    let step = if keys.just_pressed(KeyCode::ArrowDown)
+        || (sideways && keys.just_pressed(KeyCode::ArrowRight))
         || (keys.just_pressed(KeyCode::Tab) && !shift)
     {
         1
-    } else if keys.any_just_pressed([KeyCode::ArrowUp, KeyCode::ArrowLeft])
+    } else if keys.just_pressed(KeyCode::ArrowUp)
+        || (sideways && keys.just_pressed(KeyCode::ArrowLeft))
         || (keys.just_pressed(KeyCode::Tab) && shift)
     {
         -1
@@ -169,22 +193,6 @@ fn navigate(
         None => len - 1,
     };
     focus.set(order[next as usize].0, FocusCause::Navigated);
-}
-
-/// Buttons darken under the mouse or the keyboard focus, and more while pressed.
-fn button_look(
-    focus: Res<InputFocus>,
-    mut buttons: Query<(Entity, &Hovered, Has<Pressed>, &mut BackgroundColor), With<Button>>,
-) {
-    for (entity, hovered, pressed, mut background) in &mut buttons {
-        background.0 = if pressed {
-            PRESSED
-        } else if hovered.get() || focus.get() == Some(entity) {
-            LIT
-        } else {
-            Color::NONE
-        };
-    }
 }
 
 #[cfg(test)]

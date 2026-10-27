@@ -1,65 +1,90 @@
-//! The main menu, the chapters to replay, and the confirmation before a new game erases the campaign.
+//! The main menu over the Marches, and the confirmation before a new game erases the campaign.
 
 use bevy::prelude::*;
 use bevy::ui_widgets::Activate;
 
-use super::settings::open_settings;
-use super::{Screen, VEIL, button, go, label, page, text};
+use super::carnet::{open_carnet, written};
+use super::controls::open_controls;
+use super::credits::open_credits;
+use super::sceaux::open_sceaux;
+use super::settings_page::open_settings;
+use super::{Screen, button, go, label, page, primary, text};
 use crate::campaign::LoadLevel;
 use crate::campaign::save::Save;
-use crate::level::data::{LEVELS, level_name};
+use crate::i18n::{t, tp};
+use crate::level::Level;
+use crate::menu::BUTTON_WIDTH;
+use crate::theme::{HEADING_SIZE, INK_SOFT, PAPER, SMALL_SIZE, SUBTITLE_SIZE, VEIL};
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(OnEnter(Screen::Title), spawn)
-        .add_systems(OnEnter(Screen::Chapters), spawn_chapters)
-        .add_systems(OnEnter(Screen::ConfirmNew), spawn_confirm);
+    app.add_systems(OnEnter(Screen::Title), spawn).add_systems(OnEnter(Screen::ConfirmNew), spawn_confirm);
 }
 
-/// A new campaign that keeps the player's settings.
-fn fresh(save: &Save) -> Save {
-    Save { settings: save.settings.clone(), ..default() }
-}
-
-fn spawn(mut commands: Commands, assets: Res<AssetServer>, save: Res<Save>) {
-    let new = *save == fresh(&save);
-    commands.spawn(page(Screen::Title, VEIL)).with_children(|p| {
-        p.spawn(text(&assets, "Hachures", 72.0));
-        p.spawn(button(label(&assets, if new { "Jouer" } else { "Continuer" }))).observe(go(Screen::Playing));
-        if !new {
-            p.spawn(button(label(&assets, "Chapitres"))).observe(go(Screen::Chapters));
-            p.spawn(button(label(&assets, "Nouvelle partie"))).observe(go(Screen::ConfirmNew));
-        }
-        p.spawn(button(label(&assets, "Réglages"))).observe(open_settings(Screen::Title));
-        // A browser tab is closed, not quit.
-        #[cfg(not(target_arch = "wasm32"))]
-        p.spawn(button(label(&assets, "Quitter"))).observe(|_: On<Activate>, mut exit: MessageWriter<AppExit>| {
-            exit.write(AppExit::Success);
-        });
+fn spawn(mut commands: Commands, assets: Res<AssetServer>, save: Res<Save>, level: Res<Level>) {
+    let new = *save == Save::default();
+    // The Marches drift behind; the menu is a sheet laid on the left.
+    let mut page = commands.spawn(page(Screen::Title, Color::NONE));
+    page.entry::<Node>().and_modify(|mut node| {
+        node.align_items = AlignItems::FlexStart;
+        node.padding = UiRect::left(px(64));
     });
-}
-
-/// Every level reached, with its sceaux, to play again: a missed challenge can still be won.
-fn spawn_chapters(mut commands: Commands, assets: Res<AssetServer>, save: Res<Save>) {
-    commands.spawn(page(Screen::Chapters, VEIL)).with_children(|p| {
-        p.spawn(text(&assets, "Chapitres", 56.0));
-        for index in 0..=save.reached.min(LEVELS.len() - 1) {
-            let sceaux = save.levels.get(index).map_or(0, |r| r.won as u32 + r.challenge as u32);
-            p.spawn(button(label(&assets, format!("{} ({sceaux}/2)", level_name(index))))).observe(
-                move |_: On<Activate>, mut load: MessageWriter<LoadLevel>, mut next: ResMut<NextState<Screen>>| {
-                    load.write(LoadLevel(index));
-                    next.set(Screen::Playing);
+    page.with_children(|page| {
+        let mut p = page.spawn((
+            Node {
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::Center,
+                row_gap: px(14),
+                padding: UiRect::axes(px(40), px(36)),
+                ..default()
+            },
+            BackgroundColor(PAPER),
+            super::Panel,
+            UiTransform::IDENTITY,
+            super::Rise::default(),
+        ));
+        p.with_children(|p| {
+            p.spawn(text(&assets, crate::NAME, 72.0));
+            p.spawn(text(&assets, t("title.tagline"), SUBTITLE_SIZE));
+            // A new campaign starts with the prologue; one under way goes back to the Grand Plan.
+            p.spawn(primary(BUTTON_WIDTH, label(&assets, if new { t("title.play") } else { t("title.continue") })))
+                .observe(go(if new { Screen::Playing } else { Screen::Plan }));
+            if !new {
+                // Where the campaign stands, under the button that goes back to it.
+                let n = save.sceaux();
+                let progress = tp("title.progress", n, &[&t(&level.name), &n]);
+                p.spawn(text(&assets, progress, SMALL_SIZE)).insert(TextColor(INK_SOFT));
+                p.spawn(button(label(&assets, t("sceaux.title")))).observe(open_sceaux(Screen::Title));
+                if written(&save) {
+                    p.spawn(button(label(&assets, t("title.carnet")))).observe(open_carnet(Screen::Title));
+                }
+            }
+            p.spawn(button(label(&assets, t("menu.controls")))).observe(open_controls(Screen::Title));
+            p.spawn(button(label(&assets, t("menu.settings")))).observe(open_settings(Screen::Title));
+            p.spawn(button(label(&assets, t("menu.credits")))).observe(open_credits(Screen::Title));
+            if !new {
+                p.spawn(button(label(&assets, t("title.new_game")))).observe(go(Screen::ConfirmNew));
+            }
+            // A browser tab is closed, not quit.
+            #[cfg(not(target_arch = "wasm32"))]
+            p.spawn(button(label(&assets, t("title.quit")))).observe(
+                |_: On<Activate>, mut exit: MessageWriter<AppExit>| {
+                    exit.write(AppExit::Success);
                 },
             );
-        }
-        p.spawn(button(label(&assets, "Retour"))).observe(go(Screen::Title));
+        });
+        // The build, small in the corner, for bug reports.
+        page.spawn(text(&assets, concat!("v", env!("CARGO_PKG_VERSION")), SMALL_SIZE)).insert((
+            TextColor(INK_SOFT),
+            Node { position_type: PositionType::Absolute, right: px(16), bottom: px(12), ..default() },
+        ));
     });
 }
 
 fn spawn_confirm(mut commands: Commands, assets: Res<AssetServer>) {
     commands.spawn(page(Screen::ConfirmNew, VEIL)).with_children(|p| {
-        p.spawn(text(&assets, "Effacer la campagne et recommencer ?", 36.0));
-        p.spawn(button(label(&assets, "Oui, tout effacer"))).observe(new_game);
-        p.spawn(button(label(&assets, "Non"))).observe(go(Screen::Title));
+        p.spawn(text(&assets, t("title.confirm_new"), HEADING_SIZE));
+        p.spawn(button(label(&assets, t("title.confirm_yes")))).observe(new_game);
+        p.spawn(button(label(&assets, t("title.confirm_no")))).observe(go(Screen::Title));
     });
 }
 
@@ -69,7 +94,7 @@ fn new_game(
     mut load: MessageWriter<LoadLevel>,
     mut next: ResMut<NextState<Screen>>,
 ) {
-    *save = fresh(&save);
+    *save = Save::default();
     save.store();
     load.write(LoadLevel(0));
     next.set(Screen::Playing);

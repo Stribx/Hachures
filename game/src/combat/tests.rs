@@ -4,7 +4,8 @@ use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 
 use super::boss::{Borne, Boss, boss_phases};
-use super::enemies::{EnemyLook, spawn_enemies, walk};
+use super::enemies::{spawn_enemies, walk};
+use super::shards::EnemyLook;
 use super::towers::{Tower, Weapon, fire};
 use super::{Enemy, Shots};
 use crate::campaign::save::Save;
@@ -108,7 +109,7 @@ fn grande_chaine_phases() {
     set_hp(&mut app, 500.0);
     run(&mut app, 16);
     let level = app.world().resource::<Level>();
-    assert_eq!(level.boss.as_deref(), Some("Le Bornage"));
+    assert_eq!(level.boss.as_deref(), Some("boss.grande_chaine.bornage"));
     assert_eq!(level.base.bornes.len(), 3, "Le Bornage plants three bornes");
     let bornes = app.world_mut().query_filtered::<(), With<Borne>>().iter(app.world()).count();
     assert_eq!(bornes, 3);
@@ -117,7 +118,7 @@ fn grande_chaine_phases() {
     run(&mut app, 1);
     let level = app.world().resource::<Level>();
     let rompue = index_of(&level.species, "grande_chaine_rompue").unwrap();
-    assert_eq!(level.boss.as_deref(), Some("La Chaîne rompue"));
+    assert_eq!(level.boss.as_deref(), Some("boss.grande_chaine.chaine_rompue"));
     assert_eq!(app.world().get::<Enemy>(boss).unwrap().species, rompue, "la Chaîne rompue reads l'Ombre");
 }
 
@@ -203,14 +204,10 @@ fn bot_build(app: &mut App) -> usize {
             }
         }
         candidates.sort_by(|a, b| b.0.total_cmp(&a.0));
-        let Some(&(_, t, cell)) = candidates.iter().find(|&&(_, t, cell)| {
-            level.tool = t;
-            level.refusal(cell).is_none()
-        }) else {
+        let Some(&(_, t, cell)) = candidates.iter().find(|&&(_, t, cell)| level.refusal(cell, t).is_none()) else {
             return built;
         };
-        level.tool = t;
-        level.ink(cell);
+        level.ink(cell, t);
         let weapon = TOOLS[t].weapon.unwrap();
         let (x, z) = level.grid.coords(cell);
         app.world_mut().spawn((Tower { cell, weapon, ready_in: 0.0 }, Transform::from_xyz(x as f32, 0.8, z as f32)));

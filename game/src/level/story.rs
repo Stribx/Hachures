@@ -6,6 +6,7 @@ use serde::Deserialize;
 
 use super::Level;
 use crate::campaign::save::Save;
+use crate::i18n::{fill, t};
 use crate::ink::TOOLS;
 
 /// When a margin note is written.
@@ -42,6 +43,8 @@ enum Rule {
     NoFuyardHurt,
     /// Win with at least this much Rôle left.
     KeepRole(u32),
+    /// Win without scratching out a single name.
+    KeepNames,
 }
 
 /// The reading challenge: the level's second sceau.
@@ -60,6 +63,40 @@ pub struct Choice {
     pub options: Vec<(String, String)>,
 }
 
+/// A line in Nève's margin: its key, and the key of the place it speaks of if any (its `{}`). It is translated when
+/// shown, so it reads in the language of the moment.
+pub struct MarginNote {
+    pub line: String,
+    pub name: Option<String>,
+}
+
+impl MarginNote {
+    pub fn shown(&self) -> String {
+        match &self.name {
+            Some(name) => fill(t(&self.line), &[&t(name)]),
+            None => t(&self.line).to_string(),
+        }
+    }
+}
+
+impl Note {
+    /// The line, in French (for the translation tests).
+    #[cfg(test)]
+    pub fn text(&self) -> &str {
+        &self.text
+    }
+
+    /// Written on `trigger`, if its choice went its way.
+    fn due(&self, trigger: &Trigger, choices: &BTreeMap<String, String>) -> bool {
+        self.on == *trigger && self.when.as_deref().is_none_or(|c| holds(choices, c))
+    }
+}
+
+/// How a level closes in the carnet: its `Won` lines, as `choices` let them through.
+pub fn closing_lines(notes: &[Note], choices: &BTreeMap<String, String>) -> Vec<String> {
+    notes.iter().filter(|n| n.due(&Trigger::Won, choices)).map(|n| n.text.clone()).collect()
+}
+
 /// Whether the choice "id=option" in `cond` went that way.
 pub fn holds(choices: &BTreeMap<String, String>, cond: &str) -> bool {
     let (id, option) = cond.split_once('=').unwrap_or_else(|| panic!("condition {cond:?} is not id=option"));
@@ -69,13 +106,11 @@ pub fn holds(choices: &BTreeMap<String, String>, cond: &str) -> bool {
 impl Level {
     /// Writes in the margin the notes `trigger` calls for.
     pub fn note(&mut self, trigger: Trigger) {
-        let (due, rest) = std::mem::take(&mut self.notes)
-            .into_iter()
-            .partition(|n| n.on == trigger && n.when.as_deref().is_none_or(|c| holds(&self.choices, c)));
+        let (due, rest) = std::mem::take(&mut self.notes).into_iter().partition(|n| n.due(&trigger, &self.choices));
         self.notes = rest;
         for note in due {
             self.names += note.names;
-            self.margin.push(note.text);
+            self.margin.push(MarginNote { line: note.text, name: None });
         }
     }
 
@@ -84,6 +119,7 @@ impl Level {
             Rule::Without(tool) => !self.used.iter().any(|&t| TOOLS[t].name == tool),
             Rule::NoFuyardHurt => !self.fuyard_hurt,
             Rule::KeepRole(role) => self.lives >= *role,
+            Rule::KeepNames => self.erased.is_empty(),
         })
     }
 
@@ -139,6 +175,17 @@ mod tests {
         assert_eq!(save.choices["refuge"], made, "a replay can't change the choice");
     }
 
+    /// The carnet closes 1-4 on what the Refuge choice left: Oudine speaks, or she is silent.
+    #[test]
+    fn closing_lines_follow_the_choice() {
+        let boss: crate::level::data::LevelData = ron::from_str(LEVELS[refuge_choice() + 1]).unwrap();
+        let lines = |option: &str| closing_lines(&boss.notes, &[("refuge".into(), option.into())].into());
+        let (moulin, bois) = (lines("moulin"), lines("bois"));
+        assert_ne!(moulin, bois);
+        let said = |lines: &[String], words: &str| lines.iter().any(|l| crate::i18n::t(l).contains(words));
+        assert!(said(&moulin, "parlera") && said(&bois, "se tait"));
+    }
+
     /// The Refuge choice moves the Refuge, and "Dans le Bois" costs a Name when Le Bornage begins.
     #[test]
     fn refuge_choice_has_consequences() {
@@ -149,8 +196,8 @@ mod tests {
         let mut bois = Level::load(boss_level, &save);
         assert_ne!(moulin.base.goals[&Goal::Refuge], bois.base.goals[&Goal::Refuge]);
 
-        bois.note(Trigger::Boss("Le Bornage".into()));
+        bois.note(Trigger::Boss("boss.grande_chaine.bornage".into()));
         assert_eq!(bois.names, -1);
-        assert!(bois.margin.iter().any(|line| line.contains("meule")));
+        assert!(bois.margin.iter().any(|note| note.shown().contains("meule")));
     }
 }

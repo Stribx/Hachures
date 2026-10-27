@@ -1,21 +1,35 @@
-//! What the player reads and toggles: the label, Nève's margin, the sceaux tree, le Calque.
+//! What the player reads and clicks: the label, Nève's margin, the bar of tools, the names on the sheet,
+//! and the page at the end of a level.
 
+mod bar;
 mod hud;
+mod notebook;
+mod places;
+mod stamp;
+mod studio;
+pub(crate) mod widgets;
 
+use bevy::input::keyboard::Key;
 use bevy::prelude::*;
 
 use crate::Step;
-use crate::campaign::between_levels;
+use crate::ink::Selection;
 use crate::level::Level;
-use crate::menu::Screen;
+use crate::schedule::Screen;
+use crate::theme::{INK, PAPER, SMALL_SIZE, font};
+use widgets::{Panel, letter};
 
 pub fn plugin(app: &mut App) {
-    app.init_resource::<TreeOpen>().add_systems(Startup, setup).add_systems(
+    app.add_plugins((studio::plugin, widgets::plugin));
+    app.init_resource::<Fast>().add_systems(Startup, (setup, places::setup)).add_systems(
         Update,
         (
-            toggles.in_set(Step::Input).before(between_levels),
-            (hud::update_label, update_margin).in_set(Step::Render),
+            toggles.in_set(Step::Input).before(crate::overworld::onward::between_levels),
+            (hud::update_label, update_margin, fresh_ink, places::label_places, places::tooltip).in_set(Step::Render),
+            (stamp::stamp_wave, stamp::strike_stamps).in_set(Step::Render),
+            (bar::sync, bar::look, notebook::sync).in_set(Step::Render).run_if(in_state(Screen::Playing)),
             show_during_play.run_if(state_changed::<Screen>),
+            speed,
         ),
     );
 }
@@ -28,71 +42,117 @@ fn show_during_play(screen: Res<State<Screen>>, mut texts: Query<&mut Visibility
     }
 }
 
-/// The skill tree is shown instead of the usual panel.
-#[derive(Resource, Default)]
-pub struct TreeOpen(pub bool);
-
-#[derive(Component)]
-struct Hud;
-
 /// Hidden behind the menus.
 #[derive(Component)]
 struct DuringPlay;
 
-/// Nève's notebook, down the right side.
+/// Nève's notebook, down the right side: a strip of paper with her latest notes.
 #[derive(Component)]
 struct Margin;
 
+/// A note just written: its ink comes up (300 ms).
+#[derive(Component)]
+struct Fresh(f32);
+
 fn setup(mut commands: Commands, assets: Res<AssetServer>) {
-    commands.spawn((
-        Hud,
-        DuringPlay,
-        Visibility::Hidden,
-        Text::default(),
-        TextFont {
-            font: assets.load("fonts/IMFellEnglish-Regular.ttf").into(),
-            font_size: FontSize::Px(24.0),
-            ..default()
-        },
-        Node { margin: UiRect::all(Val::Px(16.0)), ..default() },
-    ));
+    hud::spawn(&mut commands, &assets);
     commands.spawn((
         Margin,
         DuringPlay,
         Visibility::Hidden,
-        Text::default(),
-        TextFont {
-            font: assets.load("fonts/IMFellEnglish-Italic.ttf").into(),
-            font_size: FontSize::Px(20.0),
-            ..default()
-        },
-        TextColor(Color::srgb(0.9, 0.85, 0.7)),
+        Panel,
+        BackgroundColor(PAPER),
         Node {
             position_type: PositionType::Absolute,
-            top: Val::Px(16.0),
-            right: Val::Px(16.0),
-            width: Val::Px(360.0),
+            top: px(16),
+            right: px(16),
+            width: px(360),
+            flex_direction: FlexDirection::Column,
+            row_gap: px(12),
+            padding: UiRect::axes(px(20), px(16)),
+            display: Display::None,
             ..default()
         },
     ));
 }
 
-/// A: the sceaux tree. Tab: the next species. F1: le Calque.
-fn toggles(keys: Res<ButtonInput<KeyCode>>, mut level: ResMut<Level>, mut tree: ResMut<TreeOpen>) {
-    if keys.just_pressed(KeyCode::KeyA) {
-        tree.0 = !tree.0;
-    }
+/// Tab: the next species. F1: le Calque. F: speed ×2. (A, the sceaux tree, is in `menu`.)
+fn toggles(
+    keys: Res<ButtonInput<KeyCode>>,
+    letters: Res<ButtonInput<Key>>,
+    level: Res<Level>,
+    mut selection: ResMut<Selection>,
+    mut fast: ResMut<Fast>,
+) {
     if keys.just_pressed(KeyCode::Tab) {
-        let next = level.present.iter().position(|&k| k == level.shown).map_or(0, |p| (p + 1) % level.present.len());
-        level.shown = level.present[next];
+        next_species(&mut selection, &level);
     }
     if keys.just_pressed(KeyCode::F1) {
-        level.calque = !level.calque;
+        selection.calque = !selection.calque;
+    }
+    if letter(&letters, "f") {
+        fast.0 = !fast.0;
     }
 }
 
-/// The latest notes of Nève's notebook.
-fn update_margin(level: Res<Level>, mut margin: Single<&mut Text, With<Margin>>) {
-    let recent = &level.margin[level.margin.len().saturating_sub(8)..];
-    margin.0 = recent.join("\n\n");
+/// The game at double speed: waves, walkers and towers, not the menus over it.
+#[derive(Resource, Default)]
+pub struct Fast(pub bool);
+
+fn speed(fast: Res<Fast>, screen: Res<State<Screen>>, mut time: ResMut<Time<Virtual>>) {
+    let ratio = if fast.0 && *screen.get() == Screen::Playing { 2.0 } else { 1.0 };
+    if time.relative_speed() != ratio {
+        time.set_relative_speed(ratio);
+    }
+}
+
+/// Shows the route of the next species the level sends.
+fn next_species(selection: &mut Selection, level: &Level) {
+    let next = level.present.iter().position(|&k| k == selection.shown).map_or(0, |p| (p + 1) % level.present.len());
+    selection.shown = level.present[next];
+}
+
+/// The latest notes of Nève's notebook, the newest in full ink, the older ones fading back.
+fn update_margin(
+    level: Res<Level>,
+    assets: Res<AssetServer>,
+    mut written: Local<Option<(usize, usize, &'static str)>>,
+    margin: Single<(Entity, &mut Node), With<Margin>>,
+    mut commands: Commands,
+) {
+    const SHOWN: usize = 5;
+    // Written again in another language too.
+    let now = Some((level.index, level.margin.len(), crate::i18n::code()));
+    if *written == now {
+        return;
+    }
+    let grew = written.is_some_and(|(index, len, _)| index == level.index && len < level.margin.len());
+    *written = now;
+    let (margin, mut node) = margin.into_inner();
+    node.display = if level.margin.is_empty() { Display::None } else { Display::Flex };
+    let recent = &level.margin[level.margin.len().saturating_sub(SHOWN)..];
+    let font = font(&assets, true, SMALL_SIZE);
+    commands.entity(margin).despawn_related::<Children>().with_children(|m| {
+        for (k, note) in recent.iter().enumerate() {
+            let newest = k + 1 == recent.len();
+            let mut line = m.spawn((
+                Text::new(note.shown()),
+                font.clone(),
+                TextColor(INK.with_alpha(if newest { 1.0 } else { 0.55 })),
+            ));
+            if newest && grew {
+                line.insert((Fresh(0.0), TextColor(INK.with_alpha(0.0))));
+            }
+        }
+    });
+}
+
+fn fresh_ink(time: Res<Time>, mut notes: Query<(Entity, &mut Fresh, &mut TextColor)>, mut commands: Commands) {
+    for (entity, mut fresh, mut color) in &mut notes {
+        fresh.0 = (fresh.0 + time.delta_secs() / 0.3).min(1.0);
+        color.0 = INK.with_alpha(1.0 - (1.0 - fresh.0).powi(3));
+        if fresh.0 >= 1.0 {
+            commands.entity(entity).remove::<Fresh>();
+        }
+    }
 }

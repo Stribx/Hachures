@@ -2,6 +2,7 @@
 
 pub mod boss;
 pub mod enemies;
+mod shards;
 #[cfg(test)]
 mod tests;
 pub mod towers;
@@ -11,11 +12,15 @@ use bevy::prelude::*;
 use crate::Step;
 
 pub fn plugin(app: &mut App) {
-    app.init_resource::<Shots>().add_systems(Startup, enemies::setup).add_systems(
+    app.init_resource::<Shots>().add_systems(Startup, shards::setup).add_systems(
         Update,
         (
             enemies::start_waves.in_set(Step::Input),
-            (enemies::spawn_enemies, enemies::walk, towers::fire, boss::boss_phases).chain().in_set(Step::Simulate),
+            towers::raise_towers.in_set(Step::Input).after(crate::ink::inking),
+            (enemies::spawn_enemies, enemies::walk, towers::fire, boss::boss_phases, shards::shards)
+                .chain()
+                .in_set(Step::Simulate)
+                .before(crate::level::finish_level),
             draw.in_set(Step::Render),
         ),
     );
@@ -52,7 +57,10 @@ fn draw(time: Res<Time>, mut shots: ResMut<Shots>, enemies: Query<(&Enemy, &Tran
     for (enemy, t) in &enemies {
         let left = t.translation + Vec3::new(-0.25, 0.35 * t.scale.y, 0.0);
         let frac = (enemy.hp / enemy.max_hp).clamp(0.0, 1.0);
-        gizmos.line(left, left + Vec3::X * 0.5 * frac, Color::srgb(1.0 - frac, frac, 0.1));
+        // Ink on a strip of paper; the seal's red once it is nearly broken.
+        gizmos.line(left, left + Vec3::X * 0.5, crate::theme::SHEET);
+        let ink = if frac < 0.35 { crate::theme::SEAL } else { crate::theme::WORLD_INK };
+        gizmos.line(left + Vec3::Z * 0.01, left + Vec3::new(0.5 * frac, 0.0, 0.01), ink);
     }
     for (from, to, left) in &mut shots.0 {
         gizmos.line(*from, *to, Color::srgb(0.2, 0.1, 0.05));

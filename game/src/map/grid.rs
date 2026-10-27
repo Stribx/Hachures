@@ -5,6 +5,7 @@ use std::collections::HashMap;
 use serde::Deserialize;
 
 use super::species::{Goal, Species};
+use crate::i18n::n_;
 use crate::level::world::Event;
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Deserialize)]
@@ -27,6 +28,23 @@ pub enum Tile {
 }
 
 impl Tile {
+    /// What the Calque calls it, in French.
+    pub fn name(self) -> &'static str {
+        match self {
+            Tile::Sol => n_("tile.sol"),
+            Tile::SolBas => n_("tile.sol_bas"),
+            Tile::Boue => n_("tile.boue"),
+            Tile::Ronces => n_("tile.ronces"),
+            Tile::Eau => n_("tile.eau"),
+            Tile::Gue => n_("tile.gue"),
+            Tile::Barricade => n_("tile.barricade"),
+            Tile::Roc => n_("tile.roc"),
+            Tile::Tour => n_("tile.tour"),
+            Tile::Chaussee => n_("tile.chaussee"),
+            Tile::Glace => n_("tile.glace"),
+        }
+    }
+
     /// Nève can only ink over open, dry ground.
     pub fn buildable(self) -> bool {
         matches!(self, Tile::Sol | Tile::SolBas | Tile::Chaussee)

@@ -2,6 +2,7 @@
 //! `Level` is one resource; each feature adds its own `impl Level` (inking in `ink`, tower reach in `combat`).
 
 pub mod data;
+mod load;
 pub mod story;
 pub mod waves;
 pub mod world;
@@ -13,22 +14,26 @@ use bevy::prelude::*;
 use crate::Step;
 use crate::campaign::save::Save;
 use crate::campaign::skills::Skill;
-use crate::combat::boss::boss_phases;
-use crate::combat::towers::{self, TowerStats, Weapon};
-use crate::ink::{TOOLS, tool_index};
+use crate::combat::towers::{TowerStats, Weapon};
 use crate::map::flow::{self, FlowField};
-use crate::map::grid::{Grid, Tile};
-use crate::map::species::{self, Species};
-use data::{Change, LEVELS, LevelData, START_LIVES};
-use story::{Challenge, Choice, Note, Trigger, holds};
-use waves::{Wave, spawn_order};
+use crate::map::grid::Grid;
+use crate::map::species::Species;
+use data::{Change, LEVELS, Place};
+use story::{Challenge, Choice, MarginNote, Note, Trigger};
+use waves::Wave;
 use world::{WORLDS, World};
 
 /// Chaîneur HP at world 1, wave 1 (docs, section 8).
 const BASE_HP: f32 = 100.0;
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(Update, finish_level.in_set(Step::Simulate).after(boss_phases));
+    // Once the Rôle is lost, the sheet stands still until Enter plays again.
+    app.configure_sets(Update, Step::Simulate.run_if(alive)).add_systems(Update, finish_level.in_set(Step::Simulate));
+}
+
+/// Some of the Rôle is left: the simulation goes on.
+fn alive(level: Res<Level>) -> bool {
+    level.lives > 0
 }
 
 /// Tags what belongs to the level being played, to clear it when another one loads.
@@ -63,6 +68,9 @@ pub struct Level {
     pub waves: Vec<Vec<usize>>,
     /// Scripted changes still to come.
     pub changes: Vec<Change>,
+    pub places: Vec<Place>,
+    /// Indices in `places` of the names scratched out.
+    pub erased: Vec<usize>,
     pub wave: Wave,
     pub tower_stats: HashMap<Weapon, TowerStats>,
     /// (cell, weapon) of every tower inked.
@@ -71,10 +79,8 @@ pub struct Level {
     pub boss: Option<String>,
     /// Indices in `TOOLS` this level allows.
     pub tools: Vec<usize>,
-    pub tool: usize,
     /// Tools inked at least once, for the challenge.
     pub used: Vec<usize>,
-    pub shown: usize,
     pub sepia: u32,
     /// Fractions of sépia owed by Sceaux brisés.
     loot_carry: f32,
@@ -84,11 +90,9 @@ pub struct Level {
     pub fuyard_hurt: bool,
     /// (species, cell) of every enemy on the map and the cell it walks to.
     pub walkers: Vec<(usize, usize)>,
-    pub calque: bool,
-    pub hovered: Option<usize>,
     /// Notes still to come, and the margin written so far.
     notes: Vec<Note>,
-    pub margin: Vec<String>,
+    pub margin: Vec<MarginNote>,
     pub challenge: Option<Challenge>,
     pub choice: Option<Choice>,
     /// The choice was made on an earlier run: replaying the level can't change it.
@@ -105,116 +109,6 @@ pub struct Level {
 }
 
 impl Level {
-    /// A bare level of world 1 on `base`: every tool, no waves, no event, no skills.
-    pub fn new(base: Grid, species: Vec<Species>) -> Level {
-        let fields = flow::fields(&base, &species);
-        let present = (0..species.len()).collect();
-        Level {
-            index: 0,
-            world: 0,
-            name: String::new(),
-            grid: base.clone(),
-            base,
-            events: Vec::new(),
-            event_on: false,
-            event_next: false,
-            redraw: true,
-            species,
-            fields,
-            present,
-            waves: Vec::new(),
-            changes: Vec::new(),
-            wave: Wave::default(),
-            tower_stats: towers::load_stats(),
-            towers: Vec::new(),
-            boss: None,
-            tools: (0..TOOLS.len()).collect(),
-            tool: 0,
-            used: Vec::new(),
-            shown: 0,
-            sepia: 120,
-            loot_carry: 0.0,
-            lives: START_LIVES,
-            names: 0,
-            fuyard_hurt: false,
-            walkers: Vec::new(),
-            calque: false,
-            hovered: None,
-            notes: Vec::new(),
-            margin: Vec::new(),
-            challenge: None,
-            choice: None,
-            choice_locked: false,
-            choices: BTreeMap::new(),
-            skills: Vec::new(),
-            finished: false,
-            tension: 0,
-            lives_at_wave_start: START_LIVES,
-        }
-    }
-
-    /// Level `index` of the campaign, from its data file, shaped by the save's choices and skills.
-    pub fn load(index: usize, save: &Save) -> Level {
-        let data: LevelData = ron::from_str(LEVELS[index]).expect("invalid level file");
-        let mut species = species::load();
-        if save.skills.contains(&Skill::BoueProfonde) {
-            for s in species.iter_mut().filter(|s| s.hostile) {
-                if let Some(cost) = s.costs.get_mut(&Tile::Boue) {
-                    *cost += 1.0;
-                }
-            }
-        }
-        let find = |name: &str| species::index_of(&species, name).unwrap_or_else(|| panic!("unknown species {name:?}"));
-        let mut waves: Vec<Vec<usize>> = data
-            .waves
-            .iter()
-            .map(|groups| spawn_order(groups.iter().map(|(name, count)| (find(name), *count)).collect()))
-            .collect();
-        if let Some((cond, by)) = &data.shorter
-            && holds(&save.choices, cond)
-        {
-            waves.truncate(waves.len() - by);
-        }
-        let mut present: Vec<usize> = waves.iter().flatten().copied().collect();
-        // A boss changes species with its phases.
-        if let Some(boss) = &WORLDS[data.world - 1].boss
-            && present.contains(&find(&boss.phases[0].species))
-        {
-            present.extend(boss.phases.iter().map(|p| find(&p.species)));
-        }
-        present.sort_unstable();
-        present.dedup();
-        let tools: Vec<usize> =
-            data.tools.iter().map(|t| tool_index(t).unwrap_or_else(|| panic!("unknown tool {t:?}"))).collect();
-        let mut map = data.map.join("\n");
-        map = match &data.alt_refuge {
-            Some(cond) if holds(&save.choices, cond) => map.replace('R', ".").replace('W', "R"),
-            _ => map.replace('W', "."),
-        };
-
-        let mut level = Level::new(Grid::parse(&map), species);
-        level.index = index;
-        level.world = data.world - 1;
-        level.name = data.name;
-        level.sepia = data.sepia;
-        level.tool = tools[0];
-        level.tools = tools;
-        level.events = data.events;
-        level.event_next = level.event_at(1);
-        level.waves = waves;
-        level.shown = present[0];
-        level.present = present;
-        level.changes = data.changes;
-        level.notes = data.notes;
-        level.challenge = data.challenge;
-        level.choice_locked = data.choice.as_ref().is_some_and(|c| save.choices.contains_key(&c.id));
-        level.choice = data.choice;
-        level.choices = save.choices.clone();
-        level.skills = save.skills.clone();
-        level.note(Trigger::Start);
-        level
-    }
-
     pub fn world(&self) -> &'static World {
         &WORLDS[self.world]
     }
@@ -238,6 +132,11 @@ impl Level {
         grid
     }
 
+    /// The place at cell `i` whose name is still on the sheet, if any.
+    pub fn place_at(&self, i: usize) -> Option<usize> {
+        (0..self.places.len()).find(|&p| !self.erased.contains(&p) && self.places[p].covers(i, self.base.width))
+    }
+
     pub fn has(&self, skill: Skill) -> bool {
         self.skills.contains(&skill)
     }
@@ -256,6 +155,7 @@ impl Level {
         record.won = true;
         record.challenge |= challenge;
         record.names = self.names;
+        record.erased = self.erased.iter().map(|&p| self.places[p].name.clone()).collect();
         // A level with a choice opens the next one only once it is made: see `choose`.
         if self.chosen() {
             self.unlock_next(save);
@@ -283,7 +183,7 @@ impl Level {
 }
 
 /// Once the last wave is beaten: sceaux, Names and the next level go to the save.
-fn finish_level(mut level: ResMut<Level>, mut save: ResMut<Save>) {
+pub(crate) fn finish_level(mut level: ResMut<Level>, mut save: ResMut<Save>) {
     if level.won() && !level.finished {
         level.finish(&mut save);
         save.store();
@@ -292,7 +192,30 @@ fn finish_level(mut level: ResMut<Level>, mut save: ResMut<Save>) {
 
 #[cfg(test)]
 mod tests {
+    use bevy::state::app::StatesPlugin;
+
     use super::*;
+    use crate::map::species;
+    use crate::schedule::Screen;
+
+    /// Once the Rôle is lost, the simulation stands still, even during play.
+    #[test]
+    fn a_lost_level_stands_still() {
+        #[derive(Resource, Default)]
+        struct Ticks(u32);
+        let mut app = App::new();
+        app.add_plugins((MinimalPlugins, StatesPlugin, crate::schedule::plugin, plugin))
+            .init_resource::<Ticks>()
+            .insert_resource(Save::default())
+            .insert_resource(Level::new(Grid::parse("S.M"), species::load()))
+            .add_systems(Update, (|mut ticks: ResMut<Ticks>| ticks.0 += 1).in_set(Step::Simulate));
+        app.world_mut().resource_mut::<NextState<Screen>>().set(Screen::Playing);
+        app.update();
+        assert_eq!(app.world().resource::<Ticks>().0, 1, "playing");
+        app.world_mut().resource_mut::<Level>().lives = 0;
+        app.update();
+        assert_eq!(app.world().resource::<Ticks>().0, 1, "the Rôle is lost");
+    }
 
     /// Every level loads, and every species it sends can reach its goal, with and without the world event,
     /// whatever was chosen.
@@ -327,6 +250,20 @@ mod tests {
         }
     }
 
+    /// Every named place stands on ground Nève can ink: otherwise its name could never cost anything.
+    #[test]
+    fn places_can_be_inked() {
+        for index in 0..LEVELS.len() {
+            let level = Level::load(index, &Save::default());
+            for place in &level.places {
+                for &(x, y) in &place.at {
+                    let i = y * level.base.width + x;
+                    assert!(level.base.tiles[i].buildable(), "{}: {} at ({x}, {y})", level.name, place.name);
+                }
+            }
+        }
+    }
+
     /// Le Droit de Passage and Tab only consider the species a level sends, boss phases included.
     #[test]
     fn present_species() {
@@ -334,7 +271,9 @@ mod tests {
             level.present.iter().map(|&k| level.species[k].name.as_str()).collect()
         }
         let at = |prefix: &str| {
-            let index = (0..LEVELS.len()).find(|&i| Level::load(i, &Save::default()).name.starts_with(prefix)).unwrap();
+            let index = (0..LEVELS.len())
+                .find(|&i| Level::load(i, &Save::default()).name == format!("level.{prefix}.name"))
+                .unwrap();
             Level::load(index, &Save::default())
         };
         let (col, boss_level) = (at("2-1"), at("1-4"));
@@ -346,7 +285,7 @@ mod tests {
     /// Handing the deserters over in 2-2 drops the last two waves of 2-3, and costs a Name.
     #[test]
     fn deserters_choice_shortens_the_escort() {
-        let escort = (0..LEVELS.len()).find(|&i| Level::load(i, &Save::default()).name.starts_with("2-3")).unwrap();
+        let escort = (0..LEVELS.len()).find(|&i| Level::load(i, &Save::default()).name == "level.2-3.name").unwrap();
         let mut save = Save::default();
         save.choices.insert("deserteurs".into(), "escorter".into());
         let full = Level::load(escort, &save);

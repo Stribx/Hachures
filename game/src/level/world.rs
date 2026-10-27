@@ -1,4 +1,5 @@
-//! A world of the campaign (`assets/data/worlds/`): what Nève defends there, its event and its boss.
+//! A world of the campaign (`assets/data/worlds/`): what Nève defends there, its event and its boss. Its texts are
+//! keys of `assets/data/i18n/<code>.ron`.
 
 use std::sync::LazyLock;
 
@@ -17,7 +18,9 @@ pub static WORLDS: LazyLock<Vec<World>> = LazyLock::new(|| {
 
 #[derive(Deserialize)]
 pub struct World {
-    /// The Cible, as the HUD names it mid-sentence: "le Moulin".
+    /// As the Grand Plan titles it: "Les Marches de Saule" (`world.1.name`).
+    pub name: String,
+    /// The Cible, as the HUD names it mid-sentence: "le Moulin" (`world.1.defends`).
     pub defends: String,
     pub event: Event,
     #[serde(default)]

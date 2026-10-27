@@ -11,6 +11,7 @@ use crate::map::species::index_of;
 /// One phase of the boss.
 #[derive(Deserialize)]
 pub struct Phase {
+    /// Its key in `assets/data/i18n/`, which is also what level notes `on: Boss(…)` wait for.
     pub name: String,
     /// Lasts until the boss's HP fraction drops to this.
     pub until: f32,

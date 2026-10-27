@@ -6,7 +6,8 @@ use super::story::{Challenge, Choice, Note};
 use crate::map::grid::{Grid, Tile};
 
 /// The campaign, in order.
-pub const LEVELS: [&str; 7] = [
+pub const LEVELS: [&str; 8] = [
+    include_str!("../../assets/data/levels/0-0.ron"),
     include_str!("../../assets/data/levels/1-1.ron"),
     include_str!("../../assets/data/levels/1-2.ron"),
     include_str!("../../assets/data/levels/1-3.ron"),
@@ -19,19 +20,13 @@ pub const LEVELS: [&str; 7] = [
 /// Enemies reaching the Cible or the Borne-Mère before the Rôle is lost (not in the docs; set with the balance bot).
 pub const START_LIVES: u32 = 20;
 
-/// The name of level `index`, for the menus.
-pub fn level_name(index: usize) -> String {
-    #[derive(Deserialize)]
-    struct Named {
-        name: String,
-    }
-    ron::from_str::<Named>(LEVELS[index]).expect("invalid level file").name
-}
-
 /// A level file.
 #[derive(Deserialize)]
 pub struct LevelData {
     pub name: String,
+    /// Where the sheet lies on the Marches: world position of its cell (0, 0).
+    #[serde(default)]
+    pub at: (f32, f32),
     /// Its world, from 1 (`assets/data/worlds/1.ron`).
     pub world: usize,
     pub sepia: u32,
@@ -55,6 +50,38 @@ pub struct LevelData {
     /// Scripted changes of the map, such as an avalanche.
     #[serde(default)]
     pub changes: Vec<Change>,
+    /// Named places, written on the sheet.
+    #[serde(default)]
+    pub places: Vec<Place>,
+}
+
+impl LevelData {
+    /// Level `index` of `LEVELS`, read from its file.
+    pub fn of(index: usize) -> LevelData {
+        ron::from_str(LEVELS[index]).expect("invalid level file")
+    }
+
+    /// The map as text for `Grid::parse`. The Refuge stands on `R`, or on `W` once the choice in `alt_refuge`
+    /// went that way (`alt`); the cell not used is plain ground.
+    pub fn map_text(&self, alt: bool) -> String {
+        let map = self.map.join("\n");
+        if alt { map.replace('R', ".").replace('W', "R") } else { map.replace('W', ".") }
+    }
+}
+
+/// A named place (docs, section 2: le prix du nom): inking any of its cells scratches the name out,
+/// and the Rôle des Noms loses it.
+#[derive(Clone, Deserialize)]
+pub struct Place {
+    pub name: String,
+    pub at: Vec<(usize, usize)>,
+}
+
+impl Place {
+    /// Whether it covers cell `i` on a map `width` wide.
+    pub fn covers(&self, i: usize, width: usize) -> bool {
+        self.at.iter().any(|&(x, y)| y * width + x == i)
+    }
 }
 
 /// A scripted change of the map [T]: as wave `wave` starts, the cells `at` (x, y) become `becomes`.
@@ -77,5 +104,19 @@ impl Change {
         for i in self.cells(grid.width) {
             grid.tiles[i] = self.becomes;
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// The Refuge stands on `R`, or on `W` once the choice went that way; the other cell is ground.
+    #[test]
+    fn the_refuge_moves_with_the_choice() {
+        let mut data = LevelData::of(0);
+        data.map = vec!["R.W".into()];
+        assert_eq!(data.map_text(false), "R..");
+        assert_eq!(data.map_text(true), "..R");
     }
 }
