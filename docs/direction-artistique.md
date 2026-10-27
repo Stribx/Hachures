@@ -87,6 +87,21 @@ On ne passe à la phase suivante que quand le critère « fini quand » tient su
 - ✓ **Correctif :** `Tonemapping::None` désactivait en silence le tramage (`DebandDither`) que les commentaires promettaient. `Tonemapping::Linear` garde les couleurs et trame quand même.
 - **Fini quand :** l'eau se lit comme une carte gravée et l'œil sent d'où vient la lumière. ✓ Atteint sur le plateau et le Grand Plan. Les plis restent discrets sur les pièces Kenney.
 
+### Phase 6 : la maquette vivante (à faire)
+La maquette reste une gravure, mais **enluminée** : des lavis d'aquarelle sous les hachures, comme une carte de Cassini coloriée à la main. Le plateau devient un **bocage en patchwork** : de petits champs en feutre et en tissu, verts, blonds et ocre, cousus entre eux, bordés de haies, et qui bougent avec le vent. Spécification et tickets : `.scratch/maquette-vivante/`.
+
+- **Couleur.** La fonte vers le papier se règle par matière : légère sur la terre, gardée sur les traits d'encre. La palette gagne les couleurs du bocage (pâture, pré, blé, jachère, lin, haie, ciel), et le brouillard et le vignettage se réchauffent.
+  - **Fini quand :** on dit « une carte coloriée à la main », pas « une maquette beige ».
+- **Lisibilité.** Chaque case garde sa famille de couleur. Les champs ne varient qu'à l'intérieur du Sol (pâture sèche) et du Sol bas (pré humide). Boue, Ronces, Eau, Roc et Chaussée restent immédiatement reconnaissables, et l'herbe ne cache jamais une case ni un repère.
+  - **Fini quand :** sur une capture de 1-1, chaque type de case et chaque repère se nomme sans hésiter.
+- **Le patchwork.** Les champs sont tirés de chaque niveau, toujours les mêmes, sans donnée à écrire, avec une couture en feutre là où deux champs se touchent. Sur le Grand Plan, des parcelles bordées de haies.
+  - **Fini quand :** en plissant les yeux, le plateau se lit comme un quilt de champs, et non plus comme une plaine unie.
+- **Le vent.** Les arbres, l'herbe, les fleurs et le blé se balancent d'un même vent, et l'on voit les rafales traverser les champs. Leurs ombres suivent.
+  - **Fini quand :** deux captures à deux instants différents ne diffèrent que par ce que le vent fait bouger.
+- **La vie.** Des vols d'oiseaux en papier passent de temps en temps, des papillons volent au-dessus des fleurs, et les ombres des nuages glissent. La pluie vient avec la Crue et la neige avec le Gel, et la lumière se réchauffe de vague en vague. Des sons d'ambiance CC0 portent le tout.
+  - **Fini quand :** le plateau vit même sans vague.
+- **Budget.** Tout tourne aussi dans le navigateur, en suivant le préréglage graphique (Bas : peu d'herbe, pas d'oiseaux). Le préréglage Haut prend au plus 2 ms de GPU de plus qu'avant cette phase.
+
 ## Revues (grille taste-skill, `references/critique.md`)
 
 La skill est faite pour des pages web, et son inspecteur ne mesure pas un rendu Bevy : ces revues sont faites à l'œil sur les captures, avec sa grille.

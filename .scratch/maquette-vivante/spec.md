@@ -20,7 +20,7 @@ The board and the Grand Plan become a hand-coloured bocage quilt. The ink hachur
 - **Sound:** CC0 only. A shortlist goes to the owner for approval, and every file gets a row in `CREDITS.md`.
 - **Visual only:** the balance table (`game/tests/balance.txt`) must stay identical through every ticket.
 
-## Tickets (one file each under `issues/` to come)
+## Tickets (one file each under `issues/`)
 
 | # | Ticket | Blocked by | Delivers |
 |---|---|---|---|
@@ -53,4 +53,4 @@ New gameplay tiles or rules. Changing the balance. Replacing the Kenney tower mo
 
 ## Further Notes
 
-The direction still needs writing into `docs/direction-artistique.md` as "Phase 6: la maquette vivante", plus one clause in the bible's "Voisin à distinguer" paragraph (the engraving is *enluminée*). Both have the owner's approval.
+The direction is written into `docs/direction-artistique.md` as "Phase 6: la maquette vivante", with one "fini quand" per part. The bible's "Voisin à distinguer" paragraph now says the engraving is *enluminée*. Both have the owner's approval.

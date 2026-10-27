@@ -38,7 +38,7 @@
 
 Je n'ai interrogé aucune base de marques (INPI, EUIPO, USPTO). Il faut le faire avant toute page publique. Il faut aussi renommer le fichier de travail en « Hachures — Bible narrative ».
 
-**Voisin à distinguer : *Carto*.** Dans *Carto*, une petite cartographe fait pivoter des tuiles de carte pour changer la géographie. Le ton est doux et le jeu est un puzzle.\[11\]\[12\] *Hachures* doit s'en écarter nettement : ici, on ne déplace jamais de tuiles, on ne fait pas tourner de pièces de carte, l'esthétique est celle de la gravure et non du livre d'images, et le pouvoir est toujours payé.
+**Voisin à distinguer : *Carto*.** Dans *Carto*, une petite cartographe fait pivoter des tuiles de carte pour changer la géographie. Le ton est doux et le jeu est un puzzle.\[11\]\[12\] *Hachures* doit s'en écarter nettement : ici, on ne déplace jamais de tuiles, on ne fait pas tourner de pièces de carte, l'esthétique est celle de la gravure et non du livre d'images (une gravure enluminée, comme les cartes de Cassini : des lavis d'aquarelle sous l'encre), et le pouvoir est toujours payé.
 
 ---
 
