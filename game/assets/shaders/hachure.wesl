@@ -56,6 +56,29 @@ fn hash(p: vec3<f32>) -> f32 {
     return fract(sin(dot(p, vec3(12.9898, 78.233, 37.719))) * 43758.5453);
 }
 
+// The wind, as in `wind.wesl`: the clouds drift with it.
+const WIND: vec2<f32> = vec2(0.94, 0.34);
+
+fn value_noise(p: vec2<f32>) -> f32 {
+    let i = floor(p);
+    let f = fract(p);
+    let u = f * f * (3.0 - 2.0 * f);
+    let a = hash(vec3(i.x, 0.0, i.y));
+    let b = hash(vec3(i.x + 1.0, 0.0, i.y));
+    let c = hash(vec3(i.x, 0.0, i.y + 1.0));
+    let d = hash(vec3(i.x + 1.0, 0.0, i.y + 1.0));
+    return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+
+// The light left at `p` under the clouds drifting over the land: soft-edged shadows a dozen units across, passing
+// in under a minute, never darker than two thirds of the sun, above where the strokes start, so no tile or marker
+// loses its colour.
+fn cloud(p: vec2<f32>) -> f32 {
+    let q = p * 0.05 - WIND * globals.time * 0.06;
+    let n = value_noise(q) * 0.65 + value_noise(q * 2.3 + 5.1) * 0.35;
+    return 1.0 - 0.35 * smoothstep(0.5, 0.66, n);
+}
+
 // Coverage of parallel strokes `width` wide (0 to 1 of the spacing) across coordinate `u`, anti-aliased. Where
 // they get finer than a pixel, they turn into their average tone instead of shimmering.
 fn strokes(u: f32, width: f32) -> f32 {
@@ -96,10 +119,11 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
     // what the ambient light alone loses: strokes gather there, as an engraver marks a contact.
     // Bevy's occlusion is faint (0.85 at a contact): squared, it reads.
     let occlusion = pow(luminance(pbr_input.diffuse_occlusion), 2.0);
-    let shade = clamp(luminance(lit.rgb) / max(luminance(albedo), 0.02) / hachure.params.z, 0.0, 1.0) * occlusion;
+    let pos = in.world_position.xyz;
+    let shade =
+        clamp(luminance(lit.rgb) / max(luminance(albedo), 0.02) / hachure.params.z, 0.0, 1.0) * occlusion * cloud(pos.xz);
 
     // Flat colour faded toward the paper, a little darker in the shade so faces still read apart.
-    let pos = in.world_position.xyz;
     // Plaster grain, faded out where its specks get finer than a pixel (it would shimmer as the camera moves).
     let speck = 0.97 + 0.06 * hash(floor(pos * 24.0));
     let grain = mix(speck, 1.0, smoothstep(0.3, 1.0, length(fwidth(pos * 24.0))));
