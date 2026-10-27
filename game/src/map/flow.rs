@@ -76,6 +76,8 @@ pub fn can_place(
     }
     let mut next = grid.clone();
     next.tiles[i] = tile;
+    // Bornes fall (shot or scraped): only the lasting goals vouch for a path.
+    next.bornes.clear();
     present.iter().map(|&k| (k, &species[k])).filter(|(_, s)| next.goals.contains_key(&s.goal)).all(|(k, s)| {
         let field = FlowField::new(&next, s);
         let walking = walkers.iter().filter(|w| w.0 == k).map(|w| w.1);
@@ -146,5 +148,22 @@ mod tests {
         let path = FlowField::new(&grid, rompue).path(&grid, grid.spawns[0]);
         assert_eq!(path.last(), Some(&grid.goals[&Goal::Cible]));
         assert!(path.iter().all(|c| !(1..4).contains(c)), "path {path:?} stays out of the shadow");
+    }
+
+    /// A borne may fall at any time: it doesn't keep the Borne-Mère's last gap open.
+    #[test]
+    fn a_borne_is_no_way_out() {
+        let species = species::load();
+        let jalonneur = index_of(&species, "jalonneur").unwrap();
+        let mut grid = Grid::parse(
+            "
+            S...#B
+            ....#.
+            ......
+            ",
+        );
+        grid.bornes.push(2);
+        let gap = 2 * grid.width + 4;
+        assert!(!can_place(&grid, &species, &[jalonneur], gap, Tile::Barricade, &[]));
     }
 }
