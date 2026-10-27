@@ -5,7 +5,6 @@ use serde::Deserialize;
 
 use super::Enemy;
 use super::shards::{EnemyLook, shatter};
-use crate::ink::Scraped;
 use crate::level::Level;
 use crate::level::story::Trigger;
 use crate::map::species::index_of;
@@ -65,15 +64,15 @@ pub struct Boss {
 #[derive(Component)]
 pub struct Borne;
 
-/// Takes down the borne Nève scraped off its cell, in shards like a shot one.
-pub(super) fn scrape_bornes(
-    mut scraped: MessageReader<Scraped>,
+/// The map owns the bornes: one gone from it (Nève scraped it off) breaks into shards like a shot one.
+pub(super) fn drop_bornes(
+    level: Res<Level>,
     bornes: Query<(Entity, &Enemy, &Transform), With<Borne>>,
     look: Res<EnemyLook>,
     mut commands: Commands,
 ) {
-    for &Scraped { cell } in scraped.read() {
-        for (entity, _, transform) in bornes.iter().filter(|(_, e, _)| e.cell == cell) {
+    for (entity, enemy, transform) in &bornes {
+        if !level.base.bornes.contains(&enemy.cell) {
             shatter(&mut commands, &look, transform.translation);
             commands.entity(entity).try_despawn();
         }

@@ -22,7 +22,6 @@ pub use selection::Selection;
 pub fn plugin(app: &mut App) {
     app.add_plugins((overlay::plugin, selection::plugin))
         .add_message::<TowerInked>()
-        .add_message::<Scraped>()
         .add_systems(
             Update,
             inking.in_set(Step::Input).after(selection::hover).after(selection::reset).after(load_level),
@@ -37,10 +36,30 @@ pub struct TowerInked {
     pub weapon: Weapon,
 }
 
-/// A borne was scraped off `cell`; combat takes its piece down.
-#[derive(Message)]
-pub struct Scraped {
-    pub cell: usize,
+/// What a tool does to the cell it is inked on.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Act {
+    /// Inks a tile: a barricade, mud, brambles.
+    Lay(Tile),
+    /// Stands a tower up.
+    Raise(Weapon),
+    /// Scrapes decor off the cell (Gratter): today an imperial borne; the tile stays.
+    Scrape,
+}
+
+impl Act {
+    /// The tile it leaves on the cell, if it changes it.
+    pub const fn lays(self) -> Option<Tile> {
+        match self {
+            Act::Lay(tile) => Some(tile),
+            Act::Raise(_) => Some(Tile::Tour),
+            Act::Scrape => None,
+        }
+    }
+
+    pub const fn weapon(self) -> Option<Weapon> {
+        if let Act::Raise(weapon) = self { Some(weapon) } else { None }
+    }
 }
 
 pub struct Tool {
@@ -49,41 +68,26 @@ pub struct Tool {
     pub name: &'static str,
     /// What the bar calls it: a key of `assets/data/i18n/`.
     pub label: &'static str,
-    pub tile: Tile,
     /// Sépia (docs, section 8).
     pub cost: u32,
-    pub weapon: Option<Weapon>,
-    /// Scrapes decor off a cell instead of inking a tile on it (Gratter).
-    pub scrapes: bool,
+    pub act: Act,
 }
 
-const fn tool(
-    key: KeyCode,
-    name: &'static str,
-    label: &'static str,
-    tile: Tile,
-    cost: u32,
-    weapon: Option<Weapon>,
-) -> Tool {
-    Tool { key, name, label, tile, cost, weapon, scrapes: false }
-}
-
-/// A power that scrapes decor off a cell, back to plain ground.
-const fn scraper(key: KeyCode, name: &'static str, label: &'static str, cost: u32) -> Tool {
-    Tool { key, name, label, tile: Tile::Sol, cost, weapon: None, scrapes: true }
+const fn tool(key: KeyCode, name: &'static str, label: &'static str, cost: u32, act: Act) -> Tool {
+    Tool { key, name, label, cost, act }
 }
 
 pub const TOOLS: [Tool; 8] = [
-    tool(KeyCode::Digit1, "barricade", n_("tool.barricade"), Tile::Barricade, 10, None),
-    tool(KeyCode::Digit2, "boue", n_("tool.boue"), Tile::Boue, 15, None),
-    tool(KeyCode::Digit3, "ronces", n_("tool.ronces"), Tile::Ronces, 20, None),
-    tool(KeyCode::Digit4, "arbalète", n_("tool.arbalete"), Tile::Tour, 50, Some(Weapon::Arbalete)),
-    tool(KeyCode::Digit5, "mortier", n_("tool.mortier"), Tile::Tour, 90, Some(Weapon::Mortier)),
-    tool(KeyCode::Digit6, "harpon", n_("tool.harpon"), Tile::Tour, 70, Some(Weapon::Harpon)),
+    tool(KeyCode::Digit1, "barricade", n_("tool.barricade"), 10, Act::Lay(Tile::Barricade)),
+    tool(KeyCode::Digit2, "boue", n_("tool.boue"), 15, Act::Lay(Tile::Boue)),
+    tool(KeyCode::Digit3, "ronces", n_("tool.ronces"), 20, Act::Lay(Tile::Ronces)),
+    tool(KeyCode::Digit4, "arbalète", n_("tool.arbalete"), 50, Act::Raise(Weapon::Arbalete)),
+    tool(KeyCode::Digit5, "mortier", n_("tool.mortier"), 90, Act::Raise(Weapon::Mortier)),
+    tool(KeyCode::Digit6, "harpon", n_("tool.harpon"), 70, Act::Raise(Weapon::Harpon)),
     // Not priced in the docs: tune with the balance bot.
-    tool(KeyCode::Digit7, "lanterne", n_("tool.lanterne"), Tile::Tour, 60, Some(Weapon::Lanterne)),
+    tool(KeyCode::Digit7, "lanterne", n_("tool.lanterne"), 60, Act::Raise(Weapon::Lanterne)),
     // Not priced in the docs: tune with the balance bot.
-    scraper(KeyCode::Digit8, "gratter", n_("tool.gratter"), 25),
+    tool(KeyCode::Digit8, "gratter", n_("tool.gratter"), 25, Act::Scrape),
 ];
 
 /// Index in `TOOLS` of the tool called `name`.
@@ -98,7 +102,6 @@ pub(crate) fn inking(
     mut level: ResMut<Level>,
     mut selection: ResMut<Selection>,
     mut inked: MessageWriter<TowerInked>,
-    mut scraped: MessageWriter<Scraped>,
 ) {
     if level.finished {
         return;
@@ -111,11 +114,8 @@ pub(crate) fn inking(
         return;
     }
     level.ink(i, selection.tool);
-    if let Some(weapon) = TOOLS[selection.tool].weapon {
+    if let Some(weapon) = TOOLS[selection.tool].act.weapon() {
         inked.write(TowerInked { cell: i, weapon });
-    }
-    if TOOLS[selection.tool].scrapes {
-        scraped.write(Scraped { cell: i });
     }
 }
 
@@ -123,9 +123,9 @@ impl Level {
     /// Sépia cost of tool `t`, skills included.
     pub fn tool_cost(&self, t: usize) -> u32 {
         let tool = &TOOLS[t];
-        let factor = if tool.weapon == Some(Weapon::Arbalete) && self.has(Skill::MineDePlomb) {
+        let factor = if tool.act == Act::Raise(Weapon::Arbalete) && self.has(Skill::MineDePlomb) {
             0.9
-        } else if tool.tile == Tile::Barricade && self.has(Skill::Fascines) {
+        } else if tool.act == Act::Lay(Tile::Barricade) && self.has(Skill::Fascines) {
             0.7
         } else {
             1.0
@@ -133,29 +133,23 @@ impl Level {
         (tool.cost as f32 * factor).round() as u32
     }
 
-    /// Inks `tool` at `i`, paid in sépia, and in a Name if a place's name is written there; a scraping tool
-    /// takes the borne off `i` instead.
+    /// Inks `tool` at `i`, paid in sépia, and in a Name if a place's name is written there.
     /// The caller has checked `refusal`.
     pub fn ink(&mut self, i: usize, tool: usize) {
-        let piece = &TOOLS[tool];
+        let act = TOOLS[tool].act;
         self.sepia -= self.tool_cost(tool);
         if !self.used.contains(&tool) {
             self.used.push(tool);
         }
-        // The cell's type doesn't change, so no Name is lost.
-        if piece.scrapes {
-            self.base.bornes.retain(|&b| b != i);
-            self.refresh();
-            return;
-        }
-        if let Some(p) = self.place_at(i) {
+        // Scraping leaves the cell's type, so no Name is lost.
+        if let (Some(_), Some(p)) = (act.lays(), self.place_at(i)) {
             self.erased.push(p);
             self.names -= 1;
             let line = n_("note.erased").to_string();
             self.margin.push(MarginNote { line, name: Some(self.places[p].name.clone()) });
         }
-        self.base.tiles[i] = piece.tile;
-        if let Some(weapon) = piece.weapon {
+        act_on(&mut self.base, i, act);
+        if let Some(weapon) = act.weapon() {
             self.towers.push((i, weapon));
         }
         self.refresh();
@@ -164,13 +158,17 @@ impl Level {
     /// The map and the shown species' field if `tool` were inked at `i`.
     pub fn what_if(&self, i: usize, tool: usize, shown: usize) -> (Grid, FlowField) {
         let mut grid = self.grid.clone();
-        if TOOLS[tool].scrapes {
-            grid.bornes.retain(|&b| b != i);
-        } else {
-            grid.tiles[i] = TOOLS[tool].tile;
-        }
+        act_on(&mut grid, i, TOOLS[tool].act);
         let field = FlowField::new(&grid, &self.species[shown]);
         (grid, field)
+    }
+}
+
+/// What `act` does to the map at `i`: the tile it lays, or the borne it scrapes off.
+fn act_on(grid: &mut Grid, i: usize, act: Act) {
+    match act.lays() {
+        Some(tile) => grid.tiles[i] = tile,
+        None => grid.bornes.retain(|&b| b != i),
     }
 }
 

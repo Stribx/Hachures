@@ -3,7 +3,7 @@ use std::time::Duration;
 use bevy::prelude::*;
 use bevy::time::TimeUpdateStrategy;
 
-use super::boss::{Borne, Boss, boss_phases};
+use super::boss::{Borne, Boss, boss_phases, drop_bornes};
 use super::enemies::{spawn_enemies, walk};
 use super::shards::EnemyLook;
 use super::towers::{Tower, Weapon, fire};
@@ -83,6 +83,27 @@ fn lanterne_slows() {
     let enemy = app.world().get::<Enemy>(gens).unwrap();
     assert_eq!(enemy.hp, 70.0, "15 damage, doubled against the Gens du Col");
     assert!(enemy.slowed > 0.0, "and it walks slowed");
+}
+
+/// The map owns the bornes: one taken off it (scraped) loses its piece, the other stays.
+#[test]
+fn a_borne_off_the_map_breaks() {
+    let mut level = Level::new(Grid::parse("S...M"), species::load());
+    level.base.bornes = vec![1, 3];
+    let jalonneur = index_of(&level.species, "jalonneur").unwrap();
+    let mut app = App::new();
+    app.add_plugins(MinimalPlugins)
+        .init_resource::<EnemyLook>()
+        .insert_resource(level)
+        .add_systems(Update, drop_bornes);
+    for cell in [1, 3] {
+        app.world_mut().spawn((Borne, Enemy::new(jalonneur, 50.0, cell), Transform::default()));
+    }
+    app.world_mut().resource_mut::<Level>().base.bornes.retain(|&b| b != 1);
+    app.update();
+    let left: Vec<usize> =
+        app.world_mut().query_filtered::<&Enemy, With<Borne>>().iter(app.world()).map(|e| e.cell).collect();
+    assert_eq!(left, vec![3]);
 }
 
 /// La Grande Chaîne lays Chaussée, then plants three bornes, then reads l'Ombre, as its HP drops.
@@ -189,12 +210,12 @@ fn bot_build(app: &mut App) -> usize {
 
         // (value per sépia, tool, cell), best first.
         let mut candidates = Vec::new();
-        for t in level.tools.clone().into_iter().filter(|&t| TOOLS[t].weapon.is_some()) {
+        for t in level.tools.clone().into_iter().filter(|&t| TOOLS[t].act.weapon().is_some()) {
             let cost = level.tool_cost(t);
             if cost > level.sepia {
                 continue;
             }
-            let stats = &level.tower_stats[&TOOLS[t].weapon.unwrap()];
+            let stats = &level.tower_stats[&TOOLS[t].act.weapon().unwrap()];
             let dps = stats.damage / stats.cooldown * if stats.splash > 0.0 { 2.0 } else { 1.0 };
             for cell in 0..level.grid.tiles.len() {
                 let covered = route.iter().filter(|&&c| level.grid.within(c, cell, stats.range)).count();
@@ -208,7 +229,7 @@ fn bot_build(app: &mut App) -> usize {
             return built;
         };
         level.ink(cell, t);
-        let weapon = TOOLS[t].weapon.unwrap();
+        let weapon = TOOLS[t].act.weapon().unwrap();
         let (x, z) = level.grid.coords(cell);
         app.world_mut().spawn((Tower { cell, weapon, ready_in: 0.0 }, Transform::from_xyz(x as f32, 0.8, z as f32)));
         built += 1;

@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 
-use super::{Selection, TOOLS};
+use super::{Act, Selection, TOOLS};
 use crate::campaign::skills::Skill;
 use crate::level::Level;
 use crate::look::{Hachure, InkMaterial, ink};
@@ -36,10 +36,14 @@ pub(super) fn ghost(
     mut stock: Stock,
 ) {
     let grid = &level.grid;
-    let tool = &TOOLS[selection.tool];
-    let at = selection.hovered.filter(|&i| {
-        tool.weapon.is_none() && !tool.scrapes && !level.finished && level.refusal(i, selection.tool).is_none()
-    });
+    // Only a tile has a ghost: a tower shows its range, a scrape the route it opens.
+    let Act::Lay(tile) = TOOLS[selection.tool].act else {
+        if let Some(entity) = *ghost {
+            commands.entity(entity).insert(Visibility::Hidden);
+        }
+        return;
+    };
+    let at = selection.hovered.filter(|&i| !level.finished && level.refusal(i, selection.tool).is_none());
     let entity = *ghost.get_or_insert_with(|| {
         let mut pale = ink(Color::WHITE.with_alpha(0.45));
         pale.base.alpha_mode = AlphaMode::Blend;
@@ -50,16 +54,16 @@ pub(super) fn ghost(
         commands.entity(entity).insert(Visibility::Hidden);
         return;
     };
-    let shape = if tool.tile == Tile::Barricade { barricade_shape(grid, i, level.has(Skill::Fascines)) } else { 0 };
+    let shape = if tile == Tile::Barricade { barricade_shape(grid, i, level.has(Skill::Fascines)) } else { 0 };
     let (x, z) = grid.coords(i);
-    let height = if tool.tile == Tile::Boue { look(Tile::Boue).0 } else { look(Tile::Sol).0 };
+    let height = if tile == Tile::Boue { look(Tile::Boue).0 } else { look(Tile::Sol).0 };
     commands.entity(entity).insert((Transform::from_xyz(x as f32, height, z as f32), Visibility::Inherited));
-    if *shown == Some((tool.tile, shape)) {
+    if *shown == Some((tile, shape)) {
         return;
     }
-    *shown = Some((tool.tile, shape));
-    let mesh = made.entry((tool.tile, shape)).or_insert_with(|| {
-        let parts = prop(tool.tile, shape).into_iter().map(|(mesh, color)| {
+    *shown = Some((tile, shape));
+    let mesh = made.entry((tile, shape)).or_insert_with(|| {
+        let parts = prop(tile, shape).into_iter().map(|(mesh, color)| {
             let n = mesh.count_vertices();
             mesh.with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, vec![color.to_linear().to_f32_array(); n])
         });

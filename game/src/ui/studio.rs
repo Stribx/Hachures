@@ -11,7 +11,7 @@ use bevy::world_serialization::WorldInstanceReady;
 
 use super::bar::Bar;
 use crate::combat::towers::{BASE_WOOD, TOWER_BASE, WEAPON_WOOD, weapon_model};
-use crate::ink::{TOOLS, Tool};
+use crate::ink::{Act, TOOLS, Tool};
 use crate::look::{Hachure, InkMaterial, ink, varnished};
 use crate::map::grid::Tile;
 use crate::map::look;
@@ -76,7 +76,7 @@ fn setup(
 /// The camera of `TOOLS[t]`, filming into `image`.
 fn spawn_camera(commands: &mut Commands, image: &Handle<Image>, t: usize, at: Vec3, layer: &RenderLayers) {
     // A tower stands taller than a piece of terrain: frame it wider, look higher.
-    let (frame, aim) = if TOOLS[t].weapon.is_some() { (1.3, 0.5) } else { (1.05, 0.12) };
+    let (frame, aim) = if TOOLS[t].act.weapon().is_some() { (1.3, 0.5) } else { (1.05, 0.12) };
     commands.spawn((
         StudioCamera,
         Camera3d::default(),
@@ -110,8 +110,8 @@ fn spawn_ground(
     at: Vec3,
     layer: &RenderLayers,
 ) {
-    let ground = match tool.tile {
-        Tile::Boue => varnished(look(Tile::Boue).1, 0.6),
+    let ground = match tool.act {
+        Act::Lay(Tile::Boue) => varnished(look(Tile::Boue).1, 0.6),
         _ => ink(look(Tile::Sol).1),
     };
     commands.spawn((
@@ -137,9 +137,9 @@ fn spawn_piece(
         paint.extension = Hachure::fine();
         paint
     };
-    match tool.weapon {
-        None => {
-            let parts = if tool.scrapes { scraper() } else { prop(tool.tile, 0) };
+    match tool.act {
+        Act::Lay(_) | Act::Scrape => {
+            let parts = if let Act::Lay(tile) = tool.act { prop(tile, 0) } else { scraper() };
             for (mesh, color) in parts {
                 commands.spawn((
                     Mesh3d(meshes.add(mesh)),
@@ -149,7 +149,7 @@ fn spawn_piece(
                 ));
             }
         }
-        Some(weapon) => {
+        Act::Raise(weapon) => {
             let scene = |path: &'static str| WorldAssetRoot(assets.load(GltfAssetLabel::Scene(0).from_asset(path)));
             commands.spawn((StudioModel, scene(TOWER_BASE), BASE_WOOD, Transform::from_translation(at), layer.clone()));
             commands.spawn((

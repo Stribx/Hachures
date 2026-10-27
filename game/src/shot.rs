@@ -178,7 +178,7 @@ fn act(
             .collect();
         for (tool, &i) in [0, 3].into_iter().zip(open.iter().step_by(4)) {
             level.ink(i, tool);
-            if let Some(weapon) = crate::ink::TOOLS[tool].weapon {
+            if let Some(weapon) = crate::ink::TOOLS[tool].act.weapon() {
                 spawn_tower(&mut commands, &assets, &level.grid, i, weapon);
             }
         }

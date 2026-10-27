@@ -9,8 +9,8 @@ use crate::map::grid::{Grid, Tile};
 impl Level {
     /// Why `tool` can't be inked at `i`, if it can't.
     pub fn refusal(&self, i: usize, tool: usize) -> Option<&'static str> {
-        if TOOLS[tool].scrapes {
-            // Erasing only opens the map: no need to check that it stays open.
+        let Some(tile) = TOOLS[tool].act.lays() else {
+            // Scraping only opens the map: no need to check that it stays open.
             return if !self.base.bornes.contains(&i) {
                 Some(n_("refusal.nothing_to_scrape"))
             } else if self.sepia < self.tool_cost(tool) {
@@ -18,7 +18,7 @@ impl Level {
             } else {
                 None
             };
-        }
+        };
         if !self.grid.tiles[i].buildable() {
             Some(n_("refusal.firm_ground"))
         } else if self.sepia < self.tool_cost(tool) {
@@ -26,7 +26,7 @@ impl Level {
         } else if self.walkers.iter().any(|w| w.1 == i) {
             Some(n_("refusal.column"))
         } else {
-            self.closes(i, TOOLS[tool].tile)
+            self.closes(i, tile)
         }
     }
 

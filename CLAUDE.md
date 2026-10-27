@@ -105,7 +105,7 @@ The game's world keeps its French names in code, data and files (they are names 
 | Chaîneur, Échassier, Jalonneur, Gens du Col… | the imperial species | `data/species.ron` |
 | la Grande Chaîne | world 1's boss, in phases | `combat/boss.rs`, `World.boss` |
 | bornes, Borne-Mère | imperial markers the boss plants; the Jalonneurs' goal | `Grid.bornes`, `Goal::BorneMere` |
-| Gratter | a power: scrape decor (today the imperial bornes; éboulis and palissades with later worlds) back to plain ground, earned by beating world 1's boss | `TOOLS` "gratter", `Tool.scrapes`, `LevelData.grants` |
+| Gratter | a power: scrape decor (today the imperial bornes; éboulis and palissades with later worlds) back to plain ground, earned by beating world 1's boss | `TOOLS` "gratter", `Act::Scrape`, `LevelData.grants` |
 | Pente, Ombre | how a species reads the land: by tile costs, or by the towers' shadow | `Species.reading` |
 | Sol, Sol bas, Boue, Ronces, Eau, Gué, Roc, Glace, Chaussée | the tiles | `Tile` |
 
