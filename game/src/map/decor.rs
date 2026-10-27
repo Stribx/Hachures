@@ -53,9 +53,9 @@ pub(crate) fn palisade(shape: u8) -> Vec<(Mesh, Color)> {
         )));
         tips.push(Mesh::from(Cone { radius: 0.05, height: 0.1 }).translated_by(Vec3::new(x, height + 0.05, 0.0)));
     }
+    // The rails run edge to edge, so a line of palissades is one fence.
     for y in [0.15, 0.4] {
-        let rail =
-            Mesh::from(Cylinder { radius: 0.03, half_height: 0.45 }).rotated_by(Quat::from_rotation_z(FRAC_PI_2));
+        let rail = Mesh::from(Cylinder { radius: 0.03, half_height: 0.5 }).rotated_by(Quat::from_rotation_z(FRAC_PI_2));
         wood.push(rail.translated_by(Vec3::new(0.0, y, 0.0)));
     }
     let paint =
