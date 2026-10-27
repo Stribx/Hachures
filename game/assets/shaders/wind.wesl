@@ -17,7 +17,7 @@ struct Hachure {
     shore: vec4<f32>,
     gloss: f32,
     flow: f32,
-    // How far a piece leans in the wind, per unit of height squared: 0 for what never moves.
+    // How far a piece leans in the wind, per unit of its weight (`Blown`): 0 for what never moves.
     wind: f32,
 }
 
@@ -27,15 +27,22 @@ var<uniform> hachure: Hachure;
 // The wind, from the west-south-west, flat on the land.
 const WIND: vec2<f32> = vec2(0.94, 0.34);
 
-// How far a point `world` of a piece standing at `base` is blown at time `t`: nothing at its foot, more the higher it
-// stands. A gust rolls downwind across the land, and under it each piece sways in its own time, as a whole.
-fn sway(world: vec3<f32>, base: vec3<f32>, t: f32) -> vec3<f32> {
-    let h = max(world.y - base.y, 0.0);
+// How far a point of a piece standing at `base` is blown at time `t`, `weight` of it: nothing at its foot, more the
+// higher it stands. A gust rolls downwind across the land, and under it each piece sways in its own time, as a whole.
+fn sway(base: vec3<f32>, weight: f32, t: f32) -> vec3<f32> {
     let along = dot(base.xz, WIND);
     let gust = 0.5 + 0.5 * sin(along * 0.15 - t * 1.2);
     let lean = 0.3 + gust * gust + 0.25 * sin(t * 2.1 + base.x * 3.7 + base.z * 1.3);
-    let d = hachure.wind * lean * h * h;
+    let d = hachure.wind * lean * weight;
     return vec3(WIND.x * d, 0.0, WIND.y * d);
+}
+
+// How much of the wind a vertex takes, and where its piece stands. A model leans by its height above its foot,
+// squared. A merged mesh of many small pieces (the grass) says it in its vertex colour's alpha, 0 at a blade's foot
+// to 1 at its tip, each blade swaying where it stands.
+struct Blown {
+    weight: f32,
+    base: vec3<f32>,
 }
 
 @vertex
@@ -44,7 +51,10 @@ fn vertex(vertex_in: Vertex) -> VertexOutput {
     let vertex = decompress_vertex(vertex_in, vertex_in.instance_index);
     let world_from_local = mesh_functions::get_world_from_local(vertex_in.instance_index);
     let still = mesh_functions::mesh_position_local_to_world(world_from_local, vec4<f32>(vertex.position, 1.0)).xyz;
-    out.world_position = vec4(still + sway(still, world_from_local[3].xyz, globals.time), 1.0);
+    var blown = Blown(pow(max(still.y - world_from_local[3].y, 0.0), 2.0), world_from_local[3].xyz);
+@if(VERTEX_COLORS)
+    blown = Blown(vertex.color.a, still);
+    out.world_position = vec4(still + sway(blown.base, blown.weight, globals.time), 1.0);
     out.position = position_world_to_clip(out.world_position.xyz);
 
 @if(VERTEX_NORMALS)

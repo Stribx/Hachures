@@ -109,8 +109,8 @@ fn kind(drawn: Tile) -> Tile {
     if drawn == Tile::SolBas { Tile::SolBas } else { Tile::Sol }
 }
 
-/// A well-stirred hash of `h`, for the fields' order and sizes.
-fn mix(h: u32) -> u32 {
+/// A well-stirred hash of `h`, for the fields' order and sizes, and what grows on them.
+pub(super) fn mix(h: u32) -> u32 {
     let h = (h ^ (h >> 16)).wrapping_mul(0x7feb_352d);
     let h = (h ^ (h >> 15)).wrapping_mul(0x846c_a68b);
     h ^ (h >> 16)

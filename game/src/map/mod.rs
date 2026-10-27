@@ -8,6 +8,8 @@ pub mod terrain;
 mod cells;
 mod decor;
 pub mod fields;
+mod grass;
+pub mod growth;
 pub(crate) mod land;
 pub(crate) mod props;
 pub(crate) mod scraper;
@@ -18,11 +20,12 @@ use bevy::prelude::*;
 use crate::Step;
 use crate::theme::{MEADOW, PASTURE, SEPIA, WATER, WOOD};
 use cells::redraw_cells;
+use grass::grow;
 use grid::{Grid, Tile};
 use land::{fibres, land};
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(Update, (redraw_cells, land, fibres).chain().in_set(Step::Render));
+    app.add_systems(Update, (redraw_cells, grow, land, fibres).chain().in_set(Step::Render));
 }
 
 /// Center of cell `i`, just above the ground.

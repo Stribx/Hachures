@@ -1,0 +1,105 @@
+//! The growth on the board: one mesh of felt tufts, wildflowers and wheat that sways in the wind, grown again with
+//! the board.
+
+use bevy::prelude::*;
+
+use super::cells::Cell;
+use super::fields::ground;
+use super::growth::{Crop, Sprig, sprigs};
+use super::look;
+use crate::level::Level;
+use crate::look::{Hachure, InkMaterial, ink};
+use crate::settings::Settings;
+use crate::theme::{HEDGE, WHEAT};
+
+/// The growth now on the board.
+#[derive(Component)]
+pub(super) struct Growth;
+
+/// How far a tip leans in the wind (`Hachure::wind`): a few hundredths of a cell.
+const GRASS_WIND: f32 = 0.05;
+/// The tallest thing that grows, for the sway's weight: wheat, which stays well under a barricade.
+const TALLEST: f32 = 0.24;
+/// The wildflowers' colours: poppy, cornflower, ox-eye daisy, buttercup.
+const BLOOMS: [Color; 4] = [
+    Color::srgb(0.82, 0.26, 0.2),
+    Color::srgb(0.36, 0.47, 0.82),
+    Color::srgb(0.96, 0.94, 0.86),
+    Color::srgb(0.95, 0.8, 0.28),
+];
+
+/// The board was redrawn, or the settings changed: the growth is grown again, as much as the machine allows. Low,
+/// the one preset without shadows, grows a third; reduced motion stills the wind.
+pub(super) fn grow(
+    redrawn: Query<(), Added<Cell>>,
+    old: Query<Entity, With<Growth>>,
+    level: Res<Level>,
+    settings: Res<Settings>,
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<InkMaterial>>,
+) {
+    if redrawn.is_empty() && !settings.is_changed() {
+        return;
+    }
+    for entity in &old {
+        commands.entity(entity).despawn();
+    }
+    let grid = level.terrain.grid();
+    let density = if settings.shadows { 1.0 } else { 0.35 };
+    let washes = ground(grid);
+    let pieces = sprigs(grid, density).into_iter().flat_map(|sprig| {
+        let (x, z) = grid.coords(sprig.cell);
+        let foot = Vec3::new(x as f32 + sprig.at.x, look(grid.tiles[sprig.cell]).0, z as f32 + sprig.at.y);
+        sprig_parts(&sprig, washes[sprig.cell]).into_iter().map(move |part| part.translated_by(foot))
+    });
+    let Some(mesh) = pieces.reduce(|mut all, part| {
+        all.merge(&part).expect("the growth's parts share their attributes");
+        all
+    }) else {
+        return;
+    };
+    let mut felt = ink(Color::WHITE);
+    felt.extension = Hachure::fine();
+    felt.extension.uniform.wind = if settings.reduced_motion { 0.0 } else { GRASS_WIND };
+    commands.spawn((Growth, Mesh3d(meshes.add(mesh)), MeshMaterial3d(materials.add(felt))));
+}
+
+/// One sprig's parts, standing at the origin, coloured, each vertex weighted for the wind by its height.
+fn sprig_parts(sprig: &Sprig, wash: Color) -> Vec<Mesh> {
+    let roll = sprig.roll;
+    let turn = (roll >> 16 & 255) as f32 / 255.0 * std::f32::consts::TAU;
+    let grass = wash.mix(&HEDGE, 0.45);
+    let stalk = |h: f32, w: f32, tilt: f32, color: Color| part(Vec3::new(w, h, w * 0.5), h / 2.0, turn, tilt, color);
+    match sprig.crop {
+        // A tuft: five blades splayed.
+        Crop::Grass => (0..5)
+            .map(|k| {
+                let h = 0.09 + (roll >> (k * 3) & 7) as f32 * 0.009;
+                part(Vec3::new(0.022, h, 0.008), h / 2.0, turn + k as f32 * 1.26, 0.4, grass)
+            })
+            .collect(),
+        Crop::Flowers => {
+            let h = 0.07 + (roll >> 3 & 7) as f32 * 0.006;
+            let bloom = BLOOMS[(roll >> 24) as usize % BLOOMS.len()];
+            vec![stalk(h, 0.014, 0.1, grass), part(Vec3::splat(0.042), h, turn, 0.1, bloom)]
+        }
+        Crop::Wheat => {
+            let h = 0.17 + (roll >> 3 & 7) as f32 * 0.008;
+            let ear = WHEAT.mix(&Color::srgb(0.7, 0.55, 0.28), 0.4);
+            vec![stalk(h, 0.018, 0.05, WHEAT), part(Vec3::new(0.034, 0.07, 0.034), h, turn, 0.05, ear)]
+        }
+    }
+}
+
+/// A box `size`, its centre `up` above the foot, turned and tilted, coloured, its vertices' alpha the share of the
+/// wind they take (0 at the ground).
+fn part(size: Vec3, up: f32, turn: f32, tilt: f32, color: Color) -> Mesh {
+    let mesh = Mesh::from(Cuboid::from_size(size))
+        .translated_by(Vec3::Y * up)
+        .rotated_by(Quat::from_rotation_y(turn) * Quat::from_rotation_x(tilt));
+    let [r, g, b, _] = color.to_linear().to_f32_array();
+    let Some(positions) = mesh.attribute(Mesh::ATTRIBUTE_POSITION).and_then(|p| p.as_float3()) else { return mesh };
+    let colors: Vec<[f32; 4]> = positions.iter().map(|p| [r, g, b, (p[1] / TALLEST).clamp(0.0, 1.0)]).collect();
+    mesh.with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, colors)
+}

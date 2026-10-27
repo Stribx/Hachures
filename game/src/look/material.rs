@@ -34,7 +34,8 @@ pub struct HachureUniform {
     pub gloss: f32,
     /// How much the water moves: 1 for a river or a lake, 0 for ice.
     pub flow: f32,
-    /// How far it leans in the wind, per world unit of height squared (`wind.wesl`): 0 for what never moves.
+    /// How far it leans in the wind (`wind.wesl`): per world unit of height squared for a model, at the tip for a
+    /// mesh whose vertex colours' alpha weighs each vertex's sway (the grass). 0 for what never moves.
     pub wind: f32,
 }
 
