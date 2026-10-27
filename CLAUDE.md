@@ -63,7 +63,7 @@ screenshots/, .taste-skill/, .impeccable/   local only, ignored by git
 ## Game data
 
 - **Level** (`data/levels/<world>-<n>.ron`, read as `LevelData` in `level/data.rs`): `name` (an i18n key), `at` (where the sheet lies on the Marches), `world`, `sepia`, `tools`, `grants` (tools winning it earns for good), `events` (waves the world event starts at), `map` (rows of characters), `waves` (per wave, `(species, count)`), and optional `notes`, `challenge`, `choice`, `alt_refuge`, `shorter`, `changes` (scripted map changes: `(wave, at, becomes)`), `places` (named places).
-- **Map characters** (`Grid::parse`): `.` Sol, `,` Sol bas, `b` Boue, `r` Ronces, `~` Eau, `g` Gué, `#` Barricade, `^` Roc. Markers stand on Sol: `S` spawn, `F` allies' start, `M` Cible, `B` Borne-Mère, `R` Refuge, `X` Sortie, `W` where the Refuge moves if `alt_refuge`'s choice went that way.
+- **Map characters** (`Grid::parse`): `.` Sol, `,` Sol bas, `b` Boue, `r` Ronces, `~` Eau, `g` Gué, `#` Barricade, `^` Roc, `e` Éboulis, `p` Palissade. Markers stand on Sol: `S` spawn, `F` allies' start, `M` Cible, `B` Borne-Mère, `R` Refuge, `X` Sortie, `W` where the Refuge moves if `alt_refuge`'s choice went that way.
 - **World** (`data/worlds/<n>.ron`): its event (`cells` it hits, what they `becomes`, the tiles it `spares`, how many waves it `lasts`, the `announce`/`during`/`refuse_next`/`refuse_after` keys) and its boss (phases, each with its species and `until` HP fraction).
 - **Species** (`data/species.ron`): `goal`, `hostile`, `hp` (relative to the Chaîneur's 100), `speed`, `loot`, `weak_to`, `reading` (Pente prices tiles by `costs`; Ombre prices cells by the towers covering them) and `costs`: **a tile left out of `costs` is impassable** for that species.
 - **Towers** (`data/towers.ron`): damage, range and splash in tiles, cooldown, pin and slow in seconds.
@@ -105,9 +105,10 @@ The game's world keeps its French names in code, data and files (they are names 
 | Chaîneur, Échassier, Jalonneur, Gens du Col… | the imperial species | `data/species.ron` |
 | la Grande Chaîne | world 1's boss, in phases | `combat/boss.rs`, `World.boss` |
 | bornes, Borne-Mère | imperial markers the boss plants; the Jalonneurs' goal | `Grid.bornes`, `Goal::BorneMere` |
-| Gratter | a power: returns a cell to plain Sol, scraping off a borne, an Éboulis or a Palissade and nothing else (never Nève's own ink). Never costs a Name and is never needed to win a level; a scrape is final for Nève. Earned by beating world 1's boss | `TOOLS` "gratter", `Act::Scrape`, `LevelData.grants` |
-| Éboulis | fallen stone on a cell, slow to walk; Gratter scrapes it | not yet |
-| Palissade | an imperial barricade the level or world data lays: impassable, but never closes the map; Gratter scrapes it | not yet |
+| Gratter | a power: scrapes a borne off a cell (the ground under it stays), or returns an Éboulis or a Palissade to plain Sol, and nothing else (never Nève's own ink). Never costs a Name and is never needed to win a level; a scrape is final for Nève. Earned by beating world 1's boss | `TOOLS` "gratter", `Act::Scrape`, `LevelData.grants` |
+| Éboulis | fallen stone on a cell, slow to walk; Gratter scrapes it | `Tile::Eboulis`, map char `e` |
+| Palissade | an imperial barricade the level or world data lays: impassable, but never closes the map; Gratter scrapes it | `Tile::Palissade`, map char `p` |
+| the terrain | the sheet's ground as drawn, as inked and as walked under the world event, and the routes over it. Every lasting change goes through it, as *the land changing* (a scripted change, a scrape: la Crue reads the new ground) or as *ink on the land* (the tools, the Chaussée, Ronces-mères: drowned on low ground unless spared) | `map::terrain::Terrain`, `Edit`, `Level::alter` |
 | Pente, Ombre | how a species reads the land: by tile costs, or by the towers' shadow | `Species.reading` |
 | Sol, Sol bas, Boue, Ronces, Eau, Gué, Roc, Glace, Chaussée | the tiles | `Tile` |
 
