@@ -6,6 +6,7 @@ pub mod species;
 pub mod terrain;
 
 mod cells;
+pub mod daylight;
 mod decor;
 pub mod fields;
 mod grass;
@@ -25,7 +26,8 @@ use grid::{Grid, Tile};
 use land::{fibres, land};
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(Update, (redraw_cells, grow, land, fibres).chain().in_set(Step::Render));
+    app.add_systems(Update, (redraw_cells, grow, land, fibres).chain().in_set(Step::Render))
+        .add_systems(Update, daylight::follow_the_waves.in_set(Step::Render));
 }
 
 /// Center of cell `i`, just above the ground.
