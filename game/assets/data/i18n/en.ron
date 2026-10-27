@@ -71,6 +71,10 @@
     "hud.line_cost": "Line: {} then {}",
     "hud.names": "Names",
     "hud.sepia": "Sepia",
+    "hud.tip.cible": "{}: what it still holds. At zero, the Roll of Names is lost.",
+    "hud.tip.names": "Names: the ones the Roll keeps. Inking a named place scratches one out; Fugitives brought to safety add some.",
+    "hud.tip.sepia": "Sepia: the ink your tools cost. Every enemy shot down pays some back.",
+    "hud.tip.wave": "Wave: the current one, out of the level's total.",
     "hud.wave": "Wave",
     "hud.wave_stamp": "Wave {}",
     // level

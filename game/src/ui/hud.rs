@@ -2,10 +2,12 @@
 //! do, and what the cursor reads. The keys are on the bar's
 //! buttons, the end of the level on its page.
 
+use bevy::picking::hover::Hovered;
 use bevy::prelude::*;
+use bevy::window::PrimaryWindow;
 
 use super::DuringPlay;
-use super::widgets::{IconSlot, Panel, Skin};
+use super::widgets::{IconSlot, Panel, Skin, follow_cursor, tooltip};
 use crate::campaign::skills::Skill;
 use crate::i18n::{t, tf};
 use crate::ink::Selection;
@@ -48,6 +50,14 @@ pub struct Figure(Counter);
 #[derive(Component)]
 pub struct Icon(Counter);
 
+/// A counter's icon and figure together: what the cursor hovers to learn its name.
+#[derive(Component)]
+pub struct Tip(Counter);
+
+/// The words of the hovered counter, next to the cursor.
+#[derive(Component)]
+pub struct CounterTip;
+
 #[derive(Component)]
 pub enum Line {
     Name,
@@ -59,6 +69,7 @@ pub enum Line {
 }
 
 pub fn spawn(commands: &mut Commands, assets: &AssetServer) {
+    commands.spawn((CounterTip, tooltip(assets)));
     commands
         .spawn((
             DuringPlay,
@@ -80,19 +91,22 @@ pub fn spawn(commands: &mut Commands, assets: &AssetServer) {
             c.spawn((Line::Name, Text::default(), font(assets, false, SUBTITLE_SIZE), TextColor(INK)));
             c.spawn(Node { column_gap: px(22), align_items: AlignItems::Center, ..default() }).with_children(|row| {
                 for counter in COUNTERS {
-                    row.spawn(Node { column_gap: px(6), align_items: AlignItems::Center, ..default() }).with_children(
-                        |pair| {
-                            pair.spawn((Icon(counter), IconSlot, Node { width: px(28), height: px(28), ..default() }))
-                                .insert(Skin(assets.load(counter.icon()), BorderRect::ZERO));
-                            pair.spawn((
-                                Figure(counter),
-                                Text::default(),
-                                font(assets, false, SUBTITLE_SIZE),
-                                TextColor(INK),
-                                TextLayout::no_wrap(),
-                            ));
-                        },
-                    );
+                    row.spawn((
+                        Tip(counter),
+                        Hovered::default(),
+                        Node { column_gap: px(6), align_items: AlignItems::Center, ..default() },
+                    ))
+                    .with_children(|pair| {
+                        pair.spawn((Icon(counter), IconSlot, Node { width: px(28), height: px(28), ..default() }))
+                            .insert(Skin(assets.load(counter.icon()), BorderRect::ZERO));
+                        pair.spawn((
+                            Figure(counter),
+                            Text::default(),
+                            font(assets, false, SUBTITLE_SIZE),
+                            TextColor(INK),
+                            TextLayout::no_wrap(),
+                        ));
+                    });
                 }
             });
             c.spawn((Line::Defi, Text::default(), font(assets, true, SMALL_SIZE), TextColor(INK_SOFT)));
@@ -130,6 +144,34 @@ pub fn update_label(
         // An empty line takes no room.
         node.display = if text.0.is_empty() { Display::None } else { Display::Flex };
     }
+}
+
+/// What a counter is, for a player who has only the icon and the number.
+fn tip_text(counter: Counter, level: &Level) -> String {
+    match counter {
+        Counter::Sepia => t("hud.tip.sepia").to_string(),
+        Counter::Cible => tf("hud.tip.cible", &[&capitalized(t(&level.world().defends))]),
+        Counter::Noms => t("hud.tip.names").to_string(),
+        Counter::Vague => t("hud.tip.wave").to_string(),
+    }
+}
+
+/// Names the counter under the cursor, next to it.
+pub fn counter_tip(
+    level: Res<Level>,
+    window: Single<&Window, With<PrimaryWindow>>,
+    pairs: Query<(&Tip, &Hovered)>,
+    tip: Single<(&mut Text, &mut Node, &mut Visibility), With<CounterTip>>,
+) {
+    let (mut text, mut node, mut visibility) = tip.into_inner();
+    let hovered = pairs.iter().find(|(_, hovered)| hovered.get()).map(|(Tip(counter), _)| *counter);
+    let (Some(counter), Some(cursor)) = (hovered, window.cursor_position()) else {
+        *visibility = Visibility::Hidden;
+        return;
+    };
+    text.0 = tip_text(counter, &level);
+    follow_cursor(&mut node, cursor);
+    *visibility = Visibility::Inherited;
 }
 
 fn notice(level: &Level) -> String {
@@ -171,4 +213,32 @@ fn readout(level: &Level, selection: &Selection) -> String {
         lines.push(tf("hud.calque", &[&t(tile.name()), &costs.join(", ")]));
     }
     lines.join("\n")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::map::grid::Grid;
+    use crate::map::species;
+
+    #[test]
+    fn a_hovered_counter_is_named_at_the_cursor() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins).insert_resource(Level::new(Grid::parse("S.M"), species::load()));
+        let mut window = Window::default();
+        window.set_cursor_position(Some(Vec2::new(100.0, 50.0)));
+        app.world_mut().spawn((window, PrimaryWindow));
+        let tip = app.world_mut().spawn((CounterTip, Text::default(), Node::default(), Visibility::Hidden)).id();
+        let pair = app.world_mut().spawn((Tip(Counter::Sepia), Hovered(true))).id();
+        app.add_systems(Update, counter_tip);
+
+        app.update();
+        assert_eq!(*app.world().get::<Visibility>(tip).unwrap(), Visibility::Inherited);
+        assert_eq!(app.world().get::<Text>(tip).unwrap().0, t("hud.tip.sepia"));
+        assert_eq!(app.world().get::<Node>(tip).unwrap().left, px(118));
+
+        app.world_mut().entity_mut(pair).insert(Hovered(false));
+        app.update();
+        assert_eq!(*app.world().get::<Visibility>(tip).unwrap(), Visibility::Hidden);
+    }
 }

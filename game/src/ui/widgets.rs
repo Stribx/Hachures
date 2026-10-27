@@ -9,7 +9,7 @@ use bevy::ui::{Pressed, VisualBox};
 use bevy::ui_widgets::Button;
 
 use crate::settings::Settings;
-use crate::theme::{INK, LIT, PAPER, PRESSED, SEAL, SEAL_DEEP, font};
+use crate::theme::{BODY_SIZE, INK, LIT, PAPER, PRESSED, SEAL, SEAL_DEEP, font};
 
 /// Whether the letter `c` was just typed, wherever it sits on the keyboard (A is A on AZERTY too).
 pub(crate) fn letter(keys: &ButtonInput<Key>, c: &str) -> bool {
@@ -23,6 +23,26 @@ pub fn plugin(app: &mut App) {
 /// Ink text in the game's font.
 pub(crate) fn text(assets: &AssetServer, text: impl Into<String>, size: f32) -> impl Bundle {
     (Text::new(text), font(assets, false, size), TextColor(INK))
+}
+
+/// A tooltip, hidden until a system writes its words and puts it next to the cursor.
+pub(crate) fn tooltip(assets: &AssetServer) -> impl Bundle {
+    (
+        Text::default(),
+        font(assets, true, BODY_SIZE),
+        TextColor(INK),
+        BackgroundColor(PAPER),
+        Node { position_type: PositionType::Absolute, padding: UiRect::axes(px(8), px(2)), ..default() },
+        Visibility::Hidden,
+        // Over the panels.
+        GlobalZIndex(50),
+    )
+}
+
+/// Puts a tooltip just below and right of the cursor.
+pub(crate) fn follow_cursor(node: &mut Node, cursor: Vec2) {
+    node.left = px(cursor.x + 18.0);
+    node.top = px(cursor.y + 18.0);
 }
 
 /// A button at least `min_width` wide.

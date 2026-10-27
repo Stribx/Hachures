@@ -25,7 +25,8 @@ pub fn plugin(app: &mut App) {
         Update,
         (
             toggles.in_set(Step::Input).before(crate::overworld::onward::between_levels),
-            (hud::update_label, update_margin, fresh_ink, places::label_places, places::tooltip).in_set(Step::Render),
+            (hud::update_label, hud::counter_tip, update_margin, fresh_ink, places::label_places, places::tooltip)
+                .in_set(Step::Render),
             (stamp::stamp_wave, stamp::strike_stamps).in_set(Step::Render),
             (bar::sync, bar::look, notebook::sync).in_set(Step::Render).run_if(in_state(Screen::Playing)),
             show_during_play.run_if(state_changed::<Screen>),

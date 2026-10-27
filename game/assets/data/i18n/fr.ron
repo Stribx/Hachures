@@ -73,6 +73,10 @@
     "hud.line_cost": "Trait : {} puis {}",
     "hud.names": "Noms",
     "hud.sepia": "Sépia",
+    "hud.tip.cible": "{} : ce qu'il tient encore. À zéro, le Rôle des Noms est perdu.",
+    "hud.tip.names": "Noms : ceux que garde le Rôle. Encrer un lieu nommé en efface un ; les Fuyards mis à l'abri en ajoutent.",
+    "hud.tip.sepia": "Sépia : l'encre que coûtent les outils. Chaque ennemi abattu en rend un peu.",
+    "hud.tip.wave": "Vague : celle en cours, sur le total du niveau.",
     "hud.wave": "Vague",
     "hud.wave_stamp": "Vague {}",
     // level

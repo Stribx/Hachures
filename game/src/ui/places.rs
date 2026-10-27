@@ -3,13 +3,14 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
+use super::widgets::{self, follow_cursor};
 use crate::i18n::{t, tf};
 use crate::ink::Selection;
 use crate::level::{Level, LevelEntity};
 use crate::look::WorldCamera;
 use crate::map::cell_pos;
 use crate::schedule::{Screen, over_world};
-use crate::theme::{BODY_SIZE, INK, PAPER, font};
+use crate::theme::{BODY_SIZE, INK, font};
 
 /// The name of `level.places[.0]`, written over its cells.
 #[derive(Component)]
@@ -22,15 +23,7 @@ pub struct Tooltip;
 const WIDTH: f32 = 240.0;
 
 pub fn setup(mut commands: Commands, assets: Res<AssetServer>) {
-    commands.spawn((
-        Tooltip,
-        Text::default(),
-        font(&assets, true, BODY_SIZE),
-        TextColor(INK),
-        BackgroundColor(PAPER),
-        Node { position_type: PositionType::Absolute, padding: UiRect::axes(px(8), px(2)), ..default() },
-        Visibility::Hidden,
-    ));
+    commands.spawn((Tooltip, widgets::tooltip(&assets)));
 }
 
 /// Writes the level's names over their cells (under the menus' paper), and strikes out the ones inked over.
@@ -99,7 +92,6 @@ pub fn tooltip(
         return;
     };
     text.0 = said;
-    node.left = px(cursor.x + 18.0);
-    node.top = px(cursor.y + 18.0);
+    follow_cursor(&mut node, cursor);
     *visibility = Visibility::Inherited;
 }
