@@ -94,7 +94,7 @@ The game's world keeps its French names in code, data and files (they are names 
 | sépia | the ink every tool costs; enemies shot down pay it | `Level.sepia` |
 | the Cible | the place a level defends (the Moulin…); the HUD shows what it still holds | `Goal::Cible`, `Level.lives` |
 | le Rôle des Noms | the roll of names engraved at the Moulin; losing all `lives` loses the Rôle | `Level.names`, `Save::names` |
-| a Name / *le prix du nom* | inking a named place scratches its name off the Rôle | `Place`, `Level.erased` |
+| a Name / *le prix du nom* | inking a named place *rayes* its name from the Rôle (*rayer*, never *gratter*) | `Place`, `Level.erased` |
 | les sceaux | seals won per level (victory, challenge), spent in l'arbre des sceaux | `Save::sceaux`, `menu/sceaux.rs`, `campaign/skills.rs` |
 | le carnet | Nève's notebook: the margin notes in play, the campaign read back at the end | `ui` margin, `menu/carnet.rs` |
 | le Calque | F1: the overlay of every species' route | `Selection.calque` |
@@ -105,7 +105,9 @@ The game's world keeps its French names in code, data and files (they are names 
 | Chaîneur, Échassier, Jalonneur, Gens du Col… | the imperial species | `data/species.ron` |
 | la Grande Chaîne | world 1's boss, in phases | `combat/boss.rs`, `World.boss` |
 | bornes, Borne-Mère | imperial markers the boss plants; the Jalonneurs' goal | `Grid.bornes`, `Goal::BorneMere` |
-| Gratter | a power: scrape decor (today the imperial bornes; éboulis and palissades with later worlds) back to plain ground, earned by beating world 1's boss | `TOOLS` "gratter", `Act::Scrape`, `LevelData.grants` |
+| Gratter | a power: returns a cell to plain Sol, scraping off a borne, an Éboulis or a Palissade and nothing else (never Nève's own ink). Never costs a Name and is never needed to win a level; a scrape is final for Nève. Earned by beating world 1's boss | `TOOLS` "gratter", `Act::Scrape`, `LevelData.grants` |
+| Éboulis | fallen stone on a cell, slow to walk; Gratter scrapes it | not yet |
+| Palissade | an imperial barricade the level or world data lays: impassable, but never closes the map; Gratter scrapes it | not yet |
 | Pente, Ombre | how a species reads the land: by tile costs, or by the towers' shadow | `Species.reading` |
 | Sol, Sol bas, Boue, Ronces, Eau, Gué, Roc, Glace, Chaussée | the tiles | `Tile` |
 
@@ -222,3 +224,17 @@ The main session runs on Opus. Work goes to the cheapest model that can do it, u
 - Give each agent a self-contained prompt with exact paths, keys, values and, for Sonnet agents, the spec and the acceptance check. They start with none of the conversation's context.
 - Opus reviews what comes back: after `mechanic`, `implementer`, `fixer`, `test-writer` or `translator`, check `git diff --stat` and read the diff when the change is not trivial; verify `reviewer` findings before acting on them.
 - Start independent helpers in parallel, in one message.
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live as markdown files under `.scratch/<feature>/`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five default role strings, recorded as a `Status:` line in each issue file. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: the glossary is `## Glossary` above, the rules are `docs/bible.md`, ADRs go in `docs/adr/`. See `docs/agents/domain.md`.

@@ -274,7 +274,7 @@ Choix de valeur : la progression des règles simultanées est 1, 1, 2, 2, 3, 3.
    - Faction : les étayeurs aveugles de Pellan, qui lisent le relief par le son.
 4. **Monstres.**
    - **Taupier** : lit la Pente. Le roc lui coûte 2 et l'éboulis 1, il passe sous les barricades à coût 3. Faible contre la Sonde. 4 sépia.
-   - **Étayeur impérial** : lit l'Ombre et il est blindé. Il répare les bornes. Faible contre le mortier. 4 sépia.
+   - **Étayeur impérial** : lit l'Ombre et il est blindé. Il répare les bornes endommagées, jamais une borne grattée. Faible contre le mortier. 4 sépia.
    - **Jalonneur des galeries** : lit le But (le Puits d'Air).
 5. **Mécanique unique : les Effondrements.** Une vague à l'avance, des fissures rouges apparaissent sur les hachures. Les cases marquées deviennent des Gouffres [T], définitivement pour le reste du niveau. Le Droit de Passage est garanti par les données : aucun ensemble d'effondrements ne ferme toutes les issues avec les seules cases de base. Le joueur ne peut pas encrer ce qui fermerait tout après l'effondrement annoncé.
 6. **Événements scriptés.**
@@ -418,7 +418,7 @@ Choix de valeur : la progression des règles simultanées est 1, 1, 2, 2, 3, 3.
 | Palier | Pouvoir (nom en jeu) | Effet | Opération | Obtenu | Coût | Rouvre |
 |---|---|---|---|---|---|---|
 | 1 | **Tracer** | Poser tours et aménagements | [T] | Prologue | Sépia | — |
-| 2 | **Gratter** | Effacer un élément du décor (éboulis, borne, palissade) qui redevient du Sol | [T] | Boss du monde 1 | Sépia | Le Moulin noyé, la Saline engloutie |
+| 2 | **Gratter** | Rendre une case au Sol nu : une borne, un éboulis ou une palissade, et rien d'autre (ni les traits de Nève, ni la Chaussée, ni la Glace). Ne coûte jamais de Nom ; jamais nécessaire pour gagner un niveau | [T] | Boss du monde 1 | Sépia, le même prix quelle que soit la cible | Le Moulin noyé, la Saline engloutie |
 | 3 | **Renommer** | Changer le type d'une case (Sol → Eau, etc.) | [T] | Boss du monde 2 | Sépia et un Nom si la case est nommée | Le Refuge enseveli, l'intérieur du Moulin noyé |
 | 4 | **Dater** | Suspendre ou déclencher en avance l'événement de monde, une fois par niveau | [T] ou [P] (celle de l'événement) | Boss du monde 4 | Sépia | La Salle des Premiers Plans, la Ville d'en dessous |
 | 5 | **Signer** | Accès à l'éditeur de niveaux (données RON) | Les trois | Fin du monde 6 | — | La Salle de Vaux et les feuillets partagés |
@@ -445,12 +445,12 @@ Pour les lecteurs de la Pente, le chemin dépend du terrain. Pour les lecteurs d
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | Chaîneur | Pente | 1 | 3 | 4 | ∞ | ∞ | ∞ | Gué 2 · Glace 2 · Éboulis 3 · Dune 2 · Vanne selon l'état · Chaussée 0,5 · Cadastré 0,5 | 1,0 | 2 | Arbalète |
 | Jalonneur | But (borne ou cible) | 1 | 3 | 4 | ∞ | ∞ | ∞ | comme le Chaîneur | 0,7 | 2 | Harpon |
-| Échassier conscrit | Pente | 1 | 1 | 5 | 2 | ∞ | ∞ | Gué 1 · Glace 4 · Dune 3 | 1,2 | 3 | Ronces, mortier |
+| Échassier conscrit | Pente | 1 | 1 | 5 | 2 | ∞ | ∞ | Gué 1 · Glace 4 · Éboulis 3 · Dune 3 | 1,2 | 3 | Ronces, mortier |
 | Échassier rancunier (monde 5) | Pente | 1 | 1 | 3 | 2 | ∞ | ∞ | Gué 1 · Vanne 1 | 1,4 | 3 | Mortier |
-| Fuyard (non hostile) | But (Refuge) | 1 | 2 | 3 | ∞ | ∞ | ∞ | Gué 2 | — | des Noms | — |
-| Harde | Ombre | 1 + tours | 1 + tours | 1 + tours | ∞ | ∞ | ∞ | Glace : 1 + tours | 2,0 | 4 | Placement des tours |
-| Gens du Col | Pente | 1 | 2 | 3 | ∞ | ∞ | 3 | Glace 1 | 1,3 | 3 | Lanterne |
-| Convoi de Hesse (allié) | But (sortie) | 1 | 2 | 3 | ∞ | ∞ | ∞ | Glace 2 | — | — | — |
+| Fuyard (non hostile) | But (Refuge) | 1 | 2 | 3 | ∞ | ∞ | ∞ | Gué 2 · Éboulis 3 | — | des Noms | — |
+| Harde | Ombre | 1 + tours | 1 + tours | 1 + tours | ∞ | ∞ | ∞ | Glace : 1 + tours · Éboulis : 1 + tours | 2,0 | 4 | Placement des tours |
+| Gens du Col | Pente | 1 | 2 | 3 | ∞ | ∞ | 3 | Glace 1 · Éboulis 2 | 1,3 | 3 | Lanterne |
+| Convoi de Hesse (allié) | But (sortie) | 1 | 2 | 3 | ∞ | ∞ | ∞ | Glace 2 · Éboulis 4 | — | — | — |
 | Taupier | Pente | 2 | 2 | 1 | ∞ | 3 | 2 | Éboulis 1 · Gouffre ∞ | 1,5 | 4 | Sonde |
 | Étayeur | Ombre | 1 + tours | 1 + tours | 1 + tours | ∞ | ∞ | ∞ | Éboulis : 1 + tours | 1,8 | 4 | Mortier |
 | Sablier | Pente | 2 | 4 | 3 | ∞ | ∞ | ∞ | Dune 1 · Saline 1 | 1,2 | 3 | Héliographe |
@@ -486,7 +486,8 @@ Pour les lecteurs de la Pente, le chemin dépend du terrain. Pour les lecteurs d
 | Lecture du But | Refuge, borne, puits, sortie | [S] |
 | Événement de monde | La terre hésite (crue, gel, effondrements, dunes, écluses, mise au net) | [T], ou [P] pour la Mise au net |
 | Annonce une vague à l'avance | Frisson des hachures et indice sonore | Lecture des données, aucune opération |
-| Gratter | Effacer un élément du décor | [T] |
+| Gratter | Rendre une case au Sol nu. Échappe au Droit de Passage : toute espèce terrestre marche sur le Sol | [T] |
+| Palissade | Barricade impériale posée par les données (changement scripté ou phase de boss), infranchissable mais ne fermant jamais la carte | [T] |
 | Renommer et prix du nom | La case perd son nom, qui sort du Rôle | [T] et un compteur de progression |
 | Dater | Suspendre ou avancer l'événement | [T] ou [P] |
 | Défection en bataille | Les conscrits deviennent des Fuyards | [P] |
