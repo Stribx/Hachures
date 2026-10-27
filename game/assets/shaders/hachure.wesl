@@ -27,6 +27,8 @@ struct Hachure {
     gloss: f32,
     // How much the water moves: 1 for a river or a lake, 0 for ice.
     flow: f32,
+    // How far it leans in the wind (`wind.wesl`); unused here.
+    wind: f32,
 }
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(100)

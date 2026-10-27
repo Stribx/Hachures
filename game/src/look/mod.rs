@@ -24,7 +24,7 @@ use bevy::shader::ShaderRef;
 use crate::theme::{AMBIENT, SHEET, SUNLIGHT};
 
 pub use material::{Hachure, InkMaterial, ink, shore_image, varnished, water};
-pub use models::Carved;
+pub use models::{Carved, Swaying};
 use models::{Inked, ink_models};
 
 pub fn plugin(app: &mut App) {

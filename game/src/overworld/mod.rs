@@ -23,12 +23,15 @@ use crate::Step;
 use crate::campaign::save::Save;
 use crate::level::Level;
 use crate::level::data::{LEVELS, LevelData};
-use crate::look::{InkMaterial, ink, shore_image, water};
+use crate::look::{InkMaterial, Swaying, ink, shore_image, water};
 use crate::map::grid::Grid;
 use crate::map::{cell_color, look};
 use props::props;
 use terrain::{EAST, NORTH, SOUTH, WATER, WEST, height, land_mesh, road_mesh};
 
+/// How far a tree leans in the wind, per world unit of height squared: a canopy a few units up sways a few
+/// hundredths, its trunk not at all.
+const TREE_WIND: f32 = 0.012;
 pub fn plugin(app: &mut App) {
     app.add_plugins((travel::plugin, plan::plugin))
         .add_systems(Startup, spawn)
@@ -185,11 +188,14 @@ pub(super) fn spawn(
     }
 
     for (model, transform) in props() {
-        commands.spawn((
+        let mut prop = commands.spawn((
             WorldAssetRoot(assets.load(GltfAssetLabel::Scene(0).from_asset(format!("models/{model}.glb")))),
             transform,
             ChildOf(root),
         ));
+        if model.contains("tree") {
+            prop.insert(Swaying(TREE_WIND));
+        }
     }
 }
 
