@@ -152,10 +152,13 @@ impl Level {
         self.note(Trigger::Won);
         let challenge = self.challenge_met();
         let record = save.record(self.index);
+        // A replay earns sceaux, but the story is written once, like the choice: the first win keeps its Names.
+        if !record.won {
+            record.names = self.names;
+            record.erased = self.erased.iter().map(|&p| self.places[p].name.clone()).collect();
+        }
         record.won = true;
         record.challenge |= challenge;
-        record.names = self.names;
-        record.erased = self.erased.iter().map(|&p| self.places[p].name.clone()).collect();
         // A level with a choice opens the next one only once it is made: see `choose`.
         if self.chosen() {
             self.unlock_next(save);
@@ -280,6 +283,20 @@ mod tests {
         assert_eq!(names(&col), ["chaineur", "gens_du_col", "harde"]);
         let boss = names(&boss_level);
         assert!(boss.contains(&"grande_chaine") && boss.contains(&"grande_chaine_rompue"), "{boss:?}");
+    }
+
+    /// A replay can't rewrite the Rôle: the first win's Names and scratched-out places stand.
+    #[test]
+    fn a_replay_keeps_the_first_names() {
+        let mut save = Save::default();
+        let mut first = Level::load(1, &save);
+        first.finish(&mut save);
+        let mut replay = Level::load(1, &save);
+        replay.names = -3;
+        replay.erased = vec![0];
+        replay.finish(&mut save);
+        assert_eq!((save.names(), save.levels[1].erased.len()), (0, 0));
+        assert!(save.levels[1].won);
     }
 
     /// Handing the deserters over in 2-2 drops the last two waves of 2-3, and costs a Name.
