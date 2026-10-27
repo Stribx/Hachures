@@ -20,5 +20,7 @@ jobs:
       - run: cargo fmt --check
       - run: cargo clippy --all-targets -- -D warnings
       - run: cargo test
+      # The balance bot's table, kept in game/tests/balance.txt.
+      - run: cargo test -p game balance -- --ignored
       # The browser build: the save goes through localStorage there.
       - run: cargo build --target wasm32-unknown-unknown -p game

@@ -17,6 +17,9 @@ use crate::map::grid::{Grid, Tile};
 use crate::map::species::{self, index_of};
 use crate::map::terrain::Edit;
 
+/// The balance bot's last blessed table, from the crate root.
+const BALANCE: &str = "tests/balance.txt";
+
 /// Headless app running the combat systems on `level`, 50 ms per update.
 fn app_with(level: Level) -> App {
     let mut app = App::new();
@@ -147,11 +150,13 @@ fn grande_chaine_phases() {
 /// A naive player, to balance the levels without playing them: before each wave it spends
 /// all its sépia on towers, where they cover the most of the hostile routes per sépia.
 /// It never inks terrain, so a player who reads the map should do better.
-/// Run: `cargo test --features dev balance -- --ignored --nocapture`
+/// It is deterministic, so its table is kept in `BALANCE`: a rule or data change that moves it fails here.
+/// Run: `cargo test -p game balance -- --ignored --nocapture`; `HACHURES_BLESS=1` writes the new table.
 #[test]
 #[ignore]
 fn balance() {
-    println!("\n{:<32} {:>5} {:>5} {:>5} {:>7} {:>6}", "level", "won", "Rôle", "Noms", "towers", "sépia");
+    let mut table =
+        format!("{:<32} {:>5} {:>5} {:>5} {:>7} {:>6}\n", "level", "won", "Rôle", "Noms", "towers", "sépia");
     for index in 0..LEVELS.len() {
         let mut save = Save::default();
         save.choices.insert("refuge".into(), "moulin".into());
@@ -186,12 +191,21 @@ fn balance() {
         }
         let level = app.world().resource::<Level>();
         let won = if level.won() { "oui" } else { &format!("v{}", level.wave.number) };
-        println!(
-            "{:<32} {:>5} {:>5} {:>5} {:>7} {:>6}",
+        table += &format!(
+            "{:<32} {:>5} {:>5} {:>5} {:>7} {:>6}\n    Rôle lost (wave, lost): {losses:?}\n",
             level.name, won, level.lives, level.names, towers, level.sepia
         );
-        println!("    Rôle lost (wave, lost): {losses:?}");
     }
+    println!("\n{table}");
+    let path = format!("{}/{BALANCE}", env!("CARGO_MANIFEST_DIR"));
+    if std::env::var_os("HACHURES_BLESS").is_some() {
+        std::fs::write(&path, &table).unwrap();
+    }
+    let kept = std::fs::read_to_string(&path).unwrap_or_default();
+    assert!(
+        table == kept,
+        "the balance moved: diff the table above with {BALANCE}, then bless it with HACHURES_BLESS=1"
+    );
 }
 
 /// The bot's turn between waves: towers until nothing useful is affordable. Returns how many.

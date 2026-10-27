@@ -16,9 +16,9 @@ pub struct Record {
     pub won: bool,
     /// Sceau of the reading challenge.
     pub challenge: bool,
-    /// Names kept in the Rôle on the last run.
+    /// Names kept in the Rôle by the first win: a replay can't rewrite them.
     pub names: i32,
-    /// The places whose names were scratched out on the last run, by key (`place.pont_du_bief`).
+    /// The places whose names the first win scratched out, by key (`place.pont_du_bief`).
     #[serde(default)]
     pub erased: Vec<String>,
 }
