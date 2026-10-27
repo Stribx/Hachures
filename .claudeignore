@@ -1,0 +1,25 @@
+# Version-control metadata
+.git/
+
+# Rust build artifacts and generated dependency trees
+target/
+
+# Generated web output
+website/play/
+
+# Local visual-testing artifacts and notes
+.taste-skill/
+screenshots/
+
+# Dependency and frontend build directories
+node_modules/
+dist/
+build/
+
+# Logs and transient tool output
+*.log
+*.tmp
+*.swp
+
+# Design-hook cache
+.impeccable/

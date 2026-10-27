@@ -2,3 +2,11 @@
 # Built by scripts/build-web.sh
 /website/play/hachures*
 /website/play/assets/
+
+# Taste-skill working files (screenshots, notes)
+/.taste-skill/
+
+# Claude Code: personal settings, dev screenshots, design-hook cache
+/.claude/settings.local.json
+/screenshots/
+/.impeccable/

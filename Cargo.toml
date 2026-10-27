@@ -3,7 +3,8 @@ resolver = "2"
 members = ["game"]
 
 [workspace.dependencies]
-bevy = "0.20"
+# Bevy's 3d, ui and audio profiles: the default set without 2d, whose sprites the game never draws.
+bevy = { version = "0.20", default-features = false, features = ["3d", "ui", "audio"] }
 
 # Profiles only take effect at the workspace root
 [profile.dev]
