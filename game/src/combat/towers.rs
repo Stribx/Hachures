@@ -16,6 +16,7 @@ use crate::level::{Level, LevelEntity};
 use crate::look::Carved;
 use crate::map::grid::Grid;
 use crate::map::land::Land;
+use crate::map::terrain::Edit;
 
 /// Damage multiplier against a species weak to the weapon.
 const WEAKNESS: f32 = 2.0;
@@ -54,15 +55,6 @@ pub struct Tower {
     pub ready_in: f32,
 }
 
-impl Level {
-    /// Reach of the tower at `cell`; Équerre adds 1 when another tower stands beside it.
-    pub fn range(&self, cell: usize, weapon: Weapon) -> f32 {
-        let paired =
-            self.has(Skill::Equerre) && self.base.neighbours(cell).any(|n| self.towers.iter().any(|t| t.0 == n));
-        self.tower_stats[&weapon].range + if paired { 1.0 } else { 0.0 }
-    }
-}
-
 /// A tower's base model; it stands 0.6 high, and the weapon sits on top.
 pub const TOWER_BASE: &str = "models/tower-round-bottom-a.glb";
 
@@ -88,7 +80,7 @@ pub(super) fn raise_towers(
     mut commands: Commands,
 ) {
     for &TowerInked { cell, weapon } in inked.read() {
-        spawn_tower(&mut commands, &assets, &level.grid, cell, weapon);
+        spawn_tower(&mut commands, &assets, level.terrain.grid(), cell, weapon);
     }
 }
 
@@ -125,7 +117,7 @@ fn aim(level: &Level, enemies: &Targets, pos: Vec3, range: f32) -> Option<(Entit
         .iter()
         .filter(|(_, e, t, _, _)| level.species[e.species].hostile && t.translation.xz().distance(pos.xz()) <= range)
         .min_by(|(_, a, ..), (_, b, ..)| {
-            level.fields[a.species].dist[a.cell].total_cmp(&level.fields[b.species].dist[b.cell])
+            level.terrain.fields()[a.species].dist[a.cell].total_cmp(&level.terrain.fields()[b.species].dist[b.cell])
         })
         .map(|(entity, _, t, _, _)| (entity, t.translation))
 }
@@ -156,15 +148,14 @@ fn strike(level: &Level, weapon: Weapon, stats: &TowerStats, enemy: &mut Enemy, 
 
 /// Breaks the enemies with no HP left into shards, and pays out what they leave.
 fn defeat(level: &mut Level, enemies: &Targets, look: &EnemyLook, commands: &mut Commands) {
-    let mut bornes_down = false;
+    let mut bornes_down = Vec::new();
     for (entity, enemy, transform, boss, borne) in enemies {
         if enemy.hp > 0.0 {
             continue;
         }
         shatter(commands, look, transform.translation);
         if borne {
-            level.base.bornes.retain(|&b| b != enemy.cell);
-            bornes_down = true;
+            bornes_down.push((enemy.cell, Edit::DropBorne));
         } else {
             level.loot(level.species[enemy.species].loot);
         }
@@ -173,8 +164,8 @@ fn defeat(level: &mut Level, enemies: &Targets, look: &EnemyLook, commands: &mut
         }
         commands.entity(entity).try_despawn();
     }
-    if bornes_down {
-        level.refresh();
+    if !bornes_down.is_empty() {
+        level.alter(bornes_down);
     }
 }
 
@@ -195,7 +186,7 @@ pub(super) fn fire(
             continue;
         }
         let stats = &level.tower_stats[&tower.weapon];
-        let range = level.range(tower.cell, tower.weapon);
+        let range = level.terrain.reach(tower.cell, tower.weapon);
         let pos = tower_transform.translation;
         // Aim at the hostile in range that is closest to its goal.
         let Some((target, target_pos)) = aim(level, &enemies, pos, range) else { continue };

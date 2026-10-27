@@ -65,7 +65,7 @@ pub(super) fn hover(
         return;
     }
     let (camera, camera_transform) = *camera;
-    let grid = &level.grid;
+    let grid = level.terrain.grid();
     let hit = window
         .cursor_position()
         .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor).ok())

@@ -195,18 +195,18 @@ fn readout(level: &Level, selection: &Selection) -> String {
     if level.has(Skill::LectureFine) && level.refusal(i, selection.tool).is_none() {
         let (what_if, field) = level.what_if(i, selection.tool, selection.shown);
         if let Some(&spawn) = what_if.spawns_for(&level.species[selection.shown]).first() {
-            let (before, after) = (level.fields[selection.shown].dist[spawn], field.dist[spawn]);
+            let (before, after) = (level.terrain.fields()[selection.shown].dist[spawn], field.dist[spawn]);
             lines.push(tf("hud.line_cost", &[&before, &after]));
         }
     }
     if selection.calque {
-        let tile = level.grid.tiles[i];
+        let tile = level.terrain.grid().tiles[i];
         let costs: Vec<String> = level
             .present
             .iter()
             .map(|&k| {
                 let (name, cost, goal) =
-                    (t(&level.species[k].label), level.species[k].cost(tile), level.fields[k].dist[i]);
+                    (t(&level.species[k].label), level.species[k].cost(tile), level.terrain.fields()[k].dist[i]);
                 tf("hud.calque_species", &[&name, &cost, &goal])
             })
             .collect();

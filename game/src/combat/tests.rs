@@ -15,6 +15,7 @@ use crate::level::data::{LEVELS, START_LIVES};
 use crate::map::cell_pos;
 use crate::map::grid::{Grid, Tile};
 use crate::map::species::{self, index_of};
+use crate::map::terrain::Edit;
 
 /// Headless app running the combat systems on `level`, 50 ms per update.
 fn app_with(level: Level) -> App {
@@ -31,8 +32,8 @@ fn app_with(level: Level) -> App {
 /// An enemy of `species` standing on the first spawn.
 fn walker(level: &Level, species: &str, hp: f32) -> (Enemy, Transform) {
     let species = index_of(&level.species, species).unwrap();
-    let cell = level.grid.spawns[0];
-    (Enemy::new(species, hp, cell), Transform::from_translation(cell_pos(&level.grid, cell)))
+    let cell = level.terrain.grid().spawns[0];
+    (Enemy::new(species, hp, cell), Transform::from_translation(cell_pos(level.terrain.grid(), cell)))
 }
 
 fn run(app: &mut App, seconds: u32) {
@@ -50,8 +51,8 @@ fn arbalete_spares_fuyards() {
     );
     let mut level = Level::new(grid, species::load());
     level.sepia = 0;
-    let tower_cell = level.grid.width + 3;
-    let tower_at = cell_pos(&level.grid, tower_cell);
+    let tower_cell = level.terrain.grid().width + 3;
+    let tower_at = cell_pos(level.terrain.grid(), tower_cell);
     let (chaineur, fuyard) = (walker(&level, "chaineur", 100.0), walker(&level, "fuyard", 100.0));
 
     let mut app = app_with(level);
@@ -74,7 +75,7 @@ fn arbalete_spares_fuyards() {
 fn lanterne_slows() {
     let level = Level::new(Grid::parse("S.....M"), species::load());
     let gens = walker(&level, "gens_du_col", 100.0);
-    let tower_at = cell_pos(&level.grid, 1);
+    let tower_at = cell_pos(level.terrain.grid(), 1);
     let mut app = app_with(level);
     app.world_mut()
         .spawn((Tower { cell: 1, weapon: Weapon::Lanterne, ready_in: 0.0 }, Transform::from_translation(tower_at)));
@@ -89,7 +90,7 @@ fn lanterne_slows() {
 #[test]
 fn a_borne_off_the_map_breaks() {
     let mut level = Level::new(Grid::parse("S...M"), species::load());
-    level.base.bornes = vec![1, 3];
+    level.alter([(1, Edit::PlantBorne), (3, Edit::PlantBorne)]);
     let jalonneur = index_of(&level.species, "jalonneur").unwrap();
     let mut app = App::new();
     app.add_plugins(MinimalPlugins)
@@ -99,7 +100,7 @@ fn a_borne_off_the_map_breaks() {
     for cell in [1, 3] {
         app.world_mut().spawn((Borne, Enemy::new(jalonneur, 50.0, cell), Transform::default()));
     }
-    app.world_mut().resource_mut::<Level>().base.bornes.retain(|&b| b != 1);
+    app.world_mut().resource_mut::<Level>().alter([(1, Edit::DropBorne)]);
     app.update();
     let left: Vec<usize> =
         app.world_mut().query_filtered::<&Enemy, With<Borne>>().iter(app.world()).map(|e| e.cell).collect();
@@ -124,14 +125,14 @@ fn grande_chaine_phases() {
     run(&mut app, 10);
     let level = app.world().resource::<Level>();
     assert_eq!(level.boss, None, "phase names come from spawn_enemies and boss_phases");
-    assert!(level.base.tiles.contains(&Tile::Chaussee), "Le Levé lays Chaussée");
-    assert!(level.base.bornes.is_empty());
+    assert!(level.terrain.base().tiles.contains(&Tile::Chaussee), "Le Levé lays Chaussée");
+    assert!(level.terrain.base().bornes.is_empty());
 
     set_hp(&mut app, 500.0);
     run(&mut app, 16);
     let level = app.world().resource::<Level>();
     assert_eq!(level.boss.as_deref(), Some("boss.grande_chaine.bornage"));
-    assert_eq!(level.base.bornes.len(), 3, "Le Bornage plants three bornes");
+    assert_eq!(level.terrain.base().bornes.len(), 3, "Le Bornage plants three bornes");
     let bornes = app.world_mut().query_filtered::<(), With<Borne>>().iter(app.world()).count();
     assert_eq!(bornes, 3);
 
@@ -201,8 +202,11 @@ fn bot_build(app: &mut App) -> usize {
         let mut route: Vec<usize> = (0..level.species.len())
             .filter(|&k| level.species[k].hostile && level.waves.iter().flatten().any(|&s| s == k))
             .flat_map(|k| {
-                let spawns = level.grid.spawns_for(&level.species[k]);
-                spawns.iter().flat_map(|&sp| level.fields[k].path(&level.grid, sp)).collect::<Vec<_>>()
+                let spawns = level.terrain.grid().spawns_for(&level.species[k]);
+                spawns
+                    .iter()
+                    .flat_map(|&sp| level.terrain.fields()[k].path(level.terrain.grid(), sp))
+                    .collect::<Vec<_>>()
             })
             .collect();
         route.sort_unstable();
@@ -217,8 +221,8 @@ fn bot_build(app: &mut App) -> usize {
             }
             let stats = &level.tower_stats[&TOOLS[t].act.weapon().unwrap()];
             let dps = stats.damage / stats.cooldown * if stats.splash > 0.0 { 2.0 } else { 1.0 };
-            for cell in 0..level.grid.tiles.len() {
-                let covered = route.iter().filter(|&&c| level.grid.within(c, cell, stats.range)).count();
+            for cell in 0..level.terrain.grid().tiles.len() {
+                let covered = route.iter().filter(|&&c| level.terrain.grid().within(c, cell, stats.range)).count();
                 if covered > 0 {
                     candidates.push((covered as f32 * dps / cost as f32, t, cell));
                 }
@@ -230,7 +234,7 @@ fn bot_build(app: &mut App) -> usize {
         };
         level.ink(cell, t);
         let weapon = TOOLS[t].act.weapon().unwrap();
-        let (x, z) = level.grid.coords(cell);
+        let (x, z) = level.terrain.grid().coords(cell);
         app.world_mut().spawn((Tower { cell, weapon, ready_in: 0.0 }, Transform::from_xyz(x as f32, 0.8, z as f32)));
         built += 1;
     }

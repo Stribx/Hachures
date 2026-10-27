@@ -10,6 +10,7 @@ use crate::level::{Level, LevelEntity};
 use crate::map::cell_pos;
 use crate::map::grid::Tile;
 use crate::map::species::Goal;
+use crate::map::terrain::Edit;
 use crate::settings::Settings;
 
 /// Speed factor of an enemy the Lanterne blinds.
@@ -69,7 +70,7 @@ pub fn spawn_enemies(
     let level = &mut *level;
     level.wave.spawn_in = 1.0;
     let species = level.wave.queue.pop().unwrap();
-    let spawns = level.grid.spawns_for(&level.species[species]);
+    let spawns = level.terrain.grid().spawns_for(&level.species[species]);
     let cell = spawns[level.wave.spawned % spawns.len()];
     level.wave.spawned += 1;
     let first_phase = level.world().boss.as_ref().map(|b| &b.phases[0]);
@@ -77,7 +78,7 @@ pub fn spawn_enemies(
     // Docs, section 8: ×1.5 per world, ×1.12 per wave (not for the boss).
     let wave_scale = if boss.is_some() { 1.0 } else { HP_PER_WAVE.powi(level.wave.number as i32 - 1) };
     let hp = level.hp(level.species[species].hp) * wave_scale;
-    let at = cell_pos(&level.grid, cell);
+    let at = cell_pos(level.terrain.grid(), cell);
     let material = &look.materials[species];
     let mut enemy = commands.spawn((
         LevelEntity,
@@ -137,8 +138,8 @@ fn step(
     if enemy.pinned > 0.0 {
         enemy.pinned -= dt;
     } else if let Some(next) = enemy.next {
-        let step = species.speed * slow / species.cost(level.grid.tiles[enemy.cell]) * dt;
-        let to = cell_pos(&level.grid, next) - transform.translation;
+        let step = species.speed * slow / species.cost(level.terrain.grid().tiles[enemy.cell]) * dt;
+        let to = cell_pos(level.terrain.grid(), next) - transform.translation;
         if to.length() <= step {
             transform.translation += to;
             let left = enemy.cell;
@@ -168,25 +169,26 @@ fn step(
 /// Lays what the boss left on the way: the road, the bornes; the map is inked again if it changed.
 fn lay(level: &mut Level, look: &EnemyLook, commands: &mut Commands, trail: Trail) {
     // [T] Le Levé: the imperial road.
-    for &cell in &trail.chaussee {
-        if level.base.tiles[cell].buildable() {
-            level.base.tiles[cell] = Tile::Chaussee;
-        }
-    }
+    let mut batch: Vec<(usize, Edit)> = trail
+        .chaussee
+        .iter()
+        .filter(|&&cell| level.terrain.base().tiles[cell].buildable())
+        .map(|&cell| (cell, Edit::Ink(Tile::Chaussee)))
+        .collect();
     // [S] Le Bornage: every borne is one more target for the Jalonneurs.
     for &(cell, species) in &trail.bornes {
-        level.base.bornes.push(cell);
+        batch.push((cell, Edit::PlantBorne));
         commands.spawn((
             LevelEntity,
             Borne,
             Enemy::new(species, level.hp(level.boss_file().borne_hp), cell),
             Mesh3d(look.borne_mesh.clone()),
             MeshMaterial3d(look.borne_material.clone()),
-            Transform::from_translation(cell_pos(&level.grid, cell)),
+            Transform::from_translation(cell_pos(level.terrain.grid(), cell)),
         ));
     }
-    if !trail.chaussee.is_empty() || !trail.bornes.is_empty() {
-        level.refresh();
+    if !batch.is_empty() {
+        level.alter(batch);
     }
     if trail.saved {
         level.note(Trigger::FuyardSaved);
@@ -208,8 +210,8 @@ pub fn walk(
     let mut trail = Trail::default();
     for (entity, mut enemy, mut transform, mut boss) in &mut enemies {
         if enemy.next.is_none() {
-            let field = &level.fields[enemy.species];
-            enemy.next = field.next(&level.grid, enemy.cell);
+            let field = &level.terrain.fields()[enemy.species];
+            enemy.next = field.next(level.terrain.grid(), enemy.cell);
             if enemy.next.is_none() && field.dist[enemy.cell] == 0.0 {
                 reach_goal(level, enemy.species, boss.is_some(), &mut trail);
                 commands.entity(entity).try_despawn();

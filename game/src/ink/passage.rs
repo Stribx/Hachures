@@ -5,13 +5,14 @@ use crate::i18n::n_;
 use crate::level::Level;
 use crate::map::flow::can_place;
 use crate::map::grid::{Grid, Tile};
+use crate::map::terrain::Edit;
 
 impl Level {
     /// Why `tool` can't be inked at `i`, if it can't.
     pub fn refusal(&self, i: usize, tool: usize) -> Option<&'static str> {
         let Some(tile) = TOOLS[tool].act.lays() else {
             // Scraping leaves plain Sol, which every species walks: it can lengthen a route, never close one.
-            return if !self.base.scrapable(i) {
+            return if !self.terrain.base().scrapable(i) {
                 Some(n_("refusal.nothing_to_scrape"))
             } else if self.sepia < self.tool_cost(tool) {
                 Some(n_("refusal.sepia"))
@@ -19,7 +20,7 @@ impl Level {
                 None
             };
         };
-        if !self.grid.tiles[i].buildable() {
+        if !self.terrain.grid().tiles[i].buildable() {
             Some(n_("refusal.firm_ground"))
         } else if self.sepia < self.tool_cost(tool) {
             Some(n_("refusal.sepia"))
@@ -33,13 +34,13 @@ impl Level {
     /// Le Droit de Passage: why `tile` at `i` would close the map, now or around the world event.
     fn closes(&self, i: usize, tile: Tile) -> Option<&'static str> {
         let event = &self.world().event;
-        if self.changes.iter().any(|c| c.cells(self.base.width).any(|n| n == i)) {
+        if self.changes.iter().any(|c| c.cells(self.terrain.base().width).any(|n| n == i)) {
             Some(n_("refusal.relief_changes"))
-        } else if !can_place(&self.grid, &self.species, &self.present, i, tile, &self.walkers) {
+        } else if !can_place(self.terrain.grid(), &self.species, &self.present, i, tile, &self.walkers) {
             Some(n_("refusal.closed"))
         } else if self.maps_ahead().iter().any(|map| !can_place(map, &self.species, &self.present, i, tile, &[])) {
             Some(&event.refuse_next)
-        } else if self.event_on && !can_place(&self.base, &self.species, &self.present, i, tile, &[]) {
+        } else if self.event_on && !can_place(self.terrain.base(), &self.species, &self.present, i, tile, &[]) {
             Some(&event.refuse_after)
         } else if !self.changes.is_empty()
             && !can_place(&self.after_changes(), &self.species, &self.present, i, tile, &[])
@@ -53,6 +54,7 @@ impl Level {
     /// The maps of the waves still to come that the world event floods, each with the changes fallen by then.
     fn maps_ahead(&self) -> Vec<Grid> {
         let event = &self.world().event;
+        let width = self.terrain.base().width;
         let mut seen = Vec::new();
         let mut maps = Vec::new();
         for w in self.wave.number + 1..=self.waves.len() as u32 {
@@ -60,9 +62,8 @@ impl Level {
             // Same changes fallen, same map: build it once.
             if self.event_at(w) && !seen.contains(&fallen) {
                 seen.push(fallen);
-                let mut grid = self.base.clone();
-                self.changes.iter().filter(|c| c.wave <= w).for_each(|c| c.apply(&mut grid));
-                maps.push(grid.under(event));
+                let edits = self.changes.iter().filter(|c| c.wave <= w).flat_map(|c| c.edits(width));
+                maps.push(self.terrain.ahead(edits).under(event));
             }
         }
         maps
@@ -70,14 +71,13 @@ impl Level {
 
     /// Ronces-mères: as a wave starts, one bramble spreads to a neighbouring cell, if le Droit de Passage allows.
     pub fn grow_ronces(&mut self) {
-        let base = &self.base;
+        let base = self.terrain.base();
         let spread = (0..base.tiles.len())
             .filter(|&i| base.tiles[i] == Tile::Ronces)
             .flat_map(|i| base.neighbours(i))
             .find(|&n| base.tiles[n].buildable() && self.closes(n, Tile::Ronces).is_none());
         if let Some(n) = spread {
-            self.base.tiles[n] = Tile::Ronces;
-            self.refresh();
+            self.alter([(n, Edit::Ink(Tile::Ronces))]);
         }
     }
 }
@@ -148,14 +148,13 @@ mod tests {
     #[test]
     fn gratter_scrapes_only_a_borne() {
         let mut level = level("S...M");
-        level.base.bornes.push(2);
-        level.refresh();
+        level.alter([(2, Edit::PlantBorne)]);
         let gratter = tool_index("gratter").unwrap();
         assert_eq!(level.refusal(1, gratter), Some("refusal.nothing_to_scrape"));
         assert_eq!(level.refusal(2, gratter), None);
         let sepia = level.sepia;
         level.ink(2, gratter);
-        assert!(level.base.bornes.is_empty(), "the borne is gone");
+        assert!(level.terrain.base().bornes.is_empty(), "the borne is gone");
         assert_eq!(level.sepia, sepia - 25);
         assert_eq!(level.refusal(2, gratter), Some("refusal.nothing_to_scrape"));
     }
@@ -165,14 +164,12 @@ mod tests {
     fn gratter_preview_takes_the_borne_off() {
         let mut level = level("S...B");
         let jalonneur = index_of(&level.species, "jalonneur").unwrap();
-        level.base.tiles[1] = Tile::Chaussee;
-        level.base.bornes.push(1);
-        level.refresh();
+        level.alter([(1, Edit::Ink(Tile::Chaussee)), (1, Edit::PlantBorne)]);
         let gratter = tool_index("gratter").unwrap();
         let (grid, field) = level.what_if(1, gratter, jalonneur);
         assert_eq!(grid.tiles[1], Tile::Chaussee, "the tile under the borne stays");
         level.ink(1, gratter);
-        assert_eq!(field.dist, level.fields[jalonneur].dist);
+        assert_eq!(field.dist, level.terrain.fields()[jalonneur].dist);
     }
 
     /// Gratter on an Éboulis leaves plain Sol, in the tiles and in the map the world event reads.
@@ -183,7 +180,7 @@ mod tests {
         assert_eq!(level.refusal(2, gratter), None);
         let sepia = level.sepia;
         level.ink(2, gratter);
-        assert_eq!((level.base.tiles[2], level.base.map[2]), (Tile::Sol, Tile::Sol));
+        assert_eq!((level.terrain.base().tiles[2], level.terrain.base().map[2]), (Tile::Sol, Tile::Sol));
         assert_eq!(level.sepia, sepia - level.tool_cost(gratter));
         assert_eq!(level.refusal(2, gratter), Some("refusal.nothing_to_scrape"));
     }
@@ -195,7 +192,7 @@ mod tests {
         let gratter = tool_index("gratter").unwrap();
         assert_eq!(level.refusal(2, gratter), None);
         level.ink(2, gratter);
-        assert_eq!((level.base.tiles[2], level.base.map[2]), (Tile::Sol, Tile::Sol));
+        assert_eq!((level.terrain.base().tiles[2], level.terrain.base().map[2]), (Tile::Sol, Tile::Sol));
         assert_eq!(level.refusal(2, gratter), Some("refusal.nothing_to_scrape"));
     }
 
@@ -206,26 +203,11 @@ mod tests {
     }
 
     #[test]
-    fn a_palissade_is_impassable() {
-        let level = level("S.p.M\n.....");
-        assert_eq!(level.fields[level.present[0]].dist[2], f32::INFINITY);
-    }
-
-    #[test]
-    fn la_crue_spares_a_palissade() {
-        let mut level = level("S.,.M\n.....");
-        level.base.tiles[2] = Tile::Palissade;
-        level.refresh();
-        assert_eq!(level.base.under(&level.world().event).tiles[2], Tile::Palissade);
-    }
-
-    #[test]
     fn gratter_refuses_what_is_not_decor() {
         let gratter = tool_index("gratter").unwrap();
         for tile in [Tile::Barricade, Tile::Boue, Tile::Ronces, Tile::Chaussee, Tile::Glace, Tile::Eau, Tile::Roc] {
             let mut level = level("S...M");
-            level.base.tiles[2] = tile;
-            level.refresh();
+            level.alter([(2, Edit::Ink(tile))]);
             assert_eq!(level.refusal(2, gratter), Some("refusal.nothing_to_scrape"), "{tile:?}");
         }
     }
@@ -267,16 +249,15 @@ mod tests {
         let gratter = tool_index("gratter").unwrap();
         let (_, field) = level.what_if(2, gratter, k);
         level.ink(2, gratter);
-        assert_eq!(field.dist, level.fields[k].dist);
+        assert_eq!(field.dist, level.terrain.fields()[k].dist);
     }
 
     /// A scripted change leaves `map` as drawn; after a scrape La Crue must still find plain Sol there.
     #[test]
     fn la_crue_spares_a_scraped_eboulis() {
         let mut level = level("S.,.M");
-        level.base.tiles[2] = Tile::Eboulis;
-        level.refresh();
+        level.alter([(2, Edit::Ink(Tile::Eboulis))]);
         level.ink(2, tool_index("gratter").unwrap());
-        assert_eq!(level.base.under(&level.world().event).tiles[2], Tile::Sol);
+        assert_eq!(level.terrain.base().under(&level.world().event).tiles[2], Tile::Sol);
     }
 }

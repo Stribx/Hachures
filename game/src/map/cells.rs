@@ -60,15 +60,14 @@ pub(super) fn redraw_cells(
     mut images: ResMut<Assets<Image>>,
     mut drawn: Local<Drawn>,
 ) {
-    if !level.redraw {
+    if !level.terrain.take_redraw() {
         return;
     }
-    level.redraw = false;
     for entity in &cells {
         commands.entity(entity).despawn();
     }
     let fascines = level.has(Skill::Fascines);
-    let grid = &level.grid;
+    let grid = level.terrain.grid();
     let drawn = &mut *drawn;
     // Inked by hand: a cell or so changed. A new level, or the Crue, changes many and lands nothing.
     let by_hand = drawn.before.len() == grid.tiles.len()

@@ -141,17 +141,6 @@ impl Grid {
         self.bornes.contains(&i) || matches!(self.tiles[i], Tile::Eboulis | Tile::Palissade)
     }
 
-    /// Gratter on cell `i`: takes its borne off, else the Éboulis or the Palissade. The caller has checked `scrapable`.
-    pub fn scrape(&mut self, i: usize) {
-        if self.bornes.contains(&i) {
-            self.bornes.retain(|&b| b != i);
-        } else {
-            // Plain Sol, with no memory of what was under: the world event must not see the old ground either.
-            self.tiles[i] = Tile::Sol;
-            self.map[i] = Tile::Sol;
-        }
-    }
-
     /// The map while the world event lasts: its cells turn to `event.becomes`, unless inked with one of `event.spares`.
     pub fn under(&self, event: &Event) -> Grid {
         let mut grid = self.clone();

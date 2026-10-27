@@ -1,5 +1,6 @@
 //! A level: its map as inked, its world's event, waves and sépia, and what it leaves in the campaign.
-//! `Level` is one resource; each feature adds its own `impl Level` (inking in `ink`, tower reach in `combat`).
+//! `Level` is one resource; each feature adds its own `impl Level` (inking and le Droit de Passage in `ink`).
+//! Its map is a `Terrain`, which also owns the towers' reach.
 
 pub mod data;
 mod load;
@@ -15,9 +16,9 @@ use crate::Step;
 use crate::campaign::save::Save;
 use crate::campaign::skills::Skill;
 use crate::combat::towers::{TowerStats, Weapon};
-use crate::map::flow::{self, FlowField};
 use crate::map::grid::Grid;
 use crate::map::species::Species;
+use crate::map::terrain::{Edit, Terrain};
 use data::{Change, LEVELS, Place};
 use story::{Challenge, Choice, MarginNote, Note, Trigger};
 use waves::Wave;
@@ -47,20 +48,15 @@ pub struct Level {
     /// Position in `WORLDS`.
     pub world: usize,
     pub name: String,
-    /// The map as Nève inked it.
-    pub base: Grid,
-    /// What the species walk on now: `base`, or `base` under the world event while it lasts.
-    pub grid: Grid,
+    /// The map: as inked, as walked, the towers on it and the routes over it.
+    pub terrain: Terrain,
     /// Waves the world event starts at; it lasts `event.lasts` waves.
     pub events: Vec<u32>,
     /// The world event is under way.
     pub event_on: bool,
     /// The next wave brings the event: its map is checked too before inking.
     pub event_next: bool,
-    /// Terrain blocks must be rebuilt from `grid`.
-    pub redraw: bool,
     pub species: Vec<Species>,
-    pub fields: Vec<FlowField>,
     /// The species this level sends (the boss's phases included), sorted: le Droit de Passage and Tab only
     /// consider these.
     pub present: Vec<usize>,
@@ -73,8 +69,6 @@ pub struct Level {
     pub erased: Vec<usize>,
     pub wave: Wave,
     pub tower_stats: HashMap<Weapon, TowerStats>,
-    /// (cell, weapon) of every tower inked.
-    pub towers: Vec<(usize, Weapon)>,
     /// Name of the boss phase under way, while the boss is on the map.
     pub boss: Option<String>,
     /// Indices in `TOOLS` this level allows.
@@ -127,14 +121,14 @@ impl Level {
 
     /// `base` once every scripted change still to come has fallen.
     pub fn after_changes(&self) -> Grid {
-        let mut grid = self.base.clone();
-        self.changes.iter().for_each(|c| c.apply(&mut grid));
-        grid
+        let width = self.terrain.base().width;
+        self.terrain.ahead(self.changes.iter().flat_map(|c| c.edits(width)))
     }
 
     /// The place at cell `i` whose name is still on the sheet, if any.
     pub fn place_at(&self, i: usize) -> Option<usize> {
-        (0..self.places.len()).find(|&p| !self.erased.contains(&p) && self.places[p].covers(i, self.base.width))
+        (0..self.places.len())
+            .find(|&p| !self.erased.contains(&p) && self.places[p].covers(i, self.terrain.base().width))
     }
 
     pub fn has(&self, skill: Skill) -> bool {
@@ -169,19 +163,15 @@ impl Level {
         save.reached = save.reached.max((self.index + 1).min(LEVELS.len() - 1));
     }
 
-    /// Rebuild `grid` and the flow fields after `base`, the towers or `event_on` changed.
-    pub fn refresh(&mut self) {
-        let weight = if self.has(Skill::OmbrePortee) { 1.5 } else { 1.0 };
-        let cover = (0..self.base.tiles.len())
-            .map(|i| {
-                let covering = self.towers.iter().filter(|&&(t, weapon)| self.base.within(i, t, self.range(t, weapon)));
-                covering.count() as f32 * weight
-            })
-            .collect();
-        self.base.cover = cover;
-        self.grid = if self.event_on { self.base.under(&self.world().event) } else { self.base.clone() };
-        self.fields = flow::fields(&self.grid, &self.species);
-        self.redraw = true;
+    /// Lets `edits` fall on the map: the one way a level's ground changes.
+    pub fn alter(&mut self, edits: impl IntoIterator<Item = (usize, Edit)>) {
+        self.terrain.alter(edits, &self.species);
+    }
+
+    /// The map follows `event_on`: under the world event while it lasts.
+    fn follow_event(&mut self) {
+        let world = self.world();
+        self.terrain.set_event(self.event_on.then_some(&world.event), &self.species);
     }
 }
 
@@ -198,6 +188,7 @@ mod tests {
     use bevy::state::app::StatesPlugin;
 
     use super::*;
+    use crate::map::flow::FlowField;
     use crate::map::species;
     use crate::schedule::Screen;
 
@@ -235,11 +226,12 @@ mod tests {
                     if !level.waves.iter().flatten().any(|&s| s == k) {
                         continue;
                     }
-                    let spawns = level.base.spawns_for(species);
+                    let spawns = level.terrain.base().spawns_for(species);
                     assert!(!spawns.is_empty(), "{}: nowhere for {} to spawn", level.name, species.name);
                     let event = &level.world().event;
                     let later = level.after_changes();
-                    for map in [level.base.under(event), later.under(event), level.base.clone(), later] {
+                    let base = level.terrain.base();
+                    for map in [base.under(event), later.under(event), base.clone(), later] {
                         let field = FlowField::new(&map, species);
                         assert!(
                             spawns.iter().all(|&s| field.dist[s].is_finite()),
@@ -260,8 +252,9 @@ mod tests {
             let level = Level::load(index, &Save::default());
             for place in &level.places {
                 for &(x, y) in &place.at {
-                    let i = y * level.base.width + x;
-                    assert!(level.base.tiles[i].buildable(), "{}: {} at ({x}, {y})", level.name, place.name);
+                    let base = level.terrain.base();
+                    let i = y * base.width + x;
+                    assert!(base.tiles[i].buildable(), "{}: {} at ({x}, {y})", level.name, place.name);
                 }
             }
         }

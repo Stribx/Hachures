@@ -72,7 +72,7 @@ pub(super) fn drop_bornes(
     mut commands: Commands,
 ) {
     for (entity, enemy, transform) in &bornes {
-        if !level.base.bornes.contains(&enemy.cell) {
+        if !level.terrain.base().bornes.contains(&enemy.cell) {
             shatter(&mut commands, &look, transform.translation);
             commands.entity(entity).try_despawn();
         }

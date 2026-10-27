@@ -56,13 +56,13 @@ pub fn label_places(
         return;
     }
     let (camera, at) = *camera;
-    let width = level.base.width;
+    let width = level.terrain.base().width;
     let shown = if over_world(screen) { Visibility::Hidden } else { Visibility::Inherited };
     for (entity, &PlaceLabel(k), mut node, mut color, mut visibility, struck) in &mut labels {
         *visibility = shown;
         let Some(place) = level.places.get(k) else { continue };
-        let center =
-            place.at.iter().map(|&(x, y)| cell_pos(&level.base, y * width + x)).sum::<Vec3>() / place.at.len() as f32;
+        let center = place.at.iter().map(|&(x, y)| cell_pos(level.terrain.base(), y * width + x)).sum::<Vec3>()
+            / place.at.len() as f32;
         if let Ok(p) = camera.world_to_viewport(at, center) {
             node.left = px(p.x - WIDTH / 2.0);
             // Just under the cell centre, where the routes run: a route over a name must not read as struck out.

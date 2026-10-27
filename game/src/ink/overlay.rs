@@ -39,7 +39,7 @@ fn draw(time: Res<Time>, level: Res<Level>, selection: Res<Selection>, mut gizmo
 /// Hachures: slanted strokes on top of a cell's block, as if cut by hand. Each cell draws its own
 /// from a hash of its index: 2 to 4 strokes, each a little longer or steeper, the same every frame.
 fn hachures(gizmos: &mut Gizmos, level: &Level, i: usize, color: Color, shift: Vec3) {
-    let grid = &level.grid;
+    let grid = level.terrain.grid();
     let at = cell_pos(grid, i);
     let top = Vec3::new(at.x, look(grid.tiles[i]).0 + 0.02, at.z) + shift;
     let h = (i as u32).wrapping_mul(2_654_435_761);
@@ -56,7 +56,7 @@ fn hachures(gizmos: &mut Gizmos, level: &Level, i: usize, color: Color, shift: V
 
 /// The relief, engraved: rock in ink (brambles have their own arches, `map::prop`).
 fn relief(gizmos: &mut Gizmos, level: &Level) {
-    let grid = &level.grid;
+    let grid = level.terrain.grid();
     for i in (0..grid.tiles.len()).filter(|&i| grid.tiles[i] == Tile::Roc) {
         hachures(gizmos, level, i, INK, Vec3::ZERO);
     }
@@ -65,7 +65,7 @@ fn relief(gizmos: &mut Gizmos, level: &Level) {
 /// What the next wave changes shivers: the cells of the world event in its colour,
 /// those of a scripted change (an avalanche…) in white.
 fn shiver(gizmos: &mut Gizmos, level: &Level, elapsed: f32) {
-    let grid = &level.grid;
+    let grid = level.terrain.grid();
     let shiver = Vec3::X * (elapsed * 25.0).sin() * 0.03;
     let event = &level.world().event;
     if level.event_next && !level.event_on {
@@ -86,8 +86,8 @@ fn calque(gizmos: &mut Gizmos, level: &Level, selection: &Selection) {
     if !selection.calque {
         return;
     }
-    let grid = &level.grid;
-    let field = &level.fields[selection.shown];
+    let grid = level.terrain.grid();
+    let field = &level.terrain.fields()[selection.shown];
     let at = |i| cell_pos(grid, i);
     for i in 0..grid.tiles.len() {
         if let Some(n) = field.next(grid, i) {
@@ -98,8 +98,8 @@ fn calque(gizmos: &mut Gizmos, level: &Level, selection: &Selection) {
 
 /// Current route of the shown species, in ink.
 fn route(gizmos: &mut Gizmos, level: &Level, shown: usize) {
-    let grid = &level.grid;
-    let field = &level.fields[shown];
+    let grid = level.terrain.grid();
+    let field = &level.terrain.fields()[shown];
     for &spawn in grid.spawns_for(&level.species[shown]) {
         gizmos.linestrip(field.path(grid, spawn).into_iter().map(|i| cell_pos(grid, i)), INK);
     }
@@ -108,7 +108,7 @@ fn route(gizmos: &mut Gizmos, level: &Level, shown: usize) {
 /// The grid only shows under the hand, fading out two cells around it: the relief stays one piece. The cell itself
 /// is framed, in red when the tool is refused there.
 fn cursor(gizmos: &mut Gizmos, level: &Level, i: usize, refused: bool) {
-    let grid = &level.grid;
+    let grid = level.terrain.grid();
     let (hx, hz) = grid.coords(i);
     for j in 0..grid.tiles.len() {
         let (x, z) = grid.coords(j);
@@ -130,7 +130,7 @@ fn cursor(gizmos: &mut Gizmos, level: &Level, i: usize, refused: bool) {
 /// Le trait de crayon: the route if the current tool were inked here.
 // ponytail: recomputed every frame; cache per hovered cell if maps get big.
 fn trait_de_crayon(pencil: &mut Gizmos<Pencil>, level: &Level, selection: &Selection, i: usize) {
-    let grid = &level.grid;
+    let grid = level.terrain.grid();
     let (what_if, field) = level.what_if(i, selection.tool, selection.shown);
     for &spawn in grid.spawns_for(&level.species[selection.shown]) {
         pencil

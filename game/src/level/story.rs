@@ -194,7 +194,7 @@ mod tests {
         let mut save = Save::default();
         save.choices.insert("refuge".into(), "bois".into());
         let mut bois = Level::load(boss_level, &save);
-        assert_ne!(moulin.base.goals[&Goal::Refuge], bois.base.goals[&Goal::Refuge]);
+        assert_ne!(moulin.terrain.base().goals[&Goal::Refuge], bois.terrain.base().goals[&Goal::Refuge]);
 
         bois.note(Trigger::Boss("boss.grande_chaine.bornage".into()));
         assert_eq!(bois.names, -1);

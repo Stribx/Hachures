@@ -17,6 +17,7 @@ use crate::level::story::MarginNote;
 use crate::map::flow::FlowField;
 use crate::map::grid::{Grid, Tile};
 use crate::map::land::fibres;
+use crate::map::terrain::Edit;
 pub use selection::Selection;
 
 pub fn plugin(app: &mut App) {
@@ -43,7 +44,7 @@ pub enum Act {
     Lay(Tile),
     /// Stands a tower up.
     Raise(Weapon),
-    /// Scrapes decor off the cell (Gratter): today an imperial borne; the tile stays.
+    /// Scrapes the cell (Gratter): an imperial borne comes off, an Éboulis or a Palissade returns to plain Sol.
     Scrape,
 }
 
@@ -59,6 +60,16 @@ impl Act {
 
     pub const fn weapon(self) -> Option<Weapon> {
         if let Act::Raise(weapon) = self { Some(weapon) } else { None }
+    }
+}
+
+impl From<Act> for Edit {
+    fn from(act: Act) -> Edit {
+        match act {
+            Act::Lay(tile) => Edit::Ink(tile),
+            Act::Raise(weapon) => Edit::Raise(weapon),
+            Act::Scrape => Edit::Scrape,
+        }
     }
 }
 
@@ -141,34 +152,19 @@ impl Level {
         if !self.used.contains(&tool) {
             self.used.push(tool);
         }
-        // Scraping leaves the cell's type, so no Name is lost.
+        // Gratter never costs a Name (docs, section 7).
         if let (Some(_), Some(p)) = (act.lays(), self.place_at(i)) {
             self.erased.push(p);
             self.names -= 1;
             let line = n_("note.erased").to_string();
             self.margin.push(MarginNote { line, name: Some(self.places[p].name.clone()) });
         }
-        act_on(&mut self.base, i, act);
-        if let Some(weapon) = act.weapon() {
-            self.towers.push((i, weapon));
-        }
-        self.refresh();
+        self.alter([(i, act.into())]);
     }
 
     /// The map and the shown species' field if `tool` were inked at `i`.
     pub fn what_if(&self, i: usize, tool: usize, shown: usize) -> (Grid, FlowField) {
-        let mut grid = self.grid.clone();
-        act_on(&mut grid, i, TOOLS[tool].act);
-        let field = FlowField::new(&grid, &self.species[shown]);
-        (grid, field)
-    }
-}
-
-/// What `act` does to the map at `i`: the tile it lays, or what it scrapes off.
-fn act_on(grid: &mut Grid, i: usize, act: Act) {
-    match act.lays() {
-        Some(tile) => grid.tiles[i] = tile,
-        None => grid.scrape(i),
+        self.terrain.preview(i, TOOLS[tool].act.into(), &self.species[shown])
     }
 }
 
@@ -197,9 +193,8 @@ mod tests {
         level.events = vec![2];
         assert_eq!(level.refusal(road, 0), Some("world.1.refuse_next"));
 
-        level.base.tiles[5] = Tile::Tour;
-        level.base.tiles[11] = Tile::Boue;
-        let flooded = level.base.under(&level.world().event);
+        level.alter([(5, Edit::Raise(Weapon::Arbalete)), (11, Edit::Ink(Tile::Boue))]);
+        let flooded = level.terrain.base().under(&level.world().event);
         assert_eq!(flooded.tiles[5], Tile::Tour, "towers stand through the flood");
         assert_eq!(flooded.tiles[11], Tile::Eau, "mud inked on low ground still drowns");
         assert_eq!(flooded.tiles[10], Tile::Eau);
@@ -224,7 +219,7 @@ mod tests {
         assert_eq!(level.refusal(2, 0), Some(n_("refusal.relief_changes")));
         assert_eq!(level.refusal(12, 0), Some("refusal.relief_closes"), "the bottom road will be the only one");
         level.start_wave();
-        assert_eq!(level.base.tiles[2], Tile::Roc);
+        assert_eq!(level.terrain.base().tiles[2], Tile::Roc);
         assert!(level.changes.is_empty());
     }
 
@@ -241,7 +236,7 @@ mod tests {
         );
         level.world = 1;
         level.events = vec![2];
-        let ice = level.base.under(&level.world().event);
+        let ice = level.terrain.base().under(&level.world().event);
         assert_eq!(ice.tiles[2], Tile::Glace);
         assert_eq!((1..=4).map(|w| level.event_at(w)).collect::<Vec<_>>(), [false, true, true, false], "two waves");
     }
@@ -278,7 +273,7 @@ mod tests {
         assert_eq!(chaineur.cost(Tile::Boue), 4.0, "Boue profonde: 3 + 1");
 
         let mut level = level;
-        let ronces = |level: &Level| level.base.tiles.iter().filter(|&&t| t == Tile::Ronces).count();
+        let ronces = |level: &Level| level.terrain.base().tiles.iter().filter(|&&t| t == Tile::Ronces).count();
         let before = ronces(&level);
         level.grow_ronces();
         assert_eq!(ronces(&level), before + 1, "Ronces-mères: one more bramble per wave");

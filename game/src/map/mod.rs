@@ -3,6 +3,7 @@
 pub mod flow;
 pub mod grid;
 pub mod species;
+pub mod terrain;
 
 mod cells;
 mod decor;

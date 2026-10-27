@@ -3,7 +3,8 @@
 use serde::Deserialize;
 
 use super::story::{Challenge, Choice, Note};
-use crate::map::grid::{Grid, Tile};
+use crate::map::grid::Tile;
+use crate::map::terrain::Edit;
 
 /// The campaign, in order.
 pub const LEVELS: [&str; 8] = [
@@ -102,11 +103,9 @@ impl Change {
         self.at.iter().map(move |&(x, y)| y * width + x)
     }
 
-    /// Lets it fall on `grid`.
-    pub fn apply(&self, grid: &mut Grid) {
-        for i in self.cells(grid.width) {
-            grid.tiles[i] = self.becomes;
-        }
+    /// What it does to the map, on a map `width` wide: the land itself changes.
+    pub fn edits(&self, width: usize) -> impl Iterator<Item = (usize, Edit)> + '_ {
+        self.cells(width).map(|i| (i, Edit::Land(self.becomes)))
     }
 }
 

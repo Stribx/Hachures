@@ -101,7 +101,8 @@ pub(super) fn aim(
             rig.aim(look + turn * Vec3::new(-6.0, 22.0, 26.0), look, 1.5);
         }
         _ => {
-            let (w, h) = (level.grid.width as f32, level.grid.height as f32);
+            let grid = level.terrain.grid();
+            let (w, h) = (grid.width as f32, grid.height as f32);
             let (eye, look) = framing(Vec3::new((w - 1.0) / 2.0, 0.0, (h - 1.0) / 2.0), rig.zoom);
             rig.aim(eye, look, 0.35);
         }

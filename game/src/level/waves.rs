@@ -49,11 +49,12 @@ impl Level {
         // Scripted changes due now fall on the empty map.
         let (due, rest): (Vec<_>, _) = std::mem::take(&mut self.changes).into_iter().partition(|c| c.wave == number);
         self.changes = rest;
-        due.iter().for_each(|c| c.apply(&mut self.base));
+        let width = self.terrain.base().width;
+        self.alter(due.iter().flat_map(|c| c.edits(width)));
         let started = self.event_at(number) && !self.event_at(number - 1);
         self.event_on = self.event_at(number);
         self.event_next = self.event_at(number + 1);
-        self.refresh();
+        self.follow_event();
         if self.has(Skill::RoncesMeres) {
             self.grow_ronces();
         }
@@ -69,7 +70,7 @@ impl Level {
         self.wave.running = false;
         if self.event_on {
             self.event_on = false;
-            self.refresh();
+            self.follow_event();
         }
         let lost = self.lives_at_wave_start.saturating_sub(self.lives) as i32;
         self.tension = (self.tension + if lost == 0 { 1 } else { -lost.min(2) }).clamp(-2, 2);

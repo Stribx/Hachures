@@ -16,6 +16,7 @@ use crate::combat::towers::{Weapon, spawn_tower};
 use crate::level::Level;
 use crate::look::WorldCamera;
 use crate::map::grid::Tile;
+use crate::map::terrain::Edit;
 use crate::overworld::plan::WalkTo;
 use crate::overworld::travel::{Travel, Trip};
 use crate::schedule::Screen;
@@ -112,7 +113,7 @@ fn demo(
     if env("HACHURES_WAVE").is_some() {
         send_wave(&mut level, &mut commands, &assets, &settings);
     }
-    let grid = &level.grid;
+    let grid = level.terrain.grid();
     let open = (0..grid.tiles.len()).filter(|&i| grid.tiles[i] == Tile::Sol && grid.coords(i).1 == 2);
     let weapons = [Weapon::Arbalete, Weapon::Mortier, Weapon::Harpon, Weapon::Lanterne];
     for (i, weapon) in open.step_by(3).zip(weapons) {
@@ -126,16 +127,12 @@ fn demo(
         let (x, z) = grid.coords(i);
         z == 1 && x + 5 < width && wall(i).iter().all(|&j| grid.tiles[j] == Tile::Sol)
     });
-    if let Some(i) = start {
-        for j in wall(i) {
-            level.grid.tiles[j] = Tile::Barricade;
-        }
-        level.redraw = true;
-    }
+    let walls: Vec<(usize, Edit)> = start.into_iter().flat_map(wall).map(|j| (j, Edit::Ink(Tile::Barricade))).collect();
     if env("HACHURES_FASCINES").is_some() {
         level.skills.push(Skill::Fascines);
-        level.redraw = true;
     }
+    // Even with no wall, the cells are drawn again: the skill shows on them.
+    level.alter(walls);
 }
 
 /// `HACHURES_CAM=x,y,z,tx,ty,tz`: the camera there, looking at the target.
@@ -173,13 +170,13 @@ fn act(
     let ink_at = env("HACHURES_INK").and_then(|t| t.parse::<f32>().ok());
     if !done[2] && ink_at.is_some_and(|t| time.elapsed_secs() >= t) {
         done[2] = true;
-        let open: Vec<usize> = (0..level.grid.tiles.len())
-            .filter(|&i| level.grid.tiles[i] == Tile::Sol && level.grid.coords(i).1 == 3)
-            .collect();
+        let grid = level.terrain.grid();
+        let open: Vec<usize> =
+            (0..grid.tiles.len()).filter(|&i| grid.tiles[i] == Tile::Sol && grid.coords(i).1 == 3).collect();
         for (tool, &i) in [0, 3].into_iter().zip(open.iter().step_by(4)) {
             level.ink(i, tool);
             if let Some(weapon) = crate::ink::TOOLS[tool].act.weapon() {
-                spawn_tower(&mut commands, &assets, &level.grid, i, weapon);
+                spawn_tower(&mut commands, &assets, level.terrain.grid(), i, weapon);
             }
         }
     }

@@ -11,35 +11,31 @@ use crate::campaign::save::Save;
 use crate::campaign::skills::Skill;
 use crate::combat::towers;
 use crate::ink::{TOOLS, tool_index};
-use crate::map::flow;
 use crate::map::grid::{Grid, Tile};
 use crate::map::species::{self, Species};
+use crate::map::terrain::{Reach, Terrain};
 
 impl Level {
     /// A bare level of world 1 on `base`: every tool, no waves, no event, no skills.
     pub fn new(base: Grid, species: Vec<Species>) -> Level {
-        let fields = flow::fields(&base, &species);
+        let tower_stats = towers::load_stats();
         let present = (0..species.len()).collect();
         Level {
             index: 0,
             world: 0,
             name: String::new(),
-            grid: base.clone(),
-            base,
+            terrain: Terrain::new(base, Reach::new(&tower_stats, &[]), &species),
             events: Vec::new(),
             event_on: false,
             event_next: false,
-            redraw: true,
             species,
-            fields,
             present,
             waves: Vec::new(),
             changes: Vec::new(),
             places: Vec::new(),
             erased: Vec::new(),
             wave: Wave::default(),
-            tower_stats: towers::load_stats(),
-            towers: Vec::new(),
+            tower_stats,
             boss: None,
             tools: (0..TOOLS.len()).collect(),
             used: Vec::new(),
@@ -123,6 +119,8 @@ impl Level {
         level.choice = data.choice;
         level.choices = save.choices.clone();
         level.skills = save.skills.clone();
+        let reach = Reach::new(&level.tower_stats, &level.skills);
+        level.terrain = Terrain::new(level.terrain.base().clone(), reach, &level.species);
         level.note(Trigger::Start);
         level
     }
