@@ -208,6 +208,7 @@
     // settings
     "settings.aa.fxaa": "FXAA",
     "settings.aa.smaa": "SMAA",
+    "settings.ambient": "Ambiance",
     "settings.anti_aliasing": "Anticrénelage",
     "settings.depth_of_field": "Profondeur de champ",
     "settings.effects": "Effets",

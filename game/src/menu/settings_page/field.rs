@@ -19,6 +19,7 @@ pub(super) enum Field {
     Master,
     Music,
     Effects,
+    Ambient,
     MuteUnfocused,
     PauseUnfocused,
     Lang,
@@ -38,7 +39,10 @@ pub(super) enum Field {
 /// The page's groups, in two columns.
 pub(super) const COLUMNS: [&[(&str, &[Field])]; 2] = [
     &[
-        (n_("settings.group.sound"), &[Field::Master, Field::Music, Field::Effects, Field::MuteUnfocused]),
+        (
+            n_("settings.group.sound"),
+            &[Field::Master, Field::Music, Field::Effects, Field::Ambient, Field::MuteUnfocused],
+        ),
         (n_("settings.group.game"), &[Field::PauseUnfocused, Field::Lang]),
         (n_("settings.group.accessibility"), &[Field::UiScale, Field::ReadableFont, Field::ReducedMotion]),
     ],
@@ -61,6 +65,7 @@ impl Field {
             Field::Master => n_("settings.master"),
             Field::Music => n_("settings.music"),
             Field::Effects => n_("settings.effects"),
+            Field::Ambient => n_("settings.ambient"),
             Field::MuteUnfocused => n_("settings.mute_unfocused"),
             Field::PauseUnfocused => n_("settings.pause_unfocused"),
             Field::Lang => n_("settings.language"),
@@ -84,6 +89,7 @@ impl Field {
             Field::Master => Some((&mut s.master, 0, 100)),
             Field::Music => Some((&mut s.music, 0, 100)),
             Field::Effects => Some((&mut s.effects, 0, 100)),
+            Field::Ambient => Some((&mut s.ambient, 0, 100)),
             Field::RenderScale => Some((&mut s.render_scale, 50, 100)),
             Field::UiScale => Some((&mut s.ui_scale, 80, 150)),
             _ => None,

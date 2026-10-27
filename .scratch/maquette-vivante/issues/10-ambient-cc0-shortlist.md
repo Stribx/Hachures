@@ -4,11 +4,11 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-human
+**Status:** done
 
-- [ ] At least two candidates per sound, CC0 only, with a working source link.
-- [ ] Every candidate fits the bocage and the model's scale (no traffic, no music).
-- [ ] The owner has approved or replaced each entry (recorded in this file's comments).
+- [x] At least two candidates per sound, CC0 only, with a working source link.
+- [x] Every candidate fits the bocage and the model's scale (no traffic, no music).
+- [x] The owner has approved or replaced each entry (recorded in this file's comments).
 
 ## Comments
 
@@ -40,3 +40,5 @@ Licences marked *verified* were read on the page; the others came from a search 
 Excluded for their licence (CC-BY or non-commercial): jackyyang09's wind loop, qubodup's howling wind and rain loops, Arctura's river and rain, Robinhood76's creek, sebastianlund's watermill.
 
 **Decision needed:** approve the picks (or swap any), and choose what to do about the mill wheel.
+
+**Owner's decision (2026-10-27):** the picks are approved; the mill wheel is dropped.

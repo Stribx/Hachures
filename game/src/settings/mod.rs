@@ -35,6 +35,8 @@ pub struct Settings {
     pub master: u32,
     pub music: u32,
     pub effects: u32,
+    /// The land's sounds: wind, birds, rain, the river.
+    pub ambient: u32,
     /// Silent while the window or the tab is in the background.
     pub mute_unfocused: bool,
     pub fullscreen: bool,
@@ -66,6 +68,7 @@ impl Default for Settings {
             master: 100,
             music: 100,
             effects: 100,
+            ambient: 70,
             mute_unfocused: true,
             fullscreen: false,
             vsync: true,
@@ -122,6 +125,11 @@ impl Settings {
 
     pub fn music_volume(&self, focused: bool) -> Volume {
         if focused || !self.mute_unfocused { self.volume(self.music) } else { Volume::SILENT }
+    }
+
+    /// The land's sounds, silent in the background like the music.
+    pub fn ambient_volume(&self, focused: bool) -> Volume {
+        if focused || !self.mute_unfocused { self.volume(self.ambient) } else { Volume::SILENT }
     }
 
     pub fn effects_volume(&self) -> Volume {
