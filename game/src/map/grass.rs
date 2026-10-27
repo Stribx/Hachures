@@ -20,6 +20,15 @@ pub(super) struct Growth;
 const GRASS_WIND: f32 = 0.05;
 /// The tallest thing that grows, for the sway's weight: wheat, which stays well under a barricade.
 const TALLEST: f32 = 0.24;
+/// The world (an index of `WORLDS`) whose boards are alpine meadows: the Cols.
+pub(super) const ALPINE: usize = 1;
+/// The alpine flowers' colours: gentian, edelweiss, alpenrose, arnica.
+const ALPINE_BLOOMS: [Color; 4] = [
+    Color::srgb(0.22, 0.36, 0.82),
+    Color::srgb(0.95, 0.95, 0.9),
+    Color::srgb(0.86, 0.42, 0.56),
+    Color::srgb(0.96, 0.7, 0.22),
+];
 /// The wildflowers' colours: poppy, cornflower, ox-eye daisy, buttercup.
 const BLOOMS: [Color; 4] = [
     Color::srgb(0.82, 0.26, 0.2),
@@ -48,10 +57,11 @@ pub(super) fn grow(
     let grid = level.terrain.grid();
     let density = if settings.shadows { 1.0 } else { 0.35 };
     let washes = ground(grid);
-    let pieces = sprigs(grid, density).into_iter().flat_map(|sprig| {
+    let alpine = level.world == ALPINE;
+    let pieces = sprigs(grid, density, alpine).into_iter().flat_map(|sprig| {
         let (x, z) = grid.coords(sprig.cell);
         let foot = Vec3::new(x as f32 + sprig.at.x, look(grid.tiles[sprig.cell]).0, z as f32 + sprig.at.y);
-        sprig_parts(&sprig, washes[sprig.cell]).into_iter().map(move |part| part.translated_by(foot))
+        sprig_parts(&sprig, washes[sprig.cell], alpine).into_iter().map(move |part| part.translated_by(foot))
     });
     let Some(mesh) = pieces.reduce(|mut all, part| {
         all.merge(&part).expect("the growth's parts share their attributes");
@@ -66,7 +76,7 @@ pub(super) fn grow(
 }
 
 /// One sprig's parts, standing at the origin, coloured, each vertex weighted for the wind by its height.
-fn sprig_parts(sprig: &Sprig, wash: Color) -> Vec<Mesh> {
+fn sprig_parts(sprig: &Sprig, wash: Color, alpine: bool) -> Vec<Mesh> {
     let roll = sprig.roll;
     let turn = (roll >> 16 & 255) as f32 / 255.0 * std::f32::consts::TAU;
     let grass = wash.mix(&HEDGE, 0.45);
@@ -81,7 +91,8 @@ fn sprig_parts(sprig: &Sprig, wash: Color) -> Vec<Mesh> {
             .collect(),
         Crop::Flowers => {
             let h = 0.07 + (roll >> 3 & 7) as f32 * 0.006;
-            let bloom = BLOOMS[(roll >> 24) as usize % BLOOMS.len()];
+            let blooms = if alpine { &ALPINE_BLOOMS } else { &BLOOMS };
+            let bloom = blooms[(roll >> 24) as usize % blooms.len()];
             vec![stalk(h, 0.014, 0.1, grass), part(Vec3::splat(0.042), h, turn, 0.1, bloom)]
         }
         Crop::Wheat => {
