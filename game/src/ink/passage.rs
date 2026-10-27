@@ -9,6 +9,16 @@ use crate::map::grid::{Grid, Tile};
 impl Level {
     /// Why `tool` can't be inked at `i`, if it can't.
     pub fn refusal(&self, i: usize, tool: usize) -> Option<&'static str> {
+        if TOOLS[tool].scrapes {
+            // Erasing only opens the map: no need to check that it stays open.
+            return if !self.base.bornes.contains(&i) {
+                Some(n_("refusal.nothing_to_scrape"))
+            } else if self.sepia < self.tool_cost(tool) {
+                Some(n_("refusal.sepia"))
+            } else {
+                None
+            };
+        }
         if !self.grid.tiles[i].buildable() {
             Some(n_("refusal.firm_ground"))
         } else if self.sepia < self.tool_cost(tool) {
@@ -133,5 +143,35 @@ mod tests {
         assert_eq!(level.refusal(c, tool_index("barricade").unwrap()), Some("world.1.refuse_next"));
         level.events = vec![];
         assert_eq!(level.refusal(c, tool_index("barricade").unwrap()), None, "without the flood, B stays open");
+    }
+
+    #[test]
+    fn gratter_scrapes_only_a_borne() {
+        let mut level = level("S...M");
+        level.base.bornes.push(2);
+        level.refresh();
+        let gratter = tool_index("gratter").unwrap();
+        assert_eq!(level.refusal(1, gratter), Some("refusal.nothing_to_scrape"));
+        assert_eq!(level.refusal(2, gratter), None);
+        let sepia = level.sepia;
+        level.ink(2, gratter);
+        assert!(level.base.bornes.is_empty(), "the borne is gone");
+        assert_eq!(level.sepia, sepia - 25);
+        assert_eq!(level.refusal(2, gratter), Some("refusal.nothing_to_scrape"));
+    }
+
+    /// The pencil line for Gratter is the Jalonneurs' route once the borne is gone, on the tile it stood on.
+    #[test]
+    fn gratter_preview_takes_the_borne_off() {
+        let mut level = level("S...B");
+        let jalonneur = index_of(&level.species, "jalonneur").unwrap();
+        level.base.tiles[1] = Tile::Chaussee;
+        level.base.bornes.push(1);
+        level.refresh();
+        let gratter = tool_index("gratter").unwrap();
+        let (grid, field) = level.what_if(1, gratter, jalonneur);
+        assert_eq!(grid.tiles[1], Tile::Chaussee, "the tile under the borne stays");
+        level.ink(1, gratter);
+        assert_eq!(field.dist, level.fields[jalonneur].dist);
     }
 }

@@ -8,6 +8,8 @@
     name: "level.1-4.name",
     sepia: 120,
     tools: ["barricade", "boue", "ronces", "arbalète", "mortier", "harpon"],
+    // Winning the boss earns Gratter for good: it joins every level's tools.
+    grants: ["gratter"],
     events: [4],
     alt_refuge: Some("refuge=bois"),
     challenge: Some((text: "level.1-4.challenge", rule: NoFuyardHurt)),

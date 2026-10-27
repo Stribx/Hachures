@@ -4,6 +4,8 @@ use bevy::prelude::*;
 use serde::Deserialize;
 
 use super::Enemy;
+use super::shards::{EnemyLook, shatter};
+use crate::ink::Scraped;
 use crate::level::Level;
 use crate::level::story::Trigger;
 use crate::map::species::index_of;
@@ -62,6 +64,21 @@ pub struct Boss {
 /// An imperial borne planted by the boss: shot down like an enemy, but it doesn't walk.
 #[derive(Component)]
 pub struct Borne;
+
+/// Takes down the borne Nève scraped off its cell, in shards like a shot one.
+pub(super) fn scrape_bornes(
+    mut scraped: MessageReader<Scraped>,
+    bornes: Query<(Entity, &Enemy, &Transform), With<Borne>>,
+    look: Res<EnemyLook>,
+    mut commands: Commands,
+) {
+    for &Scraped { cell } in scraped.read() {
+        for (entity, _, transform) in bornes.iter().filter(|(_, e, _)| e.cell == cell) {
+            shatter(&mut commands, &look, transform.translation);
+            commands.entity(entity).try_despawn();
+        }
+    }
+}
 
 /// The boss moves on to its next phase as its HP drops; [P] a new phase can mean a new species profile.
 pub fn boss_phases(mut level: ResMut<Level>, mut bosses: Query<(&mut Enemy, &mut Boss)>) {

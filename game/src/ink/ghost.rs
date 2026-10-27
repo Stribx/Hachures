@@ -37,9 +37,9 @@ pub(super) fn ghost(
 ) {
     let grid = &level.grid;
     let tool = &TOOLS[selection.tool];
-    let at = selection
-        .hovered
-        .filter(|&i| tool.weapon.is_none() && !level.finished && level.refusal(i, selection.tool).is_none());
+    let at = selection.hovered.filter(|&i| {
+        tool.weapon.is_none() && !tool.scrapes && !level.finished && level.refusal(i, selection.tool).is_none()
+    });
     let entity = *ghost.get_or_insert_with(|| {
         let mut pale = ink(Color::WHITE.with_alpha(0.45));
         pale.base.alpha_mode = AlphaMode::Blend;

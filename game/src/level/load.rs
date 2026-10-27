@@ -3,7 +3,7 @@
 use std::collections::BTreeMap;
 
 use super::Level;
-use super::data::{LevelData, START_LIVES};
+use super::data::{LEVELS, LevelData, START_LIVES};
 use super::story::{Trigger, holds};
 use super::waves::{Wave, spawn_order};
 use super::world::WORLDS;
@@ -93,8 +93,17 @@ impl Level {
         }
         present.sort_unstable();
         present.dedup();
-        let tools: Vec<usize> =
+        let mut tools: Vec<usize> =
             data.tools.iter().map(|t| tool_index(t).unwrap_or_else(|| panic!("unknown tool {t:?}"))).collect();
+        // Powers earned by the levels already won, in campaign order.
+        for k in (0..LEVELS.len()).filter(|&k| save.levels.get(k).is_some_and(|r| r.won)) {
+            for t in LevelData::of(k).grants {
+                let power = tool_index(&t).unwrap_or_else(|| panic!("unknown tool {t:?}"));
+                if !tools.contains(&power) {
+                    tools.push(power);
+                }
+            }
+        }
         let alt = data.alt_refuge.as_ref().is_some_and(|cond| holds(&save.choices, cond));
         let map = data.map_text(alt);
 
@@ -118,5 +127,23 @@ impl Level {
         level.skills = save.skills.clone();
         level.note(Trigger::Start);
         level
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::campaign::save::Record;
+
+    /// Winning the world-1 boss earns Gratter for good: it joins the tools of a later world's levels.
+    #[test]
+    fn winning_the_boss_earns_gratter() {
+        let gratter = tool_index("gratter").unwrap();
+        let boss = (0..LEVELS.len()).find(|&k| LevelData::of(k).name == "level.1-4.name").unwrap();
+        let later = (0..LEVELS.len()).find(|&k| LevelData::of(k).world == 2).unwrap();
+        assert!(!Level::load(later, &Save::default()).tools.contains(&gratter), "not before");
+        let mut save = Save::default();
+        *save.record(boss) = Record { won: true, ..Default::default() };
+        assert!(Level::load(later, &save).tools.contains(&gratter), "once the boss is beaten");
     }
 }

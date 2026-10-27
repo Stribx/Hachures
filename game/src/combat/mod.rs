@@ -17,6 +17,7 @@ pub fn plugin(app: &mut App) {
         (
             enemies::start_waves.in_set(Step::Input),
             towers::raise_towers.in_set(Step::Input).after(crate::ink::inking),
+            boss::scrape_bornes.in_set(Step::Input).after(crate::ink::inking),
             (enemies::spawn_enemies, enemies::walk, towers::fire, boss::boss_phases, shards::shards)
                 .chain()
                 .in_set(Step::Simulate)

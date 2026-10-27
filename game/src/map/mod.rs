@@ -7,6 +7,7 @@ pub mod species;
 mod cells;
 pub(crate) mod land;
 pub(crate) mod props;
+pub(crate) mod scraper;
 
 use bevy::prelude::*;
 

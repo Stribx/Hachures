@@ -31,6 +31,9 @@ pub struct LevelData {
     pub world: usize,
     pub sepia: u32,
     pub tools: Vec<String>,
+    /// Tools winning this level earns for good (a power): they join every level's tools once it is won.
+    #[serde(default)]
+    pub grants: Vec<String>,
     /// Waves the world event starts at.
     pub events: Vec<u32>,
     pub map: Vec<String>,

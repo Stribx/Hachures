@@ -22,6 +22,7 @@ pub use selection::Selection;
 pub fn plugin(app: &mut App) {
     app.add_plugins((overlay::plugin, selection::plugin))
         .add_message::<TowerInked>()
+        .add_message::<Scraped>()
         .add_systems(
             Update,
             inking.in_set(Step::Input).after(selection::hover).after(selection::reset).after(load_level),
@@ -36,6 +37,12 @@ pub struct TowerInked {
     pub weapon: Weapon,
 }
 
+/// A borne was scraped off `cell`; combat takes its piece down.
+#[derive(Message)]
+pub struct Scraped {
+    pub cell: usize,
+}
+
 pub struct Tool {
     pub key: KeyCode,
     /// Its id, as the level files name it (`tools`, `Without`).
@@ -46,6 +53,8 @@ pub struct Tool {
     /// Sépia (docs, section 8).
     pub cost: u32,
     pub weapon: Option<Weapon>,
+    /// Scrapes decor off a cell instead of inking a tile on it (Gratter).
+    pub scrapes: bool,
 }
 
 const fn tool(
@@ -56,10 +65,15 @@ const fn tool(
     cost: u32,
     weapon: Option<Weapon>,
 ) -> Tool {
-    Tool { key, name, label, tile, cost, weapon }
+    Tool { key, name, label, tile, cost, weapon, scrapes: false }
 }
 
-pub const TOOLS: [Tool; 7] = [
+/// A power that scrapes decor off a cell, back to plain ground.
+const fn scraper(key: KeyCode, name: &'static str, label: &'static str, cost: u32) -> Tool {
+    Tool { key, name, label, tile: Tile::Sol, cost, weapon: None, scrapes: true }
+}
+
+pub const TOOLS: [Tool; 8] = [
     tool(KeyCode::Digit1, "barricade", n_("tool.barricade"), Tile::Barricade, 10, None),
     tool(KeyCode::Digit2, "boue", n_("tool.boue"), Tile::Boue, 15, None),
     tool(KeyCode::Digit3, "ronces", n_("tool.ronces"), Tile::Ronces, 20, None),
@@ -68,6 +82,8 @@ pub const TOOLS: [Tool; 7] = [
     tool(KeyCode::Digit6, "harpon", n_("tool.harpon"), Tile::Tour, 70, Some(Weapon::Harpon)),
     // Not priced in the docs: tune with the balance bot.
     tool(KeyCode::Digit7, "lanterne", n_("tool.lanterne"), Tile::Tour, 60, Some(Weapon::Lanterne)),
+    // Not priced in the docs: tune with the balance bot.
+    scraper(KeyCode::Digit8, "gratter", n_("tool.gratter"), 25),
 ];
 
 /// Index in `TOOLS` of the tool called `name`.
@@ -82,6 +98,7 @@ pub(crate) fn inking(
     mut level: ResMut<Level>,
     mut selection: ResMut<Selection>,
     mut inked: MessageWriter<TowerInked>,
+    mut scraped: MessageWriter<Scraped>,
 ) {
     if level.finished {
         return;
@@ -96,6 +113,9 @@ pub(crate) fn inking(
     level.ink(i, selection.tool);
     if let Some(weapon) = TOOLS[selection.tool].weapon {
         inked.write(TowerInked { cell: i, weapon });
+    }
+    if TOOLS[selection.tool].scrapes {
+        scraped.write(Scraped { cell: i });
     }
 }
 
@@ -113,19 +133,26 @@ impl Level {
         (tool.cost as f32 * factor).round() as u32
     }
 
-    /// Inks `tool` at `i`, paid in sépia, and in a Name if a place's name is written there.
+    /// Inks `tool` at `i`, paid in sépia, and in a Name if a place's name is written there; a scraping tool
+    /// takes the borne off `i` instead.
     /// The caller has checked `refusal`.
     pub fn ink(&mut self, i: usize, tool: usize) {
+        let piece = &TOOLS[tool];
+        self.sepia -= self.tool_cost(tool);
+        if !self.used.contains(&tool) {
+            self.used.push(tool);
+        }
+        // The cell's type doesn't change, so no Name is lost.
+        if piece.scrapes {
+            self.base.bornes.retain(|&b| b != i);
+            self.refresh();
+            return;
+        }
         if let Some(p) = self.place_at(i) {
             self.erased.push(p);
             self.names -= 1;
             let line = n_("note.erased").to_string();
             self.margin.push(MarginNote { line, name: Some(self.places[p].name.clone()) });
-        }
-        let piece = &TOOLS[tool];
-        self.sepia -= self.tool_cost(tool);
-        if !self.used.contains(&tool) {
-            self.used.push(tool);
         }
         self.base.tiles[i] = piece.tile;
         if let Some(weapon) = piece.weapon {
@@ -137,7 +164,11 @@ impl Level {
     /// The map and the shown species' field if `tool` were inked at `i`.
     pub fn what_if(&self, i: usize, tool: usize, shown: usize) -> (Grid, FlowField) {
         let mut grid = self.grid.clone();
-        grid.tiles[i] = TOOLS[tool].tile;
+        if TOOLS[tool].scrapes {
+            grid.bornes.retain(|&b| b != i);
+        } else {
+            grid.tiles[i] = TOOLS[tool].tile;
+        }
         let field = FlowField::new(&grid, &self.species[shown]);
         (grid, field)
     }

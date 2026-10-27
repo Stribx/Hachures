@@ -16,6 +16,7 @@ use crate::look::{Hachure, InkMaterial, ink, varnished};
 use crate::map::grid::Tile;
 use crate::map::look;
 use crate::map::props::prop;
+use crate::map::scraper::scraper;
 use crate::theme::SUNLIGHT;
 
 /// The picture of each of `TOOLS`, in order.
@@ -138,7 +139,8 @@ fn spawn_piece(
     };
     match tool.weapon {
         None => {
-            for (mesh, color) in prop(tool.tile, 0) {
+            let parts = if tool.scrapes { scraper() } else { prop(tool.tile, 0) };
+            for (mesh, color) in parts {
                 commands.spawn((
                     Mesh3d(meshes.add(mesh)),
                     MeshMaterial3d(materials.add(fine(color))),
