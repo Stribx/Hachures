@@ -93,15 +93,13 @@ impl Level {
         }
         present.sort_unstable();
         present.dedup();
-        let mut tools: Vec<usize> =
-            data.tools.iter().map(|t| tool_index(t).unwrap_or_else(|| panic!("unknown tool {t:?}"))).collect();
-        // Powers earned by the levels already won, in campaign order.
-        for k in (0..LEVELS.len()).filter(|&k| save.levels.get(k).is_some_and(|r| r.won)) {
-            for t in LevelData::of(k).grants {
-                let power = tool_index(&t).unwrap_or_else(|| panic!("unknown tool {t:?}"));
-                if !tools.contains(&power) {
-                    tools.push(power);
-                }
+        // The level's tools, then the powers earned by the levels already won, in campaign order.
+        let won = (0..LEVELS.len()).filter(|&k| save.levels.get(k).is_some_and(|r| r.won));
+        let mut tools: Vec<usize> = Vec::new();
+        for name in data.tools.iter().cloned().chain(won.flat_map(|k| LevelData::of(k).grants)) {
+            let t = tool_index(&name).unwrap_or_else(|| panic!("unknown tool {name:?}"));
+            if !tools.contains(&t) {
+                tools.push(t);
             }
         }
         let alt = data.alt_refuge.as_ref().is_some_and(|cond| holds(&save.choices, cond));

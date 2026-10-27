@@ -137,18 +137,9 @@ fn spawn_piece(
         paint.extension = Hachure::fine();
         paint
     };
-    match tool.act {
-        Act::Lay(_) | Act::Scrape => {
-            let parts = if let Act::Lay(tile) = tool.act { prop(tile, 0) } else { scraper() };
-            for (mesh, color) in parts {
-                commands.spawn((
-                    Mesh3d(meshes.add(mesh)),
-                    MeshMaterial3d(materials.add(fine(color))),
-                    Transform::from_translation(at),
-                    layer.clone(),
-                ));
-            }
-        }
+    let parts = match tool.act {
+        Act::Lay(tile) => prop(tile, 0),
+        Act::Scrape => scraper(),
         Act::Raise(weapon) => {
             let scene = |path: &'static str| WorldAssetRoot(assets.load(GltfAssetLabel::Scene(0).from_asset(path)));
             commands.spawn((StudioModel, scene(TOWER_BASE), BASE_WOOD, Transform::from_translation(at), layer.clone()));
@@ -160,7 +151,16 @@ fn spawn_piece(
                 Transform::from_translation(at + Vec3::Y * 0.6).with_rotation(Quat::from_rotation_y(0.6)),
                 layer.clone(),
             ));
+            return;
         }
+    };
+    for (mesh, color) in parts {
+        commands.spawn((
+            Mesh3d(meshes.add(mesh)),
+            MeshMaterial3d(materials.add(fine(color))),
+            Transform::from_translation(at),
+            layer.clone(),
+        ));
     }
 }
 

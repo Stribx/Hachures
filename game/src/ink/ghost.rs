@@ -37,20 +37,16 @@ pub(super) fn ghost(
 ) {
     let grid = &level.grid;
     // Only a tile has a ghost: a tower shows its range, a scrape the route it opens.
-    let Act::Lay(tile) = TOOLS[selection.tool].act else {
-        if let Some(entity) = *ghost {
-            commands.entity(entity).insert(Visibility::Hidden);
-        }
-        return;
-    };
-    let at = selection.hovered.filter(|&i| !level.finished && level.refusal(i, selection.tool).is_none());
+    let tile = if let Act::Lay(tile) = TOOLS[selection.tool].act { Some(tile) } else { None };
+    let at =
+        selection.hovered.zip(tile).filter(|&(i, _)| !level.finished && level.refusal(i, selection.tool).is_none());
     let entity = *ghost.get_or_insert_with(|| {
         let mut pale = ink(Color::WHITE.with_alpha(0.45));
         pale.base.alpha_mode = AlphaMode::Blend;
         pale.extension = Hachure::fine();
         commands.spawn((MeshMaterial3d(stock.materials.add(pale)), Transform::default(), Visibility::Hidden)).id()
     });
-    let Some(i) = at else {
+    let Some((i, tile)) = at else {
         commands.entity(entity).insert(Visibility::Hidden);
         return;
     };
