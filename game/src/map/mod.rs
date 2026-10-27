@@ -15,6 +15,7 @@ pub(crate) mod land;
 pub(crate) mod props;
 pub(crate) mod scraper;
 mod seams;
+pub mod weather;
 
 use bevy::prelude::*;
 
@@ -27,7 +28,7 @@ use land::{fibres, land};
 
 pub fn plugin(app: &mut App) {
     app.add_systems(Update, (redraw_cells, grow, land, fibres).chain().in_set(Step::Render))
-        .add_systems(Update, daylight::follow_the_waves.in_set(Step::Render));
+        .add_systems(Update, (daylight::follow_the_waves, weather::fall).in_set(Step::Render));
 }
 
 /// Center of cell `i`, just above the ground.
