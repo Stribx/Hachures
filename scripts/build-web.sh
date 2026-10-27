@@ -15,12 +15,8 @@ wasm-bindgen --target web --no-typescript --out-dir website/play --out-name hach
 out=website/play/assets
 rm -rf "$out"
 mkdir -p "$out"
-cp -r game/assets/fonts game/assets/CREDITS.md "$out/"
-# Every model and sound quoted in the code, plus the texture the models load.
-{ grep -rhoE '"(models|audio)/[^"]+"' game/src | tr -d '"'; echo models/Textures/colormap.png; } |
-    sort -u | while read -r asset; do
-        mkdir -p "$out/$(dirname "$asset")"
-        cp "game/assets/$asset" "$out/$asset"
-    done
+# game/assets/ keeps only what the game loads (the rest of the packs sits in Hachures-asset-library/), so each
+# folder goes whole: paths built at runtime (`format!("models/{model}.glb")`) are covered too.
+cp -r game/assets/{fonts,models,audio,shaders,ui} game/assets/CREDITS.md "$out/"
 
 du -sh website/play

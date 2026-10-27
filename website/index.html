@@ -4,147 +4,625 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Hachures</title>
-  <meta name="description" content="Hachures, un tower defense cartographique : on ne bloque pas les légions, on leur redessine le chemin.">
+  <meta name="description" content="Hachures, un tower defense cartographique : on ne bloque pas les légions, on leur redessine le chemin, et chaque trait efface un nom.">
+  <script>document.documentElement.classList.add('js')</script>
   <style>
-    @font-face { font-family: "IM Fell English"; src: url("play/assets/fonts/IMFellEnglish-Regular.ttf"); }
-    @font-face { font-family: "IM Fell English"; font-style: italic; src: url("play/assets/fonts/IMFellEnglish-Italic.ttf"); }
+    @font-face { font-family: "IM Fell English"; src: url("play/assets/fonts/IMFellEnglish-Regular.ttf"); font-display: swap; }
+    @font-face { font-family: "IM Fell English"; font-style: italic; src: url("play/assets/fonts/IMFellEnglish-Italic.ttf"); font-display: swap; }
 
+    /* The sheet and the desk it lies on: the game's own colours. */
     :root {
-      --paper: #efe6d2;
-      --paper-deep: #e4d7bb;
-      --ink: #2b241b;
-      --ink-soft: #5d5040;
-      --sepia: #7a4a22;
-      --water: #3f6f8f;
-      --rule: rgba(43, 36, 27, 0.18);
+      --desk: #2b2117;
+      --desk-up: #3a2d20;
+      --paper: #ede4cf;
+      --paper-deep: #e0d3b6;
+      --water: #c6d5d9;
+      --ink: #2b2118;
+      --ink-soft: #5e5141;
+      --on-desk: #ede4cf;
+      --on-desk-soft: #c9bda4;
+      /* The Chancellerie's seal: the one accent, on the action. */
+      --seal: #a8322a;
+      --seal-up: #8f2820;
+
+      --s-small: 16px;
+      --s-body: 19px;
+      --s-statement: 28px;
+      --s-heading: clamp(40px, 5vw, 72px);
+      --s-display: clamp(72px, 10vw, 144px);
+
+      --margin: 24px;
+      --gap: 24px;
+
+      --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+      --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
+      --t-press: 140ms;
+      --t-hover: 180ms;
     }
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) {
-        --paper: #1f1b16;
-        --paper-deep: #29241d;
-        --ink: #ece2cb;
-        --ink-soft: #b8aa90;
-        --sepia: #d49a62;
-        --water: #8fb6d1;
-        --rule: rgba(236, 226, 203, 0.16);
-      }
-    }
-    :root[data-theme="dark"] {
-      --paper: #1f1b16; --paper-deep: #29241d; --ink: #ece2cb; --ink-soft: #b8aa90;
-      --sepia: #d49a62; --water: #8fb6d1; --rule: rgba(236, 226, 203, 0.16);
-    }
+    @media (max-width: 640px) { :root { --margin: 16px; --gap: 12px; --s-body: 18px; --s-statement: 24px; } }
 
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
     body {
       margin: 0;
-      background: var(--paper);
-      color: var(--ink);
-      font: 1.15rem/1.6 "IM Fell English", Georgia, serif;
+      background: var(--desk);
+      color: var(--on-desk);
+      font: var(--s-body)/1.5 "IM Fell English", Georgia, serif;
+      -webkit-font-smoothing: antialiased;
     }
-    main { max-width: 46rem; margin: 0 auto; padding: 0 16px 4rem; }
+    img { display: block; max-width: 100%; height: auto; }
+    a { color: inherit; }
+    h1, h2, h3 { font-weight: normal; margin: 0; text-wrap: balance; letter-spacing: -0.02em; line-height: 1.02; }
+    p { margin: 0; text-wrap: pretty; }
+    :focus-visible { outline: 3px solid var(--seal); outline-offset: 3px; }
+    ::selection { background: var(--seal); color: var(--paper); }
 
-    /* The hachures: short slanted strokes, like relief on an old map. */
-    .hachures {
-      height: 14px;
-      background: repeating-linear-gradient(115deg, var(--ink-soft) 0 1px, transparent 1px 7px);
-      opacity: 0.55;
+    .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); padding-inline: var(--margin); }
+
+    .button {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-height: 48px; padding: 0 22px;
+      background: var(--seal); color: var(--paper);
+      text-decoration: none; font-size: var(--s-body);
+      transition: transform var(--t-press) var(--ease-out), background-color var(--t-hover) ease;
     }
-
-    header { text-align: center; padding: 4.5rem 0 2.5rem; }
-    h1 { font-size: clamp(3rem, 12vw, 5.5rem); font-weight: normal; letter-spacing: 0.06em; margin: 0; }
-    .tagline { font-style: italic; color: var(--sepia); font-size: 1.4rem; margin: 0.25rem 0 2rem; }
-    .play {
-      display: inline-block;
-      padding: 0.7rem 1.8rem;
-      border: 1.5px solid var(--ink);
-      color: var(--ink);
-      text-decoration: none;
-      font-size: 1.25rem;
-      background: var(--paper-deep);
-      transition: background 0.15s, color 0.15s;
-    }
-    .play:hover, .play:focus-visible { background: var(--ink); color: var(--paper); }
-    .note { font-size: 0.95rem; color: var(--ink-soft); font-style: italic; margin-top: 0.8rem; }
-
-    h2 { font-weight: normal; font-size: 1.7rem; margin: 3rem 0 0.8rem; border-bottom: 1px solid var(--rule); }
-    p { margin: 0 0 1rem; }
-    .margin {
-      font-style: italic;
-      color: var(--sepia);
-      border-left: 2px solid var(--sepia);
-      padding-left: 1rem;
-      margin: 1.5rem 0;
+    .button:active { transform: scale(0.97); }
+    .link { text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 0.2em; text-decoration-thickness: 0.07em; transition: text-decoration-color var(--t-hover) ease; }
+    @media (hover: hover) and (pointer: fine) {
+      .button:hover { background: var(--seal-up); }
+      .link:hover { text-decoration-color: currentColor; }
     }
 
-    .readings { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 1rem; }
-    .reading { background: var(--paper-deep); padding: 1rem 1.1rem; border-top: 3px solid var(--sepia); }
-    .reading strong { display: block; font-weight: normal; font-size: 1.25rem; }
-    .reading:nth-child(2) { border-top-color: var(--ink-soft); }
-    .reading:nth-child(3) { border-top-color: var(--water); }
 
-    table { width: 100%; border-collapse: collapse; font-size: 1.05rem; }
-    th, td { text-align: left; padding: 0.35rem 0.6rem 0.35rem 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
-    th { font-weight: normal; white-space: nowrap; color: var(--sepia); }
-    kbd { font-family: inherit; border: 1px solid var(--rule); padding: 0 0.35rem; background: var(--paper-deep); }
+    /* ── Top row, on the desk ── */
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 20px var(--margin); }
+    .wordmark { font-style: italic; font-size: var(--s-statement); text-decoration: none; }
+    .top nav { display: flex; gap: 28px; font-size: var(--s-small); }
+    .top nav a { text-decoration: none; color: var(--on-desk-soft); }
+    @media (hover: hover) { .top nav a:hover { color: var(--on-desk); } }
+    @media (max-width: 900px) { .top nav { display: none; } }
 
-    ol { padding-left: 1.4rem; }
-    footer { font-size: 0.95rem; color: var(--ink-soft); }
-    footer a, main a:not(.play) { color: var(--sepia); }
+    /* ── The hero: a map sheet on the desk, cropped by the bottom of the screen ── */
+    .hero { padding-top: 56px; height: calc(100svh - 88px); overflow: hidden; grid-template-rows: 100%; }
+    .sheet {
+      grid-column: 2 / 12; position: relative; height: calc(100% + 40px); display: flex; flex-direction: column;
+      background: var(--paper); color: var(--ink);
+      padding: 52px 56px 0; text-align: center;
+    }
+    /* Scalloped inner corners: four discs of the desk bite into the sheet. */
+    .sheet .corner { position: absolute; width: 36px; height: 36px; border-radius: 50%; background: var(--desk); }
+    .corner.tl { top: -18px; left: -18px; } .corner.tr { top: -18px; right: -18px; }
+    .corner.bl { bottom: -18px; left: -18px; } .corner.br { bottom: -18px; right: -18px; }
+    .sheet h1 { font-size: var(--s-display); letter-spacing: -0.03em; line-height: 0.95; }
+    .sheet .lede { max-width: 34ch; margin: 22px auto 0; font-size: var(--s-statement); line-height: 1.25; }
+    .facts-line { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 18px; align-items: center; margin-top: 22px; font-size: var(--s-small); }
+    .diamond { width: 10px; height: 10px; background: var(--ink); transform: rotate(45deg); }
+    .plate { display: block; margin-top: 40px; flex: 1; min-height: 0; }
+    .plate picture, .plate img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 70% 40%; }
+    @media (max-width: 640px) {
+      .hero { padding-top: 24px; height: calc(100svh - 72px); }
+      .sheet { grid-column: 1 / -1; padding: 36px 18px 0; margin-inline: -4px; }
+      .plate { margin: 28px -18px 0; }
+    }
+
+    /* ── Intro: the price of a name, and the live sheet ── */
+    .intro { padding-block: 140px 120px; row-gap: 0; }
+    .intro h2 { grid-column: 1 / 7; font-size: var(--s-heading); }
+    .intro .note { grid-column: 9 / 13; align-self: end; color: var(--on-desk); }
+    .facts { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 32px; margin-top: 120px; }
+    .facts div { max-width: 20ch; }
+    .facts b { display: block; font-weight: normal; font-size: var(--s-statement); line-height: 1.1; white-space: nowrap; }
+    .facts span { display: block; margin-top: 6px; font-size: var(--s-small); }
+    @media (max-width: 900px) {
+      .intro { padding-block: 96px 80px; }
+      .intro h2, .intro .note { grid-column: 1 / -1; }
+      .intro .note { margin-top: 20px; }
+      .facts { display: grid; grid-template-columns: 1fr 1fr; row-gap: 32px; margin-top: 56px; }
+    }
+
+    /* The live sheet: the prologue's map, to ink. */
+    .live { grid-column: 1 / -1; margin-top: 96px; display: grid; grid-template-columns: subgrid; background: var(--paper); color: var(--ink); padding-block: 40px; }
+    .live .how { grid-column: 1 / 5; padding-left: 40px; display: flex; flex-direction: column; gap: 18px; }
+    .live .how h3 { font-size: var(--s-statement); line-height: 1.15; }
+    .live .counts { display: flex; gap: 28px; font-size: var(--s-body); }
+    .live .counts b { font-weight: normal; font-variant-numeric: tabular-nums; }
+    .live .said { min-height: 3em; font-style: italic; font-size: var(--s-body); }
+    .live .said.refused { color: var(--seal); }
+    .live .again { align-self: start; background: none; border: 0; padding: 0; font: inherit; font-size: var(--s-small); color: var(--ink); cursor: pointer; }
+    .board-wrap { grid-column: 5 / 13; padding-right: 40px; }
+    .board { position: relative; display: grid; grid-template-columns: repeat(var(--cols), 1fr); aspect-ratio: var(--cols) / var(--rows); background: var(--paper-deep); gap: 3px; padding: 3px; }
+    .cell { border: 0; padding: 0; margin: 0; background: #e9dec4; font: inherit; color: inherit; cursor: pointer; transition: background-color var(--t-hover) ease, transform var(--t-press) var(--ease-out); }
+    .cell:active { transform: scale(0.94); }
+    .cell.rock {
+      cursor: default; background-color: #b3a891;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 15l6-6M9 18l7-7M15 20l6-6' stroke='%232b2118' stroke-width='1.4' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-size: 100% 100%;
+    }
+    .cell.village { background: #ddd0b0; }
+    .cell.ink { background: #4a3322; cursor: not-allowed; }
+    .cell.spawn { background: var(--seal); cursor: default; }
+    .cell.goal { background: #7a4a22; cursor: default; }
+    .cell.nope { animation: nope 360ms var(--ease-out); }
+    @keyframes nope { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+    @media (hover: hover) and (pointer: fine) { .cell.open:hover { background: #d8c9a6; } }
+    .board svg { position: absolute; inset: 3px; width: calc(100% - 6px); height: calc(100% - 6px); pointer-events: none; overflow: visible; }
+    .board .route { fill: none; stroke: var(--ink); stroke-width: 0.07; stroke-linejoin: round; }
+    .board .pencil { fill: none; stroke: #7a4a22; stroke-width: 0.06; stroke-dasharray: 0.12 0.12; stroke-linejoin: round; }
+    .place { position: absolute; pointer-events: none; font-style: italic; font-size: var(--s-body); color: var(--ink); white-space: nowrap; transform: translate(-50%, -50%); padding: 0 6px; background: #e9dec4; transition: color 400ms ease; }
+    .place.struck { text-decoration: line-through; text-decoration-thickness: 2px; color: var(--ink-soft); }
+    @media (max-width: 900px) {
+      .live { grid-template-columns: 1fr; padding: 28px 16px; margin-top: 64px; }
+      .live .how, .board-wrap { grid-column: 1; padding: 0; }
+      .board-wrap { margin-top: 24px; }
+    }
+
+    /* ── Showcase: the carnet, over a sheet of the Dufour map ── */
+    .carnet { position: relative; height: 96svh; min-height: 640px; overflow: hidden; color: var(--paper); }
+    .carnet > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: grayscale(0.4) contrast(1.05); }
+    .carnet .say { position: absolute; left: 18%; top: 10%; width: min(560px, 70%); padding: 32px 36px; background: rgba(34, 26, 18, 0.82); display: flex; flex-direction: column; gap: 18px; }
+    .carnet .say h2 { font-size: var(--s-heading); }
+    .carnet .say p { font-size: var(--s-statement); line-height: 1.25; }
+    .slips { position: absolute; left: var(--margin); right: var(--margin); bottom: 0; display: flex; gap: 12px; align-items: flex-end; }
+    .slip { flex: 1; background: var(--paper); color: var(--ink); padding: 18px 18px 0; font-size: var(--s-small); line-height: 1.4; transform-origin: bottom center; }
+    .slip strong { display: block; font-weight: normal; font-size: var(--s-body); line-height: 1.2; }
+    .slip .typed { display: block; margin: 8px 0; letter-spacing: 0.3em; color: var(--ink-soft); }
+    .slip p + p { margin-top: 8px; }
+    .slip:nth-child(1) { height: 38svh; } .slip:nth-child(2) { height: 30svh; transform: rotate(-1.5deg); }
+    .slip:nth-child(3) { height: 44svh; } .slip:nth-child(4) { height: 27svh; transform: rotate(1.2deg); }
+    .slip:nth-child(5) { height: 36svh; } .slip:nth-child(6) { height: 41svh; transform: rotate(-1deg); }
+    @media (max-width: 900px) {
+      .carnet { height: 100svh; }
+      .carnet .say { left: var(--margin); right: var(--margin); width: auto; top: 6%; padding: 22px; }
+      
+      .slips { overflow-x: auto; scroll-snap-type: x mandatory; }
+      .slip { flex: 0 0 62vw; scroll-snap-align: start; }
+    }
+
+    /* ── Features: the four laws, as sheets that stack ── */
+    .laws { padding-top: 160px; }
+    .laws > h2 { padding-inline: var(--margin); font-size: var(--s-heading); margin-bottom: 48px; }
+    .law {
+      position: sticky; top: calc(var(--k) * 72px);
+      height: 72svh; min-height: 520px;
+      display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); grid-template-rows: 72px 1fr;
+      column-gap: var(--gap); padding-inline: var(--margin);
+      border-radius: 28px 28px 0 0; color: var(--ink);
+    }
+    .law:nth-of-type(1) { background: var(--paper); }
+    .law:nth-of-type(2) { background: var(--paper-deep); }
+    .law:nth-of-type(3) { background: var(--water); }
+    .law:nth-of-type(4) { background: var(--desk-up); color: var(--paper); }
+    .law h3 { grid-column: 1 / 7; grid-row: 1; align-self: center; font-size: var(--s-statement); }
+    .law p { grid-column: 1 / 6; grid-row: 2; align-self: start; max-width: 40ch; padding-top: 28px; }
+    .law figure { grid-column: 7 / 13; grid-row: 2; margin: 0 calc(-1 * var(--margin)) 0 0; overflow: hidden; }
+    .law figure img { width: 100%; height: 100%; object-fit: cover; object-position: center 40%; }
+    @media (max-width: 900px) {
+      .law { top: calc(var(--k) * 52px); height: auto; min-height: 70svh; grid-template-rows: 52px auto auto; padding-bottom: 24px; }
+      .law h3 { grid-column: 1 / -1; }
+      .law figure { grid-column: 1 / -1; grid-row: 2; margin: 0 calc(-1 * var(--margin)); aspect-ratio: 4 / 3; }
+      .law p { grid-column: 1 / -1; grid-row: 3; padding: 20px 0 0; font-size: var(--s-body); }
+    }
+
+    /* ── The Grand Plan: a row of feuillets to drag ── */
+    .plan { padding-top: 120px; }
+    .plan .head { display: flex; align-items: center; gap: 24px; padding-inline: var(--margin); }
+    .plan .head h2 { font-size: var(--s-heading); }
+    .plan .arrows { display: flex; gap: 8px; }
+    .plan .arrows button { width: 48px; height: 48px; border: 0; background: var(--paper); color: var(--ink); font: inherit; font-size: var(--s-statement); cursor: pointer; transition: transform var(--t-press) var(--ease-out), background-color var(--t-hover) ease; }
+    .plan .arrows button:active { transform: scale(0.94); }
+    @media (hover: hover) { .plan .arrows button:hover { background: var(--paper-deep); } }
+    .progress { margin: 28px var(--margin) 0; height: 6px; background: var(--desk-up); }
+    .progress i { display: block; height: 100%; background: var(--paper); transform-origin: left; transform: scaleX(0.2); }
+    .row { display: flex; gap: 32px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 40px var(--margin) 0; padding-bottom: 8px; scrollbar-width: none; }
+    .row::-webkit-scrollbar { display: none; }
+    .level { flex: 0 0 280px; scroll-snap-align: start; display: flex; flex-direction: column; }
+    .level strong { font-weight: normal; font-size: var(--s-body); line-height: 1.25; }
+    .level p { margin-top: 8px; font-size: var(--s-small); min-height: 4.2em; }
+    .level .page { margin-top: var(--drop); aspect-ratio: 4 / 5; background: var(--paper); color: var(--ink); display: flex; flex-direction: column; justify-content: space-between; padding: 18px; }
+    .level .page img { width: 100%; image-rendering: pixelated; }
+    /* Nève's line from that level, written on the sheet under its map. */
+    .level .aside { font-style: italic; font-size: var(--s-body); line-height: 1.35; }
+    @media (max-width: 640px) {
+      .plan .arrows { display: none; }
+      .row { gap: 16px; }
+      .level { flex-basis: 72vw; }
+      .level .page { margin-top: calc(var(--drop) / 2.4); }
+    }
+
+    /* ── Commandes: a giant word and its drawers, on a field of paper ── */
+    .keys { margin-top: 160px; background: var(--paper); color: var(--ink); padding-block: 140px; }
+    .keys .column { width: min(640px, 100% - 2 * var(--margin)); margin-inline: auto; container-type: inline-size; }
+    .keys h2 { font-size: var(--s-display); line-height: 0.85; letter-spacing: -0.04em; text-align: center; }
+    .keys .lede { margin: 28px 0 24px; font-size: var(--s-body); }
+    .keys details { background: var(--paper-deep); margin-top: 6px; }
+    .keys summary { list-style: none; display: flex; justify-content: space-between; align-items: center; min-height: 56px; padding: 0 18px; cursor: pointer; font-size: var(--s-body); }
+    .keys summary::-webkit-details-marker { display: none; }
+    .keys summary::after { content: "+"; font-size: var(--s-statement); transition: transform var(--t-hover) var(--ease-out); }
+    .keys details[open] summary::after { transform: rotate(45deg); }
+    .keys dl { margin: 0; padding: 4px 18px 20px; display: grid; grid-template-columns: 1fr auto; gap: 14px 24px; }
+    .keys dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+    .keys .bar-shot { margin-top: 40px; }
+
+    /* ── The coupon: a ticket to play, perforated ── */
+    .coupon-wrap { padding-block: 120px; }
+    .coupon {
+      grid-column: 2 / 12; display: grid; grid-template-columns: 46fr 54fr;
+      background: var(--seal); color: var(--paper); border-radius: 14px; position: relative;
+      -webkit-mask: radial-gradient(circle 14px at 46% 0, #0000 98%, #000) top / 100% 51% no-repeat, radial-gradient(circle 14px at 46% 100%, #0000 98%, #000) bottom / 100% 51% no-repeat; /* taste-skill-ignore: a mask that cuts the notches, not a colour gradient */
+      mask: radial-gradient(circle 14px at 46% 0, #0000 98%, #000) top / 100% 51% no-repeat, radial-gradient(circle 14px at 46% 100%, #0000 98%, #000) bottom / 100% 51% no-repeat; /* taste-skill-ignore */
+    }
+    .coupon .left { padding: 48px; display: flex; flex-direction: column; justify-content: space-between; gap: 32px; border-right: 5px dotted var(--desk); }
+    .coupon h2 { font-size: var(--s-statement); }
+    .coupon .right { padding: 48px; display: flex; flex-direction: column; gap: 10px; }
+    .coupon .fact { min-height: 52px; display: flex; align-items: center; padding: 0 18px; background: #b8463d; }
+    .coupon .go { min-height: 56px; margin-top: 6px; display: flex; align-items: center; justify-content: center; background: var(--ink); color: var(--paper); text-decoration: none; transition: transform var(--t-press) var(--ease-out), background-color var(--t-hover) ease; }
+    .coupon .go:active { transform: scale(0.98); }
+    @media (hover: hover) { .coupon .go:hover { background: #000; } }
+    @media (max-width: 900px) {
+      .coupon { grid-column: 1 / -1; grid-template-columns: 1fr; -webkit-mask: none; mask: none; }
+      .coupon .left { border-right: 0; border-bottom: 5px dotted var(--desk); padding: 28px 22px; }
+      .coupon .right { padding: 22px; }
+    }
+
+    /* ── The footer: the back of the sheet ── */
+    footer { padding: 0 0 40px; }
+    .back { grid-column: 2 / 12; position: relative; background: var(--paper); color: var(--ink); display: grid; grid-template-columns: 1fr 1fr; gap: 48px; padding: 72px 56px 32px; }
+    .scallops { position: absolute; top: 0; left: 0; right: 0; display: flex; }
+    .scallops i { flex: 1; height: 26px; background: var(--desk); border-radius: 0 0 50% 50%; }
+    .back h2 { font-size: var(--s-statement); }
+    .back .msg { margin-top: 16px; }
+    .back .msg p + p { margin-top: 10px; }
+    .back ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+    .back .stamp { position: absolute; top: 48px; right: 56px; width: 88px; padding: 6px; background: var(--paper-deep); }
+    .back .stamp img { aspect-ratio: 3 / 4; object-fit: cover; }
+    .back .address { padding-top: 120px; }
+    .credits { grid-column: 1 / -1; font-size: var(--s-small); line-height: 1.5; }
+    @media (max-width: 900px) {
+      .back { grid-column: 1 / -1; grid-template-columns: 1fr; gap: 28px; padding: 56px 20px 24px; }
+      .back .stamp { width: 64px; right: 20px; top: 40px; }
+      .back .address { padding-top: 0; }
+      .scallops i:nth-child(n+7) { display: none; }
+    }
+
+    /* ── Motion: every part enters once, in order; nothing hides without script ── */
+    @media (prefers-reduced-motion: no-preference) {
+      .js [data-reveal] { opacity: 0; transform: translateY(24px); transition: opacity 700ms var(--ease-out), transform 900ms var(--ease-expo); transition-delay: calc(var(--d, 0) * 80ms); }
+      .js [data-reveal].is-in { opacity: 1; transform: none; }
+      .js .plate img { animation: settle 1600ms var(--ease-soft) both; }
+      @keyframes settle { from { transform: scale(1.06); opacity: 0.4; } to { transform: none; opacity: 1; } }
+      .carnet > img { animation: drift 40s var(--ease-soft) infinite alternate; }
+      @keyframes drift { from { transform: scale(1.08) translate(0, 0); } to { transform: scale(1.08) translate(-3%, -2%); } }
+    }
   </style>
 </head>
 <body>
-  <div class="hachures"></div>
-  <main>
-    <header>
-      <h1>Hachures</h1>
-      <p class="tagline">Qui trace la frontière ?</p>
-      <a class="play" href="play/">Jouer dans le navigateur</a>
-      <p class="note">Chapitre 1 jouable · clavier et souris · ordinateur conseillé</p>
-    </header>
+<main>
+  <header class="top">
+    <a class="wordmark" href="#">Hachures</a>
+    <nav aria-label="Sections">
+      <a href="#prix">Le prix d'un nom</a>
+      <a href="#carnet">Le carnet</a>
+      <a href="#lectures">Les lectures</a>
+      <a href="#plan">Le Grand Plan</a>
+      <a href="#commandes">Commandes</a>
+    </nav>
+    <a class="button" href="play/">Jouer</a>
+  </header>
 
-    <p>Dans les Marches, une carte tracée à l'encre de terre et vue par des témoins devient le paysage : la rivière se déplace, la haie pousse, le village s'efface.</p>
-    <p>Nève Achard a levé ces terres pour l'Empire du Registre. Quand les légions arrivent pour sceller le Dernier Cadastre, qui fixera chaque frontière pour toujours, elle déserte avec son carnet et sa plume.</p>
-    <p>Elle ne les arrête pas. Elle leur redessine le chemin.</p>
-    <p class="margin">« Je ne me souviens plus du nom. C'est ça, le prix. »</p>
+  <section class="hero grid" aria-labelledby="titre">
+    <div class="sheet">
+      <i class="corner tl"></i><i class="corner tr"></i>
+      <h1 id="titre" data-reveal>Hachures</h1>
+      <p class="lede" data-reveal style="--d:1">Un tower defense où l'on ne bloque pas les légions&nbsp;: on leur redessine le chemin, et chaque trait efface un nom.</p>
+      <p class="facts-line" data-reveal style="--d:2">Un prologue et deux chapitres <i class="diamond"></i> dans le navigateur <i class="diamond"></i> à la souris</p>
+      <a class="plate" href="play/" aria-label="Jouer dans le navigateur">
+        <picture>
+          <source media="(max-width: 640px)" srcset="assets/jeu-prix-carre.jpg" width="640" height="640">
+          <img src="assets/jeu-prix.jpg" width="1440" height="900" alt="Le niveau 1-1 du jeu : une carte en papier, la route des légions à l'encre, et au survol d'un pré l'avertissement « Ce trait efface « le Pré-Commun » »." fetchpriority="high">
+        </picture>
+      </a>
+    </div>
+  </section>
 
-    <h2>Les trois lectures</h2>
-    <p>Chaque peuple lit le relief à sa manière. Une même vallée n'est pas la même vallée pour tous.</p>
-    <div class="readings">
-      <div class="reading"><strong>La Pente</strong>Les Chaîneurs suivent la route la plus sèche ; les Échassiers aiment la boue et le gué.</div>
-      <div class="reading"><strong>Le But</strong>Les Jalonneurs ne voient que la Borne-Mère à voler. Les Fuyards cherchent le Refuge.</div>
-      <div class="reading"><strong>L'Ombre</strong>Certains fuient les tours. On peut alors les rabattre.</div>
+  <section class="intro grid" id="prix" aria-labelledby="prix-titre">
+    <h2 id="prix-titre" data-reveal>Chaque trait coûte un nom</h2>
+    <p class="note" data-reveal style="--d:1">Les légions suivent la route la moins chère. Nève change le prix des cases&nbsp;: boue, ronces, barricades, tours. Mais pour changer un lieu, il faut lui retirer son nom, et ce nom sort de toutes les mémoires.</p>
+    <div class="facts">
+      <div data-reveal style="--d:0"><b>8 feuillets</b><span>un prologue, deux chapitres et la Grande Chaîne</span></div>
+      <div data-reveal style="--d:1"><b>3 lectures</b><span>la Pente, l'Ombre et le But</span></div>
+      <div data-reveal style="--d:2"><b>1 ressource</b><span>la sépia, l'encre des sceaux brisés</span></div>
+      <div data-reveal style="--d:3"><b>37 Mo</b><span>à charger une fois, rien à installer</span></div>
     </div>
 
-    <h2>Tracer, sans fermer</h2>
-    <p>Barricades, boue, ronces, arbalètes, mortiers, harpons : chaque trait d'encre change la carte, et un trait de crayon en pointillé montre le détour avant de le poser.</p>
-    <p>Mais une carte qui ne laisse passer personne est une <em>carte close</em> : la terre la rejette. C'est le Droit de Passage, et même l'Empire le respecte. Il vaut aussi pour la carte de demain : quand les hachures frissonnent en bleu, la Crue arrive à la vague suivante, et le sol bas sera sous l'eau.</p>
-    <p>Dans la marge, le carnet de Nève s'écrit au fil de la partie.</p>
+    <div class="live" data-reveal>
+      <div class="how">
+        <h3>Le levé de la vallée, en petit</h3>
+        <p>La colonne part de la case rouge et suit la route la plus courte. Cliquez une case pour y encrer une barricade&nbsp;: le trait d'encre montre où elle passe désormais.</p>
+        <p class="counts"><span>Sépia&nbsp;: <b id="sepia">70</b></span><span>Rôle des Noms&nbsp;: <b id="names">0</b></span></p>
+        <p class="said" id="said" aria-live="polite">Une carte qui ne laisse passer personne est refusée.</p>
+        <button class="again link" id="again" type="button">Recommencer la feuille</button>
+      </div>
+      <div class="board-wrap">
+        <div class="board" id="board" style="--cols:12;--rows:6" role="group" aria-label="La carte du prologue, à encrer">
+          <!-- Without script: the sheet as it starts, the route straight through the village. -->
+          <svg viewBox="0 0 12 6" aria-hidden="true"><polyline class="route" points="0.5,1.5 11.5,1.5"/><polyline class="pencil" points=""/></svg>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <h2>Le chapitre 1 : les Marches de Saule</h2>
-    <ol>
-      <li>Le Gué-aux-Mères : lire la pente.</li>
-      <li>Les Haies de Pain-Perdu : lire le but, et protéger les Fuyards.</li>
-      <li>Le Moulin des Noms : tenir pendant qu'Oudine grave le Rôle, puis choisir où placer le Refuge.</li>
-      <li>La Grande Chaîne : le boss, en trois phases.</li>
-    </ol>
-    <p>Chaque niveau rapporte deux sceaux, l'un pour la victoire et l'autre pour un défi de lecture, à dépenser dans l'arbre des sceaux.</p>
+  <section class="carnet" id="carnet" aria-labelledby="carnet-titre">
+    <img src="assets/blatt-xiv-altorf-chur-g-h-dufour.jpg" width="1536" height="1147" alt="Une feuille de la carte Dufour de la Suisse, 1859 : le relief des Alpes gravé en hachures." loading="lazy">
+    <div class="say">
+      <h2 id="carnet-titre" data-reveal>Le carnet de Nève</h2>
+      <p data-reveal style="--d:1">Dans la marge, sa main répond à la vôtre&nbsp;: chaque crue, chaque nom gratté, chaque choix y laisse une ligne.</p>
+      <p data-reveal style="--d:2">À la fin de la campagne, le carnet se relit.</p>
+    </div>
+    <div class="slips">
+      <article class="slip" data-reveal style="--d:0"><strong>0-0 · Le levé de la vallée</strong><span class="typed">~~~~~~~~</span><p>J'ai gratté « Oubrenne ». Il ne reste que la case.</p><p>Je ne me souviens plus du nom. C'est ça, le prix.</p></article>
+      <article class="slip" data-reveal style="--d:1"><strong>1-1 · Le Gué-aux-Mères</strong><span class="typed">~~~~~~~~</span><p>Oudine&nbsp;: « Le gué ne s'appelle pas “gué”. Il s'appelle comme celles qui l'ont passé avec un enfant sur la hanche. »</p></article>
+      <article class="slip" data-reveal style="--d:2"><strong>1-1, première vague</strong><span class="typed">~~~~~~~~</span><p>Ils suivent la route la plus sèche. Toujours. C'est moi qui le leur ai appris.</p></article>
+      <article class="slip" data-reveal style="--d:3"><strong>1-3 · Le Moulin des Noms</strong><span class="typed">~~~~~~~~</span><p>Un Échassier fredonne. Je connais cet air&nbsp;: la berceuse d'Oudine.</p></article>
+      <article class="slip" data-reveal style="--d:4"><strong>1-4 · La Grande Chaîne</strong><span class="typed">~~~~~~~~</span><p>C'est ma main sur la borne. Dix ans, et l'encre n'a pas pâli.</p></article>
+      <article class="slip" data-reveal style="--d:5"><strong>2-2 · La Corniche des Convois</strong><span class="typed">~~~~~~~~</span><p>Corentin&nbsp;: « Donne-les-moi et je retire la 4e. C'est de l'arithmétique, Nève. »</p><p>Tout est de l'arithmétique. C'est ça le problème.</p></article>
+    </div>
+  </section>
 
-    <h2>Commandes</h2>
-    <table>
-      <tr><th>Clic gauche</th><td>Encrer l'outil choisi sur la case</td></tr>
-      <tr><th><kbd>1</kbd> à <kbd>6</kbd></th><td>Barricade, boue, ronces, arbalète, mortier, harpon (selon le niveau)</td></tr>
-      <tr><th><kbd>Espace</kbd></th><td>Envoyer la vague suivante</td></tr>
-      <tr><th><kbd>Tab</kbd></th><td>Changer l'espèce dont on suit la route</td></tr>
-      <tr><th><kbd>F1</kbd></th><td>Le Calque : la carte telle que chaque espèce la lit</td></tr>
-      <tr><th><kbd>A</kbd></th><td>L'arbre des sceaux</td></tr>
-      <tr><th><kbd>Entrée</kbd></th><td>Niveau suivant, ou recommencer</td></tr>
-    </table>
-  </main>
-  <div class="hachures"></div>
-  <main>
-    <footer>
-      <p>Fait avec <a href="https://bevyengine.org">Bevy</a>. Modèles 3D : <a href="https://kenney.nl">Kenney</a> (CC0). Police : IM FELL English, Igino Marini (SIL Open Font License). Musique : <em>Lonelyhood</em>, yd, sur OpenGameArt (CC0). Le détail est dans <a href="play/assets/CREDITS.md">CREDITS.md</a>.</p>
-    </footer>
-  </main>
+  <section class="laws" id="lectures" aria-labelledby="lectures-titre">
+    <h2 id="lectures-titre" data-reveal>Trois lectures, une loi</h2>
+    <article class="law" style="--k:0">
+      <h3>La Pente</h3>
+      <p>Les Chaîneurs et les Échassiers jugent le terrain lui-même. La boue, les ronces et le gué n'ont pas le même prix pour tous&nbsp;: une case encrée change ce prix, et la colonne se tord.</p>
+      <figure><img src="assets/jeu-vague.jpg" width="1440" height="900" alt="Une colonne de Chaîneurs longe la haie du Gué-aux-Mères en suivant la route la plus sèche." loading="lazy"></figure>
+    </article>
+    <article class="law" style="--k:1">
+      <h3>L'Ombre</h3>
+      <p>Les Hardes ne lisent pas la pente&nbsp;: elles fuient le regard des tours. Pour les rabattre, on place des tours, pas des murs. Le Calque montre la carte telle que chaque peuple la lit.</p>
+      <figure><img src="assets/jeu-calque.jpg" width="1440" height="900" alt="Le Calque dans le col de Hesse : une flèche sépia sur chaque case montre où va la colonne." loading="lazy"></figure>
+    </article>
+    <article class="law" style="--k:2">
+      <h3>Le But</h3>
+      <p>Les Jalonneurs ne voient que la Borne-Mère à voler, les Fuyards cherchent le Refuge, le convoi de Hesse la sortie du col. À eux, il faut garder un chemin court et sûr.</p>
+      <figure><img src="assets/jeu-convoi.jpg" width="1440" height="900" alt="Les charrettes du convoi de Hesse partent vers la sortie du col pendant que les légions montent." loading="lazy"></figure>
+    </article>
+    <article class="law" style="--k:3">
+      <h3>Le Droit de Passage</h3>
+      <p>Une carte qui ne laisse passer personne est une carte close&nbsp;: la terre la rejette, et même l'Empire s'y tient. La loi vaut pour la carte de demain&nbsp;: avant la Crue, on n'encre pas ce qui fermerait tout sous l'eau.</p>
+      <figure><img src="assets/cleon-d-andran-cadastre-napoleonien.jpg" width="1920" height="1295" alt="Le plan du cadastre napoléonien de Cléon-d'Andran, 1809 : chaque parcelle numérotée et bornée." loading="lazy"></figure>
+    </article>
+  </section>
+
+  <section class="plan" id="plan" aria-labelledby="plan-titre">
+    <div class="head">
+      <h2 id="plan-titre" data-reveal>Le Grand Plan</h2>
+      <div class="arrows"><button type="button" id="back" aria-label="Feuillet précédent">‹</button><button type="button" id="next" aria-label="Feuillet suivant">›</button></div>
+    </div>
+    <div class="progress" aria-hidden="true"><i id="progress"></i></div>
+    <div class="row" id="row" tabindex="0" aria-label="Les huit feuillets jouables">
+      <article class="level" style="--drop:96px"><strong>0-0 · Le levé de la vallée</strong><p>Dix ans plus tôt. Une vallée à simplifier, et un village sur la route.</p><div class="page"><img src="assets/feuillet-0-0.png" width="288" height="144" alt="La carte du prologue : une route courte et une longue, la roche entre les deux." loading="lazy"><p class="aside">« Dix ans plus tôt. La Chancellerie m'a demandé de simplifier cette vallée. »</p></div></article>
+      <article class="level" style="--drop:140px"><strong>1-1 · Le Gué-aux-Mères</strong><p>Apprendre la Pente. La Crue noie le sol bas à la sixième vague.</p><div class="page"><img src="assets/feuillet-1-1.png" width="432" height="240" alt="La carte du Gué-aux-Mères : une rivière, deux gués, un pont." loading="lazy"><p class="aside">« Les hachures frissonnent au bord du bief. La prochaine fois, la terre hésitera. »</p></div></article>
+      <article class="level" style="--drop:80px"><strong>1-2 · Les Haies de Pain-Perdu</strong><p>Le But&nbsp;: les Jalonneurs visent la Borne-Mère, les Fuyards cherchent le Refuge.</p><div class="page"><img src="assets/feuillet-1-2.png" width="432" height="240" alt="La carte des Haies de Pain-Perdu, coupée de haies de ronces." loading="lazy"><p class="aside">« Des gens du bocage, leurs vaches devant. Chacun porte un nom. »</p></div></article>
+      <article class="level" style="--drop:120px"><strong>1-3 · Le Moulin des Noms</strong><p>Tenir pendant qu'Oudine grave le Rôle, puis choisir où placer le Refuge.</p><div class="page"><img src="assets/feuillet-1-3.png" width="432" height="240" alt="La carte du Moulin des Noms." loading="lazy"><p class="aside">« Le Rôle est gravé. Reste à savoir où mettre ceux qui fuient. »</p></div></article>
+      <article class="level" style="--drop:88px"><strong>1-4 · La Grande Chaîne</strong><p>Un chariot d'arpentage en trois phases&nbsp;: le Levé, le Bornage, la Chaîne rompue.</p><div class="page"><img src="assets/feuillet-1-4.png" width="432" height="240" alt="La carte de la Grande Chaîne, où le Refuge suit le choix fait au Moulin." loading="lazy"><p class="aside">« Il a gardé ma façon de faire les V. »</p></div></article>
+      <article class="level" style="--drop:132px"><strong>2-1 · La Combe aux Sonnailles</strong><p>L'Ombre et les Hardes. Le Gel fait du lac une route.</p><div class="page"><img src="assets/feuillet-2-1.png" width="432" height="192" alt="La carte de la Combe aux Sonnailles : un lac entre deux routes." loading="lazy"><p class="aside">« Les Hardes lisent mes tours, et passent où je ne regarde pas. »</p></div></article>
+      <article class="level" style="--drop:100px"><strong>2-2 · La Corniche des Convois</strong><p>Une avalanche ferme le couloir sud. Puis Corentin réclame des déserteurs.</p><div class="page"><img src="assets/feuillet-2-2.png" width="432" height="192" alt="La carte de la Corniche des Convois, deux couloirs de part et d'autre d'une arête." loading="lazy"><p class="aside">« L'avalanche. Le couloir sud n'existe plus que sur ma carte. »</p></div></article>
+      <article class="level" style="--drop:84px"><strong>2-3 · Le Passage de Hesse</strong><p>Escorter le convoi jusqu'à la sortie du col, à travers les légions.</p><div class="page"><img src="assets/feuillet-2-3.png" width="432" height="192" alt="La carte du Passage de Hesse : deux lacs et un col." loading="lazy"><p class="aside">« Sous la glace fondue, des hachures que personne n'a tracées. »</p></div></article>
+    </div>
+  </section>
+
+  <section class="keys" id="commandes" aria-labelledby="commandes-titre">
+    <div class="column">
+      <h2 id="commandes-titre" data-reveal>Commandes</h2>
+      <p class="lede" data-reveal style="--d:1">Tout se joue à la souris&nbsp;: la barre du bas porte chaque outil et nomme sa touche. Le clavier va plus vite.</p>
+      <details open data-reveal style="--d:2"><summary>Tracer</summary><dl><dt>Encrer l'outil choisi sur la case</dt><dd>Clic gauche</dd><dt>Choisir un outil</dt><dd>1 à 7</dd></dl></details>
+      <details data-reveal style="--d:3"><summary>La vague</summary><dl><dt>Envoyer la vague suivante</dt><dd>Espace</dd></dl></details>
+      <details data-reveal style="--d:4"><summary>Lire la carte</summary><dl><dt>Suivre la route d'une autre espèce</dt><dd>Tab</dd><dt>Le Calque&nbsp;: la carte telle que chaque espèce la lit</dt><dd>F1</dd></dl></details>
+      <details data-reveal style="--d:5"><summary>Entre deux niveaux</summary><dl><dt>L'arbre des sceaux</dt><dd>A</dd><dt>Choisir, à la fin d'un niveau</dt><dd>1, 2</dd><dt>Niveau suivant, ou recommencer</dt><dd>Entrée</dd></dl></details>
+      <details data-reveal style="--d:6"><summary>La pause</summary><dl><dt>Reprendre, recommencer le niveau, réglages</dt><dd>Échap</dd></dl></details>
+      <img class="bar-shot" data-reveal src="assets/jeu-fin.jpg" width="1440" height="900" alt="La page du carnet à la fin du prologue : « Le Moulin tient. », le sceau gagné et le nom « Oubrenne » barré." loading="lazy">
+    </div>
+  </section>
+
+  <section class="coupon-wrap grid" aria-labelledby="jouer-titre">
+    <div class="coupon" data-reveal>
+      <div class="left">
+        <h2 id="jouer-titre">Une carte vous attend</h2>
+        <p>Le jeu tourne dans votre navigateur, et la partie reste enregistrée dans ce navigateur.</p>
+      </div>
+      <div class="right">
+        <p class="fact">Un prologue et deux chapitres jouables</p>
+        <p class="fact">37 Mo à charger, une seule fois</p>
+        <p class="fact">À la souris, ou au clavier</p>
+        <p class="fact">Sur un ordinateur, de préférence</p>
+        <a class="go" href="play/">Jouer dans le navigateur</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer aria-labelledby="fin-titre">
+  <div class="grid">
+    <div class="back">
+      <div class="scallops" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div>
+        <h2 id="fin-titre">Qui trace la frontière&nbsp;?</h2>
+        <div class="msg">
+          <p>Hachures est un jeu en cours&nbsp;: un prologue et deux chapitres sur les six de la campagne.</p>
+          <p>Fait en Rust avec Bevy, compilé pour le navigateur.</p>
+        </div>
+      </div>
+      <div class="address">
+        <ul>
+          <li><a class="link" href="play/">Jouer dans le navigateur</a></li>
+          <li><a class="link" href="https://bevyengine.org">Bevy, le moteur</a></li>
+          <li><a class="link" href="https://kenney.nl">Modèles 3D&nbsp;: Kenney (CC0)</a></li>
+          <li><a class="link" href="play/assets/CREDITS.md">Police, musique et tous les crédits</a></li>
+        </ul>
+      </div>
+      <div class="stamp" aria-hidden="true"><img src="assets/cadastre-napoleonien-3-p-plans-hautvillers-plans.jpg" width="1920" height="1336" alt="" loading="lazy"></div>
+      <p class="credits">Images d'archives&nbsp;: <a href="https://commons.wikimedia.org/wiki/File:Blatt_XIV._Altorf-Chur._G.H._Dufour_direxit._Ann._1859._Mullhaupt_sculpsit._Stempelmann_scripsit._H._Koegel_(IA_dr_blatt-xiv-altorf-chur-gh-dufour-direxit-ann-1859-mullhaupt-sculpsit-13220015).jpg">carte Dufour, feuille XIV, Altorf-Chur, 1859</a> (domaine public)&nbsp;; <a href="https://commons.wikimedia.org/wiki/File:Cl%C3%A9on_d%27Andran_cadastre_napol%C3%A9onien.jpg">cadastre napoléonien de Cléon-d'Andran</a>, photographie de Hubert de Vauplane (CC0)&nbsp;; <a href="https://commons.wikimedia.org/wiki/File:Cadastre_napol%C3%A9onien_(3_P)._Plans._Hautvillers_Plans_parcellaires_Hautvillers._Section_C2.jpg">cadastre napoléonien de Hautvillers, section C2</a> (domaine public)&nbsp;; via Wikimedia Commons. Les autres images sont des captures du jeu.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Every part enters once, as it comes into view.
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+  document.querySelectorAll('[data-reveal]').forEach((el) => io.observe(el));
+
+  // The Grand Plan's row: buttons, and the bar that shows how far it has been read.
+  const row = document.getElementById('row');
+  const bar = document.getElementById('progress');
+  const step = () => row.querySelector('.level').getBoundingClientRect().width + 32;
+  document.getElementById('back').onclick = () => row.scrollBy({ left: -step(), behavior: 'smooth' });
+  document.getElementById('next').onclick = () => row.scrollBy({ left: step(), behavior: 'smooth' });
+  const showProgress = () => {
+    const seen = (row.scrollLeft + row.clientWidth) / row.scrollWidth;
+    bar.style.transform = `scaleX(${Math.min(1, seen)})`;
+  };
+  row.addEventListener('scroll', showProgress, { passive: true });
+  showProgress();
+
+  // The live sheet: the prologue's map (assets/data/levels/0-0.ron), its route found breadth-first.
+  const MAP = ['^^^^^^^^^^^^', 'S..........M', '.^^^^^^^^^^.', '............', '............', '^^^^^^^^^^^^'];
+  const W = 12, H = 6, COST = 10, START_SEPIA = 70;
+  const VILLAGE = { name: 'Oubrenne', cells: [[5, 1], [6, 1]] };
+  const board = document.getElementById('board');
+  const svg = board.querySelector('svg');
+  const routeLine = svg.querySelector('.route');
+  const pencilLine = svg.querySelector('.pencil');
+  const said = document.getElementById('said');
+  const upright = matchMedia('(max-width: 640px)');
+  let inked, erased, sepia, label, cells;
+
+  const at = (x, y) => MAP[y][x];
+  const isVillage = (x, y) => VILLAGE.cells.some(([vx, vy]) => vx === x && vy === y);
+  const find = (ch) => { for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (at(x, y) === ch) return [x, y]; };
+  const [sx, sy] = find('S');
+  const [gx, gy] = find('M');
+
+  // The column's route with `ink` inked, or null if the map would be closed.
+  function route(ink) {
+    const prev = new Map([[sy * W + sx, -1]]);
+    const queue = [sy * W + sx];
+    while (queue.length) {
+      const i = queue.shift();
+      const x = i % W, y = (i / W) | 0;
+      if (x === gx && y === gy) {
+        const path = [];
+        for (let k = i; k !== -1; k = prev.get(k)) path.push([k % W, (k / W) | 0]);
+        return path.reverse();
+      }
+      for (const [dx, dy] of [[1, 0], [0, 1], [0, -1], [-1, 0]]) {
+        const nx = x + dx, ny = y + dy, n = ny * W + nx;
+        if (nx < 0 || ny < 0 || nx >= W || ny >= H || prev.has(n) || at(nx, ny) === '^' || ink.has(n)) continue;
+        prev.set(n, i);
+        queue.push(n);
+      }
+    }
+    return null;
+  }
+
+  // On a phone the sheet stands upright, so every cell stays a thumb wide.
+  const place = (x, y) => (upright.matches ? [y, x] : [x, y]);
+  const points = (path) => (path || []).map(([x, y]) => place(x, y).map((v) => v + 0.5).join(',')).join(' ');
+
+  function draw(pencil) {
+    routeLine.setAttribute('points', points(route(inked)));
+    pencilLine.setAttribute('points', pencil ? points(pencil) : '');
+  }
+
+  function say(text, refused = false) {
+    said.textContent = text;
+    said.classList.toggle('refused', refused);
+  }
+
+  function ink(x, y, el) {
+    const i = y * W + x;
+    if (inked.has(i)) return say("L'encre est sèche.");
+    if (sepia < COST) return say('Plus de sépia.', true);
+    const next = new Set(inked).add(i);
+    const path = route(next);
+    if (!path) {
+      el.classList.remove('nope'); void el.offsetWidth; el.classList.add('nope');
+      return say("Carte close : l'encre ne prend pas.", true);
+    }
+    const before = route(inked).length;
+    inked = next;
+    sepia -= COST;
+    el.classList.add('ink');
+    el.classList.remove('open');
+    document.getElementById('sepia').textContent = sepia;
+    if (isVillage(x, y) && !erased) {
+      erased = true;
+      label.classList.add('struck');
+      document.getElementById('names').textContent = '−1';
+      say(`J'ai gratté « ${VILLAGE.name} ». Il ne reste que la case.`);
+    } else if (path.length !== before) {
+      say(`La colonne se tord : ${path.length - 1} pas au lieu de ${before - 1}.`);
+    } else {
+      say('La colonne passe à côté.');
+    }
+    draw();
+  }
+
+  function build() {
+    inked = new Set(); erased = false; sepia = START_SEPIA;
+    document.getElementById('sepia').textContent = sepia;
+    document.getElementById('names').textContent = '0';
+    board.querySelectorAll('.cell, .place').forEach((n) => n.remove());
+    const [cols, rows] = upright.matches ? [H, W] : [W, H];
+    board.style.setProperty('--cols', cols);
+    board.style.setProperty('--rows', rows);
+    svg.setAttribute('viewBox', `0 0 ${cols} ${rows}`);
+    cells = [];
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const ch = at(x, y);
+      const open = ch === '.';
+      const el = document.createElement(open ? 'button' : 'div');
+      el.className = 'cell' + (ch === '^' ? ' rock' : ch === 'S' ? ' spawn' : ch === 'M' ? ' goal' : ' open') + (isVillage(x, y) ? ' village' : '');
+      const [c, r] = place(x, y);
+      el.style.gridColumn = c + 1;
+      el.style.gridRow = r + 1;
+      if (open) {
+        el.type = 'button';
+        el.setAttribute('aria-label', isVillage(x, y) ? `Encrer une case d'${VILLAGE.name}` : `Encrer la case ${x + 1}, ${y + 1}`);
+        el.addEventListener('click', () => ink(x, y, el));
+        // Le trait de crayon: the route if this cell were inked, before the click.
+        el.addEventListener('pointerenter', () => {
+          const i = y * W + x;
+          if (inked.has(i)) return;
+          draw(route(new Set(inked).add(i)) || []);
+          if (isVillage(x, y) && !erased) say(`Ce trait efface « ${VILLAGE.name} ».`);
+        });
+        el.addEventListener('pointerleave', () => draw());
+      } else {
+        el.setAttribute('aria-hidden', 'true');
+      }
+      board.insertBefore(el, svg);
+      cells.push(el);
+    }
+    // The village's name, written over its two cells.
+    label = document.createElement('span');
+    label.className = 'place';
+    label.textContent = VILLAGE.name;
+    const [[ax, ay], [bx, by]] = VILLAGE.cells.map(([x, y]) => place(x, y));
+    Object.assign(label.style, {
+      left: `${(((ax + bx) / 2 + 0.5) / cols) * 100}%`,
+      top: `${(((ay + by) / 2 + 0.5) / rows) * 100}%`,
+    });
+    board.appendChild(label);
+    say('Une carte qui ne laisse passer personne est refusée.');
+    draw();
+  }
+
+  document.getElementById('again').onclick = build;
+  upright.addEventListener('change', build);
+  build();
+</script>
 </body>
 </html>
