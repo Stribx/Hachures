@@ -14,7 +14,7 @@ Ce qu'on retient de LittleBigPlanet et Sackboy : tout est **un vrai objet fait m
 | Le plateau-maquette | **L'élément unique**, voir la feuille de route ci-dessous |
 | Décors en code (barricade, boue, ronces) | gardés ; leurs matières changent à la phase 3 |
 | Icônes d'outil | faites en jeu : filmées sur les pièces (`ui/studio.rs`). Les icônes de compteur restent à faire avec MOSS |
-| Cadres d'interface à filet de 1 px et repères de coin | à retirer après la feuille de route : des « tics » (voir la revue) |
+| Cadres d'interface à filet de 1 px et repères de coin | ✓ retirés : les boutons et les cartes d'outil sont des feuillets lavés d'encre aux coins à peine arrondis, les panneaux se posent sur la carte par leur ombre ; seul l'outil en main garde un cercle d'encre (un état, pas un décor) |
 | Nuages, Moulin, têtes de tour, socle (`3d-assets.md`) | en pause jusqu'à la fin de la feuille de route |
 
 ## Feuille de route du plateau-maquette
@@ -199,6 +199,18 @@ Trois problèmes :
 1. Les filets de l'interface plafonnent toujours la note : c'est le chantier suivant.
 2. Les plateaux des Cols poussent du blé comme le bocage : des fleurs d'alpage y iraient mieux.
 3. Le son manque encore (ticket 11, après l'accord sur la liste CC0), et le web reste à voir tourner dans un navigateur.
+```
+
+```
+ROUND 9 (après le retrait des filets)
+Vu en une seconde : un bocage vivant ; l'interface posée dessus en feuillets de papier, sans cadre.
+Idée : la maquette vivante, jusque dans l'interface.
+Scores : design 8,5 · utilisabilité 8 · créativité 8,5 · contenu 7,5 → 8,1
+Plafonds : aucun (les filets et les repères de coin sont partis)
+Trois problèmes :
+1. Les feuillets sont discrets sur le papier clair : à surveiller sur un écran pâle ou très lumineux.
+2. Le web reste à voir tourner dans un navigateur.
+3. Les têtes de tour Kenney restent les pièces les moins « maquette » (3d-assets.md).
 ```
 
 **Cible :** environ 7,5. Atteinte à l'arrondi près, hors plafond. La feuille de route du plateau est finie ; le prochain chantier est l'interface.

@@ -14,6 +14,8 @@ pub const INK_SOFT: Color = Color::srgb(0.37, 0.32, 0.25);
 pub const SEAL: Color = Color::srgb(0.66, 0.2, 0.16);
 /// The seal under the mouse or pressed, darker.
 pub const SEAL_DEEP: Color = Color::srgb(0.56, 0.16, 0.13);
+/// A button at rest: a faint wash of ink on the paper, a slip laid on the sheet rather than a ruled frame.
+pub const SLIP: Color = Color::srgba(0.55, 0.4, 0.22, 0.1);
 /// A hovered button's wash.
 pub const LIT: Color = Color::srgba(0.55, 0.4, 0.22, 0.25);
 /// A pressed button's wash.
@@ -41,6 +43,8 @@ pub const MEADOW: Color = Color::srgb(0.53, 0.68, 0.53);
 pub const WHEAT: Color = Color::srgb(0.84, 0.77, 0.52);
 /// Hedgerows and the woods' floor, the deepest green.
 pub const HEDGE: Color = Color::srgb(0.36, 0.5, 0.32);
+/// The shadow a panel casts on the map, lifting the sheet off it.
+pub const PANEL_SHADOW: Color = Color::srgba(0.22, 0.14, 0.08, 0.18);
 /// Frames and borders drawn on the map.
 pub const FRAME: Color = Color::srgb(0.36, 0.3, 0.24);
 /// Wood: the barricade and the varnished props.

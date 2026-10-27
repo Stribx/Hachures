@@ -1,4 +1,4 @@
-//! The widgets every screen draws with: ink text, framed and primary buttons, panels with their corner marks and
+//! The widgets every screen draws with: ink text, slip and primary buttons, panels lifted off the map and their
 //! drawn skins, icon slots and rising pages, the systems that make them look and move, and the typed-letter check.
 
 use bevy::input::keyboard::Key;
@@ -9,7 +9,7 @@ use bevy::ui::{Pressed, VisualBox};
 use bevy::ui_widgets::Button;
 
 use crate::settings::Settings;
-use crate::theme::{BODY_SIZE, INK, LIT, PAPER, PRESSED, SEAL, SEAL_DEEP, font};
+use crate::theme::{BODY_SIZE, INK, LIT, PANEL_SHADOW, PAPER, PRESSED, SEAL, SEAL_DEEP, SLIP, font};
 
 /// Whether the letter `c` was just typed, wherever it sits on the keyboard (A is A on AZERTY too).
 pub(crate) fn letter(keys: &ButtonInput<Key>, c: &str) -> bool {
@@ -17,7 +17,7 @@ pub(crate) fn letter(keys: &ButtonInput<Key>, c: &str) -> bool {
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(Update, (mark_corners, skin, reveal_icons, primary_ink, button_look, rise).chain());
+    app.add_systems(Update, (lift_panels, skin, reveal_icons, primary_ink, button_look, rise).chain());
 }
 
 /// Ink text in the game's font.
@@ -45,23 +45,25 @@ pub(crate) fn follow_cursor(node: &mut Node, cursor: Vec2) {
     node.top = px(cursor.y + 18.0);
 }
 
-/// A button at least `min_width` wide.
+/// A button at least `min_width` wide: a slip of washed paper, no ruled frame.
 pub(crate) fn framed(min_width: f32, label: impl Bundle) -> impl Bundle {
-    frame(min_width, label, Color::NONE, INK)
+    frame(min_width, label, SLIP)
 }
 
-fn frame(min_width: f32, label: impl Bundle, background: Color, border: Color) -> impl Bundle {
+/// How round a button's or a card's corners are: a slip of paper, cut by hand.
+pub(crate) const SLIP_RADIUS: f32 = 4.0;
+
+fn frame(min_width: f32, label: impl Bundle, background: Color) -> impl Bundle {
     (
         Button,
         Hovered::default(),
         Node {
             min_width: px(min_width),
             padding: UiRect::axes(px(16), px(6)),
-            border: UiRect::all(px(1)),
             justify_content: JustifyContent::Center,
+            border_radius: BorderRadius::all(px(SLIP_RADIUS)),
             ..default()
         },
-        BorderColor::all(border),
         BackgroundColor(background),
         UiTransform::IDENTITY,
         children![label],
@@ -70,13 +72,13 @@ fn frame(min_width: f32, label: impl Bundle, background: Color, border: Color) -
 
 /// The one action a page leads to, in the seal's red.
 pub(crate) fn primary(min_width: f32, label: impl Bundle) -> impl Bundle {
-    (frame(min_width, label, SEAL, SEAL), Primary)
+    (frame(min_width, label, SEAL), Primary)
 }
 
 #[derive(Component)]
 pub(crate) struct Primary;
 
-/// A sheet of paper for a panel, its corners marked like the neatline of a map.
+/// A sheet of paper for a panel, lifted off the map by its shadow.
 #[derive(Component)]
 pub(crate) struct Panel;
 
@@ -95,35 +97,10 @@ fn reveal_icons(mut slots: Query<(&mut Node, Has<ImageNode>), With<IconSlot>>) {
     }
 }
 
-/// A panel's four corner marks: short ink angles just inside the sheet, as on the edge of a survey sheet.
-fn mark_corners(panels: Query<Entity, Added<Panel>>, mut commands: Commands) {
-    const ARM: f32 = 12.0;
-    const IN: f32 = 6.0;
+/// A panel casts a soft shadow on the map, as a sheet of paper laid on the model would: no ruled corners.
+fn lift_panels(panels: Query<Entity, Added<Panel>>, mut commands: Commands) {
     for panel in &panels {
-        for (top, left) in [(true, true), (true, false), (false, true), (false, false)] {
-            let (inset, rule) = (px(IN), px(1));
-            commands.spawn((
-                ChildOf(panel),
-                Node {
-                    position_type: PositionType::Absolute,
-                    width: px(ARM),
-                    height: px(ARM),
-                    top: if top { inset } else { Val::Auto },
-                    bottom: if top { Val::Auto } else { inset },
-                    left: if left { inset } else { Val::Auto },
-                    right: if left { Val::Auto } else { inset },
-                    border: UiRect {
-                        top: if top { rule } else { Val::ZERO },
-                        bottom: if top { Val::ZERO } else { rule },
-                        left: if left { rule } else { Val::ZERO },
-                        right: if left { Val::ZERO } else { rule },
-                    },
-                    ..default()
-                },
-                BorderColor::all(INK),
-                Pickable::IGNORE,
-            ));
-        }
+        commands.entity(panel).insert(BoxShadow::new(PANEL_SHADOW, px(0), px(3), px(0), px(12)));
     }
 }
 
@@ -207,7 +184,7 @@ fn button_look(
             (true, false, false) => SEAL,
             (false, true, _) => PRESSED,
             (false, false, true) => LIT,
-            (false, false, false) => Color::NONE,
+            (false, false, false) => SLIP,
         };
         background.0 = tint;
         let scale = if pressed && !still { 0.97 } else { 1.0 };

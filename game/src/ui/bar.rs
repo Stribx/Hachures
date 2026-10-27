@@ -7,7 +7,7 @@ use bevy::prelude::*;
 use bevy::ui_widgets::{Activate, Button};
 
 use super::studio::ToolIcons;
-use super::widgets::{Panel, framed, primary, text};
+use super::widgets::{Panel, SLIP_RADIUS, framed, primary, text};
 use super::{DuringPlay, Fast, next_species};
 use crate::combat::enemies::send_wave;
 use crate::i18n::{t, tf};
@@ -16,7 +16,7 @@ use crate::level::{Level, LevelEntity};
 use crate::menu::open_sceaux;
 use crate::schedule::Screen;
 use crate::settings::Settings;
-use crate::theme::{BODY_SIZE, INK, INK_SOFT, PAPER, SEAL, SMALL_SIZE};
+use crate::theme::{BODY_SIZE, INK, INK_SOFT, PAPER, SEAL, SLIP, SMALL_SIZE};
 
 #[derive(Component)]
 pub struct Bar;
@@ -107,17 +107,16 @@ fn spawn_card(tools: &mut ChildSpawnerCommands, assets: &AssetServer, icons: &To
             ToolButton(t),
             Outline::default(),
             UiTransform::IDENTITY,
-            BackgroundColor(Color::NONE),
+            BackgroundColor(SLIP),
             Node {
                 width: px(92),
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Center,
                 // Room at the top for the key.
                 padding: UiRect::new(px(4), px(4), px(20), px(6)),
-                border: UiRect::all(px(1)),
+                border_radius: BorderRadius::all(px(SLIP_RADIUS)),
                 ..default()
             },
-            BorderColor::all(INK),
         ))
         .observe(move |_: On<Activate>, mut selection: ResMut<Selection>| selection.tool = t)
         .with_children(|card| {
@@ -165,7 +164,7 @@ pub struct Hand<'w> {
     fast: Res<'w, Fast>,
 }
 
-/// The tool in hand gets a second frame around its own; tools out of sépia fade, their cost in red. Costs follow
+/// The tool in hand is ringed in ink; tools out of sépia fade, their cost in red. Costs follow
 /// the skills.
 pub fn look(
     hand: Hand,
