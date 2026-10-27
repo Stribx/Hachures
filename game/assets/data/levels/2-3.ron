@@ -5,24 +5,31 @@
 // The deserters choice of 2-2: escorted, the level is full; handed over, it drops its last two waves.
 (
     world: 2,
-    name: "2-3 · Le Passage de Hesse",
+    // Where the sheet lies on the Marches: world position of its cell (0, 0) (`overworld`).
+    at: (190.0, -28.0),
+    name: "level.2-3.name",
     // Above the docs' 120: world 2 HP is ×1.5 for the same loot (set with the balance bot).
     sepia: 180,
     tools: ["barricade", "boue", "ronces", "arbalète", "mortier", "harpon", "lanterne"],
     // Le Gel lasts two waves: 5-6 and 9-10.
     events: [5, 9],
     shorter: Some(("deserteurs=livrer", 2)),
-    challenge: Some((text: "Aucune charrette du convoi blessée", rule: NoFuyardHurt)),
+    challenge: Some((text: "level.2-3.challenge", rule: NoFuyardHurt)),
     notes: [
         // Hesse's line is from the docs; the others are drafts.
-        (on: Start, when: Some("deserteurs=escorter"), text: "Hesse : « Je ne passe pas des gens. Je passe des histoires qui ont encore des jambes. »"),
+        (on: Start, when: Some("deserteurs=escorter"), text: "note.2-3.hesse_passe_gens_passe"),
         // Handing the deserters over costs the world's Name: Hesse will not come back.
-        (on: Start, when: Some("deserteurs=livrer"), names: -1, text: "Hesse ne m'a pas regardée. Elle a compté ses charrettes, deux fois, et rayé un nom de son registre."),
-        (on: Wave(1), text: "Deux routes se croisent au milieu du col : la leur et la sienne. Je n'en trace qu'une à la fois."),
-        (on: Event, text: "Le Gel. Le convoi pourrait couper par le lac. Les Hardes aussi."),
-        (on: FuyardHurt, text: "Le mortier ne lit pas les passeports. Hesse non plus ne me le pardonnera pas."),
-        (on: FuyardSaved, text: "Une charrette passe le col. Hesse ne se retourne pas."),
-        (on: Won, text: "Le convoi est passé. Sous la glace fondue, des hachures que personne n'a tracées."),
+        (on: Start, when: Some("deserteurs=livrer"), names: -1, text: "note.2-3.hesse_m_regardee_compte"),
+        (on: Wave(1), text: "note.2-3.deux_routes_se_croisent"),
+        (on: Event, text: "note.2-3.gel_convoi_pourrait_couper"),
+        (on: FuyardHurt, text: "note.2-3.mortier_lit_passeports_hesse"),
+        (on: FuyardSaved, text: "note.2-3.charrette_passe_col_hesse"),
+        (on: Won, text: "note.2-3.convoi_passe_sous_glace"),
+    ],
+    // Named places: inking any of their cells scratches the name out of the Rôle (docs, section 2). Drafts.
+    places: [
+        (name: "place.pas_de_hesse", at: [(10, 3), (11, 3)]),
+        (name: "place.croix_des_passeurs", at: [(12, 5), (13, 5), (12, 6), (13, 6)]),
     ],
     map: [
         "^^^^^^^^^^^^^^^^^^",

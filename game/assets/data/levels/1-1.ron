@@ -4,20 +4,29 @@
 // The bridge (the `.` in the river) stays dry during La Crue; the fords drown.
 (
     world: 1,
-    name: "1-1 · Le Gué-aux-Mères",
+    // Where the sheet lies on the Marches: world position of its cell (0, 0) (`overworld`).
+    at: (24.0, -16.0),
+    name: "level.1-1.name",
     sepia: 120,
     tools: ["barricade", "boue", "arbalète"],
     // Docs: first flood at wave 6.
     events: [6, 10],
-    challenge: Some((text: "Sans barricade : lire la pente, pas la fermer", rule: Without("barricade"))),
-    // Notes: Nève's notebook in the margin (docs, section 9). Triggers: Start, Wave(n), Event (the world event starts), Boss("phase"),
+    challenge: Some((text: "level.1-1.challenge", rule: Without("barricade"))),
+    // Every text here is a key of `assets/data/i18n/<code>.ron` (`fr.ron` holds the French).
+    // Notes: Nève's notebook in the margin (docs, section 9). Triggers: Start, Wave(n), Event (the world event starts), Boss(phase key),
     // FuyardHurt, FuyardSaved, Won. `when: Some("id=option")` keeps a note to one choice; `names` changes the Rôle.
     notes: [
         // Oudine's line is from the docs; the others are drafts.
-        (on: Start, text: "Oudine : « Le gué ne s'appelle pas \"gué\". Il s'appelle comme celles qui l'ont passé avec un enfant sur la hanche. »"),
-        (on: Wave(1), text: "Ils suivent la route la plus sèche. Toujours. C'est moi qui le leur ai appris."),
-        (on: Wave(5), text: "Les hachures frissonnent au bord du bief. La prochaine fois, la terre hésitera."),
-        (on: Event, text: "La crue. Deux cartes tirent ce gué chacune de son côté, et c'est l'eau qui tranche."),
+        (on: Start, text: "note.1-1.oudine_gue_appelle_gue"),
+        (on: Wave(1), text: "note.1-1.suivent_route_plus_seche"),
+        (on: Wave(5), text: "note.1-1.hachures_frissonnent_bord_bief"),
+        (on: Event, text: "note.1-1.crue_deux_cartes_tirent"),
+    ],
+    // Named places: inking any of their cells scratches the name out of the Rôle (docs, section 2). Drafts.
+    places: [
+        (name: "place.pont_aux_lavandieres", at: [(11, 4), (11, 5)]),
+        (name: "place.pre_commun", at: [(12, 2), (13, 2), (14, 2), (12, 3), (13, 3), (14, 3)]),
+        (name: "place.clos_marthe", at: [(5, 6), (6, 6), (7, 6), (8, 6), (5, 7), (6, 7), (7, 7), (8, 7)]),
     ],
     map: [
         "^^^^^^^^^^^^^^^^^^",

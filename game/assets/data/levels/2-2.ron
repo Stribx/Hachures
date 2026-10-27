@@ -5,7 +5,9 @@
 // Ends with the choice about the deserters hidden in Hesse's convoy, which shapes 2-3.
 (
     world: 2,
-    name: "2-2 · La Corniche des Convois",
+    // Where the sheet lies on the Marches: world position of its cell (0, 0) (`overworld`).
+    at: (164.0, -12.0),
+    name: "level.2-2.name",
     // Above the docs' 120: world 2 HP is ×1.5 for the same loot (set with the balance bot).
     sepia: 180,
     tools: ["barricade", "boue", "ronces", "arbalète", "mortier", "harpon", "lanterne"],
@@ -15,24 +17,30 @@
         // The avalanche: the south corridor turns to rock.
         (wave: 7, at: [(10, 6), (11, 6)], becomes: Roc),
     ],
-    challenge: Some((text: "Garder quinze du Rôle", rule: KeepRole(15))),
+    challenge: Some((text: "level.2-2.challenge", rule: KeepNames)),
     notes: [
         // Corentin's and Nève's lines are from the docs; the others are drafts.
-        (on: Start, text: "La corniche tient à deux couloirs. Le sud est plus court, et la neige le sait."),
-        (on: Wave(6), text: "La neige pend au-dessus du couloir sud. Je ne trace plus rien dessous."),
-        (on: Wave(7), text: "L'avalanche. Le couloir sud n'existe plus que sur ma carte."),
-        (on: Event, text: "Le Gel encore. Les Gens du Col passent sur le lac sans même baisser les yeux."),
-        (on: Won, text: "Corentin : « Donne-les-moi et je retire la 4e. C'est de l'arithmétique, Nève. »"),
-        (on: Won, text: "Tout est de l'arithmétique. C'est ça le problème."),
+        (on: Start, text: "note.2-2.corniche_tient_deux_couloirs"),
+        (on: Wave(6), text: "note.2-2.neige_pend_dessus_couloir"),
+        (on: Wave(7), text: "note.2-2.avalanche_couloir_sud_existe"),
+        (on: Event, text: "note.2-2.gel_encore_gens_col"),
+        (on: Won, text: "note.2-2.corentin_donne_moi_retire"),
+        (on: Won, text: "note.2-2.tout_arithmetique_ca_probleme"),
     ],
     choice: Some((
         id: "deserteurs",
-        prompt: "Le convoi de Hesse cache des déserteurs échassiers : ceux qui marchaient contre le Moulin. Corentin les réclame.",
+        prompt: "choice.deserteurs.prompt",
         options: [
-            ("escorter", "Les escorter avec le convoi : le passage sera plus dur."),
-            ("livrer", "Les livrer à Corentin : il retire une légion, deux vagues de moins."),
+            ("escorter", "choice.deserteurs.escorter"),
+            ("livrer", "choice.deserteurs.livrer"),
         ],
     )),
+    // Named places: inking any of their cells scratches the name out of the Rôle (docs, section 2). Drafts.
+    places: [
+        (name: "place.corniche", at: [(12, 1), (13, 1), (14, 1)]),
+        (name: "place.replat_sarre", at: [(13, 3), (14, 3), (13, 4), (14, 4)]),
+        (name: "place.pre_des_sonnailles", at: [(3, 6), (4, 6), (5, 6)]),
+    ],
     map: [
         "^^^^^^^^^^^^^^^^^^",
         "^................^",

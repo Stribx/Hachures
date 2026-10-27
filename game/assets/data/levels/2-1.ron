@@ -4,21 +4,28 @@
 // Gens du Col (ice 1), dear for the Chaîneurs (ice 2), and open to the Hardes wherever no tower looks.
 (
     world: 2,
-    name: "2-1 · La Combe aux Sonnailles",
+    // Where the sheet lies on the Marches: world position of its cell (0, 0) (`overworld`).
+    at: (138.0, -26.0),
+    name: "level.2-1.name",
     // Above the docs' 120: world 2 HP is ×1.5 for the same loot (set with the balance bot).
     sepia: 180,
     tools: ["barricade", "boue", "ronces", "arbalète", "mortier", "harpon", "lanterne"],
     // Le Gel lasts two waves: 4-5 and 9-10.
     events: [4, 9],
-    challenge: Some((text: "Sans mortier : la Lanterne suffit", rule: Without("mortier"))),
+    challenge: Some((text: "level.2-1.challenge", rule: Without("mortier"))),
     notes: [
         // Hesse's line is from the docs; the others are drafts.
-        (on: Start, text: "Hesse : « Tu veux savoir qui est l'ennemi ? Regarde qui a froid aux pieds dans les deux colonnes. »"),
-        (on: Wave(1), text: "Les Gens du Col grimpent ce que les Chaîneurs contournent. Deux lectures pour une même pente."),
-        (on: Wave(2), text: "Les Hardes ne lisent pas la pente. Elles lisent mes tours, et passent où je ne regarde pas."),
-        (on: Wave(3), text: "Le givre court sur le lac. Demain, il portera."),
-        (on: Event, text: "Le Gel. Le lac devient une route, et ce ne sont pas les nôtres qui l'empruntent."),
-        (on: Won, text: "Le Refuge tient. Hesse compte ses gens, puis les miens, et ne dit rien."),
+        (on: Start, text: "note.2-1.hesse_tu_veux_savoir"),
+        (on: Wave(1), text: "note.2-1.gens_col_grimpent_ce"),
+        (on: Wave(2), text: "note.2-1.hardes_lisent_pente_elles"),
+        (on: Wave(3), text: "note.2-1.givre_court_lac_demain"),
+        (on: Event, text: "note.2-1.gel_lac_devient_route"),
+        (on: Won, text: "note.2-1.refuge_tient_hesse_compte"),
+    ],
+    // Named places: inking any of their cells scratches the name out of the Rôle (docs, section 2). Drafts.
+    places: [
+        (name: "place.draye", at: [(8, 1), (9, 1), (8, 2), (9, 2)]),
+        (name: "place.pas_du_berger", at: [(14, 4), (15, 4), (14, 5), (15, 5)]),
     ],
     map: [
         "^^^^^^^^^^^^^^^^^^",

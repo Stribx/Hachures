@@ -3,26 +3,34 @@
 // Map legend: see 1-1.ron.
 (
     world: 1,
-    name: "1-3 · Le Moulin des Noms",
+    // Where the sheet lies on the Marches: world position of its cell (0, 0) (`overworld`).
+    at: (76.0, -20.0),
+    name: "level.1-3.name",
     sepia: 120,
     tools: ["barricade", "boue", "ronces", "arbalète", "mortier", "harpon"],
     events: [5, 9],
-    challenge: Some((text: "Garder tout le Rôle", rule: KeepRole(10))),
+    challenge: Some((text: "level.1-3.challenge", rule: KeepRole(10))),
     // Notes: see 1-1.ron. Oudine's line and the lullaby (wave 9) are from the docs.
     notes: [
-        (on: Start, text: "Oudine : « Ce champ s'appelle Pain-Perdu parce qu'on l'a perdu deux fois. Mets-le sur ta carte, ou je te le répète jusqu'à l'hiver. »"),
-        (on: Wave(9), text: "Un Échassier fredonne. Je connais cet air : la berceuse d'Oudine."),
-        (on: FuyardHurt, text: "Pas eux. Pas sous mes tours."),
-        (on: Won, text: "Le Rôle est gravé. Reste à savoir où mettre ceux qui fuient."),
+        (on: Start, text: "note.1-3.oudine_ce_champ_appelle"),
+        (on: Wave(9), text: "note.1-3.echassier_fredonne_connais_cet"),
+        (on: FuyardHurt, text: "note.1-3.eux_sous_mes_tours"),
+        (on: Won, text: "note.1-3.role_grave_reste_savoir"),
     ],
     choice: Some((
         id: "refuge",
-        prompt: "Où placer le Refuge ?",
+        prompt: "choice.refuge.prompt",
         options: [
-            ("moulin", "Au Moulin : les Fuyards traversent la zone de tir, mais chacun qui arrive garde un Nom."),
-            ("bois", "Dans le Bois : un chemin sûr, mais le Moulin reste à découvert."),
+            ("moulin", "choice.refuge.moulin"),
+            ("bois", "choice.refuge.bois"),
         ],
     )),
+    // Named places: inking any of their cells scratches the name out of the Rôle (docs, section 2). Drafts.
+    places: [
+        (name: "place.pont_du_bief", at: [(9, 4), (9, 5)]),
+        (name: "place.pres_oudine", at: [(11, 2), (12, 2), (13, 2), (11, 3), (12, 3), (13, 3)]),
+        (name: "place.clos_gaillard", at: [(2, 6), (3, 6), (4, 6), (2, 7), (3, 7), (4, 7)]),
+    ],
     map: [
         "^^^^^^^^^^^^^^^^^^",
         "S......rr........F",

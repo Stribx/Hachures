@@ -3,30 +3,38 @@
 // Map legend: see 1-1.ron.
 (
     world: 1,
-    name: "1-4 · La Grande Chaîne",
+    // Where the sheet lies on the Marches: world position of its cell (0, 0) (`overworld`).
+    at: (102.0, -8.0),
+    name: "level.1-4.name",
     sepia: 120,
     tools: ["barricade", "boue", "ronces", "arbalète", "mortier", "harpon"],
     events: [4],
     alt_refuge: Some("refuge=bois"),
-    challenge: Some((text: "Aucun Fuyard blessé", rule: NoFuyardHurt)),
+    challenge: Some((text: "level.1-4.challenge", rule: NoFuyardHurt)),
     // Notes: see 1-1.ron. Gast's line, the twist, Nève's borne line, the Bois consequence
     // and the closing transition are from the docs; the others are drafts.
     notes: [
-        (on: Start, text: "Gast : « Borne quatre ! Plantez ! Le reste suivra. »"),
-        (on: Boss("Le Levé"), text: "La Grande Chaîne suit un levé. Le mien, dix ans plus tôt, borne pour borne."),
-        (on: Boss("Le Bornage"), text: "C'est ma main sur la borne. Dix ans, et l'encre n'a pas pâli."),
+        (on: Start, text: "note.1-4.gast_borne_quatre_plantez"),
+        (on: Boss("boss.grande_chaine.leve"), text: "note.1-4.grande_chaine_suit_leve"),
+        (on: Boss("boss.grande_chaine.bornage"), text: "note.1-4.ma_main_borne_dix"),
         (
-            on: Boss("Le Bornage"),
+            on: Boss("boss.grande_chaine.bornage"),
             when: Some("refuge=bois"),
-            text: "Le Moulin est à découvert. L'Empire grave sa propre borne sur la meule : un Nom s'efface du Rôle.",
+            text: "note.1-4.moulin_decouvert_empire_grave",
             names: -1,
         ),
-        (on: Boss("La Chaîne rompue"), text: "Les bœufs paniquent. Elle fuit les tours : on peut la rabattre."),
-        (on: FuyardHurt, text: "Ils traversent la zone de tir. Je le savais en posant le Refuge ici."),
-        (on: Won, text: "La Grande Chaîne s'effondre dans le bief. Dans ses coffres, un ordre de marche vers les Cols, signé « C. Vass »."),
-        (on: Won, text: "Il a gardé ma façon de faire les V."),
-        (on: Won, when: Some("refuge=moulin"), text: "Oudine a vu passer chacun d'eux. Elle parlera, plus tard."),
-        (on: Won, when: Some("refuge=bois"), text: "Oudine se tait. Elle ne dit plus rien du Rôle."),
+        (on: Boss("boss.grande_chaine.chaine_rompue"), text: "note.1-4.boeufs_paniquent_fuit_tours"),
+        (on: FuyardHurt, text: "note.1-4.traversent_zone_tir_savais"),
+        (on: Won, text: "note.1-4.grande_chaine_effondre_dans"),
+        (on: Won, text: "note.1-4.garde_ma_facon_faire"),
+        (on: Won, when: Some("refuge=moulin"), text: "note.1-4.oudine_vu_passer_chacun"),
+        (on: Won, when: Some("refuge=bois"), text: "note.1-4.oudine_se_tait_dit"),
+    ],
+    // Named places: inking any of their cells scratches the name out of the Rôle (docs, section 2). Drafts.
+    places: [
+        (name: "place.pont_du_bief", at: [(9, 4), (9, 5)]),
+        (name: "place.pres_oudine", at: [(11, 2), (12, 2), (13, 2), (11, 3), (12, 3), (13, 3)]),
+        (name: "place.clos_gaillard", at: [(2, 6), (3, 6), (4, 6), (2, 7), (3, 7), (4, 7)]),
     ],
     map: [
         "^^^^^^^^^^^^^^^^^^",

@@ -1,0 +1,34 @@
+// Prologue (docs, section 1: ouverture jouable): ten years earlier, Nève earns her rank by "simplifying" a valley.
+// The short road runs through the village; inking over it sends the column the long way, and scratches the name out.
+// The village is Oubrenne, Nève's own (docs, section 10: the secret ending). The player reads it; Nève forgets it.
+// Map legend: see 1-1.ron.
+(
+    world: 1,
+    // Where the sheet lies on the Marches: world position of its cell (0, 0) (`overworld`).
+    at: (0.0, 0.0),
+    name: "level.0-0.name",
+    sepia: 70,
+    tools: ["barricade", "arbalète"],
+    events: [],
+    notes: [
+        // The Won line is from the docs; the others are drafts.
+        (on: Start, text: "note.0-0.dix_ans_plus_tot"),
+        (on: Wave(1), text: "note.0-0.route_passe_par_village"),
+        (on: Won, text: "note.0-0.me_souviens_plus_nom"),
+    ],
+    places: [
+        (name: "place.oubrenne", at: [(5, 1), (6, 1)]),
+    ],
+    map: [
+        "^^^^^^^^^^^^",
+        "S..........M",
+        ".^^^^^^^^^^.",
+        "............",
+        "............",
+        "^^^^^^^^^^^^",
+    ],
+    waves: [
+        [("chaineur", 3)],
+        [("chaineur", 5)],
+    ],
+)
