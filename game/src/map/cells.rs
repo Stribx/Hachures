@@ -5,9 +5,11 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 
 use super::decor::palisade_shape;
+use super::fields::ground;
 use super::grid::{Grid, Tile};
+use super::look;
 use super::props::{Props, barricade_shape, prop_parts, spawn_prop};
-use super::{cell_color, look};
+use super::seams::spawn_seams;
 use crate::campaign::skills::Skill;
 use crate::level::Level;
 use crate::look::{InkMaterial, ink, shore_image, varnished, water};
@@ -73,9 +75,9 @@ pub(super) fn redraw_cells(
     let by_hand = drawn.before.len() == grid.tiles.len()
         && grid.tiles.iter().zip(drawn.before.iter()).filter(|(a, b)| a != b).count() <= 3;
     let rect = lay_water_lines(grid, drawn, &mut images, &mut materials);
-    for i in 0..grid.tiles.len() {
+    for (i, color) in ground(grid).into_iter().enumerate() {
         let tile = grid.tiles[i];
-        let (height, mesh, material) = block(grid, i, rect, drawn, &mut meshes, &mut materials);
+        let (height, mesh, material) = block(tile, color, rect, drawn, &mut meshes, &mut materials);
         let (x, z) = grid.coords(i);
         let cell = commands
             .spawn((
@@ -95,6 +97,7 @@ pub(super) fn redraw_cells(
         spawn_prop(&mut commands, cell, i, tile, height, parts, new);
     }
     drawn.before = grid.tiles.clone();
+    spawn_seams(&mut commands, grid, &mut meshes, &mut materials);
     spawn_base(&mut commands, grid, &mut meshes, &mut materials);
 }
 
@@ -124,19 +127,20 @@ fn lay_water_lines(
     rect
 }
 
-/// Cell `i`'s block: its height, and its mesh and material, made the first time that height and colour are seen.
+/// The block of a cell of `tile` on ground washed `color`: its height, and its mesh and material, made the first
+/// time that height and colour are seen. A tool's piece stands on plain ground: the field's, or the pasture's.
 fn block(
-    grid: &Grid,
-    i: usize,
+    tile: Tile,
+    color: Color,
     rect: Vec4,
     drawn: &mut Drawn,
     meshes: &mut Assets<Mesh>,
     materials: &mut Assets<InkMaterial>,
 ) -> (f32, Handle<Mesh>, Handle<InkMaterial>) {
-    let tile = grid.tiles[i];
     let (height, color) = match tile {
-        Tile::Barricade | Tile::Ronces | Tile::Eboulis | Tile::Palissade => look(Tile::Sol),
-        _ => (look(tile).0, cell_color(grid, i)),
+        Tile::Barricade | Tile::Ronces => (look(Tile::Sol).0, color),
+        Tile::Eboulis | Tile::Palissade => look(Tile::Sol),
+        _ => (look(tile).0, color),
     };
     let shore = &drawn.shore;
     let (mesh, material) = drawn

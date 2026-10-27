@@ -7,9 +7,11 @@ pub mod terrain;
 
 mod cells;
 mod decor;
+pub mod fields;
 pub(crate) mod land;
 pub(crate) mod props;
 pub(crate) mod scraper;
+mod seams;
 
 use bevy::prelude::*;
 

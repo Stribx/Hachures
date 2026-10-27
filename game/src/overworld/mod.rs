@@ -24,8 +24,9 @@ use crate::campaign::save::Save;
 use crate::level::Level;
 use crate::level::data::{LEVELS, LevelData};
 use crate::look::{InkMaterial, Swaying, ink, shore_image, water};
+use crate::map::fields::ground;
 use crate::map::grid::Grid;
-use crate::map::{cell_color, look};
+use crate::map::look;
 use props::props;
 use terrain::{EAST, NORTH, SOUTH, WATER, WEST, height, land_mesh, road_mesh};
 
@@ -103,10 +104,9 @@ fn sheet_mesh(sheet: &Sheet, reached: bool) -> Mesh {
     let grid = &sheet.grid;
     let mut mesh =
         block(Vec3::new(grid.width as f32 + 0.2, 0.3, grid.height as f32 + 0.2), sheet_bed(sheet), crate::theme::FRAME);
-    for i in 0..grid.tiles.len() {
+    for (i, wash) in ground(grid).into_iter().enumerate() {
         let (x, z) = grid.coords(i);
-        let (height, color) =
-            if reached { (look(grid.tiles[i]).0, cell_color(grid, i)) } else { (0.2, crate::theme::SHEET) };
+        let (height, color) = if reached { (look(grid.tiles[i]).0, wash) } else { (0.2, crate::theme::SHEET) };
         let at = Vec3::new(x as f32, height / 2.0, z as f32);
         mesh.merge(&block(Vec3::new(0.96, height, 0.96), at, color)).expect("same attributes");
     }
