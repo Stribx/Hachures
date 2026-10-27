@@ -2,10 +2,11 @@
 
 use bevy::prelude::*;
 
-use super::Selection;
+use super::{Selection, Verdict};
 use crate::Step;
 use crate::level::Level;
-use crate::map::grid::Tile;
+use crate::map::flow::FlowField;
+use crate::map::grid::{Grid, Tile};
 use crate::map::{cell_pos, look};
 use crate::schedule::over_world;
 use crate::theme::{INK, SEPIA};
@@ -22,17 +23,23 @@ pub fn plugin(app: &mut App) {
     .add_systems(Update, draw.in_set(Step::Render).run_if(not(over_world)));
 }
 
-fn draw(time: Res<Time>, level: Res<Level>, selection: Res<Selection>, mut gizmos: Gizmos, mut pencil: Gizmos<Pencil>) {
+fn draw(
+    time: Res<Time>,
+    level: Res<Level>,
+    selection: Res<Selection>,
+    verdict: Res<Verdict>,
+    mut gizmos: Gizmos,
+    mut pencil: Gizmos<Pencil>,
+) {
     relief(&mut gizmos, &level);
     shiver(&mut gizmos, &level, time.elapsed_secs());
     calque(&mut gizmos, &level, &selection);
     route(&mut gizmos, &level, selection.shown);
-    if let Some(i) = selection.hovered {
-        let refused = level.refusal(i, selection.tool).is_some();
-        cursor(&mut gizmos, &level, i, refused);
-        if !refused {
-            trait_de_crayon(&mut pencil, &level, &selection, i);
-        }
+    if let Some(i) = verdict.at {
+        cursor(&mut gizmos, &level, i, verdict.refusal.is_some());
+    }
+    if let Some((what_if, field)) = &verdict.pencil {
+        trait_de_crayon(&mut pencil, &level, selection.shown, what_if, field);
     }
 }
 
@@ -127,13 +134,10 @@ fn cursor(gizmos: &mut Gizmos, level: &Level, i: usize, refused: bool) {
     );
 }
 
-/// Le trait de crayon: the route if the current tool were inked here.
-// ponytail: recomputed every frame; cache per hovered cell if maps get big.
-fn trait_de_crayon(pencil: &mut Gizmos<Pencil>, level: &Level, selection: &Selection, i: usize) {
+/// Le trait de crayon: the route of species `shown` if the current tool were inked under the hand.
+fn trait_de_crayon(pencil: &mut Gizmos<Pencil>, level: &Level, shown: usize, what_if: &Grid, field: &FlowField) {
     let grid = level.terrain.grid();
-    let (what_if, field) = level.what_if(i, selection.tool, selection.shown);
-    for &spawn in grid.spawns_for(&level.species[selection.shown]) {
-        pencil
-            .linestrip(field.path(&what_if, spawn).into_iter().map(|i| cell_pos(grid, i)), Color::srgb(0.3, 0.2, 0.1));
+    for &spawn in grid.spawns_for(&level.species[shown]) {
+        pencil.linestrip(field.path(what_if, spawn).into_iter().map(|i| cell_pos(grid, i)), Color::srgb(0.3, 0.2, 0.1));
     }
 }

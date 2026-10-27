@@ -4,6 +4,7 @@ mod ghost;
 pub mod overlay;
 mod passage;
 pub mod selection;
+pub mod verdict;
 
 use bevy::prelude::*;
 
@@ -19,14 +20,17 @@ use crate::map::grid::{Grid, Tile};
 use crate::map::land::fibres;
 use crate::map::terrain::Edit;
 pub use selection::Selection;
+pub use verdict::Verdict;
 
 pub fn plugin(app: &mut App) {
     app.add_plugins((overlay::plugin, selection::plugin))
         .add_message::<TowerInked>()
+        .init_resource::<Verdict>()
         .add_systems(
             Update,
             inking.in_set(Step::Input).after(selection::hover).after(selection::reset).after(load_level),
         )
+        .add_systems(Update, verdict::judge.after(inking).before(Step::Render))
         .add_systems(Update, ghost::ghost.after(fibres).in_set(Step::Render));
 }
 

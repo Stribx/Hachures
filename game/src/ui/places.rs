@@ -5,7 +5,7 @@ use bevy::window::PrimaryWindow;
 
 use super::widgets::{self, follow_cursor};
 use crate::i18n::{t, tf};
-use crate::ink::Selection;
+use crate::ink::Verdict;
 use crate::level::{Level, LevelEntity};
 use crate::look::WorldCamera;
 use crate::map::cell_pos;
@@ -78,12 +78,12 @@ pub fn label_places(
 /// The price before the click: a refusal, or the name this ink would scratch out.
 pub fn tooltip(
     level: Res<Level>,
-    selection: Res<Selection>,
+    verdict: Res<Verdict>,
     window: Single<&Window, With<PrimaryWindow>>,
     tip: Single<(&mut Text, &mut Node, &mut Visibility), With<Tooltip>>,
 ) {
     let (mut text, mut node, mut visibility) = tip.into_inner();
-    let said = selection.hovered.filter(|_| !level.finished).and_then(|i| match level.refusal(i, selection.tool) {
+    let said = verdict.at.and_then(|i| match verdict.refusal {
         Some(why) => Some(t(why).to_string()),
         None => level.place_at(i).map(|p| tf("places.erases", &[&t(&level.places[p].name)])),
     });

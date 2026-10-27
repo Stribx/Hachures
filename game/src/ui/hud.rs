@@ -10,7 +10,7 @@ use super::DuringPlay;
 use super::widgets::{IconSlot, Panel, Skin, follow_cursor, tooltip};
 use crate::campaign::skills::Skill;
 use crate::i18n::{t, tf};
-use crate::ink::Selection;
+use crate::ink::{Selection, Verdict};
 use crate::level::Level;
 use crate::theme::{INK, INK_SOFT, PAPER, SEAL, SMALL_SIZE, SUBTITLE_SIZE, font};
 
@@ -118,6 +118,7 @@ pub fn spawn(commands: &mut Commands, assets: &AssetServer) {
 pub fn update_label(
     level: Res<Level>,
     selection: Res<Selection>,
+    verdict: Res<Verdict>,
     icons: Query<(&Icon, Has<ImageNode>)>,
     mut figures: Query<(&Figure, &mut Text), Without<Line>>,
     mut lines: Query<(&Line, &mut Text, &mut Node)>,
@@ -139,7 +140,7 @@ pub fn update_label(
             Line::Name => t(&level.name).to_string(),
             Line::Defi => level.challenge.as_ref().map(|c| tf("hud.challenge", &[&t(&c.text)])).unwrap_or_default(),
             Line::Notice => notice(&level),
-            Line::Readout => readout(&level, &selection),
+            Line::Readout => readout(&level, &selection, &verdict),
         };
         // An empty line takes no room.
         node.display = if text.0.is_empty() { Display::None } else { Display::Flex };
@@ -188,16 +189,16 @@ fn notice(level: &Level) -> String {
     lines.join("\n")
 }
 
-fn readout(level: &Level, selection: &Selection) -> String {
-    let Some(i) = selection.hovered.filter(|_| !level.finished) else { return String::new() };
+fn readout(level: &Level, selection: &Selection, verdict: &Verdict) -> String {
+    let Some(i) = verdict.at else { return String::new() };
     let mut lines = Vec::new();
     // Lecture fine: what the pencil line costs the shown species, before and after.
-    if level.has(Skill::LectureFine) && level.refusal(i, selection.tool).is_none() {
-        let (what_if, field) = level.what_if(i, selection.tool, selection.shown);
-        if let Some(&spawn) = what_if.spawns_for(&level.species[selection.shown]).first() {
-            let (before, after) = (level.terrain.fields()[selection.shown].dist[spawn], field.dist[spawn]);
-            lines.push(tf("hud.line_cost", &[&before, &after]));
-        }
+    if level.has(Skill::LectureFine)
+        && let Some((what_if, field)) = &verdict.pencil
+        && let Some(&spawn) = what_if.spawns_for(&level.species[selection.shown]).first()
+    {
+        let (before, after) = (level.terrain.fields()[selection.shown].dist[spawn], field.dist[spawn]);
+        lines.push(tf("hud.line_cost", &[&before, &after]));
     }
     if selection.calque {
         let tile = level.terrain.grid().tiles[i];
