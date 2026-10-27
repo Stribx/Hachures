@@ -164,11 +164,11 @@ impl Level {
     }
 }
 
-/// What `act` does to the map at `i`: the tile it lays, or the borne it scrapes off.
+/// What `act` does to the map at `i`: the tile it lays, or what it scrapes off.
 fn act_on(grid: &mut Grid, i: usize, act: Act) {
     match act.lays() {
         Some(tile) => grid.tiles[i] = tile,
-        None => grid.bornes.retain(|&b| b != i),
+        None => grid.scrape(i),
     }
 }
 

@@ -25,6 +25,10 @@ pub enum Tile {
     Chaussee,
     /// Frozen water, during Le Gel (world 2).
     Glace,
+    /// Fallen stone: slow to walk; Gratter scrapes it back to Sol.
+    Eboulis,
+    /// An imperial barricade the level data lays: impassable; Gratter scrapes it back to Sol.
+    Palissade,
 }
 
 impl Tile {
@@ -42,6 +46,8 @@ impl Tile {
             Tile::Tour => n_("tile.tour"),
             Tile::Chaussee => n_("tile.chaussee"),
             Tile::Glace => n_("tile.glace"),
+            Tile::Eboulis => n_("tile.eboulis"),
+            Tile::Palissade => n_("tile.palissade"),
         }
     }
 
@@ -97,6 +103,8 @@ impl Grid {
                 'g' => Tile::Gue,
                 '#' => Tile::Barricade,
                 '^' => Tile::Roc,
+                'e' => Tile::Eboulis,
+                'p' => Tile::Palissade,
                 'S' => {
                     grid.spawns.push(i);
                     Tile::Sol
@@ -126,6 +134,22 @@ impl Grid {
     /// Whether the world event changes cell `i`.
     pub fn hit_by(&self, event: &Event, i: usize) -> bool {
         event.cells.contains(&self.map[i])
+    }
+
+    /// Whether Gratter has something to take off cell `i`: an imperial borne, an Éboulis or a Palissade.
+    pub fn scrapable(&self, i: usize) -> bool {
+        self.bornes.contains(&i) || matches!(self.tiles[i], Tile::Eboulis | Tile::Palissade)
+    }
+
+    /// Gratter on cell `i`: takes its borne off, else the Éboulis or the Palissade. The caller has checked `scrapable`.
+    pub fn scrape(&mut self, i: usize) {
+        if self.bornes.contains(&i) {
+            self.bornes.retain(|&b| b != i);
+        } else {
+            // Plain Sol, with no memory of what was under: the world event must not see the old ground either.
+            self.tiles[i] = Tile::Sol;
+            self.map[i] = Tile::Sol;
+        }
     }
 
     /// The map while the world event lasts: its cells turn to `event.becomes`, unless inked with one of `event.spares`.
@@ -164,5 +188,24 @@ impl Grid {
         ]
         .into_iter()
         .flatten()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn an_eboulis_is_parsed_as_drawn() {
+        let grid = Grid::parse("S.e.M");
+        assert_eq!(grid.tiles[2], Tile::Eboulis);
+        assert_eq!(grid.map[2], Tile::Eboulis);
+    }
+
+    #[test]
+    fn a_palissade_is_parsed_as_drawn() {
+        let grid = Grid::parse("S.p.M");
+        assert_eq!(grid.tiles[2], Tile::Palissade);
+        assert_eq!(grid.map[2], Tile::Palissade);
     }
 }

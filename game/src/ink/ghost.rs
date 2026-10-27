@@ -36,7 +36,7 @@ pub(super) fn ghost(
     mut stock: Stock,
 ) {
     let grid = &level.grid;
-    // Only a tile has a ghost: a tower shows its range, a scrape the route it opens.
+    // Only a tile has a ghost: a tower shows its range, a scrape the route once the cell is plain.
     let tile = if let Act::Lay(tile) = TOOLS[selection.tool].act { Some(tile) } else { None };
     let at =
         selection.hovered.zip(tile).filter(|&(i, _)| !level.finished && level.refusal(i, selection.tool).is_none());

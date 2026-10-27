@@ -2,11 +2,11 @@
 (
     name: "world.1.name",
     defends: "world.1.defends",
-    // La Crue [T]: during a wave, low ground (Sol bas, Gué) turns to water, except under barricades and towers.
+    // La Crue [T]: during a wave, low ground (Sol bas, Gué) turns to water, except under barricades, palissades and towers.
     event: (
         cells: [SolBas, Gue],
         becomes: Eau,
-        spares: [Barricade, Tour],
+        spares: [Barricade, Tour, Palissade],
         lasts: 1,
         announce: "world.1.announce",
         during: "world.1.during",

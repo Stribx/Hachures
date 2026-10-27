@@ -10,8 +10,8 @@ impl Level {
     /// Why `tool` can't be inked at `i`, if it can't.
     pub fn refusal(&self, i: usize, tool: usize) -> Option<&'static str> {
         let Some(tile) = TOOLS[tool].act.lays() else {
-            // Scraping only opens the map: no need to check that it stays open.
-            return if !self.base.bornes.contains(&i) {
+            // Scraping leaves plain Sol, which every species walks: it can lengthen a route, never close one.
+            return if !self.base.scrapable(i) {
                 Some(n_("refusal.nothing_to_scrape"))
             } else if self.sepia < self.tool_cost(tool) {
                 Some(n_("refusal.sepia"))
@@ -86,7 +86,7 @@ impl Level {
 mod tests {
     use super::*;
     use crate::ink::tool_index;
-    use crate::level::data::Change;
+    use crate::level::data::{Change, Place};
     use crate::map::grid::Grid;
     use crate::map::species::{self, index_of};
 
@@ -173,5 +173,110 @@ mod tests {
         assert_eq!(grid.tiles[1], Tile::Chaussee, "the tile under the borne stays");
         level.ink(1, gratter);
         assert_eq!(field.dist, level.fields[jalonneur].dist);
+    }
+
+    /// Gratter on an Éboulis leaves plain Sol, in the tiles and in the map the world event reads.
+    #[test]
+    fn gratter_scrapes_an_eboulis() {
+        let mut level = level("S.e.M");
+        let gratter = tool_index("gratter").unwrap();
+        assert_eq!(level.refusal(2, gratter), None);
+        let sepia = level.sepia;
+        level.ink(2, gratter);
+        assert_eq!((level.base.tiles[2], level.base.map[2]), (Tile::Sol, Tile::Sol));
+        assert_eq!(level.sepia, sepia - level.tool_cost(gratter));
+        assert_eq!(level.refusal(2, gratter), Some("refusal.nothing_to_scrape"));
+    }
+
+    /// Gratter on a Palissade leaves plain Sol, as on an Éboulis. Two rows: the palissade alone doesn't close the way.
+    #[test]
+    fn gratter_scrapes_a_palissade() {
+        let mut level = level("S.p.M\n.....");
+        let gratter = tool_index("gratter").unwrap();
+        assert_eq!(level.refusal(2, gratter), None);
+        level.ink(2, gratter);
+        assert_eq!((level.base.tiles[2], level.base.map[2]), (Tile::Sol, Tile::Sol));
+        assert_eq!(level.refusal(2, gratter), Some("refusal.nothing_to_scrape"));
+    }
+
+    #[test]
+    fn a_palissade_is_not_buildable() {
+        let level = level("S.p.M\n.....");
+        assert_eq!(level.refusal(2, tool_index("barricade").unwrap()), Some("refusal.firm_ground"));
+    }
+
+    #[test]
+    fn a_palissade_is_impassable() {
+        let level = level("S.p.M\n.....");
+        assert_eq!(level.fields[level.present[0]].dist[2], f32::INFINITY);
+    }
+
+    #[test]
+    fn la_crue_spares_a_palissade() {
+        let mut level = level("S.,.M\n.....");
+        level.base.tiles[2] = Tile::Palissade;
+        level.refresh();
+        assert_eq!(level.base.under(&level.world().event).tiles[2], Tile::Palissade);
+    }
+
+    #[test]
+    fn gratter_refuses_what_is_not_decor() {
+        let gratter = tool_index("gratter").unwrap();
+        for tile in [Tile::Barricade, Tile::Boue, Tile::Ronces, Tile::Chaussee, Tile::Glace, Tile::Eau, Tile::Roc] {
+            let mut level = level("S...M");
+            level.base.tiles[2] = tile;
+            level.refresh();
+            assert_eq!(level.refusal(2, gratter), Some("refusal.nothing_to_scrape"), "{tile:?}");
+        }
+    }
+
+    #[test]
+    fn an_eboulis_is_not_buildable() {
+        let level = level("S.e.M");
+        assert_eq!(level.refusal(2, tool_index("barricade").unwrap()), Some("refusal.firm_ground"));
+    }
+
+    #[test]
+    fn scraping_an_eboulis_keeps_its_name() {
+        let mut level = level("S.e.M");
+        level.places = vec![Place { name: "place.pre_commun".into(), at: vec![(2, 0)] }];
+        let gratter = tool_index("gratter").unwrap();
+        let names = level.names;
+        level.ink(2, gratter);
+        assert_eq!(level.names, names);
+        assert!(level.erased.is_empty());
+        assert_eq!(level.place_at(2), Some(0), "the name is still written");
+    }
+
+    /// Scraping never closes a way, so a walker on the cell or a scripted change to come don't refuse it.
+    #[test]
+    fn gratter_ignores_walkers_and_changes() {
+        let gratter = tool_index("gratter").unwrap();
+        let mut level = level("S.e.M");
+        level.walkers.push((level.present[0], 2));
+        assert_eq!(level.refusal(2, gratter), None, "under a walker");
+        level.walkers.clear();
+        level.changes = vec![Change { wave: 2, at: vec![(2, 0)], becomes: Tile::Roc }];
+        assert_eq!(level.refusal(2, gratter), None, "on a cell a change will hit");
+    }
+
+    #[test]
+    fn gratter_preview_takes_the_eboulis_off() {
+        let mut level = level("S.e.M");
+        let k = level.present[0];
+        let gratter = tool_index("gratter").unwrap();
+        let (_, field) = level.what_if(2, gratter, k);
+        level.ink(2, gratter);
+        assert_eq!(field.dist, level.fields[k].dist);
+    }
+
+    /// A scripted change leaves `map` as drawn; after a scrape La Crue must still find plain Sol there.
+    #[test]
+    fn la_crue_spares_a_scraped_eboulis() {
+        let mut level = level("S.,.M");
+        level.base.tiles[2] = Tile::Eboulis;
+        level.refresh();
+        level.ink(2, tool_index("gratter").unwrap());
+        assert_eq!(level.base.under(&level.world().event).tiles[2], Tile::Sol);
     }
 }

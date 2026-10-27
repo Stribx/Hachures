@@ -93,3 +93,22 @@ pub fn load() -> Vec<Species> {
 pub fn index_of(species: &[Species], name: &str) -> Option<usize> {
     species.iter().position(|s| s.name == name)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn every_species_walks_plain_sol() {
+        for s in load() {
+            assert!(s.costs.contains_key(&Tile::Sol), "{} can't walk Sol", s.name);
+        }
+    }
+
+    #[test]
+    fn no_species_walks_a_palissade() {
+        for s in load() {
+            assert!(!s.costs.contains_key(&Tile::Palissade), "{} walks a Palissade", s.name);
+        }
+    }
+}

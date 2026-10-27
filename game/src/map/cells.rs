@@ -4,6 +4,7 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 
+use super::decor::palisade_shape;
 use super::grid::{Grid, Tile};
 use super::props::{Props, barricade_shape, prop_parts, spawn_prop};
 use super::{cell_color, look};
@@ -85,7 +86,11 @@ pub(super) fn redraw_cells(
                 Transform::from_xyz(x as f32, height / 2.0, z as f32),
             ))
             .id();
-        let shape = if tile == Tile::Barricade { barricade_shape(grid, i, fascines) } else { 0 };
+        let shape = match tile {
+            Tile::Barricade => barricade_shape(grid, i, fascines),
+            Tile::Palissade => palisade_shape(grid, i),
+            _ => 0,
+        };
         let parts = prop_parts(&mut drawn.props, tile, shape, &mut meshes, &mut materials);
         let new = by_hand && drawn.before[i] != tile;
         spawn_prop(&mut commands, cell, i, tile, height, parts, new);
@@ -131,7 +136,7 @@ fn block(
 ) -> (f32, Handle<Mesh>, Handle<InkMaterial>) {
     let tile = grid.tiles[i];
     let (height, color) = match tile {
-        Tile::Barricade | Tile::Ronces => look(Tile::Sol),
+        Tile::Barricade | Tile::Ronces | Tile::Eboulis | Tile::Palissade => look(Tile::Sol),
         _ => (look(tile).0, cell_color(grid, i)),
     };
     let shore = &drawn.shore;

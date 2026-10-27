@@ -5,6 +5,7 @@ use std::f32::consts::{FRAC_PI_2, FRAC_PI_4, PI};
 
 use bevy::prelude::*;
 
+use super::decor::{palisade, rubble};
 use super::grid::{Grid, Tile};
 use super::land::{Land, landing_sound};
 use crate::look::{Hachure, InkMaterial, ink};
@@ -44,20 +45,22 @@ fn opposite(bit: u8) -> u8 {
     }
 }
 
-/// What stands on a tool's cell, on the block's top at the origin: its parts, each with its colour. The shape says
+/// What stands on a cell, on the block's top at the origin: its parts, each with its colour. The shape says
 /// the effect: the barricade is a wall, the mud a trap sunk in the ground, the brambles a thicket that bites.
-/// `shape` is the barricade's (`barricade_shape`), 0 for the others.
+/// `shape` is the barricade's (`barricade_shape`) or the palissade's (`palisade_shape`), 0 for the others.
 pub(crate) fn prop(tile: Tile, shape: u8) -> Vec<(Mesh, Color)> {
     match tile {
         Tile::Barricade => barricade(shape),
         Tile::Boue => mud(),
         Tile::Ronces => brambles(),
+        Tile::Eboulis => rubble(),
+        Tile::Palissade => palisade(shape),
         _ => Vec::new(),
     }
 }
 
 /// The meshes made into one, if there are any.
-fn merge(parts: Vec<Mesh>) -> Option<Mesh> {
+pub(super) fn merge(parts: Vec<Mesh>) -> Option<Mesh> {
     parts.into_iter().reduce(|mut all, part| {
         all.merge(&part).expect("primitive meshes share their attributes");
         all
@@ -225,8 +228,8 @@ pub(super) fn spawn_prop(
     let h = (i as u32).wrapping_mul(2_654_435_761);
     let jitter = (h >> 8 & 255) as f32 / 255.0 - 0.5;
     let (turn, size) = match tile {
-        // Its arms point at its neighbours: no turn of its own.
-        Tile::Barricade => (0.0, 1.0),
+        // Their orientation comes from their shape: no turn of their own.
+        Tile::Barricade | Tile::Palissade => (0.0, 1.0),
         _ => ((h >> 16 & 255) as f32 / 255.0 * 2.0 * PI, 1.0 + jitter * 0.2),
     };
     let transform = Transform::from_xyz(0.0, height / 2.0, 0.0)

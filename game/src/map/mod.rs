@@ -5,6 +5,7 @@ pub mod grid;
 pub mod species;
 
 mod cells;
+mod decor;
 pub(crate) mod land;
 pub(crate) mod props;
 pub(crate) mod scraper;
@@ -42,6 +43,8 @@ pub fn look(tile: Tile) -> (f32, Color) {
         Tile::Tour => (0.2, Color::srgb(0.8, 0.76, 0.66)),
         Tile::Chaussee => (0.21, Color::srgb(0.95, 0.93, 0.86)),
         Tile::Glace => (0.07, Color::srgb(0.88, 0.93, 0.95)),
+        Tile::Eboulis => (0.2, Color::srgb(0.6, 0.57, 0.52)),
+        Tile::Palissade => (0.2, Color::srgb(0.36, 0.26, 0.2)),
     }
 }
 
