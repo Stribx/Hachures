@@ -5,6 +5,7 @@ use bevy::mesh::{Indices, PrimitiveTopology};
 use bevy::prelude::*;
 
 use super::{ROAD, SHEETS};
+use crate::theme::{HEDGE, PASTURE, WHEAT};
 
 /// Where the land is drawn.
 pub(super) const WEST: f32 = -40.0;
@@ -78,11 +79,10 @@ pub(super) fn snow(p: Vec2, h: f32) -> f32 {
 /// Colour of the land at `p`, `h` high, painted like the plaster of a plan-relief: broad swathes of meadow and
 /// straw, the woods' darker floor, sand by the water, stone and snow up high. Every change is a blend, never a cut.
 fn land_color(p: Vec2, h: f32) -> Color {
-    let meadow =
-        Color::srgb(0.64, 0.69, 0.54).mix(&Color::srgb(0.75, 0.72, 0.55), smoothstep(0.35, 0.65, fbm(p * 0.04 + 7.0)));
-    let mut color = meadow.mix(&Color::srgb(0.53, 0.6, 0.46), smoothstep(0.47, 0.55, wood(p)));
+    let meadow = PASTURE.mix(&WHEAT, smoothstep(0.35, 0.65, fbm(p * 0.04 + 7.0)));
+    let mut color = meadow.mix(&HEDGE, smoothstep(0.47, 0.55, wood(p)));
     color = color.mix(&Color::srgb(0.62, 0.66, 0.7), cols(p.x) * 0.8);
-    color = color.mix(&Color::srgb(0.8, 0.76, 0.62), 1.0 - smoothstep(WATER + 0.05, WATER + 0.25, h));
+    color = color.mix(&Color::srgb(0.86, 0.78, 0.58), 1.0 - smoothstep(WATER + 0.05, WATER + 0.25, h));
     let stone = Color::srgb(0.72, 0.68, 0.6).mix(&Color::srgb(0.93, 0.93, 0.92), cols(p.x));
     color.mix(&stone, smoothstep(2.0, 4.0, h))
 }

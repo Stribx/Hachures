@@ -42,7 +42,7 @@ impl Default for Hachure {
             uniform: HachureUniform {
                 paper: SHEET.to_linear().with_alpha(0.0),
                 ink: WORLD_INK.to_linear().with_alpha(0.85),
-                params: Vec4::new(0.13, 0.35, LIT_WHITE, 0.5),
+                params: Vec4::new(0.13, WASH, LIT_WHITE, 0.5),
                 shore: Vec4::ZERO,
                 gloss: 0.0,
                 flow: 0.0,
@@ -58,10 +58,15 @@ impl Hachure {
         let mut hachure = Hachure::default();
         hachure.uniform.ink.alpha = 0.55;
         hachure.uniform.params.x = 0.05;
-        hachure.uniform.params.y = 0.45;
+        hachure.uniform.params.y = FINE_WASH;
         hachure
     }
 }
+
+/// How far a surface's own colour fades toward the paper: a watercolour wash under the ink, as on a hand-coloured map
+/// (docs/direction-artistique.md, phase 6). Small pieces fade a little more, so their fine strokes still read.
+const WASH: f32 = 0.15;
+const FINE_WASH: f32 = 0.25;
 
 /// What a white surface lights up to under the sun and the sky, in the shader's units (tuned on screenshots).
 const LIT_WHITE: f32 = 1.0;

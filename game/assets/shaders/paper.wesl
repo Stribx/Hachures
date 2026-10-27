@@ -39,7 +39,8 @@ fn fragment(in: FullscreenVertexOutput) -> @location(0) vec4<f32> {
     let size = vec2<f32>(textureDimensions(screen_texture));
     let from_middle = (in.uv - 0.5) * vec2(size.x / size.y, 1.0);
     let corner = smoothstep(0.3, 1.0, length(from_middle)) * paper.vignette;
-    let sepia = vec3(0.82, 0.72, 0.58);
+    // Warm ochre, not grey: the corners of a hand-coloured sheet yellow, they don't dull.
+    let sepia = vec3(0.9, 0.75, 0.52);
     color = vec4(color.rgb * (1.0 + grain) * mix(vec3(1.0), sepia, corner), color.a);
     return color;
 }

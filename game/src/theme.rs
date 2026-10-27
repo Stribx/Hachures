@@ -29,8 +29,18 @@ pub const SEPIA: Color = Color::srgb(0.48, 0.29, 0.13);
 pub const SUNLIGHT: Color = Color::srgb(1.0, 0.94, 0.84);
 /// The sky's cool ambient light.
 pub const AMBIENT: Color = Color::srgb(0.9, 0.92, 1.0);
-/// Water: lakes and the Eau tile.
-pub const WATER: Color = Color::srgb(0.55, 0.68, 0.75);
+/// Water: lakes and the Eau tile, the resin's blue.
+pub const WATER: Color = Color::srgb(0.45, 0.63, 0.76);
+
+// The bocage's washes, as a hand-coloured map lays them under the ink (docs/direction-artistique.md, phase 6).
+/// Dry pasture: the Sol of the board, the Marches' meadows.
+pub const PASTURE: Color = Color::srgb(0.65, 0.74, 0.48);
+/// Wet meadow, a bluer green: the Sol bas that la Crue drowns.
+pub const MEADOW: Color = Color::srgb(0.53, 0.68, 0.53);
+/// Ripe wheat and straw.
+pub const WHEAT: Color = Color::srgb(0.84, 0.77, 0.52);
+/// Hedgerows and the woods' floor, the deepest green.
+pub const HEDGE: Color = Color::srgb(0.36, 0.5, 0.32);
 /// Frames and borders drawn on the map.
 pub const FRAME: Color = Color::srgb(0.36, 0.3, 0.24);
 /// Wood: the barricade and the varnished props.

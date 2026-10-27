@@ -176,4 +176,16 @@ Trois problèmes :
 3. Le web n'a ni occlusion ni ombres de contact : à vérifier dans le navigateur que le reste y tient.
 ```
 
+```
+ROUND 7 (phase 6, après l'enluminure : ticket 02)
+Vu en une seconde : une vallée verte coupée par une rivière bleue, entre deux crêtes de pierre chaude ; une carte coloriée à la main.
+Idée : la gravure enluminée. Le plateau a enfin une couleur à lui, et chaque case garde la sienne.
+Scores : design 7,5 · utilisabilité 8 · créativité 8 · contenu 7 → 7,6
+Plafonds : filets de l'interface (boutons 1 px, repères de coin) → 6,5 au plus tant qu'ils restent
+Trois problèmes :
+1. La plaine est verte mais unie : rien ne la découpe encore en champs → ticket 03 (les champs du plateau).
+2. Rien ne bouge en dehors de l'eau → tickets 01 et 04 (le vent, l'herbe).
+3. Le blé derrière le plateau et les crêtes de pierre sont proches en valeur : à surveiller quand les champs du Grand Plan arrivent (ticket 05).
+```
+
 **Cible :** environ 7,5. Atteinte à l'arrondi près, hors plafond. La feuille de route du plateau est finie ; le prochain chantier est l'interface.
