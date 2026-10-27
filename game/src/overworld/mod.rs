@@ -4,10 +4,12 @@
 //! The level being played always stays at the origin (combat, picking and the overlay all count from there);
 //! the rest of the world is shifted under it instead, through `OverworldRoot`.
 
+mod bocage;
 mod camera;
 mod card;
 mod clouds;
 pub mod onward;
+mod parcels;
 pub mod plan;
 mod props;
 mod road;
@@ -35,7 +37,7 @@ use terrain::{EAST, NORTH, SOUTH, WATER, WEST, height, land_mesh, road_mesh};
 const TREE_WIND: f32 = 0.012;
 pub fn plugin(app: &mut App) {
     app.add_plugins((travel::plugin, plan::plugin))
-        .add_systems(Startup, spawn)
+        .add_systems(Startup, (spawn, bocage::spawn_bocage).chain())
         .add_systems(Update, follow_level.before(camera::aim))
         .add_systems(Update, onward::between_levels.before(crate::campaign::load_level).in_set(Step::Input));
 }

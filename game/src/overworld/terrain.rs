@@ -4,6 +4,7 @@ use bevy::asset::RenderAssetUsages;
 use bevy::mesh::{Indices, PrimitiveTopology};
 use bevy::prelude::*;
 
+use super::parcels::{WASHES, openness, parcel};
 use super::{ROAD, SHEETS};
 use crate::theme::{HEDGE, PASTURE, WHEAT};
 
@@ -34,7 +35,7 @@ fn fbm(p: Vec2) -> f32 {
 }
 
 /// How far into world 2's mountains `x` lies, from 0 to 1.
-fn cols(x: f32) -> f32 {
+pub(super) fn cols(x: f32) -> f32 {
     ((x - 112.0) / 16.0).clamp(0.0, 1.0)
 }
 
@@ -50,7 +51,7 @@ pub(super) fn road_distance(p: Vec2) -> f32 {
         .fold(f32::MAX, f32::min)
 }
 
-fn smoothstep(edge0: f32, edge1: f32, x: f32) -> f32 {
+pub(super) fn smoothstep(edge0: f32, edge1: f32, x: f32) -> f32 {
     let t = ((x - edge0) / (edge1 - edge0)).clamp(0.0, 1.0);
     t * t * (3.0 - 2.0 * t)
 }
@@ -76,10 +77,12 @@ pub(super) fn snow(p: Vec2, h: f32) -> f32 {
     cols(p.x) * smoothstep(2.0, 4.0, h)
 }
 
-/// Colour of the land at `p`, `h` high, painted like the plaster of a plan-relief: broad swathes of meadow and
-/// straw, the woods' darker floor, sand by the water, stone and snow up high. Every change is a blend, never a cut.
+/// Colour of the land at `p`, `h` high, painted like the plaster of a plan-relief: the bocage's parcels on the open
+/// land, broad swathes of meadow and straw elsewhere, the woods' darker floor, sand by the water, stone and snow up
+/// high. Every change is a blend, but for the parcels' seams.
 fn land_color(p: Vec2, h: f32) -> Color {
-    let meadow = PASTURE.mix(&WHEAT, smoothstep(0.35, 0.65, fbm(p * 0.04 + 7.0)));
+    let swathes = PASTURE.mix(&WHEAT, smoothstep(0.35, 0.65, fbm(p * 0.04 + 7.0)));
+    let meadow = swathes.mix(&WASHES[parcel(p).1], openness(p));
     let mut color = meadow.mix(&HEDGE, smoothstep(0.47, 0.55, wood(p)));
     color = color.mix(&Color::srgb(0.62, 0.66, 0.7), cols(p.x) * 0.8);
     color = color.mix(&Color::srgb(0.86, 0.78, 0.58), 1.0 - smoothstep(WATER + 0.05, WATER + 0.25, h));
@@ -142,9 +145,10 @@ pub(super) fn road_mesh() -> Mesh {
 mod tests {
     use super::*;
 
-    /// The land's paint blends everywhere: a cut would stay as big however close the points, a blend shrinks.
+    /// The land's paint blends everywhere but at the parcels' seams: a cut would stay as big however close the points,
+    /// a blend shrinks.
     #[test]
-    fn land_colour_has_no_cuts() {
+    fn land_colour_cuts_only_at_seams() {
         for z in [-60.0, -20.0, 0.0, 10.0, 30.0] {
             let mut x = WEST;
             let at = |x: f32| {
@@ -156,7 +160,8 @@ mod tests {
                 x += 0.01;
                 let now = at(x);
                 let jump = before.iter().zip(now).map(|(a, b)| (a - b).abs()).fold(0.0, f32::max);
-                assert!(jump < 0.03, "a cut of {jump} in the land's colour at ({x}, {z})");
+                let seam = parcel(Vec2::new(x - 0.01, z)).0 != parcel(Vec2::new(x, z)).0;
+                assert!(jump < 0.03 || seam, "a cut of {jump} in the land's colour at ({x}, {z})");
                 before = now;
             }
         }
