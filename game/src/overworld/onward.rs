@@ -1,4 +1,5 @@
-//! What comes after a level: the choice's digits, and Enter on to the next sheet or the same one again.
+//! What comes after a level: the choice's digits, and Enter on to the next sheet or the same one
+//! again.
 
 use bevy::prelude::*;
 
@@ -8,8 +9,9 @@ use crate::level::data::LEVELS;
 use crate::overworld::plan::WalkTo;
 use crate::overworld::travel::Travel;
 
-/// Once won, digits answer the level's choice (the page at the end of the level has buttons too). Enter goes on to
-/// the next level on the Grand Plan once won and the choice made, or plays the same one again once lost.
+/// Once won, digits answer the level's choice (the page at the end of the level has buttons too).
+/// Enter goes on to the next level on the Grand Plan once won and the choice made, or plays the
+/// same one again once lost.
 pub fn between_levels(
     keys: Res<ButtonInput<KeyCode>>,
     mut level: ResMut<Level>,

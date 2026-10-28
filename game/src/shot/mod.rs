@@ -1,11 +1,13 @@
-//! Dev tool: F12 saves a screenshot to `screenshots/`. With `HACHURES_SHOT=out.png` the game jumps into play
-//! (`HACHURES_SCREEN=title|plan|paused|settings|lexique|controls|credits`, `HACHURES_LANG=en`,
-//! `HACHURES_LEVEL=n`, `HACHURES_DEMO=1` for one tower of each kind and a few barricades, `HACHURES_PARADE=1` for one
-//! still figure of each species in a row, `HACHURES_FASCINES=1` with that skill, `HACHURES_WAVE=1` to send the first
-//! wave, `HACHURES_WAVE=n` to send wave n, `HACHURES_CALQUE=1` for le Calque on), saves one screenshot after
-//! `HACHURES_AT` seconds (default 4) and quits: before/after comparisons without clicking. `HACHURES_FPS=1` logs,
-//! each second, the mean and the worst frame time (a stutter is a worst frame far above the mean), and the GPU time
-//! of each render pass (`render/<pass>/elapsed_gpu`, Vulkan and DX12 only): frame times alone can sit on the
+//! Dev tool: F12 saves a screenshot to `screenshots/`. With `HACHURES_SHOT=out.png` the game jumps
+//! into play (`HACHURES_SCREEN=title|plan|paused|settings|lexique|controls|credits`,
+//! `HACHURES_LANG=en`, `HACHURES_LEVEL=n`, `HACHURES_DEMO=1` for one tower of each kind and a few
+//! barricades, `HACHURES_PARADE=1` for one still figure of each species in a row,
+//! `HACHURES_FASCINES=1` with that skill, `HACHURES_WAVE=1` to send the first
+//! wave, `HACHURES_WAVE=n` to send wave n, `HACHURES_CALQUE=1` for le Calque on), saves one
+//! screenshot after `HACHURES_AT` seconds (default 4) and quits: before/after comparisons without
+//! clicking. `HACHURES_FPS=1` logs, each second, the mean and the worst frame time (a stutter is a
+//! worst frame far above the mean), and the GPU time of each render pass
+//! (`render/<pass>/elapsed_gpu`, Vulkan and DX12 only): frame times alone can sit on the
 //! compositor's 60 Hz whatever the GPU does.
 
 mod demo;
@@ -105,7 +107,8 @@ fn jump(
     commands.insert_resource(crate::menu::BackTo(Screen::Title));
     // The shot is taken in a window that never has the focus: play must not pause for it.
     settings.pause_unfocused = false;
-    // `HACHURES_LANG=en` (any code of `i18n::LANGUAGES`): shown in that language, the save left as it is on disk.
+    // `HACHURES_LANG=en` (any code of `i18n::LANGUAGES`): shown in that language, the save left as
+    // it is on disk.
     if let Some(code) = env("HACHURES_LANG") {
         // As `settings::plugin` does with the saved language, before the first page is written.
         crate::i18n::set(&code);
@@ -127,9 +130,9 @@ fn camera(mut camera: Single<&mut Transform, With<WorldCamera>>) {
         Transform::from_xyz(v[0], v[1], v[2]).looking_at(Vec3::new(v[3], v[4], v[5]), Vec3::Y);
 }
 
-/// `HACHURES_WALK=n@t` and `HACHURES_TRAVEL=n@t`: at `t` seconds, walk Nève to sheet `n`, or go and play it.
-/// `HACHURES_INK=t`: at `t` seconds, ink a barricade and an arbalète on the third row, as a click would, to see
-/// them land.
+/// `HACHURES_WALK=n@t` and `HACHURES_TRAVEL=n@t`: at `t` seconds, walk Nève to sheet `n`, or go and
+/// play it. `HACHURES_INK=t`: at `t` seconds, ink a barricade and an arbalète on the third row, as
+/// a click would, to see them land.
 fn act(
     time: Res<Time>,
     mut done: Local<[bool; 3]>,
@@ -174,7 +177,8 @@ fn act(
     }
 }
 
-/// `HACHURES_AT=t` or `t1,t2,…`: one screenshot at each time (`out-1.png`, … when several), then quit.
+/// `HACHURES_AT=t` or `t1,t2,…`: one screenshot at each time (`out-1.png`, … when several), then
+/// quit.
 fn timed(time: Res<Time>, mut taken: Local<usize>, mut commands: Commands) {
     let times: Vec<f32> = env("HACHURES_AT")
         .map_or(vec![4.0], |s| s.split(',').filter_map(|t| t.parse().ok()).collect());

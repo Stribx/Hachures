@@ -1,4 +1,5 @@
-//! The camera's rig: it eases toward where each screen wants it, smoothly at both ends, and the wheel zooms it.
+//! The camera's rig: it eases toward where each screen wants it, smoothly at both ends, and the
+//! wheel zooms it.
 
 use bevy::pbr::{DistanceFog, FogFalloff};
 use bevy::post_process::dof::DepthOfField;
@@ -10,7 +11,8 @@ use super::{OverworldRoot, SHEETS};
 use crate::level::Level;
 use crate::schedule::Screen;
 
-/// Where the camera is and where it is going: eye and target ease toward their goals, smoothly at both ends.
+/// Where the camera is and where it is going: eye and target ease toward their goals, smoothly at
+/// both ends.
 #[derive(Resource)]
 pub struct CameraRig {
     pub eye: Vec3,
@@ -70,8 +72,8 @@ pub fn framing(center: Vec3, zoom: f32) -> (Vec3, Vec3) {
     (center + Vec3::new(0.0, 13.0, 9.0) * zoom, center)
 }
 
-/// Where each screen wants the camera: over the board in play, behind Nève on the Grand Plan, drifting high over
-/// the Marches on the title, diving into a sheet during a trip.
+/// Where each screen wants the camera: over the board in play, behind Nève on the Grand Plan,
+/// drifting high over the Marches on the title, diving into a sheet during a trip.
 pub(super) fn aim(
     screen: Res<State<Screen>>,
     level: Res<Level>,
@@ -124,9 +126,9 @@ pub(super) fn drive(
     // The paper takes the far land, however high the camera.
     let distance = rig.eye.distance(rig.look);
     fog.falloff = FogFalloff::Linear { start: distance * 1.7, end: distance * 4.5 };
-    // In focus: what the camera looks at. The lens opens as the camera rises, so the Grand Plan seen from high up
-    // blurs at its edges as much as a board does seen from close: a model on a table, from any height.
-    // The settings may have taken the lens off.
+    // In focus: what the camera looks at. The lens opens as the camera rises, so the Grand Plan
+    // seen from high up blurs at its edges as much as a board does seen from close: a model on
+    // a table, from any height. The settings may have taken the lens off.
     if let Some(lens) = lens.as_deref_mut() {
         lens.focal_distance = distance;
         lens.aperture_f_stops =

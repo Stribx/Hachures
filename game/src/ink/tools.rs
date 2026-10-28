@@ -13,7 +13,8 @@ pub enum Act {
     Lay(Tile),
     /// Stands a tower up.
     Raise(Weapon),
-    /// Scrapes the cell (Gratter): an imperial borne comes off, an Éboulis or a Palissade returns to plain Sol.
+    /// Scrapes the cell (Gratter): an imperial borne comes off, an Éboulis or a Palissade returns
+    /// to plain Sol.
     Scrape,
     /// Takes back one of Nève's own strokes (Biffer): the cell is what it was before.
     Biffer,
@@ -60,7 +61,8 @@ pub const TOOLS: [Tool; 9] = [
     tool(KeyCode::Digit7, "lanterne", n_("tool.lanterne"), 60, Act::Raise(Weapon::Lanterne)),
     // Not priced in the docs: tune with the balance bot.
     tool(KeyCode::Digit8, "gratter", n_("tool.gratter"), 25, Act::Scrape),
-    // Free: what it gives back is the price (docs, section 7). Last, so the balance bot's indices hold.
+    // Free: what it gives back is the price (docs, section 7). Last, so the balance bot's indices
+    // hold.
     tool(KeyCode::Digit9, "biffer", n_("tool.biffer"), 0, Act::Biffer),
 ];
 

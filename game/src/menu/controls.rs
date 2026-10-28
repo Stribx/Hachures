@@ -1,4 +1,5 @@
-//! Les commandes: every key of the game on one sheet, read-only. Open from the title and the pause page.
+//! Les commandes: every key of the game on one sheet, read-only. Open from the title and the pause
+//! page.
 
 use bevy::prelude::*;
 use bevy::ui_widgets::Activate;
@@ -17,7 +18,8 @@ pub fn open_controls(from: Screen) -> impl Fn(On<Activate>, Commands, ResMut<Nex
     open(Screen::Controls, from)
 }
 
-/// (key, what it does), by where it is used. Arrows are named, not drawn: IM Fell has no arrow glyphs.
+/// (key, what it does), by where it is used. Arrows are named, not drawn: IM Fell has no arrow
+/// glyphs.
 const KEYS: [(&str, &[(&str, &str)]); 3] = [
     (
         n_("controls.group.sheet"),
@@ -100,7 +102,8 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
 mod tests {
     use super::*;
 
-    /// The row the web build leaves out is one of the sheet's rows: a typo would show it on the web.
+    /// The row the web build leaves out is one of the sheet's rows: a typo would show it on the
+    /// web.
     #[test]
     fn the_desktop_only_key_is_a_row() {
         let rows: Vec<&str> =

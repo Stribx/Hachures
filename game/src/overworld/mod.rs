@@ -1,8 +1,9 @@
-//! Les Marches: one long strip of land that every level's sheet is cut out of. Hills, lakes, fields and woods
-//! around the boards, the road from sheet to sheet, and each sheet not being played drawn as a miniature.
+//! Les Marches: one long strip of land that every level's sheet is cut out of. Hills, lakes, fields
+//! and woods around the boards, the road from sheet to sheet, and each sheet not being played drawn
+//! as a miniature.
 //!
-//! The level being played always stays at the origin (combat, picking and the overlay all count from there);
-//! the rest of the world is shifted under it instead, through `OverworldRoot`.
+//! The level being played always stays at the origin (combat, picking and the overlay all count
+//! from there); the rest of the world is shifted under it instead, through `OverworldRoot`.
 
 mod bocage;
 mod camera;

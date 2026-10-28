@@ -139,8 +139,8 @@ impl Field {
         }
     }
 
-    /// ← (-1) or → (+1): a percent moves 10 within its bounds, a switch flips, a choice, a preset (from High when
-    /// tuned by hand) or the language goes to the next, round.
+    /// ← (-1) or → (+1): a percent moves 10 within its bounds, a switch flips, a choice, a preset
+    /// (from High when tuned by hand) or the language goes to the next, round.
     pub(super) fn step(self, settings: &mut Settings, direction: i32) {
         let around = |i: usize, len: usize| (i as i32 + direction).rem_euclid(len as i32) as usize;
         if self == Field::Preset {

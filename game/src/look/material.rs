@@ -1,4 +1,5 @@
-//! `InkMaterial`, the surface drawn as an engraving, and the makers of its plain, varnished and water versions.
+//! `InkMaterial`, the surface drawn as an engraving, and the makers of its plain, varnished and
+//! water versions.
 
 use bevy::asset::RenderAssetUsages;
 use bevy::image::ImageSampler;
@@ -17,7 +18,8 @@ pub type InkMaterial = ExtendedMaterial<StandardMaterial, Hachure>;
 pub struct Hachure {
     #[uniform(100)]
     pub uniform: HachureUniform,
-    /// On water: how far each point lies from the shore (`shore_image`), which the engraver's water lines follow.
+    /// On water: how far each point lies from the shore (`shore_image`), which the engraver's
+    /// water lines follow.
     #[texture(101)]
     #[sampler(102)]
     pub shore: Option<Handle<Image>>,
@@ -27,17 +29,20 @@ pub struct Hachure {
 pub struct HachureUniform {
     pub paper: LinearRgba,
     pub ink: LinearRgba,
-    /// World units between strokes, fade toward the paper, lit value of white in full light, shade where strokes start.
+    /// World units between strokes, fade toward the paper, lit value of white in full light, shade
+    /// where strokes start.
     pub params: Vec4,
-    /// Where `Hachure::shore` lies on the map: its corner's x and z, then 1 / its width and 1 / its depth. Zero
-    /// without water lines.
+    /// Where `Hachure::shore` lies on the map: its corner's x and z, then 1 / its width and 1 /
+    /// its depth. Zero without water lines.
     pub shore: Vec4,
-    /// How much a varnished surface (the model's water, its waxed wood) shows its glints, 0 for matte plaster.
+    /// How much a varnished surface (the model's water, its waxed wood) shows its glints, 0 for
+    /// matte plaster.
     pub gloss: f32,
     /// How much the water moves: 1 for a river or a lake, 0 for ice.
     pub flow: f32,
-    /// How far it leans in the wind (`wind.wesl`): per world unit of height squared for a model, at the tip for a
-    /// mesh whose vertex colours' alpha weighs each vertex's sway (the grass). 0 for what never moves.
+    /// How far it leans in the wind (`wind.wesl`): per world unit of height squared for a model,
+    /// at the tip for a mesh whose vertex colours' alpha weighs each vertex's sway (the
+    /// grass). 0 for what never moves.
     pub wind: f32,
 }
 
@@ -69,12 +74,14 @@ impl Hachure {
     }
 }
 
-/// How far a surface's own colour fades toward the paper: a watercolour wash under the ink, as on a hand-coloured map
-/// (docs/direction-artistique.md, phase 6). Small pieces fade a little more, so their fine strokes still read.
+/// How far a surface's own colour fades toward the paper: a watercolour wash under the ink, as on a
+/// hand-coloured map (docs/direction-artistique.md, phase 6). Small pieces fade a little more, so
+/// their fine strokes still read.
 const WASH: f32 = 0.15;
 const FINE_WASH: f32 = 0.25;
 
-/// What a white surface lights up to under the sun and the sky, in the shader's units (tuned on screenshots).
+/// What a white surface lights up to under the sun and the sky, in the shader's units (tuned on
+/// screenshots).
 const LIT_WHITE: f32 = 1.0;
 
 impl MaterialExtension for Hachure {
@@ -99,16 +106,16 @@ pub fn ink(color: Color) -> InkMaterial {
     }
 }
 
-/// Ink on a varnished surface: the plan-relief's resin water and waxed wood catch the sun in glints (drawn by the
-/// shader; to Bevy the surface stays matte).
+/// Ink on a varnished surface: the plan-relief's resin water and waxed wood catch the sun in glints
+/// (drawn by the shader; to Bevy the surface stays matte).
 pub fn varnished(color: Color, gloss: f32) -> InkMaterial {
     let mut material = ink(color);
     material.extension.uniform.gloss = gloss;
     material
 }
 
-/// Water lined like an old map's: the varnished resin, with lines along the shore drawn from `shore` (made by
-/// `shore_image`, laid over `rect`), drifting as much as `flow` says.
+/// Water lined like an old map's: the varnished resin, with lines along the shore drawn from
+/// `shore` (made by `shore_image`, laid over `rect`), drifting as much as `flow` says.
 pub fn water(color: Color, shore: Handle<Image>, rect: Vec4, flow: f32) -> InkMaterial {
     let mut material = varnished(color, 0.8);
     material.extension.uniform.shore = rect;
@@ -117,12 +124,14 @@ pub fn water(color: Color, shore: Handle<Image>, rect: Vec4, flow: f32) -> InkMa
     material
 }
 
-/// The farthest from the shore `shore_image` tells apart, in world units: beyond, it is all open water.
+/// The farthest from the shore `shore_image` tells apart, in world units: beyond, it is all open
+/// water.
 const SHORE_REACH: f32 = 8.0;
 
-/// How far from the shore each point of the map rectangle `min`..`min + size` lies, at `per_unit` texels a world
-/// unit, for `water`: land where `wet` is false. Beyond the rectangle the water goes on, as off the edge of a sheet: a
-/// river leaving it is not closed by a bank. Returns the image and its rect.
+/// How far from the shore each point of the map rectangle `min`..`min + size` lies, at `per_unit`
+/// texels a world unit, for `water`: land where `wet` is false. Beyond the rectangle the water goes
+/// on, as off the edge of a sheet: a river leaving it is not closed by a bank. Returns the image
+/// and its rect.
 pub fn shore_image(
     min: Vec2,
     size: Vec2,

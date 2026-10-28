@@ -94,7 +94,8 @@ pub(super) fn pick(
     }
 }
 
-/// Names the rows (an entry not yet met is `???`, faded), and rings the tab shown and the entry picked.
+/// Names the rows (an entry not yet met is `???`, faded), and rings the tab shown and the entry
+/// picked.
 pub(super) fn show(
     view: Res<LexiqueView>,
     save: Res<Save>,

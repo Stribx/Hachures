@@ -1,5 +1,5 @@
-//! The weather follows the world: rain slanting in the wind while la Crue is under way, snow during le Gel and,
-//! lightly, all over the Cols. Drawn in ink strokes over the board.
+//! The weather follows the world: rain slanting in the wind while la Crue is under way, snow during
+//! le Gel and, lightly, all over the Cols. Drawn in ink strokes over the board.
 
 use bevy::prelude::*;
 
@@ -83,7 +83,8 @@ pub(super) fn fall(
     }
 }
 
-/// Rings spreading on the water where the rain falls: one at a time on each water cell, each in its own time.
+/// Rings spreading on the water where the rain falls: one at a time on each water cell, each in its
+/// own time.
 fn ripples(gizmos: &mut Gizmos, grid: &Grid, t: f32) {
     for i in (0..grid.tiles.len()).filter(|&i| matches!(grid.tiles[i], Tile::Eau | Tile::Gue)) {
         let h = mix(i as u32 ^ 0x51ed);

@@ -1,4 +1,5 @@
-//! The range circle: what a tower reaches, around the tower under the cursor and around the one the hand would ink.
+//! The range circle: what a tower reaches, around the tower under the cursor and around the one the
+//! hand would ink.
 
 use std::f32::consts::FRAC_PI_2;
 
@@ -13,8 +14,8 @@ use crate::level::Level;
 use crate::map;
 use crate::theme::INK;
 
-/// Draws the circle flat on the board, in the pencil's dotted line, of the reach `weapon` has at `cell`,
-/// with or without a tower there yet.
+/// Draws the circle flat on the board, in the pencil's dotted line, of the reach `weapon` has at
+/// `cell`, with or without a tower there yet.
 fn circle(gizmos: &mut Gizmos<Pencil>, level: &Level, cell: usize, weapon: Weapon, alpha: f32) {
     let flat = Isometry3d::new(
         map::cell_pos(level.terrain.grid(), cell),

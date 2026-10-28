@@ -1,5 +1,6 @@
-//! The player's settings: sound, display, play, accessibility and language. Their own resource, kept in their own
-//! file (`storage`); the page that edits them is `menu::settings_page`, `apply` puts them into effect.
+//! The player's settings: sound, display, play, accessibility and language. Their own resource,
+//! kept in their own file (`storage`); the page that edits them is `menu::settings_page`, `apply`
+//! puts them into effect.
 
 mod apply;
 mod model;

@@ -17,8 +17,8 @@ pub fn plugin(app: &mut App) {
         .add_systems(Update, show_confirms.run_if(in_state(Screen::Paused)));
 }
 
-/// A button that asks twice, for what loses the level under way: the first press arms it ("Sûr ? …" in the seal's
-/// red), a second within `ARMED` seconds acts.
+/// A button that asks twice, for what loses the level under way: the first press arms it ("Sûr ? …"
+/// in the seal's red), a second within `ARMED` seconds acts.
 #[derive(Component)]
 struct Confirm {
     label: &'static str,
@@ -28,7 +28,8 @@ struct Confirm {
 
 const ARMED: f32 = 3.0;
 
-/// Whether `button` may act now: a confirm button acts only once armed, and the first press arms it.
+/// Whether `button` may act now: a confirm button acts only once armed, and the first press arms
+/// it.
 fn confirmed(button: Entity, confirms: &mut Query<&mut Confirm>) -> bool {
     let Ok(mut confirm) = confirms.get_mut(button) else { return true };
     if confirm.armed.is_some() {

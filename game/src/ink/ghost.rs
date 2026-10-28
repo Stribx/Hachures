@@ -21,7 +21,8 @@ pub(super) struct Stock<'w> {
     materials: ResMut<'w, Assets<InkMaterial>>,
 }
 
-/// What the ghost keeps from frame to frame: its entity, the piece it shows, and the meshes made so far.
+/// What the ghost keeps from frame to frame: its entity, the piece it shows, and the meshes made so
+/// far.
 #[derive(Default)]
 pub(super) struct Held {
     ghost: Option<Entity>,
@@ -31,10 +32,11 @@ pub(super) struct Held {
 
 /// The piece the hand holds, pale, where it would stand: shown on any cell it may be inked on.
 ///
-/// One ghost that stays, moved from cell to cell, its mesh made once per tool and shape: a mesh just made is drawn
-/// a frame or more later, so a ghost made anew on every cell blinked out as the mouse moved. And one mesh, its
-/// parts' colours on its vertices: as separate see-through meshes, the wood and the string (centred alike) swapped
-/// their drawing order from frame to frame, and the ghost trembled.
+/// One ghost that stays, moved from cell to cell, its mesh made once per tool and shape: a mesh
+/// just made is drawn a frame or more later, so a ghost made anew on every cell blinked out as the
+/// mouse moved. And one mesh, its parts' colours on its vertices: as separate see-through meshes,
+/// the wood and the string (centred alike) swapped their drawing order from frame to frame, and the
+/// ghost trembled.
 pub(super) fn ghost(
     level: Res<Level>,
     selection: Res<Selection>,
@@ -44,7 +46,8 @@ pub(super) fn ghost(
     mut stock: Stock,
 ) {
     let grid = level.terrain.grid();
-    // Only a tile has a ghost: a tower's range is drawn by `combat`, a scrape the route once the cell is plain.
+    // Only a tile has a ghost: a tower's range is drawn by `combat`, a scrape the route once the
+    // cell is plain.
     let tile = if let Act::Lay(tile) = TOOLS[selection.tool].act { Some(tile) } else { None };
     let at = verdict.at.zip(tile).filter(|_| verdict.refusal.is_none());
     let entity = *held.ghost.get_or_insert_with(|| {

@@ -63,8 +63,8 @@ pub struct Choice {
     pub options: Vec<(String, String)>,
 }
 
-/// A line in Nève's margin: its key, and the key of the place it speaks of if any (its `{}`). It is translated when
-/// shown, so it reads in the language of the moment.
+/// A line in Nève's margin: its key, and the key of the place it speaks of if any (its `{}`). It is
+/// translated when shown, so it reads in the language of the moment.
 pub struct MarginNote {
     pub line: String,
     pub name: Option<String>,
@@ -131,7 +131,8 @@ impl Level {
         self.choice.as_ref().is_none_or(|c| self.choices.contains_key(&c.id))
     }
 
-    /// Picks option `k` of the level's choice, for this level and the campaign; the next level opens with it.
+    /// Picks option `k` of the level's choice, for this level and the campaign; the next level
+    /// opens with it.
     pub fn choose(&mut self, k: usize, save: &mut Save) {
         if self.choice_locked {
             return;

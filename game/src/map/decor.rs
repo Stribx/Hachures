@@ -7,7 +7,8 @@ use bevy::prelude::*;
 use super::grid::{Grid, Tile};
 use super::props::{PropPart, merge};
 
-/// Fallen stone: blocks of varied sizes, each turned and partly sunk in the ground, in a pale and a dark tone.
+/// Fallen stone: blocks of varied sizes, each turned and partly sunk in the ground, in a pale and a
+/// dark tone.
 pub(crate) fn rubble() -> Vec<PropPart> {
     // Size, turn about y, tilt about x, centre: below 0, so the block sits in the ground.
     let blocks = [
@@ -37,7 +38,8 @@ pub(crate) fn rubble() -> Vec<PropPart> {
     ]
 }
 
-/// 1 when a palissade stands north or south of cell `i` and none east or west, so the wall runs along z; else 0.
+/// 1 when a palissade stands north or south of cell `i` and none east or west, so the wall runs
+/// along z; else 0.
 pub(crate) fn palisade_shape(grid: &Grid, i: usize) -> u8 {
     let (x, _) = grid.coords(i);
     let (mut along_z, mut along_x) = (false, false);
@@ -47,8 +49,8 @@ pub(crate) fn palisade_shape(grid: &Grid, i: usize) -> u8 {
     (along_z && !along_x) as u8
 }
 
-/// A palisade: a row of pointed stakes in dark stained wood, bound by two rails, the tips dipped in the Chancellerie's
-/// vermilion. It runs along x, or along z when `shape` is 1.
+/// A palisade: a row of pointed stakes in dark stained wood, bound by two rails, the tips dipped in
+/// the Chancellerie's vermilion. It runs along x, or along z when `shape` is 1.
 pub(crate) fn palisade(shape: u8) -> Vec<PropPart> {
     let turn = Quat::from_rotation_y(if shape == 1 { FRAC_PI_2 } else { 0.0 });
     let (mut wood, mut tips) = (Vec::new(), Vec::new());

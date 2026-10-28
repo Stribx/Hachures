@@ -9,21 +9,24 @@ use bevy::world_serialization::WorldInstanceReady;
 
 use super::{Hachure, InkMaterial};
 
-/// Ink materials already made from a model's own (and its carving, if any), so every tower shares them.
+/// Ink materials already made from a model's own (and its carving, if any), so every tower shares
+/// them.
 #[derive(Resource, Default)]
 pub(super) struct Inked(
     HashMap<(AssetId<StandardMaterial>, Option<Carved>, u32), Handle<InkMaterial>>,
 );
 
-/// A model carved for the plan-relief: its colour becomes `rgb`'s wood. If `painted`, its painted texture shows
-/// through the wood's tint, so its parts still read apart; if not, it is one piece of plain wood.
+/// A model carved for the plan-relief: its colour becomes `rgb`'s wood. If `painted`, its painted
+/// texture shows through the wood's tint, so its parts still read apart; if not, it is one piece of
+/// plain wood.
 #[derive(Component, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Carved {
     pub rgb: [u8; 3],
     pub painted: bool,
 }
 
-/// A model the wind moves: `.0` is how far it leans, per world unit of height squared (`Hachure::wind`).
+/// A model the wind moves: `.0` is how far it leans, per world unit of height squared
+/// (`Hachure::wind`).
 #[derive(Component, Clone, Copy)]
 pub struct Swaying(pub f32);
 
@@ -65,7 +68,8 @@ impl Inking<'_> {
     }
 }
 
-/// A model just spawned: its materials become ink, its texture kept, unless it is `Carved`; it sways if `Swaying`.
+/// A model just spawned: its materials become ink, its texture kept, unless it is `Carved`; it
+/// sways if `Swaying`.
 pub(super) fn ink_models(
     ready: On<WorldInstanceReady>,
     carved: Query<&Carved>,

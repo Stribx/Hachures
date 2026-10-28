@@ -69,7 +69,8 @@ pub struct Boss {
 #[derive(Component)]
 pub struct Borne;
 
-/// The map owns the bornes: one gone from it (Nève scraped it off) breaks into shards like a shot one.
+/// The map owns the bornes: one gone from it (Nève scraped it off) breaks into shards like a shot
+/// one.
 pub(super) fn drop_bornes(
     level: Res<Level>,
     bornes: Query<(Entity, &Enemy, &Transform), With<Borne>>,
@@ -84,7 +85,8 @@ pub(super) fn drop_bornes(
     }
 }
 
-/// The boss moves on to its next phase as its HP drops; [P] a new phase can mean a new species profile.
+/// The boss moves on to its next phase as its HP drops; [P] a new phase can mean a new species
+/// profile.
 pub fn boss_phases(mut level: ResMut<Level>, mut bosses: Query<(&mut Enemy, &mut Boss)>) {
     let Some(boss_file) = level.world().boss.as_ref() else { return };
     let phases = &boss_file.phases;

@@ -73,8 +73,8 @@ pub fn pose(gait: Gait, phase: f32, moving: bool) -> Transform {
         .with_rotation(Quat::from_rotation_x(roll) * Quat::from_rotation_z(pitch))
 }
 
-/// The turn of a wheel, a leg (`side` is +1 or -1, which way it swings first) or the yoke, to compose with its rest
-/// rotation.
+/// The turn of a wheel, a leg (`side` is +1 or -1, which way it swings first) or the yoke, to
+/// compose with its rest rotation.
 pub fn limb(role: Role, gait: Gait, side: f32, phase: f32, walked: f32) -> Quat {
     match role {
         Role::Wheel => Quat::from_rotation_z(-walked / WHEEL_RADIUS),
@@ -196,7 +196,8 @@ mod tests {
                 let p = i as f32 * 0.1;
                 let (a, b) = (pose(gait, p, true), pose(gait, p + TAU, true));
                 assert!(a.translation.distance(b.translation) < 1e-4, "{gait:?}");
-                // angle_between loses precision near zero (acos), so compare the vector part of the difference.
+                // angle_between loses precision near zero (acos), so compare the vector part of the
+                // difference.
                 assert!((a.rotation * b.rotation.inverse()).xyz().length() < 1e-4, "{gait:?}");
             }
         }

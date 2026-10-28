@@ -1,4 +1,5 @@
-//! The land itself: procedural height, colour and wood, and the meshes of the land and of the road across it.
+//! The land itself: procedural height, colour and wood, and the meshes of the land and of the road
+//! across it.
 
 use bevy::asset::RenderAssetUsages;
 use bevy::mesh::{Indices, PrimitiveTopology};
@@ -57,7 +58,8 @@ pub(super) fn smoothstep(edge0: f32, edge1: f32, x: f32) -> f32 {
     t * t * (3.0 - 2.0 * t)
 }
 
-/// Height of the land at `p`: rolling hills in world 1, mountains in world 2, flat around every sheet.
+/// Height of the land at `p`: rolling hills in world 1, mountains in world 2, flat around every
+/// sheet.
 pub fn height(p: Vec2) -> f32 {
     let amplitude = 4.0 + 7.0 * mountain_share(p.x);
     let mut h = (fbm(p * 0.05) - 0.34) * amplitude * 1.6;
@@ -68,7 +70,8 @@ pub fn height(p: Vec2) -> f32 {
     h + (h.max(WATER + 0.3) - h) * road
 }
 
-/// How wooded the land is at `p`: the woods stand where it is over 0.52, and their floor darkens the ground.
+/// How wooded the land is at `p`: the woods stand where it is over 0.52, and their floor darkens
+/// the ground.
 pub(super) fn wood(p: Vec2) -> f32 {
     fbm(p * 0.035 + 40.0)
 }
@@ -78,9 +81,9 @@ pub(super) fn snow(p: Vec2, h: f32) -> f32 {
     mountain_share(p.x) * smoothstep(2.0, 4.0, h)
 }
 
-/// Colour of the land at `p`, `h` high, painted like the plaster of a plan-relief: the bocage's parcels on the open
-/// land, broad swathes of meadow and straw elsewhere, the woods' darker floor, sand by the water, stone and snow up
-/// high. Every change is a blend, but for the parcels' seams.
+/// Colour of the land at `p`, `h` high, painted like the plaster of a plan-relief: the bocage's
+/// parcels on the open land, broad swathes of meadow and straw elsewhere, the woods' darker floor,
+/// sand by the water, stone and snow up high. Every change is a blend, but for the parcels' seams.
 fn land_color(p: Vec2, h: f32) -> Color {
     let swathes = PASTURE.mix(&WHEAT, smoothstep(0.35, 0.65, fbm(p * 0.04 + 7.0)));
     let meadow = swathes.mix(&WASHES[parcel(p).wash], openness(p));
@@ -153,8 +156,8 @@ pub(super) fn road_mesh() -> Mesh {
 mod tests {
     use super::*;
 
-    /// The land's paint blends everywhere but at the parcels' seams: a cut would stay as big however close the points,
-    /// a blend shrinks.
+    /// The land's paint blends everywhere but at the parcels' seams: a cut would stay as big
+    /// however close the points, a blend shrinks.
     #[test]
     fn land_colour_cuts_only_at_seams() {
         for z in [-60.0, -20.0, 0.0, 10.0, 30.0] {

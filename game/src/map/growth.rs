@@ -1,4 +1,5 @@
-//! What grows on the fields: felt tufts on the pastures, wildflowers in the meadows, wheat on the crop fields.
+//! What grows on the fields: felt tufts on the pastures, wildflowers in the meadows, wheat on the
+//! crop fields.
 
 use bevy::prelude::*;
 
@@ -14,7 +15,8 @@ pub enum Crop {
     Wheat,
 }
 
-/// One thing growing: in `cell`, `at` from its centre, of `crop`, its own `roll` for its shape and colour.
+/// One thing growing: in `cell`, `at` from its centre, of `crop`, its own `roll` for its shape and
+/// colour.
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Sprig {
     pub cell: usize,
@@ -23,10 +25,10 @@ pub struct Sprig {
     pub roll: u32,
 }
 
-/// Everything growing on `grid`, `density` of it (1 in full, less on a modest machine): only on its fields' open
-/// ground as it is now, so nothing on a marker, under a tower or an inked piece, or in a drowned meadow. Up in the
-/// mountains (`Land::Cols`) nothing is sown: the crop fields are meadows in flower. The same every time the same map is
-/// drawn.
+/// Everything growing on `grid`, `density` of it (1 in full, less on a modest machine): only on its
+/// fields' open ground as it is now, so nothing on a marker, under a tower or an inked piece, or in
+/// a drowned meadow. Up in the mountains (`Land::Cols`) nothing is sown: the crop fields are
+/// meadows in flower. The same every time the same map is drawn.
 pub fn sprigs(grid: &Grid, density: f32, land: Land) -> Vec<Sprig> {
     let fields = fields(grid);
     let mut sprigs = Vec::new();

@@ -1,4 +1,5 @@
-//! The Marches' land, spawned once under `OverworldRoot`, and the shift that keeps the played sheet at the origin.
+//! The Marches' land, spawned once under `OverworldRoot`, and the shift that keeps the played sheet
+//! at the origin.
 
 use bevy::light::{NotShadowCaster, NotShadowReceiver};
 use bevy::prelude::*;
@@ -11,8 +12,8 @@ use crate::campaign::save::Save;
 use crate::level::Level;
 use crate::look::{InkMaterial, Swaying, ink, shore_image, water};
 
-/// How far a tree leans in the wind, per world unit of height squared: a canopy a few units up sways a few
-/// hundredths, its trunk not at all.
+/// How far a tree leans in the wind, per world unit of height squared: a canopy a few units up
+/// sways a few hundredths, its trunk not at all.
 const TREE_WIND: f32 = 0.012;
 
 /// The miniature of sheet `.0`, hidden while that sheet is the one on the board.
@@ -31,7 +32,8 @@ pub(super) fn spawn(
     land.extension.uniform.params.x = 0.16;
     land.extension.uniform.paper.alpha = 0.9;
     let land = materials.add(land);
-    // The same resin as the board's water, lined from the lakes' shores; seen from higher, the lines spaced wider.
+    // The same resin as the board's water, lined from the lakes' shores; seen from higher, the
+    // lines spaced wider.
     let (min, size) = (Vec2::new(WEST, NORTH), Vec2::new(EAST - WEST, SOUTH - NORTH));
     let (shore, rect) = shore_image(min, size, 4.0, |p| height(p) < WATER);
     let mut lakes = water(crate::theme::WATER, images.add(shore), rect, 1.0);
@@ -90,8 +92,8 @@ pub(super) fn spawn(
     }
 }
 
-/// A new level on the board: the world shifts so its sheet lies at the origin (the camera along with it), and its
-/// miniature hides.
+/// A new level on the board: the world shifts so its sheet lies at the origin (the camera along
+/// with it), and its miniature hides.
 pub(super) fn follow_level(
     level: Res<Level>,
     mut shown: Local<Option<usize>>,

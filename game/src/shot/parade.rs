@@ -9,8 +9,8 @@ use crate::level::{Level, LevelEntity};
 use crate::map;
 use crate::map::grid::{Grid, Tile};
 
-/// `n` distinct plain-Sol cells without a marker: a run of `n` in one row, the row nearest the middle first, else the
-/// first `n` in reading order (fewer if the map has fewer).
+/// `n` distinct plain-Sol cells without a marker: a run of `n` in one row, the row nearest the
+/// middle first, else the first `n` in reading order (fewer if the map has fewer).
 pub fn parade_cells(grid: &Grid, n: usize) -> Vec<usize> {
     let free = |i: usize| {
         grid.tiles[i] == Tile::Sol
@@ -32,7 +32,8 @@ pub fn parade_cells(grid: &Grid, n: usize) -> Vec<usize> {
     (0..grid.tiles.len()).filter(|&i| free(i)).take(n).collect()
 }
 
-/// Once the level is loaded, one figure of each species in a row: no `Enemy`, so none walks, is shot at or holds a wave.
+/// Once the level is loaded, one figure of each species in a row: no `Enemy`, so none walks, is
+/// shot at or holds a wave.
 pub fn parade(
     mut done: Local<u32>,
     level: Res<Level>,
@@ -95,7 +96,8 @@ S..^....
     #[test]
     fn cells_run_along_the_row_nearest_the_middle() {
         let grid = Grid::parse(MAP);
-        // Middle row is 2 (of 5) and has no run of 5; row 1 neither; row 3 has one from its third cell.
+        // Middle row is 2 (of 5) and has no run of 5; row 1 neither; row 3 has one from its third
+        // cell.
         let cells = parade_cells(&grid, 5);
         assert!(cells.windows(2).all(|w| w[1] == w[0] + 1), "{cells:?}");
         assert_eq!(grid.coords(cells[0]), (2, 3));

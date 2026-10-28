@@ -1,4 +1,5 @@
-//! The `Level` resource: everything a level on the board holds, and the rules that read and change it.
+//! The `Level` resource: everything a level on the board holds, and the rules that read and change
+//! it.
 
 use std::collections::{BTreeMap, HashMap};
 
@@ -34,8 +35,8 @@ pub struct Level {
     /// The next wave brings the event: its map is checked too before inking.
     pub event_next: bool,
     pub species: Vec<Species>,
-    /// The species this level sends (the boss's phases included), sorted: le Droit de Passage and Tab only
-    /// consider these.
+    /// The species this level sends (the boss's phases included), sorted: le Droit de Passage and
+    /// Tab only consider these.
     pub present: Vec<usize>,
     /// Spawn order (species indices) of every wave.
     pub waves: Vec<Vec<usize>>,
@@ -61,7 +62,8 @@ pub struct Level {
     /// Names kept in the Rôle: Fuyards reaching the Refuge, and notes.
     pub names: i32,
     pub fuyard_hurt: bool,
-    /// One for the cell each enemy on the map stands on, and a second for the cell it walks to next, when it has one.
+    /// One for the cell each enemy on the map stands on, and a second for the cell it walks to
+    /// next, when it has one.
     pub walkers: Vec<Walker>,
     /// Notes still to come, and the margin written so far.
     pub(super) notes: Vec<Note>,
@@ -76,7 +78,8 @@ pub struct Level {
     /// Won, and its sceaux are in the save.
     pub finished: bool,
     /// La Tension de la feuille (docs, section 9), hidden from the player: from -2 (the sheet
-    /// buckles) to 2 (the sheet is taut). Waves won clean tighten it; waves that cost Rôle loosen it.
+    /// buckles) to 2 (the sheet is taut). Waves won clean tighten it; waves that cost Rôle loosen
+    /// it.
     pub tension: i32,
     pub(super) lives_at_wave_start: u32,
 }
@@ -150,7 +153,8 @@ impl Level {
         self.note(Trigger::Won);
         let challenge = self.challenge_met();
         let record = save.record_mut(self.index);
-        // A replay earns sceaux, but the story is written once, like the choice: the first win keeps its Names.
+        // A replay earns sceaux, but the story is written once, like the choice: the first win
+        // keeps its Names.
         if !record.won {
             record.names = self.names;
             record.erased = self.erased.iter().map(|&p| self.places[p].name.clone()).collect();

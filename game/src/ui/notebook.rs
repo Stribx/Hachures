@@ -1,5 +1,5 @@
-//! The page of Nève's notebook at the end of a level: what held, the sceaux, the names scratched out,
-//! and the choice, made by striking out the line not taken.
+//! The page of Nève's notebook at the end of a level: what held, the sceaux, the names scratched
+//! out, and the choice, made by striking out the line not taken.
 
 use bevy::picking::hover::Hovered;
 use bevy::prelude::*;
@@ -18,7 +18,8 @@ use crate::overworld::travel::Travel;
 use crate::schedule::Screen;
 use crate::theme::{BODY_SIZE, Face, HEADING_SIZE, INK, PAPER, SMALL_SIZE, SUBTITLE_SIZE, font};
 
-/// The page, written for the option picked and the sceaux at the time: it is written again when they change.
+/// The page, written for the option picked and the sceaux at the time: it is written again when
+/// they change.
 #[derive(Component, PartialEq)]
 pub struct Notebook {
     picked: Option<String>,

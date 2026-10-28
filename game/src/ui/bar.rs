@@ -1,5 +1,5 @@
-//! The bar along the bottom: the level's tools, the next wave, le Calque, the route shown, the sceaux and the Lexique.
-//! Everything can be played with the mouse; each button names its key.
+//! The bar along the bottom: the level's tools, the next wave, le Calque, the route shown, the
+//! sceaux and the Lexique. Everything can be played with the mouse; each button names its key.
 
 use bevy::ecs::system::SystemParam;
 use bevy::picking::hover::Hovered;
@@ -44,7 +44,8 @@ pub struct SpeedLabel;
 
 type SpeedText = (With<SpeedLabel>, Without<ToolCost>, Without<RouteLabel>);
 
-/// Writes the bar for the level being played, and takes it away once the level is over (its page takes over).
+/// Writes the bar for the level being played, and takes it away once the level is over (its page
+/// takes over).
 pub fn sync(
     mut commands: Commands,
     assets: Res<AssetServer>,

@@ -1,4 +1,5 @@
-//! Where each level's sheet lies on the Marches, the road between sheets, and a sheet cut as a miniature mesh.
+//! Where each level's sheet lies on the Marches, the road between sheets, and a sheet cut as a
+//! miniature mesh.
 
 use std::sync::LazyLock;
 
@@ -45,8 +46,9 @@ pub static SHEETS: LazyLock<Vec<Sheet>> = LazyLock::new(|| {
         .collect()
 });
 
-/// The road from each sheet to the next: from the east edge of its wooden bed to the west edge of the next one's,
-/// leaving and entering each bed square to its edge, so the ribbon's ends lie flush against them.
+/// The road from each sheet to the next: from the east edge of its wooden bed to the west edge of
+/// the next one's, leaving and entering each bed square to its edge, so the ribbon's ends lie flush
+/// against them.
 pub static ROAD: LazyLock<Vec<Vec<Vec2>>> = LazyLock::new(|| {
     SHEETS
         .windows(2)
@@ -71,7 +73,8 @@ pub static ROAD: LazyLock<Vec<Vec<Vec2>>> = LazyLock::new(|| {
         .collect()
 });
 
-/// A sheet's blocks merged into one mesh, as the map draws them; a sheet not reached yet is blank paper.
+/// A sheet's blocks merged into one mesh, as the map draws them; a sheet not reached yet is blank
+/// paper.
 pub(super) fn sheet_mesh(sheet: &Sheet, reached: bool) -> Mesh {
     let grid = &sheet.grid;
     let mut mesh = block(

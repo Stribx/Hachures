@@ -1,4 +1,5 @@
-//! The shared palette and fonts: the UI's inks and papers, the world's tones, and the two typefaces.
+//! The shared palette and fonts: the UI's inks and papers, the world's tones, and the two
+//! typefaces.
 
 use bevy::prelude::*;
 
@@ -14,7 +15,8 @@ pub const INK_SOFT: Color = Color::srgb(0.37, 0.32, 0.25);
 pub const SEAL: Color = Color::srgb(0.66, 0.2, 0.16);
 /// The seal under the mouse or pressed, darker.
 pub const SEAL_DEEP: Color = Color::srgb(0.56, 0.16, 0.13);
-/// A button at rest: a faint wash of ink on the paper, a slip laid on the sheet rather than a ruled frame.
+/// A button at rest: a faint wash of ink on the paper, a slip laid on the sheet rather than a ruled
+/// frame.
 pub const SLIP: Color = Color::srgba(0.55, 0.4, 0.22, 0.1);
 /// A hovered button's wash.
 pub const LIT: Color = Color::srgba(0.55, 0.4, 0.22, 0.25);
@@ -27,14 +29,16 @@ pub const SHEET: Color = Color::srgb(0.93, 0.89, 0.8);
 pub const WORLD_INK: Color = Color::srgb(0.17, 0.12, 0.08);
 /// Sépia, for le Calque and the goal.
 pub const SEPIA: Color = Color::srgb(0.48, 0.29, 0.13);
-/// The sun's colour: late-afternoon warm, against the sky's cool ambient (`AMBIENT`). `hachure.wesl` reads both.
+/// The sun's colour: late-afternoon warm, against the sky's cool ambient (`AMBIENT`).
+/// `hachure.wesl` reads both.
 pub const SUNLIGHT: Color = Color::srgb(1.0, 0.94, 0.84);
 /// The sky's cool ambient light.
 pub const AMBIENT: Color = Color::srgb(0.9, 0.92, 1.0);
 /// Water: lakes and the Eau tile, the resin's blue.
 pub const WATER: Color = Color::srgb(0.45, 0.63, 0.76);
 
-// The bocage's washes, as a hand-coloured map lays them under the ink (docs/direction-artistique.md, phase 6).
+// The bocage's washes, as a hand-coloured map lays them under the ink
+// (docs/direction-artistique.md, phase 6).
 /// Dry pasture: the Sol of the board, the Marches' meadows.
 pub const PASTURE: Color = Color::srgb(0.65, 0.74, 0.48);
 /// Wet meadow, a bluer green: the Sol bas that la Crue drowns.
@@ -72,7 +76,8 @@ pub const READABLE: [&str; 2] =
 
 /// A page's title, over its sheet.
 pub const TITLE_SIZE: f32 = 56.0;
-/// A group's heading on a page (a column of settings, keys or a sceaux branch), and a panel's title.
+/// A group's heading on a page (a column of settings, keys or a sceaux branch), and a panel's
+/// title.
 pub const HEADING_SIZE: f32 = 30.0;
 /// The line under a title, a button's words, a panel's main line.
 pub const SUBTITLE_SIZE: f32 = 26.0;

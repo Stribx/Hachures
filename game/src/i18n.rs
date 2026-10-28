@@ -1,12 +1,13 @@
 //! The game's words, one file per language: `assets/data/i18n/<code>.ron` maps keys (`menu.play`,
-//! `note.1-1.…`) to text. The code and the data files only hold keys. French (`fr.ron`) is the reference: every key is
-//! there, and every other language has the same keys. The tests list what a language misses or no longer needs.
+//! `note.1-1.…`) to text. The code and the data files only hold keys. French (`fr.ron`) is the
+//! reference: every key is there, and every other language has the same keys. The tests list what a
+//! language misses or no longer needs.
 //!
 //! - `t("menu.play")`: a line.
-//! - `tf("hud.wave_stamp", &[&n])`: a line with values; `{}` takes the next one, `{1}` the second, so a translation
-//!   can reorder them.
-//! - `tp("title.progress", n, &[..])`: `title.progress.one` or `.other` (or `.few`, `.many`…), as the language's rule
-//!   says of `n`.
+//! - `tf("hud.wave_stamp", &[&n])`: a line with values; `{}` takes the next one, `{1}` the second,
+//!   so a translation can reorder them.
+//! - `tp("title.progress", n, &[..])`: `title.progress.one` or `.other` (or `.few`, `.many`…), as
+//!   the language's rule says of `n`.
 //! - `n_("tool.barricade")`: a key kept in a table, shown later with `t`.
 
 use std::collections::HashMap;
@@ -21,9 +22,9 @@ struct Language {
     plural: fn(u64) -> &'static str,
 }
 
-/// Every language, French first. Adding one: copy `fr.ron` to `<code>.ron`, translate it, and add a line here with
-/// its plural rule (CLDR categories). Its letters must be in IM Fell and Atkinson Hyperlegible (Western European
-/// Latin is).
+/// Every language, French first. Adding one: copy `fr.ron` to `<code>.ron`, translate it, and add a
+/// line here with its plural rule (CLDR categories). Its letters must be in IM Fell and Atkinson
+/// Hyperlegible (Western European Latin is).
 const LANGUAGES: &[Language] = &[
     Language {
         code: "fr",
@@ -48,8 +49,8 @@ static TABLES: LazyLock<Vec<HashMap<String, String>>> = LazyLock::new(|| {
         .collect()
 });
 
-/// The language shown, as an index in `LANGUAGES`, kept here so any code can translate without the save at hand;
-/// the settings set it.
+/// The language shown, as an index in `LANGUAGES`, kept here so any code can translate without the
+/// save at hand; the settings set it.
 static CURRENT: AtomicUsize = AtomicUsize::new(0);
 
 fn index(code: &str) -> usize {
@@ -90,13 +91,15 @@ pub fn tf(key: &str, args: &[&dyn Display]) -> String {
     fill(t(key), args)
 }
 
-/// `x` as a number to read: one decimal at most, none when whole, the decimal mark of the language shown.
+/// `x` as a number to read: one decimal at most, none when whole, the decimal mark of the language
+/// shown.
 pub fn number(x: f32) -> String {
     let text = format!("{x:.1}");
     text.strip_suffix(".0").map_or_else(|| text.replace('.', t("language.decimal")), String::from)
 }
 
-/// The form of `key` the language shown uses for the count `n` (`key.one`, `key.other`…), filled from `args`.
+/// The form of `key` the language shown uses for the count `n` (`key.one`, `key.other`…), filled
+/// from `args`.
 pub fn tp(key: &str, n: impl Into<u64>, args: &[&dyn Display]) -> String {
     let lang = current();
     let form = format!("{key}.{}", (LANGUAGES[lang].plural)(n.into()));
@@ -118,7 +121,8 @@ fn lookup(key: &str, lang: usize) -> &str {
     TABLES[0].get(key).map_or(key, String::as_str)
 }
 
-/// A key shown without its line, logged once in development: the tests cannot see keys made at run time.
+/// A key shown without its line, logged once in development: the tests cannot see keys made at run
+/// time.
 fn missing(key: &str, lang: usize) {
     #[cfg(debug_assertions)]
     {
@@ -164,8 +168,8 @@ pub fn fill(template: &str, args: &[&dyn Display]) -> String {
     out
 }
 
-/// The text before the first slot, the slot (`None` for `{}`, `Some(k)` for `{k}`), and the text after.
-/// Braces holding anything else are not slots and stay as written.
+/// The text before the first slot, the slot (`None` for `{}`, `Some(k)` for `{k}`), and the text
+/// after. Braces holding anything else are not slots and stay as written.
 fn split_slot(text: &str) -> Option<(&str, Option<usize>, &str)> {
     let mut from = 0;
     loop {
@@ -205,13 +209,14 @@ mod tests {
         found
     }
 
-    /// Whether `key` is one of the counted forms of `counted` (`title.progress.one` of `title.progress`).
+    /// Whether `key` is one of the counted forms of `counted` (`title.progress.one` of
+    /// `title.progress`).
     fn form_of(key: &str, counted: &BTreeSet<String>) -> bool {
         counted.iter().any(|c| key.strip_prefix(c.as_str()).is_some_and(|f| f.starts_with('.')))
     }
 
-    /// The keys written in the code: the literal in each `t("…")`, `tf("…")` and `n_("…")`, and apart, the counted
-    /// ones of `tp("…")`.
+    /// The keys written in the code: the literal in each `t("…")`, `tf("…")` and `n_("…")`, and
+    /// apart, the counted ones of `tp("…")`.
     fn code_keys(dir: &Path, keys: &mut BTreeSet<String>, counted: &mut BTreeSet<String>) {
         for entry in std::fs::read_dir(dir).unwrap() {
             let path = entry.unwrap().path();

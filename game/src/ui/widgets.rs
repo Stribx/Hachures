@@ -1,5 +1,6 @@
-//! The widgets every screen draws with: ink text, slip and primary buttons, panels lifted off the map and their
-//! drawn skins, icon slots and rising pages, the systems that make them look and move, and the typed-letter check.
+//! The widgets every screen draws with: ink text, slip and primary buttons, panels lifted off the
+//! map and their drawn skins, icon slots and rising pages, the systems that make them look and
+//! move, and the typed-letter check.
 
 use bevy::input::keyboard::Key;
 use bevy::input_focus::InputFocus;
@@ -92,8 +93,9 @@ pub(crate) struct Primary;
 #[derive(Component)]
 pub(crate) struct Panel;
 
-/// A drawn image (`docs/art-prompts.md`) that takes over a node's flat paper once it has loaded, 9-sliced `slice` px
-/// in from its edges (zero: stretched whole). Until then, or if it never comes, the flat paper stays.
+/// A drawn image (`docs/art-prompts.md`) that takes over a node's flat paper once it has loaded,
+/// 9-sliced `slice` px in from its edges (zero: stretched whole). Until then, or if it never comes,
+/// the flat paper stays.
 #[derive(Component)]
 pub(crate) struct Skin {
     pub image: Handle<Image>,
@@ -110,7 +112,8 @@ fn reveal_icons(mut slots: Query<(&mut Node, Has<ImageNode>), With<IconSlot>>) {
     }
 }
 
-/// A panel casts a soft shadow on the map, as a sheet of paper laid on the model would: no ruled corners.
+/// A panel casts a soft shadow on the map, as a sheet of paper laid on the model would: no ruled
+/// corners.
 fn lift_panels(panels: Query<Entity, Added<Panel>>, mut commands: Commands) {
     for panel in &panels {
         commands.entity(panel).insert(BoxShadow::new(PANEL_SHADOW, px(0), px(3), px(0), px(12)));
@@ -183,9 +186,9 @@ fn rise(
 type ButtonLook<'a> =
     (Entity, &'a Hovered, Has<Pressed>, Has<Primary>, &'a mut BackgroundColor, &'a mut UiTransform);
 
-/// Buttons darken under the mouse or the keyboard focus, and more while pressed. Under the mouse they also lift
-/// 2 px, and pressed they give a little (0.97), unless motion is reduced; the focus from the keyboard only darkens,
-/// at once.
+/// Buttons darken under the mouse or the keyboard focus, and more while pressed. Under the mouse
+/// they also lift 2 px, and pressed they give a little (0.97), unless motion is reduced; the focus
+/// from the keyboard only darkens, at once.
 fn button_look(
     time: Res<Time>,
     settings: Res<Settings>,

@@ -1,5 +1,5 @@
-//! Small RON files kept for the player: one per `name` in the user's data folder (localStorage in the browser),
-//! rewritten whole on every change.
+//! Small RON files kept for the player: one per `name` in the user's data folder (localStorage in
+//! the browser), rewritten whole on every change.
 
 #[cfg(not(target_arch = "wasm32"))]
 use std::fs;
@@ -12,7 +12,8 @@ use bevy::prelude::*;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 
-/// What `name` holds; none if it is missing, or unreadable (then kept aside, not overwritten by the next write).
+/// What `name` holds; none if it is missing, or unreadable (then kept aside, not overwritten by the
+/// next write).
 #[cfg(not(target_arch = "wasm32"))]
 pub fn load<T: DeserializeOwned>(name: &str) -> Option<T> {
     read(&path(name)?)

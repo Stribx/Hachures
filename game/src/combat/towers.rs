@@ -68,7 +68,8 @@ fn aim(level: &Level, enemies: &Targets, pos: Vec3, range: f32) -> Option<(Entit
         .map(|(entity, _, t, _, _)| (entity, t.translation))
 }
 
-/// A shot of `weapon` lands on `enemy`: its damage, the pin and slow it brings, and the boss's stun.
+/// A shot of `weapon` lands on `enemy`: its damage, the pin and slow it brings, and the boss's
+/// stun.
 fn strike(
     level: &Level,
     weapon: Weapon,

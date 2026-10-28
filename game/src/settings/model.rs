@@ -36,7 +36,8 @@ pub struct Settings {
     pub readable_font: bool,
     /// No pages rising, no buttons lifting, no depth of field.
     pub reduced_motion: bool,
-    /// A code of `i18n::LANGUAGES`. Named `language`: saves of the first version kept a `lang` this one ignores.
+    /// A code of `i18n::LANGUAGES`. Named `language`: saves of the first version kept a `lang`
+    /// this one ignores.
     pub language: String,
 }
 
@@ -67,8 +68,8 @@ impl Default for Settings {
 /// A save from before the settings had their own file: they were its `settings` field.
 #[derive(Deserialize)]
 struct Legacy {
-    // The save wrote the bare struct, not `Some(..)`. Read loosely: settings it cannot make out are lost, but the
-    // read never fails, so `storage` never sets the save aside over them.
+    // The save wrote the bare struct, not `Some(..)`. Read loosely: settings it cannot make out
+    // are lost, but the read never fails, so `storage` never sets the save aside over them.
     #[serde(default, deserialize_with = "loose")]
     settings: Option<Settings>,
 }
@@ -81,7 +82,8 @@ impl Settings {
     /// Its name in `storage`: `settings.ron`, or `hachures-settings` in the browser.
     pub const FILE: &str = "settings";
 
-    /// From the settings file; else from the old save's field, else the defaults. Those two are written out at once.
+    /// From the settings file; else from the old save's field, else the defaults. Those two are
+    /// written out at once.
     pub fn load() -> Settings {
         if let Some(settings) = storage::load(Settings::FILE) {
             return settings;
@@ -97,7 +99,8 @@ impl Settings {
         storage::store(Settings::FILE, self);
     }
 
-    /// Loudness is heard on a curve: half the slider is a quarter of the amplitude, clearly quieter.
+    /// Loudness is heard on a curve: half the slider is a quarter of the amplitude, clearly
+    /// quieter.
     fn volume(&self, percent: u32) -> Volume {
         Volume::Linear((self.master as f32 / 100.0 * percent as f32 / 100.0).powi(2))
     }
@@ -119,7 +122,8 @@ impl Settings {
         self.depth_of_field && !self.reduced_motion
     }
 
-    /// The quality preset these graphics match, an index of `PRESETS`; none if the player tuned them by hand.
+    /// The quality preset these graphics match, an index of `PRESETS`; none if the player tuned
+    /// them by hand.
     pub(crate) fn preset(&self) -> Option<usize> {
         PRESETS.iter().position(|&p| {
             p == (self.shadows, self.occlusion, self.anti_aliasing, self.depth_of_field)
@@ -127,10 +131,10 @@ impl Settings {
     }
 }
 
-/// The quality presets, as an options page has them: shadows, ambient occlusion, anti-aliasing, depth of field.
-/// High is the default. Measured with `HACHURES_FPS` at 2880x1800 on an integrated GPU, the frame takes about 7 ms
-/// of GPU at Low, 14 at High and 17 at Ultra: occlusion in `look::occlusion`, SMAA 1 ms, FXAA 0.85, the depth of
-/// field 1.5 and the shadows 1.
+/// The quality presets, as an options page has them: shadows, ambient occlusion, anti-aliasing,
+/// depth of field. High is the default. Measured with `HACHURES_FPS` at 2880x1800 on an integrated
+/// GPU, the frame takes about 7 ms of GPU at Low, 14 at High and 17 at Ultra: occlusion in
+/// `look::occlusion`, SMAA 1 ms, FXAA 0.85, the depth of field 1.5 and the shadows 1.
 pub(crate) const PRESETS: [(bool, u8, u8, bool); 4] =
     [(false, 0, 1, false), (true, 0, 1, true), (true, 1, 2, true), (true, 2, 2, true)];
 

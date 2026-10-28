@@ -1,6 +1,7 @@
-//! Le Grand Plan (docs, section 7): the Marches seen from above, Nève on the road from sheet to sheet. Left and right
-//! walk her to the next sheet reached, Enter dives into the one she stands on. Each sheet won carries a red seal;
-//! the road she has walked is inked over, and the new stretch is drawn as she walks it the first time.
+//! Le Grand Plan (docs, section 7): the Marches seen from above, Nève on the road from sheet to
+//! sheet. Left and right walk her to the next sheet reached, Enter dives into the one she stands
+//! on. Each sheet won carries a red seal; the road she has walked is inked over, and the new
+//! stretch is drawn as she walks it the first time.
 
 use std::collections::VecDeque;
 

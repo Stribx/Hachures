@@ -1,4 +1,5 @@
-//! The settings page (the settings themselves are in `crate::settings`). It sets one row per setting; ↑ ↓ move between them, ← → or the small arrows change one, a click moves it on.
+//! The settings page (the settings themselves are in `crate::settings`). It sets one row per
+//! setting; ↑ ↓ move between them, ← → or the small arrows change one, a click moves it on.
 
 mod field;
 

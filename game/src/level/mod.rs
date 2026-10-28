@@ -1,6 +1,6 @@
-//! A level: its map as inked, its world's event, waves and sépia, and what it leaves in the campaign.
-//! `Level` is one resource; each feature adds its own `impl Level` (inking and le Droit de Passage in `ink`).
-//! Its map is a `Terrain`, which also owns the towers' reach.
+//! A level: its map as inked, its world's event, waves and sépia, and what it leaves in the
+//! campaign. `Level` is one resource; each feature adds its own `impl Level` (inking and le Droit
+//! de Passage in `ink`). Its map is a `Terrain`, which also owns the towers' reach.
 
 pub mod data;
 mod load;
@@ -61,8 +61,8 @@ mod tests {
         assert_eq!(app.world().resource::<Ticks>().0, 1, "the Rôle is lost");
     }
 
-    /// Every level loads, and every species it sends can reach its goal, with and without the world event,
-    /// whatever was chosen.
+    /// Every level loads, and every species it sends can reach its goal, with and without the world
+    /// event, whatever was chosen.
     #[test]
     fn levels_are_playable() {
         let mut other = Save::default();
@@ -104,7 +104,8 @@ mod tests {
         }
     }
 
-    /// Every named place stands on ground Nève can ink: otherwise its name could never cost anything.
+    /// Every named place stands on ground Nève can ink: otherwise its name could never cost
+    /// anything.
     #[test]
     fn places_can_be_inked() {
         for index in 0..LEVELS.len() {

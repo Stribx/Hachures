@@ -26,9 +26,9 @@ pub(super) struct Fill;
 const CLOUD_WIDTH: f32 = 0.75;
 const CLOUD_RATIO: f32 = 1.6;
 
-/// Width and height of a cloud, in screen fractions, on a screen `aspect` wide for 1 high. On a narrower screen
-/// (a portrait window, a tall browser tab) the clouds widen past its sides, so they stand as tall as on 16:9 and
-/// the rows still overlap.
+/// Width and height of a cloud, in screen fractions, on a screen `aspect` wide for 1 high. On a
+/// narrower screen (a portrait window, a tall browser tab) the clouds widen past its sides, so they
+/// stand as tall as on 16:9 and the rows still overlap.
 fn cloud_size(aspect: f32) -> Vec2 {
     let width = CLOUD_WIDTH * (16.0 / 9.0 / aspect).max(1.0);
     Vec2::new(width, width * aspect / CLOUD_RATIO)

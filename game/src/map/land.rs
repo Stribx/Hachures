@@ -1,4 +1,5 @@
-//! A piece inked by hand drops into its cell, and the land answers with a sound and a puff of fibres.
+//! A piece inked by hand drops into its cell, and the land answers with a sound and a puff of
+//! fibres.
 
 use std::f32::consts::PI;
 
@@ -27,8 +28,8 @@ const DROP: f32 = 0.6;
 const FALL: f32 = 0.16;
 const SETTLE: f32 = 0.14;
 
-/// A piece just inked: it drops into its cell like a pin pushed into the model, squashes a little as it lands, and
-/// the land answers with a puff of fibres and the piece's sound.
+/// A piece just inked: it drops into its cell like a pin pushed into the model, squashes a little
+/// as it lands, and the land answers with a puff of fibres and the piece's sound.
 #[derive(Component)]
 pub(crate) struct Land {
     elapsed: f32,

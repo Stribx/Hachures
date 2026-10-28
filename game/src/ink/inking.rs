@@ -55,12 +55,14 @@ impl Level {
         (spec.cost as f32 * factor).round() as u32
     }
 
-    /// Inks `tool` at `cell`, paid in sépia, and in a Name if a place's name is written there. Biffer goes through here
-    /// too: free, it costs no Name and gives sépia back. The caller has checked `refusal`.
+    /// Inks `tool` at `cell`, paid in sépia, and in a Name if a place's name is written there.
+    /// Biffer goes through here too: free, it costs no Name and gives sépia back. The caller
+    /// has checked `refusal`.
     ///
     /// # Panics
     ///
-    /// If `refusal` would have refused: the sépia is a `u32`, and paying more than is left underflows.
+    /// If `refusal` would have refused: the sépia is a `u32`, and paying more than is left
+    /// underflows.
     pub fn ink(&mut self, cell: usize, tool: usize) {
         let act = TOOLS[tool].act;
         if act == Act::Biffer {
@@ -188,7 +190,8 @@ mod tests {
         );
     }
 
-    /// Le prix du nom: inking over a named place costs one Name, once, however many of its cells are inked.
+    /// Le prix du nom: inking over a named place costs one Name, once, however many of its cells
+    /// are inked.
     #[test]
     fn inking_a_place_scratches_its_name() {
         let mut level = Level::new(Grid::parse("S.....M"), species::load());
@@ -240,7 +243,8 @@ mod tests {
         assert_eq!(ronces(&level), before + 1, "Ronces-mères: one more bramble per wave");
     }
 
-    /// The click on Biffer takes the tower down through combat's message, and only when a tower was taken.
+    /// The click on Biffer takes the tower down through combat's message, and only when a tower was
+    /// taken.
     #[test]
     fn biffing_a_tower_tells_combat() {
         let biffer = tool_index("biffer").unwrap();

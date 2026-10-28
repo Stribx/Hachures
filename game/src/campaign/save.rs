@@ -1,5 +1,6 @@
 //! The campaign save: levels reached, sceaux, skills, choices and Names.
-//! One RON file (`storage`) in the user's data folder (localStorage in the browser), rewritten whole on every change.
+//! One RON file (`storage`) in the user's data folder (localStorage in the browser), rewritten
+//! whole on every change.
 
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -40,12 +41,13 @@ pub struct Save {
     pub skills: Vec<Skill>,
     /// Choice id -> option picked, e.g. "refuge" -> "moulin".
     pub choices: BTreeMap<String, String>,
-    /// What Nève has met on a sheet, for the Lexique: the label keys of tools and species (`tool.arbalete`).
+    /// What Nève has met on a sheet, for the Lexique: the label keys of tools and species
+    /// (`tool.arbalete`).
     pub seen: BTreeSet<String>,
 }
 
-/// The save's layout: 1 counts the prologue as level 0; 2 keeps the names scratched out by key, not in French;
-/// 3 remembers what was seen, for the Lexique.
+/// The save's layout: 1 counts the prologue as level 0; 2 keeps the names scratched out by key, not
+/// in French; 3 remembers what was seen, for the Lexique.
 const VERSION: u32 = 3;
 
 impl Default for Save {
@@ -67,8 +69,8 @@ impl Save {
 
     /// A save read from before the prologue moves up one level, the prologue counted as won.
     /// One holding only the settings starts with the prologue.
-    /// One from before the language files has its scratched-out names in French: they become their keys.
-    /// One from before the Lexique has met what its won levels showed.
+    /// One from before the language files has its scratched-out names in French: they become their
+    /// keys. One from before the Lexique has met what its won levels showed.
     #[must_use]
     pub fn upgrade(mut self) -> Save {
         if self.version == 0 && (self.reached > 0 || !self.levels.is_empty()) {

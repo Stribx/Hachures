@@ -1,4 +1,5 @@
-//! The names written on the sheet, struck out once inked over, and the price read at the cursor before the click.
+//! The names written on the sheet, struck out once inked over, and the price read at the cursor
+//! before the click.
 
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
@@ -36,7 +37,8 @@ type Label<'a> = (
     Has<Strikethrough>,
 );
 
-/// Writes the level's names over their cells (under the menus' paper), and strikes out the ones inked over.
+/// Writes the level's names over their cells (under the menus' paper), and strikes out the ones
+/// inked over.
 pub fn label_places(
     mut commands: Commands,
     assets: Res<AssetServer>,
@@ -76,7 +78,8 @@ pub fn label_places(
             / place.at.len() as f32;
         if let Ok(p) = camera.world_to_viewport(at, center) {
             node.left = px(p.x - WIDTH / 2.0);
-            // Just under the cell centre, where the routes run: a route over a name must not read as struck out.
+            // Just under the cell centre, where the routes run: a route over a name must not read
+            // as struck out.
             node.top = px(p.y + 2.0);
         }
         if level.erased.contains(&k) && !struck {
@@ -86,7 +89,8 @@ pub fn label_places(
     }
 }
 
-/// The price before the click: a refusal, the name this ink would scratch out, or what biffing gives back.
+/// The price before the click: a refusal, the name this ink would scratch out, or what biffing
+/// gives back.
 pub fn price_tip(
     level: Res<Level>,
     verdict: Res<Verdict>,

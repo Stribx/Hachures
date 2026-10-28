@@ -57,8 +57,8 @@ pub struct Block {
     pub color: Color,
 }
 
-/// Height and colour of a tile's block, washed in like a hand-coloured map: each tile keeps its own family, so the
-/// ground still reads at a glance (docs/direction-artistique.md, phase 6).
+/// Height and colour of a tile's block, washed in like a hand-coloured map: each tile keeps its own
+/// family, so the ground still reads at a glance (docs/direction-artistique.md, phase 6).
 pub fn look(tile: Tile) -> Block {
     match tile {
         Tile::Sol => Block { height: 0.2, color: PASTURE },

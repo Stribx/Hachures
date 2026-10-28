@@ -1,4 +1,5 @@
-//! Nève on the Grand Plan: the Pawn that stands and walks, her figure, and the way from sheet to sheet.
+//! Nève on the Grand Plan: the Pawn that stands and walks, her figure, and the way from sheet to
+//! sheet.
 
 use std::collections::VecDeque;
 
@@ -7,7 +8,8 @@ use bevy::prelude::*;
 use super::terrain::{WATER, height};
 use super::{ROAD, SHEETS};
 
-/// Nève on the map: where she stands or walks to, in the Marches' own coordinates (under `OverworldRoot`).
+/// Nève on the map: where she stands or walks to, in the Marches' own coordinates (under
+/// `OverworldRoot`).
 #[derive(Resource)]
 pub struct Pawn {
     /// The sheet she stands on, or walks to.
@@ -63,7 +65,8 @@ pub(super) fn route(from: usize, to: usize) -> VecDeque<Vec3> {
 #[derive(Component)]
 pub(super) struct Figure;
 
-/// Nève walks her route: she sets off, keeps a pace, and slows to a stop; a small step bobs her up and down.
+/// Nève walks her route: she sets off, keeps a pace, and slows to a stop; a small step bobs her up
+/// and down.
 pub(super) fn walk(
     time: Res<Time>,
     mut pawn: ResMut<Pawn>,

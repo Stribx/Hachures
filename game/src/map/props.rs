@@ -1,4 +1,5 @@
-//! The props that stand on a tool's cell: mud and brambles, the meshes made once, and setting them down.
+//! The props that stand on a tool's cell: mud and brambles, the meshes made once, and setting them
+//! down.
 
 use std::collections::HashMap;
 use std::f32::consts::{FRAC_PI_2, PI};
@@ -17,12 +18,14 @@ pub(crate) struct PropPart {
     pub color: Color,
 }
 
-/// Prop meshes and materials made so far, by tile and shape (`barricade::barricade_shape`): one pair per part.
+/// Prop meshes and materials made so far, by tile and shape (`barricade::barricade_shape`): one
+/// pair per part.
 pub(super) type Props = HashMap<(Tile, u8), Vec<(Handle<Mesh>, Handle<InkMaterial>)>>;
 
-/// What stands on a cell, on the block's top at the origin: its parts, each with its colour. The shape says
-/// the effect: the barricade is a wall, the mud a trap sunk in the ground, the brambles a thicket that bites.
-/// `shape` is the barricade's (`barricade::barricade_shape`) or the palissade's (`palisade_shape`), 0 for the others.
+/// What stands on a cell, on the block's top at the origin: its parts, each with its colour. The
+/// shape says the effect: the barricade is a wall, the mud a trap sunk in the ground, the brambles
+/// a thicket that bites. `shape` is the barricade's (`barricade::barricade_shape`) or the
+/// palissade's (`palisade_shape`), 0 for the others.
 pub(crate) fn prop(tile: Tile, shape: u8) -> Vec<PropPart> {
     match tile {
         Tile::Barricade => barricade(shape),
@@ -57,7 +60,8 @@ fn mud() -> Vec<PropPart> {
     }]
 }
 
-/// Brambles: a low mound of moss, dark arches half sunk in it, thorns pointing out along their backs.
+/// Brambles: a low mound of moss, dark arches half sunk in it, thorns pointing out along their
+/// backs.
 fn brambles() -> Vec<PropPart> {
     let mound = Mesh::from(Sphere::new(0.42)).scaled_by(Vec3::new(1.0, 0.18, 1.0));
     let mut parts = Vec::new();

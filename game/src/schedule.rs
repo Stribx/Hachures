@@ -42,8 +42,8 @@ pub fn over_world(screen: Res<State<Screen>>) -> bool {
     matches!(screen.get(), Screen::Splash | Screen::Title | Screen::ConfirmNew | Screen::Plan)
 }
 
-/// The frame's steps, in order, and when they run. Paused is simply: no input, no simulation; the map
-/// is still drawn behind the menus. `level` adds its own condition: none once the Rôle is lost.
+/// The frame's steps, in order, and when they run. Paused is simply: no input, no simulation; the
+/// map is still drawn behind the menus. `level` adds its own condition: none once the Rôle is lost.
 pub fn plugin(app: &mut App) {
     app.init_state::<Screen>().configure_sets(
         Update,

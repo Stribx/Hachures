@@ -63,8 +63,8 @@ impl Level {
     ///
     /// # Panics
     ///
-    /// If `index` is not in `LEVELS`, or the level file names an unknown species or tool, a `shorter` cut longer
-    /// than its waves, or a world that does not exist.
+    /// If `index` is not in `LEVELS`, or the level file names an unknown species or tool, a
+    /// `shorter` cut longer than its waves, or a world that does not exist.
     pub fn load(index: usize, save: &Save) -> Level {
         let data = LevelData::of(index);
         let mut species = species::load();
@@ -135,8 +135,8 @@ impl Level {
     }
 }
 
-/// The level's tools, then the powers earned by the levels already won, in campaign order, then Biffer, which
-/// every level has.
+/// The level's tools, then the powers earned by the levels already won, in campaign order, then
+/// Biffer, which every level has.
 fn tools(data: &LevelData, save: &Save) -> Vec<usize> {
     let won = (0..LEVELS.len()).filter(|&k| save.levels.get(k).is_some_and(|r| r.won));
     let earned = won.flat_map(|k| LevelData::of(k).grants);
@@ -156,7 +156,8 @@ mod tests {
     use super::*;
     use crate::campaign::save::Record;
 
-    /// Winning the world-1 boss earns Gratter for good: it joins the tools of a later world's levels.
+    /// Winning the world-1 boss earns Gratter for good: it joins the tools of a later world's
+    /// levels.
     #[test]
     fn winning_the_boss_earns_gratter() {
         let gratter = tool_index("gratter").unwrap();

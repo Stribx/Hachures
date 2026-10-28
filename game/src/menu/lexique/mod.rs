@@ -1,5 +1,5 @@
-//! Le Lexique: what the tools and the species do, a tab each, read back from what the player has met.
-//! Open from the title, the pause page, or with L during play.
+//! Le Lexique: what the tools and the species do, a tab each, read back from what the player has
+//! met. Open from the title, the pause page, or with L during play.
 
 mod detail;
 mod list;

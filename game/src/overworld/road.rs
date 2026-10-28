@@ -11,7 +11,8 @@ use crate::ink::overlay::Pencil;
 use crate::schedule::Screen;
 use crate::theme::INK;
 
-/// How many legs of the road are inked: it catches up with the sheets reached, one leg as Nève walks it.
+/// How many legs of the road are inked: it catches up with the sheets reached, one leg as Nève
+/// walks it.
 #[derive(Resource)]
 pub(super) struct Unrolled(f32);
 
@@ -33,8 +34,9 @@ pub(super) fn unroll(
     }
 }
 
-/// The road's dotted line, just over the ground: worked out once, as finding the ground under a point means
-/// measuring its distance to every stretch of the road (it was redone for every point, every frame).
+/// The road's dotted line, just over the ground: worked out once, as finding the ground under a
+/// point means measuring its distance to every stretch of the road (it was redone for every point,
+/// every frame).
 static INKED_ROAD: LazyLock<Vec<Vec<Vec3>>> = LazyLock::new(|| {
     ROAD.iter().map(|leg| leg.iter().map(|&p| pawn::ground(p) + Vec3::Y * 0.15).collect()).collect()
 });

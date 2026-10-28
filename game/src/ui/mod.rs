@@ -1,5 +1,5 @@
-//! What the player reads and clicks: the label, Nève's margin, the bar of tools, the names on the sheet,
-//! and the page at the end of a level.
+//! What the player reads and clicks: the label, Nève's margin, the bar of tools, the names on the
+//! sheet, and the page at the end of a level.
 
 pub mod bar;
 mod counter_tip;
@@ -40,7 +40,8 @@ pub fn plugin(app: &mut App) {
                     places::price_tip,
                 )
                     .in_set(Step::Render),
-                // The card of an enemy gives way to the tip of a tool, and covers the price of the cell.
+                // The card of an enemy gives way to the tip of a tool, and covers the price of the
+                // cell.
                 (tool_tip::tool_tip, enemy_card::enemy_card)
                     .chain()
                     .after(places::price_tip)

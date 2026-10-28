@@ -14,7 +14,8 @@ const OX: f32 = 0.55;
 /// Where the oxen's yoke lies in front of the chest, and the oxen abreast of it.
 const YOKE: f32 = 0.567;
 
-/// An ox: the Harde's body in hide, with a horn each side of the head, its middle `(x, z)` from the origin.
+/// An ox: the Harde's body in hide, with a horn each side of the head, its middle `(x, z)` from the
+/// origin.
 fn ox(x: f32, z: f32) -> Vec<Part> {
     let at = Part::at;
     let hide = |p: Part| if p.paint == Coat { p.painted(Hide) } else { p };
@@ -35,7 +36,8 @@ fn ox(x: f32, z: f32) -> Vec<Part> {
     ox
 }
 
-/// The parts of the Grande Chaîne's own `carry`s: the oxen and the yoke, Gast and the sighting lantern.
+/// The parts of the Grande Chaîne's own `carry`s: the oxen and the yoke, Gast and the sighting
+/// lantern.
 fn assembly(carry: Carry, a: &Anchors) -> Vec<Part> {
     let at = Part::at;
     let cx = a.chest.x;
@@ -153,7 +155,8 @@ pub(super) fn props(carry: Carry, a: &Anchors) -> Vec<Part> {
     }
 }
 
-/// The parts of a `carry` held or worn on the body's back and sides, or standing beside it, on a body with `a`.
+/// The parts of a `carry` held or worn on the body's back and sides, or standing beside it, on a
+/// body with `a`.
 fn carried(carry: Carry, a: &Anchors) -> Vec<Part> {
     let at = Part::at;
     let cx = a.chest.x;

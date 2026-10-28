@@ -1,4 +1,5 @@
-//! The demo `HACHURES_DEMO`, `HACHURES_WAVE` and `HACHURES_CALQUE` set up: towers, barricades and a wave sent.
+//! The demo `HACHURES_DEMO`, `HACHURES_WAVE` and `HACHURES_CALQUE` set up: towers, barricades and a
+//! wave sent.
 
 use bevy::prelude::*;
 
@@ -36,7 +37,8 @@ pub(super) fn demo(
     if env("HACHURES_CALQUE").is_some() {
         selection.calque = true;
     }
-    // `HACHURES_WAVE` sends the first wave (wave `n` for a number) with or without the demo's towers.
+    // `HACHURES_WAVE` sends the first wave (wave `n` for a number) with or without the demo's
+    // towers.
     if let Some(arg) = env("HACHURES_WAVE") {
         level.wave.number = waves_done(&arg, level.waves.len());
         send_wave(&mut level, &mut commands, &assets, &settings);
@@ -51,8 +53,8 @@ pub(super) fn demo(
     for (i, weapon) in open.step_by(3).zip(weapons) {
         spawn_tower(&mut commands, &assets, grid, i, weapon);
     }
-    // And barricades to see their props: a wall of three with a branch down (a T), and one alone further on.
-    // `HACHURES_FASCINES=1` learns the skill that shows on them.
+    // And barricades to see their props: a wall of three with a branch down (a T), and one alone
+    // further on. `HACHURES_FASCINES=1` learns the skill that shows on them.
     let width = grid.width;
     let wall = |i: usize| [i, i + 1, i + 2, i + 1 + width, i + 5];
     let start = (0..grid.tiles.len()).find(|&i| {

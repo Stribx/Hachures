@@ -76,12 +76,13 @@ pub struct Grid {
 }
 
 impl Grid {
-    /// One char per tile. Markers stand on Sol: S spawn, F allies' start (Fuyards, a convoy), M the Cible
-    /// (Moulin…), B Borne-Mère, R Refuge, X Sortie.
+    /// One char per tile. Markers stand on Sol: S spawn, F allies' start (Fuyards, a convoy), M the
+    /// Cible (Moulin…), B Borne-Mère, R Refuge, X Sortie.
     ///
     /// # Panics
     ///
-    /// If the map is empty, its rows differ in length, or it holds a character that is not a tile or a marker.
+    /// If the map is empty, its rows differ in length, or it holds a character that is not a tile
+    /// or a marker.
     pub fn parse(map: &str) -> Grid {
         let rows: Vec<&str> = map.lines().map(str::trim).filter(|l| !l.is_empty()).collect();
         let width = rows[0].len();
@@ -140,12 +141,14 @@ impl Grid {
         event.cells.contains(&self.map[i])
     }
 
-    /// Whether Gratter has something to take off cell `i`: an imperial borne, an Éboulis or a Palissade.
+    /// Whether Gratter has something to take off cell `i`: an imperial borne, an Éboulis or a
+    /// Palissade.
     pub fn scrapable(&self, i: usize) -> bool {
         self.bornes.contains(&i) || matches!(self.tiles[i], Tile::Eboulis | Tile::Palissade)
     }
 
-    /// The map while the world event lasts: its cells turn to `event.becomes`, unless inked with one of `event.spares`.
+    /// The map while the world event lasts: its cells turn to `event.becomes`, unless inked with
+    /// one of `event.spares`.
     pub fn under(&self, event: &Event) -> Grid {
         let mut grid = self.clone();
         for i in 0..grid.tiles.len() {

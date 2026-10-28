@@ -1,4 +1,5 @@
-//! The trip from the Grand Plan down into a sheet: the dive, the clouds closing, the level swapped, the reveal.
+//! The trip from the Grand Plan down into a sheet: the dive, the clouds closing, the level swapped,
+//! the reveal.
 
 use bevy::prelude::*;
 
@@ -17,8 +18,9 @@ pub fn plugin(app: &mut App) {
         .add_systems(Update, ink_clouds);
 }
 
-/// Go and play level `.0`: from the Grand Plan the camera dives into its sheet; from anywhere else the clouds just
-/// close and open on it. `again` replays it from the start even if it is the level on the board.
+/// Go and play level `.0`: from the Grand Plan the camera dives into its sheet; from anywhere else
+/// the clouds just close and open on it. `again` replays it from the start even if it is the level
+/// on the board.
 #[derive(Message)]
 pub struct Travel {
     pub to: usize,
@@ -77,8 +79,8 @@ fn trip(
     mut commands: Commands,
 ) {
     let Some(mut trip) = trip else { return };
-    // Loading the level behind the closed clouds takes a long frame: the trip's clock never leaps more than a frame,
-    // so the clouds open from closed instead of snapping half open.
+    // Loading the level behind the closed clouds takes a long frame: the trip's clock never leaps
+    // more than a frame, so the clouds open from closed instead of snapping half open.
     trip.t += time.delta_secs().min(1.0 / 30.0);
     let ease_out = |t: f32| 1.0 - (1.0 - t.clamp(0.0, 1.0)).powi(3);
     match trip.phase {

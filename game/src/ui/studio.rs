@@ -1,6 +1,6 @@
-//! The tools' icons, filmed: each piece of the plan-relief stands on a little square of ground in a studio off the
-//! board, on its own render layer, and a camera takes its picture into a texture. The bar shows the picture, so a
-//! tool's icon is always its piece, in its wood and string.
+//! The tools' icons, filmed: each piece of the plan-relief stands on a little square of ground in a
+//! studio off the board, on its own render layer, and a camera takes its picture into a texture.
+//! The bar shows the picture, so a tool's icon is always its piece, in its wood and string.
 
 use bevy::camera::visibility::RenderLayers;
 use bevy::camera::{RenderTarget, ScalingMode};
@@ -31,9 +31,9 @@ struct StudioModel;
 #[derive(Component)]
 struct StudioCamera;
 
-/// How many more frames the studio films. Each studio camera costs a whole pass (about 1.5 ms here, measured), so
-/// it films only when the bar comes up, long enough for the shaders to be ready; a missed picture is retaken with
-/// the next level.
+/// How many more frames the studio films. Each studio camera costs a whole pass (about 1.5 ms here,
+/// measured), so it films only when the bar comes up, long enough for the shaders to be ready; a
+/// missed picture is retaken with the next level.
 #[derive(Resource, Default)]
 struct Filming(u32);
 
@@ -149,7 +149,8 @@ fn spawn_piece(
     };
     let parts = match tool.act {
         Act::Lay(tile) => prop(tile, 0),
-        // ponytail: Biffer borrows Gratter's scraper; its own piece (a quill striking out) when the art is drawn.
+        // ponytail: Biffer borrows Gratter's scraper; its own piece (a quill striking out) when the
+        // art is drawn.
         Act::Scrape | Act::Biffer => scraper(),
         Act::Raise(weapon) => {
             let scene = |path: &'static str| {

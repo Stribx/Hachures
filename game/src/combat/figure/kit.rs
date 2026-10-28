@@ -1,4 +1,5 @@
-//! The figurine kit: which primitives, where and in what paint make up a species' figurine (pure data).
+//! The figurine kit: which primitives, where and in what paint make up a species' figurine (pure
+//! data).
 
 use std::f32::consts::FRAC_PI_2;
 
@@ -60,14 +61,16 @@ pub enum Role {
     Yoke,
 }
 
-/// One primitive placed on the figurine. Figure units: the ground is y = 0 (the bottom of the felt), +X is forward.
+/// One primitive placed on the figurine. Figure units: the ground is y = 0 (the bottom of the
+/// felt), +X is forward.
 #[derive(Clone, Copy, Debug)]
 pub struct Part {
     pub form: Form,
     pub at: Transform,
     pub paint: Paint,
     pub role: Role,
-    /// Which way a leg swings first, +1 or -1 (0 for what is not a leg): legs of one animal alternate.
+    /// Which way a leg swings first, +1 or -1 (0 for what is not a leg): legs of one animal
+    /// alternate.
     pub side: f32,
 }
 
@@ -88,11 +91,12 @@ impl Form {
     }
 }
 
-/// Parts no bigger than this (their longest full side, in figure units) cast no shadow: seals, horns, bands, small
-/// heads. Just above the 0.06 of a seal's or a child's head.
+/// Parts no bigger than this (their longest full side, in figure units) cast no shadow: seals,
+/// horns, bands, small heads. Just above the 0.06 of a seal's or a child's head.
 const SMALL: f32 = 0.065;
 
-/// Whether a part of this form is big enough to cast a shadow (the shadow pass is costly during a wave).
+/// Whether a part of this form is big enough to cast a shadow (the shadow pass is costly during a
+/// wave).
 pub fn casts_shadow(form: &Form) -> bool {
     let longest = match *form {
         Form::Frustum { bottom, top, height } => (2.0 * bottom.max(top)).max(height),
@@ -147,7 +151,8 @@ impl Part {
         self.role(Role::Leg)
     }
 
-    /// The box, along the world axes, that holds the part once placed by `at` (an over-estimate when it is turned).
+    /// The box, along the world axes, that holds the part once placed by `at` (an over-estimate
+    /// when it is turned).
     #[cfg(test)]
     pub fn bounds(&self) -> (Vec3, Vec3) {
         let half = match self.form {
@@ -236,7 +241,8 @@ pub(super) fn body(shape: Shape) -> (Vec<Part>, Anchors) {
     }
 }
 
-/// The cart, its box `lead` further along than the Convoi's (the Grande Chaîne's is pushed back for its oxen).
+/// The cart, its box `lead` further along than the Convoi's (the Grande Chaîne's is pushed back for
+/// its oxen).
 fn chariot(lead: f32, height: f32) -> (Vec<Part>, Anchors) {
     let at = Part::at;
     // The box rests on the axles, 0.14 up.

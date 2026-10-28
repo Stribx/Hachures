@@ -1,4 +1,5 @@
-//! A barricade's figure: the arms it reaches toward the barricades beside it, and its beams, stakes and string.
+//! A barricade's figure: the arms it reaches toward the barricades beside it, and its beams, stakes
+//! and string.
 
 use std::f32::consts::{FRAC_PI_2, FRAC_PI_4, PI};
 
@@ -7,14 +8,16 @@ use bevy::prelude::*;
 use super::grid::{Grid, Tile};
 use super::props::{PropPart, merge};
 
-/// Shape bits of a barricade: an arm toward each barricade beside it, and the fascines once the skill is learnt.
+/// Shape bits of a barricade: an arm toward each barricade beside it, and the fascines once the
+/// skill is learnt.
 const WEST: u8 = 1;
 const EAST: u8 = 2;
 const NORTH: u8 = 4;
 const SOUTH: u8 = 8;
 const FASCINES: u8 = 16;
 
-/// Which arms a barricade at `i` reaches out with, so a line of them is one rampart with its corners and crossings.
+/// Which arms a barricade at `i` reaches out with, so a line of them is one rampart with its
+/// corners and crossings.
 pub(crate) fn barricade_shape(grid: &Grid, i: usize, fascines: bool) -> u8 {
     let (x, z) = grid.coords(i);
     let arms =
@@ -60,8 +63,8 @@ struct Beams {
 }
 
 impl Beams {
-    /// A beam along +x from `from` to `to`, with crossed stakes at `stations` lashed on with string, and under it a
-    /// bundle of fascines once the skill is learnt.
+    /// A beam along +x from `from` to `to`, with crossed stakes at `stations` lashed on with
+    /// string, and under it a bundle of fascines once the skill is learnt.
     fn add(&mut self, from: f32, to: f32, stations: &[f32], turn: f32) {
         // The stakes' low tips just touch the ground.
         let lift = 0.4 * FRAC_PI_4.cos();
@@ -99,9 +102,9 @@ impl Beams {
     }
 }
 
-/// Un cheval de frise: beams run through by stakes crossed in X both along them and across them, so it bristles from
-/// every side the camera sees it. Alone, one beam across the cell; in a line, an arm out to each neighbour, meeting
-/// theirs at the cell's edge.
+/// Un cheval de frise: beams run through by stakes crossed in X both along them and across them, so
+/// it bristles from every side the camera sees it. Alone, one beam across the cell; in a line, an
+/// arm out to each neighbour, meeting theirs at the cell's edge.
 pub(super) fn barricade(shape: u8) -> Vec<PropPart> {
     let mut beams = Beams {
         wood: Vec::new(),
@@ -118,13 +121,15 @@ pub(super) fn barricade(shape: u8) -> Vec<PropPart> {
                 if shape & bit != 0 {
                     beams.add(0.0, 0.5, &[0.25], turn);
                 } else if count == 1 && shape & opposite(bit) != 0 {
-                    // The end of a line: the beam goes on through the cell and stops short of its edge.
+                    // The end of a line: the beam goes on through the cell and stops short of its
+                    // edge.
                     beams.add(0.0, 0.4, &[0.22], turn);
                 }
             }
         }
     }
-    // Model-maker's stuff: whittled sticks of pale wood, cream string, the fascines in darker twigs.
+    // Model-maker's stuff: whittled sticks of pale wood, cream string, the fascines in darker
+    // twigs.
     let mut parts = vec![
         PropPart {
             mesh: merge(beams.wood).expect("a prop has parts"),

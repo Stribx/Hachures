@@ -1,4 +1,5 @@
-//! The Marches' bocage: the open land cut into parcels, each washed its own crop's colour, hedged along its seams.
+//! The Marches' bocage: the open land cut into parcels, each washed its own crop's colour, hedged
+//! along its seams.
 
 use bevy::prelude::*;
 
@@ -8,8 +9,8 @@ use crate::theme::{PASTURE, WHEAT};
 /// How wide a parcel is, in world units.
 const SIZE: f32 = 6.0;
 
-/// The washes the parcels are coloured with: pasture, wheat, fallow, sainfoin in flower (pink: a blue crop would
-/// read as water), a second pasture. Neighbours never share one (see `parcel`).
+/// The washes the parcels are coloured with: pasture, wheat, fallow, sainfoin in flower (pink: a
+/// blue crop would read as water), a second pasture. Neighbours never share one (see `parcel`).
 pub(super) const WASHES: [Color; 5] = [
     PASTURE,
     WHEAT,
@@ -30,7 +31,8 @@ pub(super) struct Parcel {
 /// The parcel at `p`. Defined everywhere; `openness` says where the bocage actually shows.
 pub(super) fn parcel(p: Vec2) -> Parcel {
     let (id, _) = nearest(p);
-    // Along a row the washes step by one, down a column by two: over the 3 x 3 cells around, never a repeat.
+    // Along a row the washes step by one, down a column by two: over the 3 x 3 cells around, never
+    // a repeat.
     Parcel { id, wash: (id.x + 2 * id.y).rem_euclid(WASHES.len() as i32) as usize }
 }
 
@@ -39,8 +41,9 @@ pub(super) fn seam(p: Vec2) -> f32 {
     nearest(p).1
 }
 
-/// The parcel whose centre is nearest `p`, and how far `p` lies from its seam with the next nearest. Each parcel's
-/// centre is its grid cell's, shifted a little by a hash so the fields are not a chequerboard.
+/// The parcel whose centre is nearest `p`, and how far `p` lies from its seam with the next
+/// nearest. Each parcel's centre is its grid cell's, shifted a little by a hash so the fields are
+/// not a chequerboard.
 fn nearest(p: Vec2) -> (IVec2, f32) {
     let cell = (p / SIZE).floor().as_ivec2();
     let centre = |c: IVec2| {
@@ -58,8 +61,8 @@ fn nearest(p: Vec2) -> (IVec2, f32) {
     (id, to_seam)
 }
 
-/// How much of the bocage shows at `p`, from 0 to 1: none in the woods, by the water, up the mountains or on the
-/// road, fading in over a few units so the land's colour never cuts there.
+/// How much of the bocage shows at `p`, from 0 to 1: none in the woods, by the water, up the
+/// mountains or on the road, fading in over a few units so the land's colour never cuts there.
 pub(super) fn openness(p: Vec2) -> f32 {
     let h = height(p);
     let dry = smoothstep(WATER + 0.25, WATER + 0.6, h) * (1.0 - smoothstep(1.5, 2.5, h));

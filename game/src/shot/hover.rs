@@ -1,6 +1,7 @@
-//! Dev tool: points at things without a mouse, for shots of the reading aids. `HACHURES_HOVER=tower|enemy|<cell>`
-//! puts the cursor on the first tower, the first enemy or a cell; `HACHURES_TOOL=n` takes tool `n` of `TOOLS`;
-//! `HACHURES_CARD=n` hovers the bar's card for tool `n`.
+//! Dev tool: points at things without a mouse, for shots of the reading aids.
+//! `HACHURES_HOVER=tower|enemy|<cell>` puts the cursor on the first tower, the first enemy or a
+//! cell; `HACHURES_TOOL=n` takes tool `n` of `TOOLS`; `HACHURES_CARD=n` hovers the bar's card for
+//! tool `n`.
 
 use bevy::picking::hover::Hovered;
 use bevy::prelude::*;

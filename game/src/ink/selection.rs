@@ -1,4 +1,5 @@
-//! What the player points at and has picked: the cell under the cursor, the tool, the route shown, le Calque.
+//! What the player points at and has picked: the cell under the cursor, the tool, the route shown,
+//! le Calque.
 
 use bevy::picking::hover::Hovered;
 use bevy::prelude::*;

@@ -1,5 +1,5 @@
-//! Les crédits: who made what the game is drawn, played and set with, read from `assets/CREDITS.md` so the list has
-//! one source.
+//! Les crédits: who made what the game is drawn, played and set with, read from `assets/CREDITS.md`
+//! so the list has one source.
 
 use bevy::prelude::*;
 use bevy::ui_widgets::Activate;

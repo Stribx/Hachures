@@ -1,5 +1,5 @@
-//! A world of the campaign (`assets/data/worlds/`): what Nève defends there, its event and its boss. Its texts are
-//! keys of `assets/data/i18n/<code>.ron`.
+//! A world of the campaign (`assets/data/worlds/`): what Nève defends there, its event and its
+//! boss. Its texts are keys of `assets/data/i18n/<code>.ron`.
 
 use std::sync::LazyLock;
 

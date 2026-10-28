@@ -19,7 +19,8 @@ pub struct Wave {
     pub spawn_in: f32,
 }
 
-/// Spawn order of a wave, last one first: one of each (species, count) group in turn, so species come mixed.
+/// Spawn order of a wave, last one first: one of each (species, count) group in turn, so species
+/// come mixed.
 pub fn spawn_order(mut groups: Vec<(usize, u32)>) -> Vec<usize> {
     let mut order = Vec::new();
     while groups.iter().any(|g| g.1 > 0) {
@@ -35,8 +36,8 @@ pub fn spawn_order(mut groups: Vec<(usize, u32)>) -> Vec<usize> {
 }
 
 impl Level {
-    /// Sends the next wave, and the world event with it if it is due. Returns whether the wave after it
-    /// brings the event, for the rumble.
+    /// Sends the next wave, and the world event with it if it is due. Returns whether the wave
+    /// after it brings the event, for the rumble.
     ///
     /// # Panics
     ///
@@ -70,7 +71,8 @@ impl Level {
         self.event_next
     }
 
-    /// The wave's last enemy is gone: the world event withdraws until the next wave, and the sheet tightens or buckles.
+    /// The wave's last enemy is gone: the world event withdraws until the next wave, and the sheet
+    /// tightens or buckles.
     pub fn end_wave(&mut self) {
         self.wave.running = false;
         if self.event_on {

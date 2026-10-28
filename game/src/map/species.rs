@@ -17,7 +17,8 @@ pub enum Reading {
     Ombre,
 }
 
-/// The silhouette a species is drawn with (docs, section 9: one template, told apart by silhouette and colour).
+/// The silhouette a species is drawn with (docs, section 9: one template, told apart by silhouette
+/// and colour).
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Default, Deserialize)]
 pub enum Shape {
     /// On foot.
@@ -73,7 +74,8 @@ pub enum Carry {
 /// What a species walks towards.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Deserialize)]
 pub enum Goal {
-    /// What the hostiles attack and Nève defends (`M` on the map): the Moulin in world 1, the Refuge Sarre in world 2.
+    /// What the hostiles attack and Nève defends (`M` on the map): the Moulin in world 1, the
+    /// Refuge Sarre in world 2.
     Cible,
     BorneMere,
     Refuge,

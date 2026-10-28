@@ -13,7 +13,8 @@ use crate::look::InkMaterial;
 const SHARD_LIFE: f32 = 0.6;
 const BLOT: f32 = 1.5;
 
-/// A splinter of ink from a defeated enemy (docs, section 1: units break into shards of ink, never blood).
+/// A splinter of ink from a defeated enemy (docs, section 1: units break into shards of ink, never
+/// blood).
 #[derive(Component)]
 pub struct Shard {
     velocity: Vec3,
@@ -56,7 +57,8 @@ pub fn shatter(commands: &mut Commands, look: &EnemyLook, at: Vec3) {
     fan(commands, at, (&look.shard_mesh, &look.shard_material), 8, 1.4, 1.6);
 }
 
-/// Breaks a defeated figure of `species` at `at` into shards of its coat and droplets of sépia, and leaves a blot.
+/// Breaks a defeated figure of `species` at `at` into shards of its coat and droplets of sépia, and
+/// leaves a blot.
 pub fn break_up(commands: &mut Commands, look: &EnemyLook, species: usize, at: Vec3) {
     let coat = look.coats.get(species).cloned().unwrap_or_default();
     fan(commands, at, (&look.shard_mesh, &coat), 6, 1.4, 1.6);

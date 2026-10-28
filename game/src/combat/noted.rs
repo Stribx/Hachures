@@ -8,8 +8,8 @@ use crate::i18n::n_;
 use crate::level::Level;
 use crate::level::story::MarginNote;
 
-/// Notes the species on the board that are new to the Lexique, in Nève's margin, and keeps the save.
-/// Looks at every enemy: a boss changes species between its phases.
+/// Notes the species on the board that are new to the Lexique, in Nève's margin, and keeps the
+/// save. Looks at every enemy: a boss changes species between its phases.
 pub(super) fn notice(enemies: Query<&Enemy>, mut level: ResMut<Level>, mut save: ResMut<Save>) {
     let mut new = false;
     for enemy in &enemies {

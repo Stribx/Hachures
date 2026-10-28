@@ -26,9 +26,9 @@ fn is_water(tile: Tile) -> bool {
     matches!(tile, Tile::Eau | Tile::Gue | Tile::Glace)
 }
 
-/// A strip of land the water runs under, for the water lines: water on both sides along one axis, land or the
-/// board's edge along the other (a bridge, a causeway). A one-cell island, water all round, is not one: the lines
-/// circle it.
+/// A strip of land the water runs under, for the water lines: water on both sides along one axis,
+/// land or the board's edge along the other (a bridge, a causeway). A one-cell island, water all
+/// round, is not one: the lines circle it.
 fn crossing(grid: &Grid, i: usize) -> bool {
     let (x, z) = grid.coords(i);
     let wet = |dx: isize, dz: isize| {
@@ -42,8 +42,8 @@ fn crossing(grid: &Grid, i: usize) -> bool {
             || (wet(0, -1) && wet(0, 1) && !wet(-1, 0) && !wet(1, 0)))
 }
 
-/// What `redraw_cells` keeps from one board to the next: the shared meshes and materials, the water lines' image
-/// and the tiles last drawn.
+/// What `redraw_cells` keeps from one board to the next: the shared meshes and materials, the water
+/// lines' image and the tiles last drawn.
 #[derive(Default)]
 pub(super) struct Drawn {
     made: Made,
@@ -52,9 +52,9 @@ pub(super) struct Drawn {
     before: Vec<Tile>,
 }
 
-/// Rebuild every terrain block when the map changed (inking, La Crue, new level). Meshes and materials are made
-/// once per height and colour, and shared. A tool stands on plain ground and says what it does by its prop; a prop
-/// just inked by hand lands in its cell (`Land`).
+/// Rebuild every terrain block when the map changed (inking, La Crue, new level). Meshes and
+/// materials are made once per height and colour, and shared. A tool stands on plain ground and
+/// says what it does by its prop; a prop just inked by hand lands in its cell (`Land`).
 pub(super) fn redraw_cells(
     mut level: ResMut<Level>,
     cells: Query<Entity, With<Cell>>,
@@ -73,7 +73,8 @@ pub(super) fn redraw_cells(
     let fascines = level.has(Skill::Fascines);
     let grid = level.terrain.grid();
     let drawn = &mut *drawn;
-    // Inked by hand: a cell or so changed. A new level, or the Crue, changes many and lands nothing.
+    // Inked by hand: a cell or so changed. A new level, or the Crue, changes many and lands
+    // nothing.
     let by_hand = drawn.before.len() == grid.tiles.len()
         && grid.tiles.iter().zip(drawn.before.iter()).filter(|(a, b)| a != b).count() <= 3;
     let rect = lay_water_lines(grid, drawn, &mut images, &mut materials);
@@ -103,8 +104,9 @@ pub(super) fn redraw_cells(
     spawn_base(&mut commands, grid, &mut meshes, &mut materials);
 }
 
-/// How far each point of the board lies from the bank, for the water lines, which run on under the bridges. Water
-/// made for another board has its lines laid over this one. Returns where the lines lie (`Hachure::shore`).
+/// How far each point of the board lies from the bank, for the water lines, which run on under the
+/// bridges. Water made for another board has its lines laid over this one. Returns where the lines
+/// lie (`Hachure::shore`).
 fn lay_water_lines(
     grid: &Grid,
     drawn: &mut Drawn,
@@ -139,8 +141,9 @@ fn lay_water_lines(
     rect
 }
 
-/// The block of a cell of `tile` on ground washed `color`: its height, and its mesh and material, made the first
-/// time that height and colour are seen. A tool's piece stands on plain ground: the field's, or the pasture's.
+/// The block of a cell of `tile` on ground washed `color`: its height, and its mesh and material,
+/// made the first time that height and colour are seen. A tool's piece stands on plain ground: the
+/// field's, or the pasture's.
 fn block(
     tile: Tile,
     color: Color,
@@ -162,7 +165,8 @@ fn block(
         .made
         .entry((height.to_bits(), color.to_srgba().to_u8_array()))
         .or_insert_with(|| {
-            // Edge to edge: one continuous relief, not a grid of tiles. Water is the model's varnished resin.
+            // Edge to edge: one continuous relief, not a grid of tiles. Water is the model's
+            // varnished resin.
             let paint = match tile {
                 Tile::Eau | Tile::Gue => water(color, shore.clone(), rect, 1.0),
                 Tile::Glace => water(color, shore.clone(), rect, 0.0),

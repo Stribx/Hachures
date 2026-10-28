@@ -22,7 +22,8 @@ impl FlowField {
             dist[source] = 0.0;
             heap.push(Reverse((0, source)));
         }
-        // Distances are never negative, so their bits sort like the floats: a min-heap of (bits, cell).
+        // Distances are never negative, so their bits sort like the floats: a min-heap of (bits,
+        // cell).
         while let Some(Reverse((bits, i))) = heap.pop() {
             let d = f32::from_bits(bits);
             if d > dist[i] {
@@ -63,8 +64,8 @@ pub fn fields(grid: &Grid, species: &[Species]) -> Vec<FlowField> {
     species.iter().map(|s| FlowField::new(grid, s)).collect()
 }
 
-/// Le Droit de Passage: painting `tile` at `i` is refused if any `present` species (indices in `species`)
-/// would lose every path to its goal, from its spawns or from where its `walkers` stand.
+/// Le Droit de Passage: painting `tile` at `i` is refused if any `present` species (indices in
+/// `species`) would lose every path to its goal, from its spawns or from where its `walkers` stand.
 pub fn can_place(
     grid: &Grid,
     species: &[Species],

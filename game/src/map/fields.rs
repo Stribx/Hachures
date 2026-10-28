@@ -1,4 +1,5 @@
-//! The bocage's fields: the open ground of a board cut into a quilt of small fields, each washed its own colour.
+//! The bocage's fields: the open ground of a board cut into a quilt of small fields, each washed
+//! its own colour.
 
 use bevy::prelude::*;
 
@@ -6,7 +7,8 @@ use super::cell_color;
 use super::grid::{Grid, Tile};
 use crate::theme::{MEADOW, PASTURE};
 
-/// The washes of dry pasture, the Sol's family: sap greens and a touch of gold, never as yellow as straw.
+/// The washes of dry pasture, the Sol's family: sap greens and a touch of gold, never as yellow as
+/// straw.
 const PASTURES: [Color; 4] = [
     PASTURE,
     Color::srgb(0.72, 0.77, 0.5),
@@ -16,9 +18,9 @@ const PASTURES: [Color; 4] = [
 /// The washes of wet meadow, the Sol bas's family: bluer greens, darker than any pasture.
 const MEADOWS: [Color; 3] = [MEADOW, Color::srgb(0.48, 0.65, 0.55), Color::srgb(0.57, 0.7, 0.56)];
 
-/// The field each cell of `grid` belongs to, by index: only open ground as drawn (Sol, Sol bas, and the pasture
-/// under drawn brambles), never a marker. A field is all dry pasture or all wet meadow, a few cells to a dozen, the
-/// same every time the same map is drawn.
+/// The field each cell of `grid` belongs to, by index: only open ground as drawn (Sol, Sol bas, and
+/// the pasture under drawn brambles), never a marker. A field is all dry pasture or all wet meadow,
+/// a few cells to a dozen, the same every time the same map is drawn.
 pub fn fields(grid: &Grid) -> Vec<Option<usize>> {
     let n = grid.map.len();
     let marked: Vec<usize> =
@@ -31,8 +33,8 @@ pub fn fields(grid: &Grid) -> Vec<Option<usize>> {
         .iter()
         .enumerate()
         .fold(grid.width as u32, |h, (i, &t)| mix(h ^ (t as u32 + 1) ^ i as u32));
-    // Fields are started in an order of their own, scattered over the board, and grown cell by cell up to a size of
-    // their own, over the same ground.
+    // Fields are started in an order of their own, scattered over the board, and grown cell by cell
+    // up to a size of their own, over the same ground.
     let mut order: Vec<usize> = (0..n).filter(|&i| open(i)).collect();
     order.sort_by_key(|&i| mix(seed ^ i as u32));
     let mut field = vec![None; n];
@@ -60,8 +62,8 @@ pub fn fields(grid: &Grid) -> Vec<Option<usize>> {
     field
 }
 
-/// The colour of each cell's ground: its field's wash where the field still shows (open ground, or a barricade or
-/// brambles inked on it; la Crue drowns a meadow's), else what `cell_color` says.
+/// The colour of each cell's ground: its field's wash where the field still shows (open ground, or
+/// a barricade or brambles inked on it; la Crue drowns a meadow's), else what `cell_color` says.
 pub fn ground(grid: &Grid) -> Vec<Color> {
     let fields = fields(grid);
     let count = fields.iter().flatten().max().map_or(0, |&field| field + 1);
@@ -105,7 +107,8 @@ pub fn ground(grid: &Grid) -> Vec<Color> {
         .collect()
 }
 
-/// A field of one or two cells, left over between bigger ones, joins a neighbour of its ground if that one has room.
+/// A field of one or two cells, left over between bigger ones, joins a neighbour of its ground if
+/// that one has room.
 fn absorb_crumbs(grid: &Grid, field: &mut [Option<usize>], sizes: &mut [usize]) {
     for i in 0..field.len() {
         let Some(f) = field[i] else { continue };
@@ -125,7 +128,8 @@ fn absorb_crumbs(grid: &Grid, field: &mut [Option<usize>], sizes: &mut [usize]) 
     }
 }
 
-/// The ground a drawn tile lies on, for the fields: wet meadow for Sol bas, dry pasture for the rest.
+/// The ground a drawn tile lies on, for the fields: wet meadow for Sol bas, dry pasture for the
+/// rest.
 fn kind(drawn: Tile) -> Tile {
     if drawn == Tile::SolBas { Tile::SolBas } else { Tile::Sol }
 }

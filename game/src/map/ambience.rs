@@ -1,5 +1,6 @@
-//! The land's sounds: the wind always, birds over the bocage, rain with la Crue, the river by the water, the cold
-//! wind of the Cols; each loop fading in and out as the board and its weather change.
+//! The land's sounds: the wind always, birds over the bocage, rain with la Crue, the river by the
+//! water, the cold wind of the Cols; each loop fading in and out as the board and its weather
+//! change.
 
 use bevy::audio::{AudioSinkPlayback, Volume};
 use bevy::prelude::*;
@@ -13,8 +14,8 @@ use crate::settings::Settings;
 /// The loops, in the order `ambience` gives their loudness.
 const LOOPS: [&str; 5] = ["wind", "birds", "rain", "river", "snow-wind"];
 
-/// How loud each loop of `LOOPS` is, from 0 to 1, in world `world` (an index of `WORLDS`), with its event under way
-/// or not, on a board with water (`wet`) or without.
+/// How loud each loop of `LOOPS` is, from 0 to 1, in world `world` (an index of `WORLDS`), with its
+/// event under way or not, on a board with water (`wet`) or without.
 pub fn ambience(world: usize, event_on: bool, wet: bool) -> [f32; 5] {
     let land = Land::of(world);
     let (bocage, cols) = (land == Land::Bocage, land == Land::Cols);
@@ -43,8 +44,8 @@ pub(super) fn start(mut commands: Commands, assets: Res<AssetServer>) {
     }
 }
 
-/// Each loop eases toward its loudness over a couple of seconds, under the ambient volume; the wind swells and
-/// eases slowly, so it never sits flat.
+/// Each loop eases toward its loudness over a couple of seconds, under the ambient volume; the wind
+/// swells and eases slowly, so it never sits flat.
 pub(super) fn fade(
     level: Res<Level>,
     settings: Res<Settings>,

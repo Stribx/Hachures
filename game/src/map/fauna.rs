@@ -1,4 +1,5 @@
-//! The board's small life: butterflies over the wildflowers, and now and then a flock of birds crossing the sky.
+//! The board's small life: butterflies over the wildflowers, and now and then a flock of birds
+//! crossing the sky.
 
 use bevy::prelude::*;
 
@@ -19,7 +20,8 @@ const BUTTERFLIES: usize = 6;
 const WINGS: [Color; 3] =
     [Color::srgb(0.95, 0.88, 0.4), Color::srgb(0.96, 0.95, 0.9), Color::srgb(0.95, 0.6, 0.3)];
 
-/// Where the butterflies flit: over cells in flower, a few of them spread over the board, the same each time.
+/// Where the butterflies flit: over cells in flower, a few of them spread over the board, the same
+/// each time.
 pub fn butterfly_homes(grid: &Grid, land: Land) -> Vec<Vec3> {
     let mut cells: Vec<usize> = sprigs(grid, 1.0, land)
         .into_iter()
@@ -84,8 +86,8 @@ fn felt(color: Color) -> InkMaterial {
     material
 }
 
-/// The board was redrawn or the settings changed: its butterflies are set out again over its flowers, none on Low
-/// (the one preset without shadows).
+/// The board was redrawn or the settings changed: its butterflies are set out again over its
+/// flowers, none on Low (the one preset without shadows).
 pub(super) fn settle(
     redrawn: Query<(), Added<Cell>>,
     old: Query<Entity, With<Butterfly>>,
@@ -145,8 +147,8 @@ pub(super) fn flutter(
     }
 }
 
-/// Every 20 to 40 seconds a flock of three to seven birds sets off across the sky over the board, in a V, with the
-/// wind; none on Low.
+/// Every 20 to 40 seconds a flock of three to seven birds sets off across the sky over the board,
+/// in a V, with the wind; none on Low.
 pub(super) fn launch(
     time: Res<Time>,
     mut next: Local<f32>,

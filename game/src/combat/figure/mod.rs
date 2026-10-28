@@ -1,4 +1,5 @@
-//! Enemy figurines: the kit of parts, the look built from it and the spawn that stands one on the board.
+//! Enemy figurines: the kit of parts, the look built from it and the spawn that stands one on the
+//! board.
 
 pub mod chain;
 pub mod exit;

@@ -1,4 +1,5 @@
-//! The screens around the game: splash, title, pause, settings, sceaux, lexique, carnet, controls and credits.
+//! The screens around the game: splash, title, pause, settings, sceaux, lexique, carnet, controls
+//! and credits.
 
 mod carnet;
 mod controls;
@@ -79,7 +80,8 @@ fn button(label: impl Bundle) -> impl Bundle {
     framed(BUTTON_WIDTH, label)
 }
 
-/// A button the keyboard focus passes over: the small arrows beside a settings row, reached by ← → instead.
+/// A button the keyboard focus passes over: the small arrows beside a settings row, reached by ← →
+/// instead.
 #[derive(Component)]
 pub(crate) struct NoNav;
 

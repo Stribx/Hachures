@@ -1,4 +1,5 @@
-//! Biffer, le repentir: which of Nève's strokes may be taken back, and the sépia it returns (docs, section 7).
+//! Biffer, le repentir: which of Nève's strokes may be taken back, and the sépia it returns (docs,
+//! section 7).
 
 use super::TOOLS;
 use crate::i18n::n_;
@@ -13,22 +14,22 @@ impl Level {
             .then_some(last)
     }
 
-    /// Sépia that biffing `cell` returns: all it cost while the ink is wet (inked between waves, none sent since),
-    /// half once dry.
+    /// Sépia that biffing `cell` returns: all it cost while the ink is wet (inked between waves,
+    /// none sent since), half once dry.
     pub fn refund(&self, cell: usize) -> Option<u32> {
         let stroke = &self.inked[self.stroke(cell)?];
         let wet = stroke.laid_at == Some(self.wave.number) && !self.wave.running;
         Some(if wet { stroke.paid } else { stroke.paid / 2 })
     }
 
-    /// Why Biffer can't be used at `cell`. Returning the cell to what it was opens ways, never closes one, so le Droit
-    /// de Passage doesn't apply; it costs nothing.
+    /// Why Biffer can't be used at `cell`. Returning the cell to what it was opens ways, never
+    /// closes one, so le Droit de Passage doesn't apply; it costs nothing.
     pub(super) fn biffer_refusal(&self, cell: usize) -> Option<&'static str> {
         self.stroke(cell).is_none().then_some(n_("refusal.nothing_to_biffer"))
     }
 
-    /// Takes back the stroke at `cell` and its sépia; the name it cost stays scratched out. The caller has checked
-    /// `refusal`.
+    /// Takes back the stroke at `cell` and its sépia; the name it cost stays scratched out. The
+    /// caller has checked `refusal`.
     pub(super) fn biffer(&mut self, cell: usize) {
         let refund = self.refund(cell).expect("a stroke to biffer");
         let stroke = self.inked.remove(self.stroke(cell).expect("a stroke to biffer"));
@@ -47,7 +48,8 @@ mod tests {
     use crate::map::species::{self, index_of};
     use crate::map::terrain::Edit;
 
-    /// A world-1 level where only the Chaîneur walks, three rows wide so a stroke or two closes nothing, six waves.
+    /// A world-1 level where only the Chaîneur walks, three rows wide so a stroke or two closes
+    /// nothing, six waves.
     fn level(map: &str) -> Level {
         let mut level = Level::new(Grid::parse(map), species::load());
         level.present = vec![index_of(&level.species, "chaineur").unwrap()];
@@ -103,7 +105,8 @@ mod tests {
         assert_eq!((level.refund(2), level.refund(8)), (Some(3), Some(25)));
     }
 
-    /// Ink laid while a wave runs is dry at once: no free tower picked up and moved ahead of the column.
+    /// Ink laid while a wave runs is dry at once: no free tower picked up and moved ahead of the
+    /// column.
     #[test]
     fn ink_laid_during_a_wave_is_dry() {
         let mut level = level(OPEN);
@@ -136,8 +139,8 @@ mod tests {
         assert!(cover.iter().all(|&c| c == 0.0), "{cover:?}");
     }
 
-    /// Only what Nève inked herself: not the sheet's own barricade, the Ronces-mères' growth, a Palissade, a borne,
-    /// or bare ground.
+    /// Only what Nève inked herself: not the sheet's own barricade, the Ronces-mères' growth, a
+    /// Palissade, a borne, or bare ground.
     #[test]
     fn biffer_takes_back_only_neves_strokes() {
         let mut level = level("S.#.p.M\n.......");
@@ -152,7 +155,8 @@ mod tests {
         }
     }
 
-    /// Ink the land has since covered (the Chaussée laid over mud) is no longer Nève's to take back.
+    /// Ink the land has since covered (the Chaussée laid over mud) is no longer Nève's to take
+    /// back.
     #[test]
     fn ink_covered_since_is_not_hers() {
         let mut level = inked(level(OPEN), 2, "boue");

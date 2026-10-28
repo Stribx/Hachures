@@ -1,5 +1,6 @@
 //! The sheet's ground: as drawn, as inked, as walked under the world event, and the routes over it.
-//! Every lasting change goes through `alter`, so the map, the towers' shadow and the flow fields never disagree.
+//! Every lasting change goes through `alter`, so the map, the towers' shadow and the flow fields
+//! never disagree.
 
 use std::collections::HashMap;
 
@@ -13,13 +14,15 @@ use crate::level::world::Event;
 /// A lasting change to one cell.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Edit {
-    /// Ink on the land (Nève's tiles, the Chaussée, Ronces-mères): la Crue still reads the ground under it.
+    /// Ink on the land (Nève's tiles, the Chaussée, Ronces-mères): la Crue still reads the ground
+    /// under it.
     Ink(Tile),
     /// A tower stands up on the cell.
     Raise(Weapon),
     /// The land itself changes (a scripted change): la Crue reads the new ground.
     Land(Tile),
-    /// Gratter: the borne comes off, else the cell returns to plain Sol. The caller has checked `Grid::scrapable`.
+    /// Gratter: the borne comes off, else the cell returns to plain Sol. The caller has checked
+    /// `Grid::scrapable`.
     Scrape,
     /// Biffer: Nève's ink comes off, a tower with it, and the cell is the tile it was before.
     Unink(Tile),
@@ -79,7 +82,8 @@ impl Terrain {
         terrain
     }
 
-    /// Lets `edits` fall on the map, then rebuilds the shadow, the map as walked and the flow fields once.
+    /// Lets `edits` fall on the map, then rebuilds the shadow, the map as walked and the flow
+    /// fields once.
     pub fn alter(&mut self, edits: impl IntoIterator<Item = (usize, Edit)>, species: &[Species]) {
         for (i, edit) in edits {
             apply(&mut self.base, &mut self.towers, i, edit);
@@ -87,7 +91,8 @@ impl Terrain {
         self.settle(species);
     }
 
-    /// The map and `shown`'s field if `edit` fell on `i`: the same change as `alter`, one field only.
+    /// The map and `shown`'s field if `edit` fell on `i`: the same change as `alter`, one field
+    /// only.
     pub fn preview(&self, i: usize, edit: Edit, shown: &Species) -> (Grid, FlowField) {
         let (mut base, mut towers) = (self.base.clone(), self.towers.clone());
         apply(&mut base, &mut towers, i, edit);
@@ -102,7 +107,8 @@ impl Terrain {
         self.settle(species);
     }
 
-    /// Reach of the tower at `cell`, or of one that would stand there; Équerre adds 1 when another is beside it.
+    /// Reach of the tower at `cell`, or of one that would stand there; Équerre adds 1 when another
+    /// is beside it.
     pub fn reach(&self, cell: usize, weapon: Weapon) -> f32 {
         tower_reach(&self.reach, &self.base, &self.towers, cell, weapon)
     }
@@ -205,7 +211,8 @@ mod tests {
         Reach::new(&load_stats(), &[])
     }
 
-    /// The pencil line for a tower counts the shadow it will cast: the Harde, reading l'Ombre, goes round it.
+    /// The pencil line for a tower counts the shadow it will cast: the Harde, reading l'Ombre, goes
+    /// round it.
     #[test]
     fn a_tower_preview_casts_its_shadow() {
         let species = species::load();
@@ -218,7 +225,8 @@ mod tests {
         assert_eq!(field.dist, terrain.fields()[harde].dist, "the preview is what the ink does");
     }
 
-    /// La Crue reads the land, not the ink (docs, section 5): a rockfall on low ground stays dry, mud drowns.
+    /// La Crue reads the land, not the ink (docs, section 5): a rockfall on low ground stays dry,
+    /// mud drowns.
     #[test]
     fn la_crue_reads_the_land_not_the_ink() {
         let species = species::load();
@@ -230,8 +238,8 @@ mod tests {
         assert_eq!(&terrain.grid().tiles[1..4], [Tile::Roc, Tile::Boue, Tile::SolBas]);
     }
 
-    /// Gratter takes a borne off and leaves the ground under it; an Éboulis or a Palissade goes back to plain Sol,
-    /// in the map la Crue reads too.
+    /// Gratter takes a borne off and leaves the ground under it; an Éboulis or a Palissade goes
+    /// back to plain Sol, in the map la Crue reads too.
     #[test]
     fn a_scrape_takes_off_a_borne_or_returns_the_land_to_sol() {
         let species = species::load();
@@ -263,7 +271,8 @@ mod tests {
         assert_eq!(terrain.base().under(&WORLDS[0].event).tiles[2], Tile::Palissade);
     }
 
-    /// Biffer: the tower comes off with its shadow, the barricade gives the road back; the cell is what it was.
+    /// Biffer: the tower comes off with its shadow, the barricade gives the road back; the cell is
+    /// what it was.
     #[test]
     fn unink_returns_the_cell_and_lifts_the_shadow() {
         let species = species::load();

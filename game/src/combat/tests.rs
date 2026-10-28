@@ -206,8 +206,9 @@ fn the_chain_follows_and_goes_with_the_boss() {
 /// A naive player, to balance the levels without playing them: before each wave it spends
 /// all its sépia on towers, where they cover the most of the hostile routes per sépia.
 /// It never inks terrain, so a player who reads the map should do better.
-/// It is deterministic, so its table is kept in `BALANCE`: a rule or data change that moves it fails here.
-/// Run: `cargo test -p game balance -- --ignored --nocapture`; `HACHURES_BLESS=1` writes the new table.
+/// It is deterministic, so its table is kept in `BALANCE`: a rule or data change that moves it
+/// fails here. Run: `cargo test -p game balance -- --ignored --nocapture`; `HACHURES_BLESS=1`
+/// writes the new table.
 #[test]
 #[ignore]
 fn balance() {
@@ -318,7 +319,8 @@ fn bot_build(app: &mut App) -> usize {
     }
 }
 
-/// A Chaîneur on the first spawn, standing as `spawn_enemies` makes one: a figure, an enemy and a stride.
+/// A Chaîneur on the first spawn, standing as `spawn_enemies` makes one: a figure, an enemy and a
+/// stride.
 fn striding(app: &mut App, species: &str) -> Entity {
     let level = app.world().resource::<Level>();
     let (enemy, at) = walker(level, species, 100.0);
@@ -404,7 +406,8 @@ fn ghosts_and_shards(app: &mut App) -> (Vec<ExitKind>, usize) {
     (kinds, app.world_mut().query::<&Shard>().iter(app.world()).count())
 }
 
-/// A defeated enemy goes on the frame it falls, as before; a ghost tips over, then breaks into shards.
+/// A defeated enemy goes on the frame it falls, as before; a ghost tips over, then breaks into
+/// shards.
 #[test]
 fn a_defeated_enemy_leaves_a_ghost_then_shards() {
     let mut level = Level::new(Grid::parse("S.....M\n...^..R"), species::load());

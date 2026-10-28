@@ -1,4 +1,5 @@
-//! How enemies look: each species' parts as meshes and inks, made once, and the shard and borne handles.
+//! How enemies look: each species' parts as meshes and inks, made once, and the shard and borne
+//! handles.
 
 use bevy::prelude::*;
 
@@ -9,7 +10,8 @@ use crate::level::Level;
 use crate::look::{Hachure, InkMaterial};
 use crate::theme::{FELT, HIDE, IRON, LAMP, LIMESTONE, LINEN, SEAL, SEPIA, SLATE, WOOD};
 
-/// One part of a figurine, ready to spawn: its mesh, place, ink, role, side and whether it casts a shadow.
+/// One part of a figurine, ready to spawn: its mesh, place, ink, role, side and whether it casts a
+/// shadow.
 pub struct Piece {
     pub mesh: Handle<Mesh>,
     pub at: Transform,

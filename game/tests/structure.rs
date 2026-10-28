@@ -1,5 +1,5 @@
-//! One file, one job: every source file stays within `LIMIT` lines of code. Blank lines, comments and the
-//! `#[cfg(test)]` module do not count; test-only files (`tests.rs`) are left out.
+//! One file, one job: every source file stays within `LIMIT` lines of code. Blank lines, comments
+//! and the `#[cfg(test)]` module do not count; test-only files (`tests.rs`) are left out.
 
 use std::fs;
 use std::path::Path;

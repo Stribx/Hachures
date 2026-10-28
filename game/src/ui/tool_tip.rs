@@ -1,4 +1,5 @@
-//! The tooltip of a tool card: what the tool is and does, while the card is hovered or just picked by its key.
+//! The tooltip of a tool card: what the tool is and does, while the card is hovered or just picked
+//! by its key.
 
 use bevy::ecs::system::SystemParam;
 use bevy::picking::hover::Hovered;
@@ -42,7 +43,8 @@ pub struct Reads<'w> {
     save: Res<'w, Save>,
 }
 
-/// Shows the tip of the hovered card, or for 2 s of the card just picked by its key: the hover wins.
+/// Shows the tip of the hovered card, or for 2 s of the card just picked by its key: the hover
+/// wins.
 pub fn tool_tip(
     reads: Reads,
     window: Single<&Window, With<PrimaryWindow>>,

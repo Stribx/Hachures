@@ -1,6 +1,6 @@
-//! Puts the settings into effect: the language, the sound, the window, the light, the lens and the UI scale.
-//! Each system runs when the settings change, and when the window gains or loses focus (for the sound) or changes
-//! size (for the scale).
+//! Puts the settings into effect: the language, the sound, the window, the light, the lens and the
+//! UI scale. Each system runs when the settings change, and when the window gains or loses focus
+//! (for the sound) or changes size (for the scale).
 
 use bevy::anti_alias::contrast_adaptive_sharpening::ContrastAdaptiveSharpening;
 use bevy::audio::AudioSinkPlayback;
@@ -71,8 +71,8 @@ fn apply_window(mut due: Due, mut window: Single<&mut Window, With<PrimaryWindow
     }
 }
 
-/// The board's picture and what is drawn into it: the render scale, the shadows, the occlusion, the anti-aliasing
-/// and the lens.
+/// The board's picture and what is drawn into it: the render scale, the shadows, the occlusion, the
+/// anti-aliasing and the lens.
 fn apply_render(
     mut due: Due,
     window: Single<&Window, With<PrimaryWindow>>,
@@ -83,8 +83,8 @@ fn apply_render(
     mut commands: Commands,
 ) {
     let Some(settings) = due.check(&window) else { return };
-    // The board's picture at the render scale. Its own scale factor shrinks with it, so it keeps the window's
-    // logical size: picking and the place labels need no conversion.
+    // The board's picture at the render scale. Its own scale factor shrinks with it, so it keeps
+    // the window's logical size: picking and the place labels need no conversion.
     let scale = settings.render_scale as f32 / 100.0;
     let wanted = (window.physical_size().as_vec2() * scale).as_uvec2().max(UVec2::ONE);
     // `get_mut` marks the image changed, so only when it does.
@@ -95,7 +95,8 @@ fn apply_render(
     let target =
         ImageRenderTarget { handle: frame.0.clone(), scale_factor: window.scale_factor() * scale };
     commands.entity(camera.0).insert(RenderTarget::Image(target));
-    // Stretched over the window, a smaller picture blurs: sharpened back, as a game's upscaler would.
+    // Stretched over the window, a smaller picture blurs: sharpened back, as a game's upscaler
+    // would.
     if settings.render_scale < 100 {
         commands.entity(camera.0).insert(ContrastAdaptiveSharpening::default());
     } else {
@@ -149,13 +150,15 @@ fn apply_ui_scale(
 /// The room the largest page (the settings) takes at a UI scale of 1, in logical pixels.
 const FIT: Vec2 = Vec2::new(1100.0, 760.0);
 
-/// The UI as large as the player asked, as long as the pages fit the window (a small browser tab, a tiled window).
+/// The UI as large as the player asked, as long as the pages fit the window (a small browser tab, a
+/// tiled window).
 fn fitted(asked: f32, window: Vec2) -> f32 {
     asked.min(window.x / FIT.x).min(window.y / FIT.y)
 }
 
-/// With the readable font on, every text set in IM Fell takes Atkinson Hyperlegible instead, and back. Texts are
-/// written in IM Fell everywhere; this swaps them as they come and when the setting changes.
+/// With the readable font on, every text set in IM Fell takes Atkinson Hyperlegible instead, and
+/// back. Texts are written in IM Fell everywhere; this swaps them as they come and when the setting
+/// changes.
 fn swap_fonts(settings: Res<Settings>, assets: Res<AssetServer>, mut texts: Query<&mut TextFont>) {
     let (from, to) = if settings.readable_font { (FELL, READABLE) } else { (READABLE, FELL) };
     for mut font in &mut texts {

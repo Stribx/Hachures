@@ -1,5 +1,6 @@
-//! The look of the world: the camera, the light, the paper fog, and `InkMaterial`, which draws every surface as an
-//! engraving (`assets/shaders/hachure.wesl`). Kenney models get their materials swapped for ink when they spawn.
+//! The look of the world: the camera, the light, the paper fog, and `InkMaterial`, which draws
+//! every surface as an engraving (`assets/shaders/hachure.wesl`). Kenney models get their materials
+//! swapped for ink when they spawn.
 
 mod camera;
 mod material;

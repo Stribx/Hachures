@@ -1,4 +1,5 @@
-//! How a figurine leaves the board: it falls, sinks or hops away as a ghost, a copy with no `Enemy`.
+//! How a figurine leaves the board: it falls, sinks or hops away as a ghost, a copy with no
+//! `Enemy`.
 
 use bevy::prelude::*;
 

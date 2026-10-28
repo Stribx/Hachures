@@ -48,7 +48,8 @@ pub fn load_level(
     }
 }
 
-/// The tools in the bar of `level` join the Lexique, each new one noted in the margin. True if any was new.
+/// The tools in the bar of `level` join the Lexique, each new one noted in the margin. True if any
+/// was new.
 fn meet_tools(save: &mut Save, level: &mut Level) -> bool {
     let mut new = false;
     for t in level.tools.clone() {

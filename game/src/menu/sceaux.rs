@@ -1,5 +1,5 @@
-//! L'arbre des sceaux (docs, section 7): three branches, bought node by node with the sceaux the levels gave.
-//! Open from the title, from the page at the end of a level, or with A during play.
+//! L'arbre des sceaux (docs, section 7): three branches, bought node by node with the sceaux the
+//! levels gave. Open from the title, from the page at the end of a level, or with A during play.
 
 use bevy::input::keyboard::Key;
 use bevy::prelude::*;

@@ -15,7 +15,8 @@ impl Level {
             return self.biffer_refusal(cell);
         }
         let Some(tile) = TOOLS[tool].act.lays() else {
-            // Scraping leaves plain Sol, which every species walks: it can lengthen a route, never close one.
+            // Scraping leaves plain Sol, which every species walks: it can lengthen a route, never
+            // close one.
             return if !self.terrain.base().scrapable(cell) {
                 Some(n_("refusal.nothing_to_scrape"))
             } else if self.sepia < self.tool_cost(tool) {
@@ -35,7 +36,8 @@ impl Level {
         }
     }
 
-    /// Le Droit de Passage: why `tile` at `cell` would close the map, now or around the world event.
+    /// Le Droit de Passage: why `tile` at `cell` would close the map, now or around the world
+    /// event.
     fn closes(&self, cell: usize, tile: Tile) -> Option<&'static str> {
         let event = &self.world().event;
         if self.changes.iter().any(|c| c.cells(self.terrain.base().width).any(|n| n == cell)) {
@@ -68,7 +70,8 @@ impl Level {
         }
     }
 
-    /// The maps of the waves still to come that the world event floods, each with the changes fallen by then.
+    /// The maps of the waves still to come that the world event floods, each with the changes
+    /// fallen by then.
     fn maps_ahead(&self) -> Vec<Grid> {
         let event = &self.world().event;
         let width = self.terrain.base().width;
@@ -87,7 +90,8 @@ impl Level {
         maps
     }
 
-    /// Ronces-mères: as a wave starts, one bramble spreads to a neighbouring cell, if le Droit de Passage allows.
+    /// Ronces-mères: as a wave starts, one bramble spreads to a neighbouring cell, if le Droit de
+    /// Passage allows.
     pub fn grow_ronces(&mut self) {
         let base = self.terrain.base();
         let spread = (0..base.tiles.len())
@@ -144,7 +148,8 @@ mod tests {
         assert_eq!(level.refusal(12, tool_index("barricade").unwrap()), None);
     }
 
-    /// Three ways A (top), B (low, floods), C (bottom). A rockfall closes A at wave 2, the flood comes at wave 4.
+    /// Three ways A (top), B (low, floods), C (bottom). A rockfall closes A at wave 2, the flood
+    /// comes at wave 4.
     #[test]
     fn a_rockfall_then_the_flood_is_counted() {
         let mut level = level(
@@ -182,7 +187,8 @@ mod tests {
         assert_eq!(level.refusal(2, gratter), Some("refusal.nothing_to_scrape"));
     }
 
-    /// The pencil line for Gratter is the Jalonneurs' route once the borne is gone, on the tile it stood on.
+    /// The pencil line for Gratter is the Jalonneurs' route once the borne is gone, on the tile it
+    /// stood on.
     #[test]
     fn gratter_preview_takes_the_borne_off() {
         let mut level = level("S...B");
@@ -211,7 +217,8 @@ mod tests {
         assert_eq!(level.refusal(2, gratter), Some("refusal.nothing_to_scrape"));
     }
 
-    /// Gratter on a Palissade leaves plain Sol, as on an Éboulis. Two rows: the palissade alone doesn't close the way.
+    /// Gratter on a Palissade leaves plain Sol, as on an Éboulis. Two rows: the palissade alone
+    /// doesn't close the way.
     #[test]
     fn gratter_scrapes_a_palissade() {
         let mut level = level("S.p.M\n.....");
@@ -267,7 +274,8 @@ mod tests {
         assert_eq!(level.place_at(2), Some(0), "the name is still written");
     }
 
-    /// Scraping never closes a way, so a walker on the cell or a scripted change to come don't refuse it.
+    /// Scraping never closes a way, so a walker on the cell or a scripted change to come don't
+    /// refuse it.
     #[test]
     fn gratter_ignores_walkers_and_changes() {
         let gratter = tool_index("gratter").unwrap();
@@ -289,7 +297,8 @@ mod tests {
         assert_eq!(field.dist, level.terrain.fields()[k].dist);
     }
 
-    /// A scripted change leaves `map` as drawn; after a scrape La Crue must still find plain Sol there.
+    /// A scripted change leaves `map` as drawn; after a scrape La Crue must still find plain Sol
+    /// there.
     #[test]
     fn la_crue_spares_a_scraped_eboulis() {
         let mut level = level("S.,.M");

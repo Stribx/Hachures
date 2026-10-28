@@ -1,5 +1,5 @@
-//! The growth on the board: one mesh of felt tufts, wildflowers and wheat that sways in the wind, grown again with
-//! the board.
+//! The growth on the board: one mesh of felt tufts, wildflowers and wheat that sways in the wind,
+//! grown again with the board.
 
 use bevy::prelude::*;
 
@@ -35,8 +35,9 @@ const BLOOMS: [Color; 4] = [
     Color::srgb(0.95, 0.8, 0.28),
 ];
 
-/// The board was redrawn, or the settings changed: the growth is grown again, as much as the machine allows. Low,
-/// the one preset without shadows, grows a third; reduced motion stills the wind.
+/// The board was redrawn, or the settings changed: the growth is grown again, as much as the
+/// machine allows. Low, the one preset without shadows, grows a third; reduced motion stills the
+/// wind.
 pub(super) fn grow(
     redrawn: Query<(), Added<Cell>>,
     old: Query<Entity, With<Growth>>,
@@ -79,7 +80,8 @@ pub(super) fn grow(
     commands.spawn((Growth, Mesh3d(meshes.add(mesh)), MeshMaterial3d(materials.add(felt))));
 }
 
-/// One sprig's parts, standing at the origin, coloured, each vertex weighted for the wind by its height.
+/// One sprig's parts, standing at the origin, coloured, each vertex weighted for the wind by its
+/// height.
 fn sprig_parts(sprig: &Sprig, wash: Color, land: Land) -> Vec<Mesh> {
     let roll = sprig.roll;
     let turn = (roll >> 16 & 255) as f32 / 255.0 * std::f32::consts::TAU;
@@ -115,8 +117,8 @@ fn sprig_parts(sprig: &Sprig, wash: Color, land: Land) -> Vec<Mesh> {
     }
 }
 
-/// A box `size`, its centre `up` above the foot, turned and tilted, coloured, its vertices' alpha the share of the
-/// wind they take (0 at the ground).
+/// A box `size`, its centre `up` above the foot, turned and tilted, coloured, its vertices' alpha
+/// the share of the wind they take (0 at the ground).
 fn part(size: Vec3, up: f32, turn: f32, tilt: f32, color: Color) -> Mesh {
     let mesh = Mesh::from(Cuboid::from_size(size))
         .translated_by(Vec3::Y * up)

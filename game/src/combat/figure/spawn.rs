@@ -10,14 +10,15 @@ use super::look::EnemyLook;
 /// How high an enemy's root floats above the ground (`cell_pos`).
 pub const FLOAT: f32 = 0.25;
 
-/// The pivot of a figurine's parts: the gait moves it from `rest`, and nothing else writes its transform.
+/// The pivot of a figurine's parts: the gait moves it from `rest`, and nothing else writes its
+/// transform.
 #[derive(Component)]
 pub struct Body {
     pub rest: Transform,
 }
 
-/// Stands the figure of the species numbered `index` in the level's list at `at`, `scale` times the kit's size: only
-/// what is seen, no walker.
+/// Stands the figure of the species numbered `index` in the level's list at `at`, `scale` times the
+/// kit's size: only what is seen, no walker.
 pub fn spawn_figure(
     commands: &mut Commands,
     look: &EnemyLook,

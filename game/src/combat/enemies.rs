@@ -99,7 +99,8 @@ pub fn spawn_enemies(
     }
 }
 
-/// What the walkers leave for after the walk: the road and bornes the boss lays, and whether a Name was saved.
+/// What the walkers leave for after the walk: the road and bornes the boss lays, and whether a Name
+/// was saved.
 #[derive(Default)]
 struct Trail {
     chaussee: Vec<usize>,
@@ -124,7 +125,8 @@ fn reach_goal(level: &mut Level, species: usize, is_boss: bool, trail: &mut Trai
     }
 }
 
-/// One step of an enemy towards its next cell, unless it is pinned; the boss lays its road and bornes on arriving.
+/// One step of an enemy towards its next cell, unless it is pinned; the boss lays its road and
+/// bornes on arriving.
 fn step(
     level: &Level,
     enemy: &mut Enemy,

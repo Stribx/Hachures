@@ -12,8 +12,9 @@ const THREAD: Color = Color::srgb(0.9, 0.85, 0.68);
 /// Stitches along one cell's edge.
 const STITCHES: usize = 4;
 
-/// Every seam of `grid`, as the two ends of a cell's edge at the top of its ground: between two cells of different
-/// fields, both still open ground of the same kind (an inked cell hides its seams, a drowned one has none).
+/// Every seam of `grid`, as the two ends of a cell's edge at the top of its ground: between two
+/// cells of different fields, both still open ground of the same kind (an inked cell hides its
+/// seams, a drowned one has none).
 pub(super) fn seams(grid: &Grid) -> Vec<(Vec3, Vec3)> {
     let fields = fields(grid);
     let mut seams = Vec::new();
@@ -69,7 +70,8 @@ pub(super) fn spawn_seams(
 mod tests {
     use super::*;
 
-    /// Each seam runs between two cells of different fields, never along the board's edge or over water.
+    /// Each seam runs between two cells of different fields, never along the board's edge or over
+    /// water.
     #[test]
     fn seams_part_two_fields() {
         let grid = Grid::parse(

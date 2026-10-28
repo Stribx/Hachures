@@ -1,4 +1,5 @@
-//! The day goes on with the waves: the sun lowers into the afternoon and warms, eased from one wave to the next.
+//! The day goes on with the waves: the sun lowers into the afternoon and warms, eased from one wave
+//! to the next.
 
 use bevy::prelude::*;
 
@@ -6,8 +7,9 @@ use crate::level::Level;
 use crate::look::Sun;
 use crate::theme::SUNLIGHT;
 
-/// Where the sun stands, seen from the board, and its colour, as wave `wave` of `waves` begins: early afternoon
-/// before the first, a lower and warmer sun by the last, never so low that a piece's shadow hides its neighbour.
+/// Where the sun stands, seen from the board, and its colour, as wave `wave` of `waves` begins:
+/// early afternoon before the first, a lower and warmer sun by the last, never so low that a
+/// piece's shadow hides its neighbour.
 pub fn daylight(wave: u32, waves: usize) -> (Vec3, Color) {
     let t = (wave as f32 / waves.max(1) as f32).clamp(0.0, 1.0);
     let noon = Vec3::new(-4.0, 9.0, -3.0);

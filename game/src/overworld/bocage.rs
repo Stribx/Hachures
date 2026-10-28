@@ -1,12 +1,12 @@
-//! The bocage's hedgerows along the parcels' seams, and the wheat standing in its wheat parcels, swaying.
+//! The bocage's hedgerows along the parcels' seams, and the wheat standing in its wheat parcels,
+//! swaying.
 
 use bevy::prelude::*;
 
-use super::OverworldRoot;
-use super::SHEETS;
 use super::parcels::{WHEAT_WASH, openness, parcel, seam};
 use super::props::CLEAR;
 use super::terrain::{EAST, NORTH, SOUTH, WEST, hash, height, road_distance};
+use super::{OverworldRoot, SHEETS};
 use crate::look::{Hachure, InkMaterial, ink};
 use crate::theme::{HEDGE, WHEAT};
 
@@ -25,8 +25,8 @@ pub(super) enum Growth {
     Wheat(Vec2),
 }
 
-/// Every hedge lump along the seams and every clump of wheat in the wheat parcels, on open land only, clear of the
-/// sheets and the road.
+/// Every hedge lump along the seams and every clump of wheat in the wheat parcels, on open land
+/// only, clear of the sheets and the road.
 pub(super) fn growth() -> Vec<Growth> {
     let mut growth = Vec::new();
     let mut z = NORTH;
@@ -97,7 +97,8 @@ pub(super) fn spawn_bocage(
     }
 }
 
-/// A hedge lump: two rounded masses of foliage, a little different each, their tops taking the wind.
+/// A hedge lump: two rounded masses of foliage, a little different each, their tops taking the
+/// wind.
 fn hedge_lumps(p: Vec2) -> Vec<Mesh> {
     let roll = hash(p * 7.1);
     let green = HEDGE.mix(&Color::srgb(0.42, 0.56, 0.3), roll);
@@ -130,7 +131,8 @@ fn wheat_stalks(p: Vec2) -> Vec<Mesh> {
         .collect()
 }
 
-/// `mesh` coloured, its vertices' alpha the share of the wind they take: 0 at the ground, 1 at `tallest`.
+/// `mesh` coloured, its vertices' alpha the share of the wind they take: 0 at the ground, 1 at
+/// `tallest`.
 fn weighed(mesh: Mesh, color: Color, tallest: f32) -> Mesh {
     let [r, g, b, _] = color.to_linear().to_f32_array();
     let Some(positions) = mesh.attribute(Mesh::ATTRIBUTE_POSITION).and_then(|p| p.as_float3())
@@ -147,7 +149,8 @@ mod tests {
     use super::*;
     use crate::overworld::terrain::WATER;
 
-    /// Hedges and wheat stand on dry land, clear of every sheet and of the road, and there are plenty of both.
+    /// Hedges and wheat stand on dry land, clear of every sheet and of the road, and there are
+    /// plenty of both.
     #[test]
     fn the_bocage_keeps_off_the_sheets_and_the_road() {
         let growth = growth();

@@ -1,5 +1,6 @@
-//! Le carnet de Nève at the end of the campaign: the Rôle des Noms, each level won with the names scratched out
-//! there, the choices made (the line not taken struck out), and how each level closed.
+//! Le carnet de Nève at the end of the campaign: the Rôle des Noms, each level won with the names
+//! scratched out there, the choices made (the line not taken struck out), and how each level
+//! closed.
 
 use bevy::prelude::*;
 use bevy::ui_widgets::Activate;

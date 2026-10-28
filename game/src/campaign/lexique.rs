@@ -87,7 +87,8 @@ pub fn strong_against(weapon: Weapon, species: &[Species]) -> Vec<&Species> {
     species.iter().filter(|s| s.hostile && s.weak_to == Some(weapon)).collect()
 }
 
-/// The lines of tool `t` at `cost` (skills counted). A `Lay` tool lists the step price of `species`, the ones to show.
+/// The lines of tool `t` at `cost` (skills counted). A `Lay` tool lists the step price of
+/// `species`, the ones to show.
 pub fn tool_lines(
     tool: usize,
     cost: u32,

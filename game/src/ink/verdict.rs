@@ -1,4 +1,5 @@
-//! The verdict on the cell under the hand, made once a frame: may the tool in hand be inked there, and the route if it were.
+//! The verdict on the cell under the hand, made once a frame: may the tool in hand be inked there,
+//! and the route if it were.
 
 use bevy::prelude::*;
 

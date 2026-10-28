@@ -18,7 +18,8 @@ pub const LEVELS: [&str; 8] = [
     include_str!("../../assets/data/levels/2-3.ron"),
 ];
 
-/// Enemies reaching the Cible or the Borne-Mère before the Rôle is lost (not in the docs; set with the balance bot).
+/// Enemies reaching the Cible or the Borne-Mère before the Rôle is lost (not in the docs; set with
+/// the balance bot).
 pub const START_LIVES: u32 = 20;
 
 /// A level file.
@@ -32,7 +33,8 @@ pub struct LevelData {
     pub world: usize,
     pub sepia: u32,
     pub tools: Vec<String>,
-    /// Tools winning this level earns for good (a power): they join every level's tools once it is won.
+    /// Tools winning this level earns for good (a power): they join every level's tools once it is
+    /// won.
     #[serde(default)]
     pub grants: Vec<String>,
     /// Waves the world event starts at.
@@ -77,8 +79,8 @@ impl LevelData {
         ron::from_str(LEVELS[index]).expect("invalid level file")
     }
 
-    /// The map as text for `Grid::parse`. The Refuge stands on `R`, or on `W` once `refuge` is `Moved`; the cell
-    /// not used is plain ground.
+    /// The map as text for `Grid::parse`. The Refuge stands on `R`, or on `W` once `refuge` is
+    /// `Moved`; the cell not used is plain ground.
     pub fn map_text(&self, refuge: Refuge) -> String {
         let map = self.map.join("\n");
         match refuge {

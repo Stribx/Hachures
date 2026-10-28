@@ -1,5 +1,5 @@
-//! The cartouche in the top left corner: the level's name and its counters, the Défi, what the world is about to
-//! do, and what the cursor reads. The keys are on the bar's
+//! The cartouche in the top left corner: the level's name and its counters, the Défi, what the
+//! world is about to do, and what the cursor reads. The keys are on the bar's
 //! buttons, the end of the level on its page.
 
 use bevy::picking::hover::Hovered;

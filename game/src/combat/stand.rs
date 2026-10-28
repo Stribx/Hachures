@@ -23,7 +23,8 @@ pub struct TowerBase(pub usize);
 /// A tower's base model; it stands 0.6 high, and the weapon sits on top.
 pub const TOWER_BASE: &str = "models/tower-round-bottom-a.glb";
 
-/// Carved for the plan-relief: a base of plain limewood, the weapon in walnut with its parts still told apart.
+/// Carved for the plan-relief: a base of plain limewood, the weapon in walnut with its parts still
+/// told apart.
 pub const BASE_WOOD: Carved = Carved { rgb: [214, 186, 140], painted: false };
 pub const WEAPON_WOOD: Carved = Carved { rgb: [196, 150, 110], painted: true };
 
@@ -76,7 +77,8 @@ pub fn spawn_tower(
     let (x, z) = grid.coords(cell);
     let scene =
         |path: &'static str| WorldAssetRoot(assets.load(GltfAssetLabel::Scene(0).from_asset(path)));
-    // Both land in the cell like the other pieces; the base makes the sound of a wooden figure set down.
+    // Both land in the cell like the other pieces; the base makes the sound of a wooden figure set
+    // down.
     let (base, top) = (
         Transform::from_xyz(x as f32, 0.2, z as f32),
         Transform::from_xyz(x as f32, 0.8, z as f32),

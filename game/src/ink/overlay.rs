@@ -1,15 +1,15 @@
-//! What Nève reads on the sheet: routes in ink, the pencil line, le Calque and the world event's shiver.
+//! What Nève reads on the sheet: routes in ink, the pencil line, le Calque and the world event's
+//! shiver.
 
 use bevy::prelude::*;
 
 use super::{Selection, Verdict};
-use crate::Step;
 use crate::level::Level;
-use crate::map;
 use crate::map::flow::FlowField;
 use crate::map::grid::{Grid, Tile};
 use crate::schedule::over_world;
 use crate::theme::{INK, SEPIA};
+use crate::{Step, map};
 
 /// Gizmos for the dotted pencil line (preview of the detour).
 #[derive(Default, Reflect, GizmoConfigGroup)]
@@ -115,8 +115,8 @@ fn route(gizmos: &mut Gizmos, level: &Level, shown: usize) {
     }
 }
 
-/// The grid only shows under the hand, fading out two cells around it: the relief stays one piece. The cell itself
-/// is framed, in red when the tool is refused there.
+/// The grid only shows under the hand, fading out two cells around it: the relief stays one piece.
+/// The cell itself is framed, in red when the tool is refused there.
 fn cursor(gizmos: &mut Gizmos, level: &Level, i: usize, refused: bool) {
     let grid = level.terrain.grid();
     let (hx, hz) = grid.coords(i);

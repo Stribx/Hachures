@@ -1,4 +1,5 @@
-//! The surveying chain the Grande Chaîne drags: twenty links lying along the road its cart has driven.
+//! The surveying chain the Grande Chaîne drags: twenty links lying along the road its cart has
+//! driven.
 
 use bevy::light::NotShadowCaster;
 use bevy::prelude::*;
@@ -17,12 +18,14 @@ const SPACING: f32 = 0.07;
 pub const LINK_MINOR: f32 = 0.012;
 pub const LINK_MAJOR: f32 = 0.035;
 
-/// Where the chain lies: `links` points, the first at `history[0]` (the newest), each `spacing` further back along
-/// the path (arc length). A road shorter than the chain bunches the last links up at its oldest point.
+/// Where the chain lies: `links` points, the first at `history[0]` (the newest), each `spacing`
+/// further back along the path (arc length). A road shorter than the chain bunches the last links
+/// up at its oldest point.
 pub fn trail(history: &[Vec3], links: usize, spacing: f32) -> Vec<Vec3> {
     let Some(&first) = history.first() else { return Vec::new() };
     let mut road = vec![first];
-    // Where the walk along the history stands: the segment it is on, the point, and the length owed to the next link.
+    // Where the walk along the history stands: the segment it is on, the point, and the length owed
+    // to the next link.
     let (mut seg, mut at, mut owed) = (0, first, spacing);
     while road.len() < links {
         let Some(&next) = history.get(seg + 1) else {
@@ -55,7 +58,8 @@ pub struct Link {
     index: usize,
 }
 
-/// Where link `index` of the `road` lies: on the ground, turned about the chain's direction every other link.
+/// Where link `index` of the `road` lies: on the ground, turned about the chain's direction every
+/// other link.
 fn link_pose(road: &[Vec3], index: usize) -> Transform {
     let heading = match index {
         0 => road[0] - road[1],
@@ -68,13 +72,14 @@ fn link_pose(road: &[Vec3], index: usize) -> Transform {
         (Quat::from_rotation_x(FRAC_PI_2), LINK_MAJOR)
     };
     let ground = road[index] - Vec3::Y * (FLOAT - lift);
-    // A link that has not moved (the chain just laid, or bunched) keeps its pose from the heading it had.
+    // A link that has not moved (the chain just laid, or bunched) keeps its pose from the heading
+    // it had.
     let rotation = if heading.length_squared() > 1e-8 { yaw * turn } else { turn };
     Transform::from_translation(ground).with_rotation(rotation)
 }
 
-/// Keeps each boss's road, lays its chain along it (spawning the links with the boss) and takes the chain away
-/// with a boss that is gone.
+/// Keeps each boss's road, lays its chain along it (spawning the links with the boss) and takes the
+/// chain away with a boss that is gone.
 pub fn drag_chain(
     look: Res<EnemyLook>,
     mut bosses: Query<(Entity, &Transform, Option<&mut Rope>), With<Boss>>,
