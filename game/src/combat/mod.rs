@@ -3,6 +3,8 @@
 pub mod boss;
 pub mod enemies;
 pub mod figure;
+mod noted;
+mod range;
 mod shards;
 #[cfg(test)]
 mod tests;
@@ -19,14 +21,14 @@ pub fn plugin(app: &mut App) {
             enemies::start_waves.in_set(Step::Input),
             towers::raise_towers.in_set(Step::Input).after(crate::ink::inking),
             boss::drop_bornes.in_set(Step::Input).after(crate::ink::inking),
-            (enemies::spawn_enemies, enemies::walk, towers::fire, boss::boss_phases, shards::shards)
+            (enemies::spawn_enemies, noted::notice, enemies::walk, towers::fire, boss::boss_phases, shards::shards)
                 .chain()
                 .in_set(Step::Simulate)
                 .before(crate::level::finish_level),
             figure::animate.in_set(Step::Simulate).after(enemies::walk),
             figure::drag_chain.in_set(Step::Simulate).after(figure::animate),
             (figure::exits, shards::blots).in_set(Step::Simulate),
-            draw.in_set(Step::Render),
+            (draw, range::draw).in_set(Step::Render),
         ),
     );
 }
@@ -50,6 +52,16 @@ impl Enemy {
     /// A fresh enemy of `species` with `hp`, standing on `cell`.
     pub fn new(species: usize, hp: f32, cell: usize) -> Enemy {
         Enemy { species, hp, max_hp: hp, cell, next: None, pinned: 0.0, slowed: 0.0 }
+    }
+
+    /// Its species, an index in `Level.species`.
+    pub fn species(&self) -> usize {
+        self.species
+    }
+
+    /// Its HP now and at most.
+    pub fn health(&self) -> (f32, f32) {
+        (self.hp, self.max_hp)
     }
 }
 

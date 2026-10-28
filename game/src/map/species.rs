@@ -81,7 +81,7 @@ pub enum Goal {
     Sortie,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 pub struct Species {
     /// Its key in `species.ron`, which the code and the level files use.
     #[serde(skip)]

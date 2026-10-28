@@ -87,6 +87,12 @@ pub fn tf(key: &str, args: &[&dyn Display]) -> String {
     fill(t(key), args)
 }
 
+/// `x` as a number to read: one decimal at most, none when whole, the decimal mark of the language shown.
+pub fn number(x: f32) -> String {
+    let text = format!("{x:.1}");
+    text.strip_suffix(".0").map_or_else(|| text.replace('.', t("language.decimal")), String::from)
+}
+
 /// The form of `key` the language shown uses for the count `n` (`key.one`, `key.other`…), filled from `args`.
 pub fn tp(key: &str, n: impl Into<u64>, args: &[&dyn Display]) -> String {
     let lang = current();
@@ -263,7 +269,19 @@ mod tests {
                 keys.extend(boss.phases.iter().map(|p| p.name.clone()));
             }
         }
-        keys.extend(species::load().into_iter().map(|s| s.label));
+        let species = species::load();
+        // The Lexique's descriptions: `<label>.text`, built, not written out in the code.
+        for (tab, _) in crate::campaign::lexique::TABS {
+            keys.extend(crate::campaign::lexique::entries(tab, &species).iter().map(|e| e.text()));
+        }
+        keys.extend(species.into_iter().map(|s| s.label));
+    }
+
+    #[test]
+    fn numbers_read_with_the_decimal_mark() {
+        assert_eq!(number(0.8), "0,8");
+        assert_eq!(number(3.0), "3");
+        assert_eq!(number(1.25), "1,2");
     }
 
     #[test]
@@ -271,7 +289,7 @@ mod tests {
         let (mut used, mut counted) = (BTreeSet::new(), BTreeSet::new());
         code_keys(&Path::new(env!("CARGO_MANIFEST_DIR")).join("src"), &mut used, &mut counted);
         data_keys(&mut used);
-        used.insert("language.name".into());
+        used.extend(["language.name".into(), "language.decimal".into()]);
         let french = &TABLES[0];
         let missing: Vec<&String> = used.iter().filter(|k| !french.contains_key(*k)).collect();
         let forms: Vec<String> = counted.iter().flat_map(|k| [format!("{k}.one"), format!("{k}.other")]).collect();

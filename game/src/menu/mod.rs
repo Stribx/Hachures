@@ -1,8 +1,9 @@
-//! The screens around the game: splash, title, pause, settings, sceaux, carnet, controls and credits.
+//! The screens around the game: splash, title, pause, settings, sceaux, lexique, carnet, controls and credits.
 
 mod carnet;
 mod controls;
 mod credits;
+mod lexique;
 mod pause;
 mod sceaux;
 mod settings_page;
@@ -16,6 +17,7 @@ use bevy::ui::UiGlobalTransform;
 use bevy::ui_widgets::{Activate, Button};
 
 pub use carnet::open_carnet;
+pub use lexique::open_lexique;
 pub use sceaux::open_sceaux;
 
 // The pages build with the shared widgets; `super::{text, ..}` reaches them from here.
@@ -30,6 +32,7 @@ pub fn plugin(app: &mut App) {
         pause::plugin,
         settings_page::plugin,
         sceaux::plugin,
+        lexique::plugin,
         carnet::plugin,
         controls::plugin,
         credits::plugin,
@@ -85,7 +88,7 @@ fn go(screen: Screen) -> impl Fn(On<Activate>, ResMut<NextState<Screen>>) {
     move |_, mut next| next.set(screen)
 }
 
-/// Where the settings, sceaux, carnet, controls and credits pages go back to.
+/// Where the settings, sceaux, lexique, carnet, controls and credits pages go back to.
 #[derive(Resource)]
 pub struct BackTo(pub Screen);
 
@@ -132,7 +135,7 @@ fn escape(
     match screen.get() {
         Screen::Playing => next.set(Screen::Paused),
         Screen::Paused => next.set(Screen::Playing),
-        Screen::Settings | Screen::Sceaux | Screen::Carnet | Screen::Controls | Screen::Credits => {
+        Screen::Settings | Screen::Sceaux | Screen::Lexique | Screen::Carnet | Screen::Controls | Screen::Credits => {
             next.set(from.map_or(Screen::Title, |f| f.0))
         }
         Screen::ConfirmNew | Screen::Plan => next.set(Screen::Title),

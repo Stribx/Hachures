@@ -43,7 +43,7 @@ pub(super) fn ghost(
     mut stock: Stock,
 ) {
     let grid = level.terrain.grid();
-    // Only a tile has a ghost: a tower shows its range, a scrape the route once the cell is plain.
+    // Only a tile has a ghost: a tower's range is drawn by `combat`, a scrape the route once the cell is plain.
     let tile = if let Act::Lay(tile) = TOOLS[selection.tool].act { Some(tile) } else { None };
     let at = verdict.at.zip(tile).filter(|_| verdict.refusal.is_none());
     let entity = *held.ghost.get_or_insert_with(|| {

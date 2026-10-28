@@ -26,6 +26,8 @@ pub enum Screen {
     Settings,
     /// L'arbre des sceaux.
     Sceaux,
+    /// Le Lexique: what the tools and the species do.
+    Lexique,
     /// Le carnet de Nève, once the campaign is over.
     Carnet,
     /// The keys, read-only.

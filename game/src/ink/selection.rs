@@ -53,7 +53,7 @@ pub(super) fn reset(mut loads: MessageReader<LoadLevel>, level: Res<Level>, mut 
 }
 
 /// Cell under the mouse cursor, unless the cursor is on the bar or a page.
-pub(super) fn hover(
+pub(crate) fn hover(
     level: Res<Level>,
     mut selection: ResMut<Selection>,
     window: Single<&Window, With<PrimaryWindow>>,

@@ -3,10 +3,13 @@
 
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use super::skills::Skill;
 use crate::i18n::french_key;
+use crate::ink::TOOLS;
+use crate::level::Level;
+use crate::level::data::LEVELS;
 use crate::storage;
 
 /// What a level left in the campaign.
@@ -37,14 +40,24 @@ pub struct Save {
     pub skills: Vec<Skill>,
     /// Choice id -> option picked, e.g. "refuge" -> "moulin".
     pub choices: BTreeMap<String, String>,
+    /// What Nève has met on a sheet, for the Lexique: the label keys of tools and species (`tool.arbalete`).
+    pub seen: BTreeSet<String>,
 }
 
-/// The save's layout: 1 counts the prologue as level 0; 2 keeps the names scratched out by key, not in French.
-const VERSION: u32 = 2;
+/// The save's layout: 1 counts the prologue as level 0; 2 keeps the names scratched out by key, not in French;
+/// 3 remembers what was seen, for the Lexique.
+const VERSION: u32 = 3;
 
 impl Default for Save {
     fn default() -> Save {
-        Save { version: VERSION, reached: 0, levels: Vec::new(), skills: Vec::new(), choices: BTreeMap::new() }
+        Save {
+            version: VERSION,
+            reached: 0,
+            levels: Vec::new(),
+            skills: Vec::new(),
+            choices: BTreeMap::new(),
+            seen: BTreeSet::new(),
+        }
     }
 }
 
@@ -55,6 +68,7 @@ impl Save {
     /// A save read from before the prologue moves up one level, the prologue counted as won.
     /// One holding only the settings starts with the prologue.
     /// One from before the language files has its scratched-out names in French: they become their keys.
+    /// One from before the Lexique has met what its won levels showed.
     pub fn upgrade(mut self) -> Save {
         if self.version == 0 && (self.reached > 0 || !self.levels.is_empty()) {
             self.reached += 1;
@@ -67,8 +81,27 @@ impl Save {
                 }
             }
         }
+        if self.version < 3 {
+            for k in (0..self.levels.len().min(LEVELS.len())).filter(|&k| self.levels[k].won) {
+                let level = Level::load(k, &self);
+                let tools = level.tools.iter().map(|&t| TOOLS[t].label);
+                let species = level.present.iter().map(|&s| level.species[s].label.as_str());
+                let met: Vec<String> = tools.chain(species).map(String::from).collect();
+                self.seen.extend(met);
+            }
+        }
         self.version = VERSION;
         self
+    }
+
+    /// Notes that `id` (a label key) has been met; true the first time.
+    pub fn discover(&mut self, id: &str) -> bool {
+        self.seen.insert(id.to_string())
+    }
+
+    /// Nothing played yet: the Lexique may already hold the first sheet's tools.
+    pub fn is_new(&self) -> bool {
+        self.reached == 0 && self.levels.is_empty() && self.skills.is_empty() && self.choices.is_empty()
     }
 
     pub fn sceaux(&self) -> u32 {
@@ -112,6 +145,7 @@ mod tests {
         let mut save = Save { reached: 2, skills: vec![Skill::MineDePlomb], ..default() };
         *save.record(1) = Record { won: true, challenge: true, names: 3, erased: vec!["place.pre_commun".into()] };
         save.choices.insert("refuge".into(), "bois".into());
+        save.seen.insert("tool.arbalete".into());
         storage::write(&path, &save).unwrap();
         assert_eq!(storage::read(&path).as_ref(), Some(&save));
         assert_eq!(save.sceaux(), 1, "2 earned, 1 spent");
@@ -135,5 +169,34 @@ mod tests {
         assert_eq!(storage::read::<Save>(&path), None);
         assert_eq!(std::fs::read_to_string(dir.join("save.ron.bak")).unwrap(), "not a save", "kept aside, not lost");
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn discover_is_true_once() {
+        let mut save = Save::default();
+        assert!(save.discover("species.chaineur"));
+        assert!(!save.discover("species.chaineur"));
+    }
+
+    #[test]
+    fn meeting_tools_is_not_playing() {
+        let mut save = Save::default();
+        save.discover("tool.barricade");
+        assert!(save.is_new(), "the title still offers a new game");
+        save.record(0).won = true;
+        assert!(!save.is_new());
+    }
+
+    #[test]
+    fn a_save_before_the_lexique_remembers_its_won_levels() {
+        let old: Save =
+            ron::from_str("(version: 2, reached: 2, levels: [(won: true, challenge: false, names: 0), (won: true, challenge: false, names: 0), (won: false, challenge: false, names: 0)])")
+                .unwrap();
+        let old = old.upgrade();
+        assert_eq!(old.version, 3);
+        for id in ["tool.arbalete", "tool.barricade", "species.chaineur", "species.echassier"] {
+            assert!(old.seen.contains(id), "{id} was on level 1-1");
+        }
+        assert!(!old.seen.contains("tool.mortier"), "level 1-2 was never won");
     }
 }

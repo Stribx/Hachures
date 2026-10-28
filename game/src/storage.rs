@@ -86,6 +86,10 @@ pub(crate) fn write<T: Serialize>(path: &Path, value: &T) -> io::Result<()> {
 /// `~/Library/Application Support` on macOS.
 #[cfg(not(target_arch = "wasm32"))]
 fn path(name: &str) -> Option<PathBuf> {
+    // The tests that store a save or settings must not touch the player's.
+    if cfg!(test) {
+        return None;
+    }
     let home = || std::env::var_os("HOME").map(PathBuf::from);
     let base = if cfg!(target_os = "windows") {
         std::env::var_os("APPDATA").map(PathBuf::from)

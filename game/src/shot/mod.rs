@@ -1,5 +1,5 @@
 //! Dev tool: F12 saves a screenshot to `screenshots/`. With `HACHURES_SHOT=out.png` the game jumps into play
-//! (`HACHURES_SCREEN=title|plan|paused|settings|controls|credits`, `HACHURES_LANG=en`,
+//! (`HACHURES_SCREEN=title|plan|paused|settings|lexique|controls|credits`, `HACHURES_LANG=en`,
 //! `HACHURES_LEVEL=n`, `HACHURES_DEMO=1` for one tower of each kind and a few barricades, `HACHURES_PARADE=1` for one
 //! still figure of each species in a row, `HACHURES_FASCINES=1` with that skill, `HACHURES_WAVE=1` to send the first
 //! wave, `HACHURES_WAVE=n` to send wave n, `HACHURES_CALQUE=1` for le Calque on), saves one screenshot after
@@ -8,6 +8,7 @@
 //! of each render pass (`render/<pass>/elapsed_gpu`, Vulkan and DX12 only): frame times alone can sit on the
 //! compositor's 60 Hz whatever the GPU does.
 
+mod hover;
 mod parade;
 
 use bevy::prelude::*;
@@ -39,7 +40,16 @@ pub fn plugin(app: &mut App) {
         ));
     }
     if std::env::var(SHOT).is_ok() {
-        app.add_systems(Startup, jump).add_systems(Update, (demo, parade::parade, act, timed));
+        app.add_systems(Startup, jump).add_systems(
+            Update,
+            (
+                demo,
+                parade::parade,
+                act,
+                timed,
+                hover::hover.after(crate::ink::selection::hover).before(crate::ink::inking),
+            ),
+        );
         app.add_systems(PostUpdate, camera.before(TransformSystems::Propagate));
     }
 }
@@ -89,6 +99,7 @@ fn jump(
         "plan" => Screen::Plan,
         "paused" => Screen::Paused,
         "settings" => Screen::Settings,
+        "lexique" => Screen::Lexique,
         "controls" => Screen::Controls,
         "credits" => Screen::Credits,
         _ => Screen::Playing,

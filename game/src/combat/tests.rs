@@ -410,3 +410,21 @@ fn an_arrival_sinks_into_the_board() {
     run(&mut app, 1);
     assert_eq!(ghosts_and_shards(&mut app), (vec![], 0), "then nothing is left");
 }
+
+/// The first figure of a species is noted in the Lexique, once.
+#[test]
+fn a_new_species_is_noted_once() {
+    let level = Level::new(Grid::parse("S...M"), species::load());
+    let (first, second) = (walker(&level, "chaineur", 100.0), walker(&level, "chaineur", 100.0));
+    let mut app = app_with(level);
+    app.insert_resource(Save::default()).add_systems(Update, super::noted::notice);
+    app.world_mut().spawn(first);
+    app.update();
+    let level = app.world().resource::<Level>();
+    assert_eq!(level.margin.len(), 1);
+    assert_eq!(level.margin[0].shown(), "Noté au Lexique : Chaîneur");
+    assert!(app.world().resource::<Save>().seen.contains("species.chaineur"));
+    app.world_mut().spawn(second);
+    app.update();
+    assert_eq!(app.world().resource::<Level>().margin.len(), 1, "already known");
+}

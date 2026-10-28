@@ -39,7 +39,7 @@ screenshots/, .taste-skill/, .impeccable/   local only, ignored by git
 | `combat/` | towers, enemies and their figurines (`combat/figure/`), waves sent, shards, la Grande Chaîne |
 | `overworld/` | les Marches and the Grand Plan: terrain, sheets, road, Nève's walk, the camera rig, clouds, trips |
 | `ui/` | what the player reads during play: label, margin notes, tool bar, place names, the end-of-level page; `widgets` is the shared UI toolkit |
-| `menu/` | the screens around play: splash, title, pause, settings page, sceaux tree, carnet, controls, credits |
+| `menu/` | the screens around play: splash, title, pause, settings page, sceaux tree, carnet, Lexique, controls, credits |
 | `look/`, `theme.rs`, `storage.rs`, `i18n.rs` | toolkit: ink material and camera, palette and fonts, saved files, words |
 | `shot/` | the dev harness (see "Dev tools") |
 
@@ -78,7 +78,7 @@ screenshots/, .taste-skill/, .impeccable/   local only, ignored by git
 
 ## Dev tools
 
-- **Screenshot harness** (`shot/`): F12 saves to `screenshots/`. `HACHURES_SHOT=out.png` jumps into play, saves a shot after `HACHURES_AT` seconds (a comma list takes several) and quits. Also: `HACHURES_SCREEN=title|plan|paused|settings|controls|credits`, `HACHURES_LANG=en`, `HACHURES_LEVEL=n` (index in `LEVELS`), `HACHURES_DEMO=1` (one tower of each kind and a few barricades), `HACHURES_PARADE=1` (one still figure of each species in a row), `HACHURES_FASCINES=1`, `HACHURES_WAVE=1` (`n` sends wave n at once), `HACHURES_CALQUE=1` (le Calque on), `HACHURES_CAM=x,y,z,tx,ty,tz`, `HACHURES_WALK=n@t`, `HACHURES_TRAVEL=n@t`, `HACHURES_INK=t`, and `HACHURES_FPS=1` (frame and per-pass GPU times). The harness changes settings in memory only; point `XDG_DATA_HOME` at a scratch folder to keep the real save untouched. Running the binary directly needs `BEVY_ASSET_ROOT=game`.
+- **Screenshot harness** (`shot/`): F12 saves to `screenshots/`. `HACHURES_SHOT=out.png` jumps into play, saves a shot after `HACHURES_AT` seconds (a comma list takes several) and quits. Also: `HACHURES_SCREEN=title|plan|paused|settings|lexique|controls|credits`, `HACHURES_LANG=en`, `HACHURES_LEVEL=n` (index in `LEVELS`), `HACHURES_DEMO=1` (one tower of each kind and a few barricades), `HACHURES_PARADE=1` (one still figure of each species in a row), `HACHURES_FASCINES=1`, `HACHURES_WAVE=1` (`n` sends wave n at once), `HACHURES_CALQUE=1` (le Calque on), `HACHURES_CAM=x,y,z,tx,ty,tz`, `HACHURES_WALK=n@t`, `HACHURES_TRAVEL=n@t`, `HACHURES_INK=t`, `HACHURES_HOVER=tower|enemy|<cell>` and `HACHURES_TOOL=n` (point without a mouse: range circle, enemy card), `HACHURES_CARD=n` (hover tool card `n`: its tooltip), and `HACHURES_FPS=1` (frame and per-pass GPU times). The harness changes settings in memory only; point `XDG_DATA_HOME` at a scratch folder to keep the real save untouched. Running the binary directly needs `BEVY_ASSET_ROOT=game`.
 - **Balance bot**: `cargo test -p game balance -- --ignored --nocapture` plays every level with a simple tower strategy and prints a table (won, Rôle, Names, towers, sépia, losses per wave). It is deterministic and checks the table against `game/tests/balance.txt` (CI runs it too): a rule or data change that moves it fails. Read the diff, then rerun with `HACHURES_BLESS=1` to keep the new table.
 
 ## Glossary
@@ -97,6 +97,7 @@ The game's world keeps its French names in code, data and files (they are names 
 | a Name / *le prix du nom* | inking a named place *rayes* its name from the Rôle (*rayer*, never *gratter*) | `Place`, `Level.erased` |
 | les sceaux | seals won per level (victory, challenge), spent in l'arbre des sceaux | `Save::sceaux`, `menu/sceaux.rs`, `campaign/skills.rs` |
 | le carnet | Nève's notebook: the margin notes in play, the campaign read back at the end | `ui` margin, `menu/carnet.rs` |
+| le Lexique | L: every tool and species met, with its real numbers; an entry unlocks the first time it shows on the sheet (`???` before). The tool tooltip and the enemy card show the same lines | `Save.seen`, `campaign/lexique.rs`, `menu/lexique/` |
 | le Calque | F1: the overlay of every species' route | `Selection.calque` |
 | le Droit de Passage | nothing may be inked that leaves a land species without a path, now or on a map to come | `ink/passage.rs` |
 | la Crue, le Gel | world 1 and 2 events, announced a wave ahead | `World.event`, `Level.event_on/next` |
@@ -184,7 +185,7 @@ Checked by the build: break a rule and CI fails. Don't work around a check; chan
 - In code: `t("key")` for a line, `tf("key", &[&n])` for a line with values (`{}` in order, `{1}` by position so a translation can reorder), `tp("key", n, &[..])` for counts (`key.one` / `key.other`, plus `.few`/`.many` where a language needs them), `n_("key")` for a key kept in a table and shown later with `t`.
 - Adding a line: put the key in `fr.ron` and in every other language file, use it, then run `cargo test -p game i18n`: it lists the keys `fr.ron` lacks or no longer needs, and what each other file misses against `fr.ron`. Dev builds also log any key shown without its line.
 - Adding a language: copy `fr.ron` to `<code>.ron`, translate it (keep `language.name` as the language names itself), and add one entry to `LANGUAGES` in `game/src/i18n.rs` with its plural rule; the settings offer it at once. IM Fell and Atkinson Hyperlegible cover Western European Latin only.
-- Saves keep scratched-out places by key (save version 2); older saves with French names are converted on load.
+- Saves keep scratched-out places by key (save version 2); older saves with French names are converted on load. Version 3 adds `seen` (the Lexique), backfilled from the levels already won.
 
 ## Test and build output
 

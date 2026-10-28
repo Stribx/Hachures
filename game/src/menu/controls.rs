@@ -29,6 +29,7 @@ const KEYS: [(&str, &[(&str, &str)]); 3] = [
             (n_("controls.key.tab"), n_("controls.action.next_route")),
             (n_("controls.key.f1"), n_("controls.action.calque")),
             (n_("controls.key.a"), n_("controls.action.sceaux")),
+            (n_("controls.key.l"), n_("controls.action.lexique")),
             (n_("controls.key.wheel"), n_("controls.action.zoom")),
             (n_("controls.key.enter"), n_("controls.action.next_or_retry")),
         ],

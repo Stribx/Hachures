@@ -100,7 +100,7 @@ impl Terrain {
         self.settle(species);
     }
 
-    /// Reach of the tower at `cell`; Équerre adds 1 when another tower stands beside it.
+    /// Reach of the tower at `cell`, or of one that would stand there; Équerre adds 1 when another is beside it.
     pub fn reach(&self, cell: usize, weapon: Weapon) -> f32 {
         tower_reach(&self.reach, &self.base, &self.towers, cell, weapon)
     }
@@ -256,6 +256,20 @@ mod tests {
         assert_eq!(terrain.reach(2, Weapon::Arbalete), 3.0);
         terrain.alter([(3, Edit::Raise(Weapon::Arbalete))], &species);
         assert_eq!(terrain.reach(2, Weapon::Arbalete), 4.0);
+    }
+
+    /// The range circle of a tower not yet inked: the reach it would have there, Équerre counted.
+    #[test]
+    fn reach_answers_for_a_cell_without_a_tower() {
+        let species = species::load();
+        let arbalete = |equerre| {
+            let mut terrain = Terrain::new(Grid::parse("S.....M"), Reach { equerre, ..reach() }, &species);
+            let alone = terrain.reach(4, Weapon::Arbalete);
+            terrain.alter([(3, Edit::Raise(Weapon::Arbalete))], &species);
+            (alone, terrain.reach(4, Weapon::Arbalete))
+        };
+        assert_eq!(arbalete(true), (3.0, 4.0));
+        assert_eq!(arbalete(false), (3.0, 3.0));
     }
 
     /// Every tool's preview is what inking it does, for every species, with the world event on.

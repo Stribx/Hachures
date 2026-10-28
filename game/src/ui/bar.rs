@@ -1,4 +1,4 @@
-//! The bar along the bottom: the level's tools, the next wave, le Calque, the route shown and the sceaux.
+//! The bar along the bottom: the level's tools, the next wave, le Calque, the route shown, the sceaux and the Lexique.
 //! Everything can be played with the mouse; each button names its key.
 
 use bevy::ecs::system::SystemParam;
@@ -13,7 +13,7 @@ use crate::combat::enemies::send_wave;
 use crate::i18n::{t, tf};
 use crate::ink::{Selection, TOOLS};
 use crate::level::{Level, LevelEntity};
-use crate::menu::open_sceaux;
+use crate::menu::{open_lexique, open_sceaux};
 use crate::schedule::Screen;
 use crate::settings::Settings;
 use crate::theme::{BODY_SIZE, INK, INK_SOFT, PAPER, SEAL, SLIP, SMALL_SIZE};
@@ -23,7 +23,7 @@ pub struct Bar;
 
 /// The button of `TOOLS[.0]`.
 #[derive(Component)]
-pub struct ToolButton(usize);
+pub struct ToolButton(pub usize);
 
 /// The name of `TOOLS[.0]`.
 #[derive(Component)]
@@ -153,6 +153,7 @@ fn spawn_actions(bar: &mut ChildSpawnerCommands, assets: &AssetServer) {
             |_: On<Activate>, level: Res<Level>, mut selection: ResMut<Selection>| next_species(&mut selection, &level),
         );
         actions.spawn(framed(0.0, small(t("bar.sceaux")))).observe(open_sceaux(Screen::Playing));
+        actions.spawn(framed(0.0, small(t("bar.lexique")))).observe(open_lexique(Screen::Playing));
     });
 }
 

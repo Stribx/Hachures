@@ -495,6 +495,7 @@ Pour les lecteurs de la Pente, le chemin dépend du terrain. Pour les lecteurs d
 | Escorte | Convoi vers la sortie | [S] |
 | Fuyards qui rapportent des Noms | Récompense des non-hostiles | Exception [X], donnée de progression hors terrain |
 | Calque (F1) | Exercice d'apprenti, accessibilité | Affichage |
+| Lexique (L) | Le registre de Nève : chaque outil et chaque espèce s'y note la première fois qu'ils paraissent sur la feuille (avant, « ??? »). Il donne les chiffres réels (dégâts, portée, cadence, PV, faiblesse) ; la fiche de l'outil en main et celle d'une figure survolée en sont des extraits | Affichage |
 | Tension de la feuille | Jauge cachée : si le joueur domine, la feuille « se tend » et la Chancellerie envoie des vagues plus mixtes. S'il peine, la feuille « gondole » et les sceaux rendent +10 % de sépia | Exception [X], tables d'apparition et de butin |
 | Combat (PV, dégâts, harpon, treuil) | Tours | Exception [X], couche de combat |
 | Narration en marge | Le carnet de Nève réagit aux événements | Déclencheurs de texte, sans opération |

@@ -6,6 +6,7 @@ use bevy::ui_widgets::Activate;
 use super::carnet::{open_carnet, written};
 use super::controls::open_controls;
 use super::credits::open_credits;
+use super::lexique::open_lexique;
 use super::sceaux::open_sceaux;
 use super::settings_page::open_settings;
 use super::{Screen, button, go, label, page, primary, text};
@@ -21,7 +22,7 @@ pub fn plugin(app: &mut App) {
 }
 
 fn spawn(mut commands: Commands, assets: Res<AssetServer>, save: Res<Save>, level: Res<Level>) {
-    let new = *save == Save::default();
+    let new = save.is_new();
     // The Marches drift behind; the menu is a sheet laid on the left.
     let mut page = commands.spawn(page(Screen::Title, Color::NONE));
     page.entry::<Node>().and_modify(|mut node| {
@@ -54,6 +55,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>, save: Res<Save>, leve
                 let progress = tp("title.progress", n, &[&t(&level.name), &n]);
                 p.spawn(text(&assets, progress, SMALL_SIZE)).insert(TextColor(INK_SOFT));
                 p.spawn(button(label(&assets, t("sceaux.title")))).observe(open_sceaux(Screen::Title));
+                p.spawn(button(label(&assets, t("menu.lexique")))).observe(open_lexique(Screen::Title));
                 if written(&save) {
                     p.spawn(button(label(&assets, t("title.carnet")))).observe(open_carnet(Screen::Title));
                 }

@@ -1,12 +1,14 @@
 //! What the player reads and clicks: the label, Nève's margin, the bar of tools, the names on the sheet,
 //! and the page at the end of a level.
 
-mod bar;
+pub mod bar;
+mod enemy_card;
 mod hud;
 mod notebook;
 mod places;
 mod stamp;
 mod studio;
+mod tool_tip;
 pub(crate) mod widgets;
 
 use bevy::input::keyboard::Key;
@@ -21,18 +23,26 @@ use widgets::{Panel, letter};
 
 pub fn plugin(app: &mut App) {
     app.add_plugins((studio::plugin, widgets::plugin));
-    app.init_resource::<Fast>().add_systems(Startup, (setup, places::setup)).add_systems(
-        Update,
-        (
-            toggles.in_set(Step::Input).before(crate::overworld::onward::between_levels),
-            (hud::update_label, hud::counter_tip, update_margin, fresh_ink, places::label_places, places::tooltip)
-                .in_set(Step::Render),
-            (stamp::stamp_wave, stamp::strike_stamps).in_set(Step::Render),
-            (bar::sync, bar::look, notebook::sync).in_set(Step::Render).run_if(in_state(Screen::Playing)),
-            show_during_play.run_if(state_changed::<Screen>),
-            speed,
-        ),
-    );
+    app.init_resource::<Fast>()
+        .add_systems(Startup, (setup, places::setup, tool_tip::setup, enemy_card::setup))
+        .add_systems(
+            Update,
+            (
+                toggles.in_set(Step::Input).before(crate::overworld::onward::between_levels),
+                (hud::update_label, hud::counter_tip, update_margin, fresh_ink, places::label_places, places::tooltip)
+                    .in_set(Step::Render),
+                // The card of an enemy gives way to the tip of a tool, and covers the price of the cell.
+                (tool_tip::tool_tip, enemy_card::enemy_card)
+                    .chain()
+                    .after(places::tooltip)
+                    .in_set(Step::Render)
+                    .run_if(in_state(Screen::Playing)),
+                (stamp::stamp_wave, stamp::strike_stamps).in_set(Step::Render),
+                (bar::sync, bar::look, notebook::sync).in_set(Step::Render).run_if(in_state(Screen::Playing)),
+                show_during_play.run_if(state_changed::<Screen>),
+                speed,
+            ),
+        );
 }
 
 /// The label and the margin only show during play, not behind the menus.
