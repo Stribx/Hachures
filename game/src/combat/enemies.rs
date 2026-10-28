@@ -4,7 +4,7 @@ use bevy::prelude::*;
 
 use super::Enemy;
 use super::boss::{Borne, Boss};
-use super::shards::EnemyLook;
+use super::figure::{EnemyLook, Kind, Stride, leave, spawn_figure};
 use crate::level::story::Trigger;
 use crate::level::{Level, LevelEntity};
 use crate::map::cell_pos;
@@ -20,7 +20,10 @@ const SLOW: f32 = 0.5;
 const HP_PER_WAVE: f32 = 1.12;
 
 /// Size of the silhouettes, so they read on the board.
-const SCALE: f32 = 1.3;
+pub const SCALE: f32 = 1.3;
+
+/// The boss stands larger than the rest.
+pub const BOSS_SCALE: f32 = 1.6 * SCALE;
 
 /// Space sends the next wave of the level.
 pub fn start_waves(
@@ -79,20 +82,12 @@ pub fn spawn_enemies(
     let wave_scale = if boss.is_some() { 1.0 } else { HP_PER_WAVE.powi(level.wave.number as i32 - 1) };
     let hp = level.hp(level.species[species].hp) * wave_scale;
     let at = cell_pos(level.terrain.grid(), cell);
-    let material = &look.materials[species];
-    let mut enemy = commands.spawn((
-        LevelEntity,
-        Enemy::new(species, hp, cell),
-        Transform::from_translation(at).with_scale(Vec3::splat(SCALE)),
-        Visibility::default(),
-    ));
-    enemy.with_children(|parts| {
-        for (mesh, transform) in &look.shapes[level.species[species].shape as usize] {
-            parts.spawn((Mesh3d(mesh.clone()), MeshMaterial3d(material.clone()), *transform));
-        }
-    });
+    let scale = if boss.is_some() { BOSS_SCALE } else { SCALE };
+    let enemy = spawn_figure(&mut commands, &look, species, at, scale);
+    let mut enemy = commands.entity(enemy);
+    enemy.insert((LevelEntity, Enemy::new(species, hp, cell), Stride::default()));
     if let Some(first_phase) = boss {
-        enemy.insert((Boss::default(), Transform::from_translation(at).with_scale(Vec3::splat(1.6 * SCALE))));
+        enemy.insert(Boss::default());
         level.boss = Some(first_phase.name.clone());
         level.note(Trigger::Boss(first_phase.name.clone()));
     }
@@ -159,10 +154,6 @@ fn step(
         } else {
             transform.translation += to.normalize() * step;
         }
-        // Face the way it walks; a wagon or a beast reads its route by its head.
-        if to.xz().length() > 0.0 {
-            transform.rotation = Quat::from_rotation_y((-to.z).atan2(to.x));
-        }
     }
 }
 
@@ -178,14 +169,19 @@ fn lay(level: &mut Level, look: &EnemyLook, commands: &mut Commands, trail: Trai
     // [S] Le Bornage: every borne is one more target for the Jalonneurs.
     for &(cell, species) in &trail.bornes {
         batch.push((cell, Edit::PlantBorne));
-        commands.spawn((
-            LevelEntity,
-            Borne,
-            Enemy::new(species, level.hp(level.boss_file().borne_hp), cell),
-            Mesh3d(look.borne_mesh.clone()),
-            MeshMaterial3d(look.borne_material.clone()),
-            Transform::from_translation(cell_pos(level.terrain.grid(), cell)),
-        ));
+        commands
+            .spawn((
+                LevelEntity,
+                Borne,
+                Enemy::new(species, level.hp(level.boss_file().borne_hp), cell),
+                Transform::from_translation(cell_pos(level.terrain.grid(), cell)),
+                Visibility::default(),
+            ))
+            .with_children(|borne| {
+                for &(ref mesh, at, ref material, ..) in &look.borne {
+                    borne.spawn((Mesh3d(mesh.clone()), MeshMaterial3d(material.clone()), at));
+                }
+            });
     }
     if !batch.is_empty() {
         level.alter(batch);
@@ -214,6 +210,8 @@ pub fn walk(
             enemy.next = field.next(level.terrain.grid(), enemy.cell);
             if enemy.next.is_none() && field.dist[enemy.cell] == 0.0 {
                 reach_goal(level, enemy.species, boss.is_some(), &mut trail);
+                let goal = level.species[enemy.species].goal;
+                leave(&mut commands, &look, enemy.species, &transform, Kind::arriving(goal));
                 commands.entity(entity).try_despawn();
                 continue;
             }

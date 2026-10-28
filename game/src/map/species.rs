@@ -31,6 +31,45 @@ pub enum Shape {
     Chariot,
 }
 
+/// A prop a species wears on its figurine (docs, direction artistique, phase 7).
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Deserialize)]
+pub enum Carry {
+    /// The Chancellerie's flat hat.
+    Bicorne,
+    /// The surveying chain, coiled over the shoulder.
+    Chaine,
+    /// The ranging pole, striped, taller than its bearer.
+    Jalon,
+    /// The Échassiers' wide straw hat.
+    Paille,
+    /// The Marches' kerchief.
+    Fichu,
+    /// A bundle on the back.
+    Ballot,
+    /// A child carried on the hip.
+    Enfant,
+    /// The Gens du Col's chalk-white hood.
+    Capuche,
+    /// A coil of rope on the back.
+    Corde,
+    /// The alpenstock: an ice axe.
+    Piolet,
+    /// Pack boxes hanging at a beast's flanks.
+    Bats,
+    /// The convoy's canvas hood over the cart.
+    Bache,
+    /// The little figure who leads the cart.
+    Meneur,
+    /// The Grande Chaîne's two oxen walking in front of the cart.
+    Boeufs,
+    /// The yoke across the oxen's necks, a part of its own.
+    Joug,
+    /// The Chancellerie's cartographer standing on the cart's box.
+    Gast,
+    /// The sighting lantern on a post at the front of the box.
+    Visee,
+}
+
 /// What a species walks towards.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Deserialize)]
 pub enum Goal {
@@ -63,6 +102,9 @@ pub struct Species {
     pub color: (f32, f32, f32),
     #[serde(default)]
     pub shape: Shape,
+    /// The props its figurine wears, besides its body and (for a hostile) its seal.
+    #[serde(default)]
+    pub carries: Vec<Carry>,
     pub costs: HashMap<Tile, f32>,
 }
 
@@ -110,5 +152,15 @@ mod tests {
         for s in load() {
             assert!(!s.costs.contains_key(&Tile::Palissade), "{} walks a Palissade", s.name);
         }
+    }
+
+    #[test]
+    fn carries_default_to_none() {
+        let species: Species = ron::from_str(
+            "(label: \"x\", goal: Cible, hostile: true, hp: 1.0, speed: 1.0, loot: 0, weak_to: None, \
+             color: (0.5, 0.5, 0.5), costs: {Sol: 1.0})",
+        )
+        .unwrap();
+        assert!(species.carries.is_empty());
     }
 }

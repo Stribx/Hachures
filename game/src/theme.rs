@@ -49,6 +49,20 @@ pub const PANEL_SHADOW: Color = Color::srgba(0.22, 0.14, 0.08, 0.18);
 pub const FRAME: Color = Color::srgb(0.36, 0.3, 0.24);
 /// Wood: the barricade and the varnished props.
 pub const WOOD: Color = Color::srgb(0.3, 0.2, 0.12);
+/// Dark moss felt: the base a figurine stands on.
+pub const FELT: Color = Color::srgb(0.30, 0.33, 0.24);
+/// Cream linen: a figurine's collar and packs.
+pub const LINEN: Color = Color::srgb(0.88, 0.83, 0.70);
+/// Dark iron: chains and fittings on a figurine.
+pub const IRON: Color = Color::srgb(0.25, 0.25, 0.27);
+/// Ox hide: the Grande Chaîne's oxen.
+pub const HIDE: Color = Color::srgb(0.42, 0.30, 0.20);
+/// Slate cloth: the Chancellerie's coat, on the Chaîneur and on Gast.
+pub const SLATE: Color = Color::srgb(0.30, 0.32, 0.40);
+/// A lit lantern's glass.
+pub const LAMP: Color = Color::srgb(0.93, 0.78, 0.38);
+/// Cream limestone: the imperial bornes.
+pub const LIMESTONE: Color = Color::srgb(0.86, 0.82, 0.72);
 
 /// The game's two faces, regular and italic.
 pub const FELL: [&str; 2] = ["fonts/IMFellEnglish-Regular.ttf", "fonts/IMFellEnglish-Italic.ttf"];

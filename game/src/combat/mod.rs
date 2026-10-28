@@ -2,6 +2,7 @@
 
 pub mod boss;
 pub mod enemies;
+pub mod figure;
 mod shards;
 #[cfg(test)]
 mod tests;
@@ -12,7 +13,7 @@ use bevy::prelude::*;
 use crate::Step;
 
 pub fn plugin(app: &mut App) {
-    app.init_resource::<Shots>().add_systems(Startup, shards::setup).add_systems(
+    app.init_resource::<Shots>().add_systems(Startup, figure::setup).add_systems(
         Update,
         (
             enemies::start_waves.in_set(Step::Input),
@@ -22,6 +23,9 @@ pub fn plugin(app: &mut App) {
                 .chain()
                 .in_set(Step::Simulate)
                 .before(crate::level::finish_level),
+            figure::animate.in_set(Step::Simulate).after(enemies::walk),
+            figure::drag_chain.in_set(Step::Simulate).after(figure::animate),
+            (figure::exits, shards::blots).in_set(Step::Simulate),
             draw.in_set(Step::Render),
         ),
     );

@@ -1,3 +1,4 @@
+use std::f32::consts::{PI, TAU};
 use std::time::Duration;
 
 use bevy::prelude::*;
@@ -5,7 +6,11 @@ use bevy::time::TimeUpdateStrategy;
 
 use super::boss::{Borne, Boss, boss_phases, drop_bornes};
 use super::enemies::{spawn_enemies, walk};
-use super::shards::EnemyLook;
+use super::figure::chain::{Link, drag_chain};
+use super::figure::exit::Exit;
+use super::figure::kit::BOSS_REAR;
+use super::figure::{EnemyLook, Kind, Stride, animate, exits, spawn_figure};
+use super::shards::Shard;
 use super::towers::{Tower, Weapon, fire};
 use super::{Enemy, Shots};
 use crate::campaign::save::Save;
@@ -147,6 +152,35 @@ fn grande_chaine_phases() {
     assert_eq!(app.world().get::<Enemy>(boss).unwrap().species, rompue, "la Chaîne rompue reads l'Ombre");
 }
 
+/// The boss drags twenty links along the road its cart drove, and they go with it.
+#[test]
+fn the_chain_follows_and_goes_with_the_boss() {
+    let grid = Grid::parse(
+        "
+        S...................M
+        .....................
+        ",
+    );
+    let level = Level::new(grid, species::load());
+    let boss = walker(&level, "grande_chaine", 1000.0);
+    let mut app = app_with(level);
+    app.add_systems(Update, drag_chain);
+    let boss = app.world_mut().spawn((boss, Boss::default())).id();
+
+    run(&mut app, 2);
+    let links: Vec<Vec3> =
+        app.world_mut().query::<(&Link, &Transform)>().iter(app.world()).map(|(_, t)| t.translation).collect();
+    assert_eq!(links.len(), 20);
+    let boss_at = app.world().get::<Transform>(boss).unwrap().translation;
+    let rear = boss_at - Vec3::X * BOSS_REAR;
+    let nearest = links.iter().map(|l| l.xz().distance(rear.xz())).fold(f32::MAX, f32::min);
+    assert!(nearest < 0.3, "the first link is {nearest} from the rear");
+
+    app.world_mut().despawn(boss);
+    app.update();
+    assert_eq!(app.world_mut().query::<&Link>().iter(app.world()).count(), 0, "the chain goes with the boss");
+}
+
 /// A naive player, to balance the levels without playing them: before each wave it spends
 /// all its sépia on towers, where they cover the most of the hostile routes per sépia.
 /// It never inks terrain, so a player who reads the map should do better.
@@ -162,10 +196,8 @@ fn balance() {
         save.choices.insert("refuge".into(), "moulin".into());
         let level = Level::load(index, &save);
         let waves = level.waves.len();
-        let species = level.species.len();
         let mut app = app_with(level);
         app.add_systems(Update, spawn_enemies.before(walk));
-        app.world_mut().resource_mut::<EnemyLook>().materials = vec![default(); species];
 
         let mut towers = 0;
         // (wave, Rôle lost)
@@ -252,4 +284,129 @@ fn bot_build(app: &mut App) -> usize {
         app.world_mut().spawn((Tower { cell, weapon, ready_in: 0.0 }, Transform::from_xyz(x as f32, 0.8, z as f32)));
         built += 1;
     }
+}
+
+/// A Chaîneur on the first spawn, standing as `spawn_enemies` makes one: a figure, an enemy and a stride.
+fn striding(app: &mut App, species: &str) -> Entity {
+    let level = app.world().resource::<Level>();
+    let (enemy, at) = walker(level, species, 100.0);
+    let index = enemy.species;
+    let id = {
+        let mut commands = app.world_mut().commands();
+        let look = EnemyLook::default();
+        let id = spawn_figure(&mut commands, &look, index, at.translation, 1.0);
+        commands.entity(id).insert((enemy, Stride::default()));
+        id
+    };
+    app.world_mut().flush();
+    id
+}
+
+/// `animate` runs after `walk`, as in the game.
+fn with_animation(app: &mut App) {
+    app.add_systems(Update, animate.after(walk));
+}
+
+/// The step follows the ground walked, and a pinned walker does not step.
+#[test]
+fn a_stride_follows_the_ground_walked() {
+    let level = Level::new(Grid::parse("S.........M"), species::load());
+    let mut app = app_with(level);
+    with_animation(&mut app);
+    let id = striding(&mut app, "chaineur");
+    let start = app.world().get::<Transform>(id).unwrap().translation;
+    run(&mut app, 2);
+    let at = app.world().get::<Transform>(id).unwrap().translation;
+    let walked = app.world().get::<Stride>(id).unwrap().walked;
+    let moved = at.distance(start);
+    assert!(moved > 0.5, "it walked");
+    assert!((walked - moved).abs() < 0.1 * moved, "walked {walked} for {moved} moved");
+
+    app.world_mut().get_mut::<Enemy>(id).unwrap().pinned = 1.0;
+    // One more update to take the pin's first frame, then the pin holds.
+    let before = app.world().get::<Stride>(id).unwrap().walked;
+    (0..15).for_each(|_| app.update());
+    assert_eq!(app.world().get::<Stride>(id).unwrap().walked, before, "pinned, it does not step");
+}
+
+/// A turn eases toward the heading and never passes it.
+#[test]
+fn turns_ease_without_overshoot() {
+    let level = Level::new(Grid::parse("S...\n...M\n...."), species::load());
+    let mut app = app_with(level);
+    with_animation(&mut app);
+    let id = striding(&mut app, "chaineur");
+    // The heading is fixed while it walks to one cell, so the yaw's gap to it must only shrink.
+    let (mut gap, mut cell, mut checked) = (f32::MAX, usize::MAX, 0);
+    for _ in 0..200 {
+        app.update();
+        let Some(enemy) = app.world().get::<Enemy>(id) else { break };
+        let Some(next) = enemy.next else { continue };
+        if enemy.cell != cell {
+            (gap, cell) = (f32::MAX, enemy.cell);
+        }
+        let level = app.world().resource::<Level>();
+        let transform = app.world().get::<Transform>(id).unwrap();
+        let to = cell_pos(level.terrain.grid(), next) - transform.translation;
+        if to.xz().length() < 0.05 {
+            continue;
+        }
+        let heading = (-to.z).atan2(to.x);
+        let yaw = transform.rotation.to_euler(EulerRot::YXZ).0;
+        let now = (heading - yaw + PI).rem_euclid(TAU) - PI;
+        assert!(now.abs() <= gap + 1e-4, "the yaw moved away from its heading: {now} after {gap}");
+        gap = now.abs();
+        checked += 1;
+    }
+    assert!(checked > 10, "the walker was followed");
+}
+
+/// The kinds of the ghosts standing, and how many shards fly.
+fn ghosts_and_shards(app: &mut App) -> (Vec<Kind>, usize) {
+    let kinds = app.world_mut().query_filtered::<&Exit, Without<Enemy>>().iter(app.world()).map(|e| e.kind).collect();
+    (kinds, app.world_mut().query::<&Shard>().iter(app.world()).count())
+}
+
+/// A defeated enemy goes on the frame it falls, as before; a ghost tips over, then breaks into shards.
+#[test]
+fn a_defeated_enemy_leaves_a_ghost_then_shards() {
+    let mut level = Level::new(Grid::parse("S.....M\n...^..R"), species::load());
+    level.sepia = 0;
+    let tower_cell = level.terrain.grid().width + 1;
+    let tower_at = cell_pos(level.terrain.grid(), tower_cell);
+    let chaineur = walker(&level, "chaineur", 0.5);
+    let mut app = app_with(level);
+    app.add_systems(Update, exits);
+    app.world_mut().spawn((
+        Tower { cell: tower_cell, weapon: Weapon::Arbalete, ready_in: 0.0 },
+        Transform::from_translation(tower_at),
+    ));
+    let id = app.world_mut().spawn(chaineur).id();
+    app.update();
+
+    assert!(app.world().get_entity(id).is_err(), "it is gone on the frame it is defeated");
+    assert_eq!(ghosts_and_shards(&mut app), (vec![Kind::Fall], 0), "a ghost tips over first");
+    run(&mut app, 1);
+    let (ghosts, shards) = ghosts_and_shards(&mut app);
+    assert!(ghosts.is_empty() && shards > 0, "then it breaks: {ghosts:?}, {shards} shards");
+}
+
+/// An enemy at its goal is gone on that frame, as before; a ghost sinks into the board, then goes.
+#[test]
+fn an_arrival_sinks_into_the_board() {
+    let level = Level::new(Grid::parse("S.M"), species::load());
+    let chaineur = walker(&level, "chaineur", 100.0);
+    let mut app = app_with(level);
+    app.add_systems(Update, exits);
+    let id = app.world_mut().spawn(chaineur).id();
+    for _ in 0..200 {
+        app.update();
+        if app.world().get_entity(id).is_err() {
+            break;
+        }
+    }
+    assert!(app.world().get_entity(id).is_err(), "it arrived");
+    assert_eq!(ghosts_and_shards(&mut app), (vec![Kind::Sink], 0), "and sinks");
+    run(&mut app, 1);
+    assert_eq!(ghosts_and_shards(&mut app), (vec![], 0), "then nothing is left");
 }

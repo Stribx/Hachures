@@ -16,6 +16,7 @@ Ce qu'on retient de LittleBigPlanet et Sackboy : tout est **un vrai objet fait m
 | Icônes d'outil | faites en jeu : filmées sur les pièces (`ui/studio.rs`). Les icônes de compteur restent à faire avec MOSS |
 | Cadres d'interface à filet de 1 px et repères de coin | ✓ retirés : les boutons et les cartes d'outil sont des feuillets lavés d'encre aux coins à peine arrondis, les panneaux se posent sur la carte par leur ombre ; seul l'outil en main garde un cercle d'encre (un état, pas un décor) |
 | Nuages, Moulin, têtes de tour, socle (`3d-assets.md`) | en pause jusqu'à la fin de la feuille de route |
+| Espèces et boss | ✓ figurines en code, phase 7 |
 
 ## Feuille de route du plateau-maquette
 
@@ -69,7 +70,7 @@ On ne passe à la phase suivante que quand le critère « fini quand » tient su
   Les sons sont du pack Kenney Impact Sounds, déjà crédité.
 - ✓ **Seule la main anime :** un redessin qui change plus de 3 cases (nouveau niveau, Crue) ne fait rien tomber.
 - ✓ **Le fantôme :** sous le curseur, la pièce de l'outil de terrain tenu, pâle (alpha 0,45), là où elle irait, avec les raccords de barricade déjà calculés. Seulement là où l'encre est permise.
-- Vérifié en capture avec `HACHURES_INK=t` (nouveau, `shot.rs`) : chute, écrasement, fibres. **Pas vérifiés en capture :** le fantôme (pas de curseur) et le son. À essayer en jouant.
+- Vérifié en capture avec `HACHURES_INK=t` (nouveau, `shot/`) : chute, écrasement, fibres. **Pas vérifiés en capture :** le fantôme (pas de curseur) et le son. À essayer en jouant.
 - **Fini quand :** poser une pièce fait plaisir en boucle, même sans vague. C'est à juger manette en main, ou plutôt souris en main.
 
 ### Phase 5 : lumière et eau (faite)
@@ -102,6 +103,72 @@ La maquette reste une gravure, mais **enluminée** : des lavis d'aquarelle sous 
   - **Fini quand :** le plateau vit même sans vague.
 - **Budget.** Tout tourne aussi dans le navigateur, en suivant le préréglage graphique (Bas : peu d'herbe, pas d'oiseaux). Le préréglage Haut prend au plus 2 ms de GPU de plus qu'avant cette phase.
   - **Mesuré** (`HACHURES_FPS=1`, 1-1, build de debug, fenêtre 1568 × 1689, total des passes GPU) : Bas 6,8 ms avant, 6,3 à 6,7 après ; Haut 8,9 avant, 10,6 à 10,7 après (+1,8 ms) ; Ultra 10,5 avant, 12,4 à 12,6 après (+2 ms). Le surcoût vient surtout de la passe opaque (l'herbe, les haies) et des ombres. Le web compile ; il reste à le lancer dans un navigateur.
+
+### Phase 7 : le bestiaire (faite)
+Les espèces sont la dernière chose du plateau qui ne soit pas « de la maquette » : deux à quatre primitives grises, une seule couleur, qui glissent sans bouger et disparaissent. Elles deviennent des **figurines de plan-relief en bois peint**, poussées case à case par une main invisible. Spécification et tickets : `.scratch/bestiaire/`.
+
+Décisions du propriétaire : figurines faites **en code** (pas de modèle généré), mouvement **procédural** (ni squelette ni clip glTF), boss **assemblés en code** à partir du même jeu de pièces (bible §9), fiches pour tout le bestiaire de la bible.
+
+- **La figurine.** Un pion de bois tourné, posé sur un socle rond en feutre : un manteau en tronc de cône, une tête ronde, un couvre-chef par peuple, et les accessoires de l'espèce. Hachure fine, comme les tours, pour qu'une petite pièce ne tourne pas au gribouillis. Bois ciré (`look::varnished`) pour le bois, feutre pour les socles.
+  - **Fini quand :** sur une capture de 1-1 en vague, chaque espèce se nomme à sa silhouette seule, en niveaux de gris.
+- **Le sceau.** Tout hostile porte sur la poitrine un **sceau de cire rouge** (`theme::SEAL`), celui que la bible lui donne (« chaque légionnaire porte un sceau de cire et d'encre »). Les alliés (Fuyards, Convoi) n'en portent pas. C'est la seule pièce rouge d'une figurine.
+  - **Fini quand :** on sait d'un regard qui tirer et qui épargner, même au Calque.
+- **La valeur avant la teinte.** Le shader change la lumière en traits : c'est la *valeur* qui se lit sous l'encre. Les manteaux sont plus sombres que les champs (pâture, pré, blé, neige), jamais du même clair. Le rouge est réservé au sceau.
+- **Une palette par peuple** (bible §9) :
+
+| Peuple | Espèces | Manteau | Accent | Couvre-chef |
+|---|---|---|---|---|
+| Chancellerie (l'Empire) | Chaîneur, Jalonneur, Greffier, Légat | ardoise froide | col crème « de plan » | bicorne plat |
+| Gens des marais | Échassier (conscrit, rancunier) | ocre de jonc (olive) | jonc | grand chapeau de paille |
+| Gens du Col | Gens du Col | bleu ardoise | blanc de craie | capuche |
+| Bêtes de bât | Harde, bœufs de la Grande Chaîne | laine brune | bâts crème | — |
+| Gens des Marches | Fuyard, Convoi de Hesse | vert-de-gris | ballot crème | fichu |
+| Gens des Combes (monde 3) | Taupier, Étayeur | noir d'ardoise | jaune de lampe | casque à lampe |
+| Gens des Sables (monde 4) | Sablier, Caravanier | ocre de sable | ombre bleue | voile |
+| Gens des Vannes (monde 5) | Haleur | brique sombre | vert-bouteille | bonnet |
+
+- **Le geste, suite de la phase 4 : seule la main anime.**
+  - **La marche :** la cadence avance avec la *distance* parcourue, pas avec le temps. Un pied ne glisse jamais ; une cible clouée ou la pause figent le pas ; la Lanterne qui ralentit se voit d'elle-même.
+  - **Les allures :** *Pas* (le pion sautille et se dandine, comme poussé du doigt), *Échasses* (balancement lent et haut), *Trot* (la tête hoche, le corps tangue), *Roule* (les roues tournent à la distance, la caisse cahote sur les cases rudes), *Nage* (le corps s'enfonce jusqu'à la taille et flotte).
+  - **Le regard :** la figurine tourne vers la case suivante en douceur, sans claquer.
+  - **Touchée :** un sursaut (elle bascule en arrière et s'écrase un peu), éteint en 0,2 s. **Clouée** (Harpon) : elle titube sur place.
+  - **Vaincue :** elle bascule (0,15 s), le sceau se fend en gouttes de sépia et la figurine en éclats de sa couleur, puis une tache de sépia pâlit au sol. Jamais de sang (bible §1).
+  - **Arrivée :** à la cible, elle s'enfonce dans la maquette comme une épingle qu'on retire ; un Fuyard au Refuge fait un petit saut et s'efface.
+  - **Fini quand :** deux captures d'une même vague à deux instants (`HACHURES_AT=t1,t2`) montrent des pas, pas des glissades ; et la table d'équilibrage n'a pas bougé.
+- **Les boss** sont des assemblages des mêmes pièces : chariot, roues, mâts, lentilles, figurines (bible §9). Leurs points faibles sont des pièces à part, qui peuvent trembler ou luire.
+
+#### Fiches du bestiaire
+
+Silhouette (ce qui se lit à 60 px), accessoires, allure, et ce qui la distingue de sa voisine. ✱ = déjà dans `species.ron`.
+
+| Espèce | Silhouette et accessoires | Allure | À distinguer de |
+|---|---|---|---|
+| Chaîneur ✱ | pion ardoise, bicorne, la chaîne d'arpentage enroulée sur l'épaule (anneaux) | Pas | Jalonneur : pas de jalon |
+| Jalonneur ✱ | pion ardoise plus mince, un **jalon** rayé noir et crème plus haut que lui (le rouge reste au sceau) | Pas, plus vif | Chaîneur : le jalon dépasse |
+| Échassier conscrit ✱ | corps court perché sur deux **échasses**, chapeau de paille | Échasses | tout le reste : deux fois plus haut |
+| Échassier rancunier (monde 5) | l'Échassier, avec un brassard de ronces et un sceau plus large | Échasses, plus vif | le conscrit : le brassard |
+| Fuyard ✱ | pion vert-de-gris, **ballot** crème sur le dos, un enfant sur la hanche ; pas de sceau | Pas, pressé | Chaîneur : ni sceau ni bicorne |
+| Gens du Col ✱ | pion bleu ardoise, **capuche** blanche, corde enroulée, piolet | Pas, penché en avant | Chaîneur : la capuche claire |
+| Harde ✱ | bête basse à quatre pattes, deux **bâts** crème | Trot | les bœufs : pas de joug, pas de cornes |
+| Convoi de Hesse ✱ | chariot à **bâche** crème, un pion vert-de-gris qui mène ; pas de sceau | Roule | la Grande Chaîne : claire, petite, sans bœufs |
+| Chaîneur d'élite (monde 5) | le Chaîneur, avec une épaulière de laiton | Pas | Chaîneur : l'épaulière |
+| Jalonneur des galeries (monde 3) | le Jalonneur, avec une lampe au chapeau | Pas, plus vif | Taupier : le jalon |
+| Taupier (monde 3) | pion noir d'ardoise, casque à lampe jaune, **pelle** ; sous une barricade, il s'enfonce jusqu'aux épaules | Pas, voûté | Étayeur : la pelle, pas l'étai |
+| Étayeur (monde 3) | pion large et cuirassé (plastron carré), un **étai** de bois sur l'épaule | Pas, lourd | Taupier : l'étai en travers |
+| Sablier (monde 4) | robe longue en cône, voile, un **sablier** dans le dos | Pas, glissé | Caravanier : le sablier |
+| Caravanier rancunier (monde 4) | pion ocre, outres pendues, bâton de marche | Pas | Sablier : les outres |
+| Haleur (monde 5) | pion brique, **deux paniers** à une palanche sur les épaules | Pas ; Nage dans l'eau | Fuyard : les paniers en travers |
+| Greffier (monde 6) | pion ardoise, col crème, **grand registre** sous le bras, plume | Pas, lent hors du Cadastré | Chaîneur : le registre |
+| Légat (monde 6) | figurine plus haute (×1,3), manteau long, **bâton à matrice de sceau** ; deux sceaux | Pas, solennel | tous : la taille |
+
+| Boss | Assemblage | Points faibles (pièces à part) | Phases, à l'œil |
+|---|---|---|---|
+| La Grande Chaîne ✱ (monde 1) | chariot de noyer, deux bœufs (Harde avec cornes), joug, Gast debout sur la caisse, lanterne de visée à l'avant, **chaîne de vingt maillons** qui traîne derrière, posée sur le chemin parcouru | la lanterne (à l'avant), le joug (dans les virages) | 3, *rompue* : les bœufs paniquent (Trot rapide et heurté), le joug cogne |
+| Le Théodolite de Givre (monde 2) | tour sur **patins**, grande **lentille** opaque jaune pâle, Ombeline Sarre au sommet | la fêlure de la lentille | 2 : il plante deux mâts de signaux ; 3 : la lentille fêlée luit, la tour s'enlise (penche et s'enfonce) |
+| La Foreuse (monde 3) | caisse de chariot, **mèche** conique qui tourne à l'avant, les deux frères Tarrière | la mèche (dans les virages) | sous terre, seul un bourrelet de terre avance (vu au Calque) ; puis elle sort |
+| Le Méridien (monde 4) | une **colonne** de pions qui marchent au pas, en file, derrière Ascelin Droit et son **gnomon** (même pas pour tous) | le porteur du gnomon, à chaque arrêt de visée | la file s'arrête net, vise, repart |
+| L'Éclusier (monde 5) | **barge-porte** plate, panneau de vanne, un grand **rouage** qui tourne, Corentin | le rouage maître | le rouage tourne plus vite à chaque phase |
+| Le Dernier Cadastre (monde 6) | **presse** du Registre (deux montants, vis, platine), Ilse qui tient la matrice | la matrice de sceau rouge dans sa main | la platine descend à chaque phase |
 
 ## Revues (grille taste-skill, `references/critique.md`)
 
@@ -211,6 +278,18 @@ Trois problèmes :
 1. Les feuillets sont discrets sur le papier clair : à surveiller sur un écran pâle ou très lumineux.
 2. Le web reste à voir tourner dans un navigateur.
 3. Les têtes de tour Kenney restent les pièces les moins « maquette » (3d-assets.md).
+```
+
+```
+ROUND 10 (phase 7, le bestiaire)
+Vu en une seconde : des pions de bois peints qui avancent en file sur le bocage, un sceau rouge sur la poitrine ; un convoi bâché, un chariot de noyer tiré par deux bœufs.
+Idée : la maquette jusque dans l'ennemi. Chaque peuple a sa silhouette et sa couleur, et la main qui les pousse se voit au pas.
+Scores : design 8,5 · utilisabilité 8,5 · créativité 8,5 · contenu 8 → 8,4
+Plafonds : aucun
+Trois problèmes :
+1. À la hauteur de la caméra de jeu, les accessoires fins (chaîne, jalon, corde) se lisent à peine : la silhouette porte, le détail moins. À revoir quand un zoom existera.
+2. Le sol est vert et les Fuyards vert-de-gris : le contraste tient (2,1) mais reste le plus faible ; à surveiller sur les feuilles du pré.
+3. ✓ Les ombres des figurines coûtaient environ +1 ms : les petites pièces (sceau, cornes, bagues, maillons, éclats) n'en projettent plus. Plein écran, préréglage Haut : la vague du boss coûte +0,57 ms par rapport au plateau vide.
 ```
 
 **Cible :** environ 7,5. Atteinte à l'arrondi près, hors plafond. La feuille de route du plateau est finie ; le prochain chantier est l'interface.

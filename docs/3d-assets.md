@@ -7,7 +7,9 @@ Comment décider si un objet du plateau se fait **en code** ou en **asset** (pro
 | Si l'objet est… | Alors | Exemples |
 |---|---|---|
 | répété, posé en ligne, à l'échelle d'une case | **code** (primitives Bevy dans `game/src/map/mod.rs`, `prop()`) | barricade, boue, ronces, et plus tard éboulis, chaussée, vannes |
-| unique, vu de près, organique | **asset** | tours, lieux à défendre, Nève, boss, repères du Grand Plan |
+| unique, vu de près, organique | **asset** | tours, lieux à défendre, Nève, repères du Grand Plan |
+| figurine d'espèce, nombreuse sur le plateau | **code** (`combat/figure/`), un seul jeu de pièces | Chaîneur, Fuyard, Harde, Convoi : voir les fiches du bestiaire (`direction-artistique.md`, phase 7) |
+| boss | **assemblage en code** des mêmes pièces (bible §9) | la Grande Chaîne : chariot, bœufs, joug, lanterne, chaîne |
 
 Pourquoi : une pièce répétée doit se **raccorder** à ses voisines, rester lisible à 60 px et changer de couleur selon le monde. Le code fait tout ça ; un modèle généré ne sait pas faire de jonctions exactes, et son maillage dense se transforme en gribouillis sous le shader de hachures.
 

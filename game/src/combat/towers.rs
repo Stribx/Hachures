@@ -7,7 +7,8 @@ use bevy::prelude::*;
 use serde::Deserialize;
 
 use super::boss::{Borne, Boss};
-use super::shards::{EnemyLook, shatter};
+use super::figure::{EnemyLook, Kind, leave};
+use super::shards::shatter;
 use super::{Enemy, Shots};
 use crate::campaign::skills::Skill;
 use crate::ink::TowerInked;
@@ -153,10 +154,11 @@ fn defeat(level: &mut Level, enemies: &Targets, look: &EnemyLook, commands: &mut
         if enemy.hp > 0.0 {
             continue;
         }
-        shatter(commands, look, transform.translation);
         if borne {
+            shatter(commands, look, transform.translation);
             bornes_down.push((enemy.cell, Edit::DropBorne));
         } else {
+            leave(commands, look, enemy.species, transform, Kind::Fall);
             level.loot(level.species[enemy.species].loot);
         }
         if boss.is_some() {

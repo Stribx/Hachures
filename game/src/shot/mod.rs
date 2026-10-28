@@ -1,10 +1,14 @@
 //! Dev tool: F12 saves a screenshot to `screenshots/`. With `HACHURES_SHOT=out.png` the game jumps into play
 //! (`HACHURES_SCREEN=title|plan|paused|settings|controls|credits`, `HACHURES_LANG=en`,
-//! `HACHURES_LEVEL=n`, `HACHURES_DEMO=1` for one tower of each kind and a few barricades, `HACHURES_FASCINES=1` with that skill, `HACHURES_WAVE=1` to send the first wave), saves one screenshot after
+//! `HACHURES_LEVEL=n`, `HACHURES_DEMO=1` for one tower of each kind and a few barricades, `HACHURES_PARADE=1` for one
+//! still figure of each species in a row, `HACHURES_FASCINES=1` with that skill, `HACHURES_WAVE=1` to send the first
+//! wave, `HACHURES_WAVE=n` to send wave n, `HACHURES_CALQUE=1` for le Calque on), saves one screenshot after
 //! `HACHURES_AT` seconds (default 4) and quits: before/after comparisons without clicking. `HACHURES_FPS=1` logs,
 //! each second, the mean and the worst frame time (a stutter is a worst frame far above the mean), and the GPU time
 //! of each render pass (`render/<pass>/elapsed_gpu`, Vulkan and DX12 only): frame times alone can sit on the
 //! compositor's 60 Hz whatever the GPU does.
+
+mod parade;
 
 use bevy::prelude::*;
 use bevy::render::view::screenshot::{Screenshot, ScreenshotCaptured, save_to_disk};
@@ -13,6 +17,7 @@ use crate::campaign::LoadLevel;
 use crate::campaign::skills::Skill;
 use crate::combat::enemies::send_wave;
 use crate::combat::towers::{Weapon, spawn_tower};
+use crate::ink::Selection;
 use crate::level::Level;
 use crate::look::WorldCamera;
 use crate::map::grid::Tile;
@@ -34,7 +39,7 @@ pub fn plugin(app: &mut App) {
         ));
     }
     if std::env::var(SHOT).is_ok() {
-        app.add_systems(Startup, jump).add_systems(Update, (demo, act, timed));
+        app.add_systems(Startup, jump).add_systems(Update, (demo, parade::parade, act, timed));
         app.add_systems(PostUpdate, camera.before(TransformSystems::Propagate));
     }
 }
@@ -60,6 +65,12 @@ fn frame_times(time: Res<Time<Real>>, trip: Option<Res<Trip>>, mut second: Local
         info!("frames: {count}, mean {:.1} ms, worst {:.1} ms", *total / *count as f32 * 1000.0, *worst * 1000.0);
         *second = (0, 0.0, 0.0);
     }
+}
+
+/// How many waves have been sent when `HACHURES_WAVE=arg` asks for the next one to be wave `arg`.
+fn waves_done(arg: &str, waves: usize) -> u32 {
+    let n: u32 = arg.parse().unwrap_or(1);
+    n.saturating_sub(1).min(waves.saturating_sub(1) as u32)
 }
 
 fn env(name: &str) -> Option<String> {
@@ -101,17 +112,26 @@ fn jump(
 fn demo(
     mut done: Local<u32>,
     mut level: ResMut<Level>,
+    mut selection: ResMut<Selection>,
     settings: Res<Settings>,
     assets: Res<AssetServer>,
     mut commands: Commands,
 ) {
     // Wait for the level asked for to be loaded.
     *done += 1;
-    if *done != 3 || env("HACHURES_DEMO").is_none() {
+    if *done != 3 {
         return;
     }
-    if env("HACHURES_WAVE").is_some() {
+    if env("HACHURES_CALQUE").is_some() {
+        selection.calque = true;
+    }
+    // `HACHURES_WAVE` sends the first wave (wave `n` for a number) with or without the demo's towers.
+    if let Some(arg) = env("HACHURES_WAVE") {
+        level.wave.number = waves_done(&arg, level.waves.len());
         send_wave(&mut level, &mut commands, &assets, &settings);
+    }
+    if env("HACHURES_DEMO").is_none() {
+        return;
     }
     let grid = level.terrain.grid();
     let open = (0..grid.tiles.len()).filter(|&i| grid.tiles[i] == Tile::Sol && grid.coords(i).1 == 2);
@@ -198,5 +218,19 @@ fn timed(time: Res<Time>, mut taken: Local<usize>, mut commands: Commands) {
         shot.observe(|_: On<ScreenshotCaptured>, mut exit: MessageWriter<AppExit>| {
             exit.write(AppExit::Success);
         });
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn wave_n_is_sent_after_n_minus_one() {
+        assert_eq!(waves_done("1", 5), 0);
+        assert_eq!(waves_done("yes", 5), 0);
+        assert_eq!(waves_done("0", 5), 0);
+        assert_eq!(waves_done("3", 5), 2);
+        assert_eq!(waves_done("9", 5), 4, "the last wave at most");
     }
 }

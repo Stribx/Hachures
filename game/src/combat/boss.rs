@@ -4,7 +4,8 @@ use bevy::prelude::*;
 use serde::Deserialize;
 
 use super::Enemy;
-use super::shards::{EnemyLook, shatter};
+use super::figure::EnemyLook;
+use super::shards::shatter;
 use crate::level::Level;
 use crate::level::story::Trigger;
 use crate::map::species::index_of;
