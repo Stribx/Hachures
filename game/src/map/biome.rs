@@ -1,0 +1,38 @@
+//! The two biomes the worlds lie in: the bocage and the Cols.
+
+/// The kind of biome a world lies in.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Biome {
+    /// World 1: hedged fields and meadows, wet with la Crue.
+    Bocage,
+    /// World 2: alpine meadows, cold with le Gel.
+    Cols,
+}
+
+impl Biome {
+    /// The biome of world `world` (an index of `WORLDS`).
+    ///
+    /// # Panics
+    ///
+    /// For a world with no biome yet: a new world names its own biome.
+    pub fn of(world: usize) -> Biome {
+        match world {
+            0 => Biome::Bocage,
+            1 => Biome::Cols,
+            _ => panic!("world {world} has no biome"),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::level::world::WORLDS;
+
+    #[test]
+    fn every_world_has_its_biome() {
+        for world in 0..WORLDS.len() {
+            Biome::of(world);
+        }
+    }
+}

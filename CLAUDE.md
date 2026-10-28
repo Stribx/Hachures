@@ -122,6 +122,8 @@ Run from the repository root:
 # Format
 cargo fmt
 cargo fmt --check
+# Now and then: wrap long comments and merge imports per module (stable rustfmt can't)
+cargo +nightly fmt -- --config wrap_comments=true,comment_width=100,imports_granularity=Module
 
 # Check and test
 cargo check

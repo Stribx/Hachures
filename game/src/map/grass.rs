@@ -3,10 +3,10 @@
 
 use bevy::prelude::*;
 
+use super::biome::Biome;
 use super::cells::Cell;
 use super::fields::ground;
 use super::growth::{Crop, Sprig, sprigs};
-use super::lands::Land;
 use crate::level::Level;
 use crate::look::{Hachure, InkMaterial, ink};
 use crate::settings::Settings;
@@ -56,15 +56,15 @@ pub(super) fn grow(
     let grid = level.terrain.grid();
     let density = if settings.shadows { 1.0 } else { 0.35 };
     let washes = ground(grid);
-    let land = Land::of(level.world);
-    let pieces = sprigs(grid, density, land).into_iter().flat_map(|sprig| {
+    let biome = Biome::of(level.world);
+    let pieces = sprigs(grid, density, biome).into_iter().flat_map(|sprig| {
         let (x, z) = grid.coords(sprig.cell);
         let foot = Vec3::new(
             x as f32 + sprig.at.x,
             super::look(grid.tiles[sprig.cell]).height,
             z as f32 + sprig.at.y,
         );
-        sprig_parts(&sprig, washes[sprig.cell], land)
+        sprig_parts(&sprig, washes[sprig.cell], biome)
             .into_iter()
             .map(move |part| part.translated_by(foot))
     });
@@ -82,7 +82,7 @@ pub(super) fn grow(
 
 /// One sprig's parts, standing at the origin, coloured, each vertex weighted for the wind by its
 /// height.
-fn sprig_parts(sprig: &Sprig, wash: Color, land: Land) -> Vec<Mesh> {
+fn sprig_parts(sprig: &Sprig, wash: Color, biome: Biome) -> Vec<Mesh> {
     let roll = sprig.roll;
     let turn = (roll >> 16 & 255) as f32 / 255.0 * std::f32::consts::TAU;
     let grass = wash.mix(&HEDGE, 0.45);
@@ -99,9 +99,9 @@ fn sprig_parts(sprig: &Sprig, wash: Color, land: Land) -> Vec<Mesh> {
             .collect(),
         Crop::Flowers => {
             let h = 0.07 + (roll >> 3 & 7) as f32 * 0.006;
-            let blooms = match land {
-                Land::Cols => &ALPINE_BLOOMS,
-                Land::Bocage => &BLOOMS,
+            let blooms = match biome {
+                Biome::Cols => &ALPINE_BLOOMS,
+                Biome::Bocage => &BLOOMS,
             };
             let bloom = blooms[(roll >> 24) as usize % blooms.len()];
             vec![stalk(h, 0.014, 0.1, grass), part(Vec3::splat(0.042), h, turn, 0.1, bloom)]

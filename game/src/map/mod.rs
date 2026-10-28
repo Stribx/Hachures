@@ -7,6 +7,7 @@ pub mod terrain;
 
 pub mod ambience;
 pub(crate) mod barricade;
+pub mod biome;
 mod cells;
 pub mod daylight;
 mod decor;
@@ -15,7 +16,6 @@ pub mod fields;
 mod grass;
 pub mod growth;
 pub(crate) mod land;
-pub mod lands;
 pub(crate) mod props;
 pub(crate) mod scraper;
 mod seams;

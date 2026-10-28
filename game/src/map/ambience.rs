@@ -6,8 +6,8 @@ use bevy::audio::{AudioSinkPlayback, Volume};
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
+use super::biome::Biome;
 use super::grid::Tile;
-use super::lands::Land;
 use crate::level::Level;
 use crate::settings::Settings;
 
@@ -17,8 +17,8 @@ const LOOPS: [&str; 5] = ["wind", "birds", "rain", "river", "snow-wind"];
 /// How loud each loop of `LOOPS` is, from 0 to 1, in world `world` (an index of `WORLDS`), with its
 /// event under way or not, on a board with water (`wet`) or without.
 pub fn ambience(world: usize, event_on: bool, wet: bool) -> [f32; 5] {
-    let land = Land::of(world);
-    let (bocage, cols) = (land == Land::Bocage, land == Land::Cols);
+    let biome = Biome::of(world);
+    let (bocage, cols) = (biome == Biome::Bocage, biome == Biome::Cols);
     let on = |yes: bool, loud: f32| if yes { loud } else { 0.0 };
     [
         0.55,

@@ -3,9 +3,9 @@
 
 use bevy::prelude::*;
 
+use super::biome::Biome;
 use super::fields::{fields, mix};
 use super::grid::{Grid, Tile};
-use super::lands::Land;
 
 /// What a field grows.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -27,9 +27,9 @@ pub struct Sprig {
 
 /// Everything growing on `grid`, `density` of it (1 in full, less on a modest machine): only on its
 /// fields' open ground as it is now, so nothing on a marker, under a tower or an inked piece, or in
-/// a drowned meadow. Up in the mountains (`Land::Cols`) nothing is sown: the crop fields are
+/// a drowned meadow. Up in the mountains (`Biome::Cols`) nothing is sown: the crop fields are
 /// meadows in flower. The same every time the same map is drawn.
-pub fn sprigs(grid: &Grid, density: f32, land: Land) -> Vec<Sprig> {
+pub fn sprigs(grid: &Grid, density: f32, biome: Biome) -> Vec<Sprig> {
     let fields = fields(grid);
     let mut sprigs = Vec::new();
     for (cell, field) in fields.iter().enumerate() {
@@ -40,7 +40,7 @@ pub fn sprigs(grid: &Grid, density: f32, land: Land) -> Vec<Sprig> {
         let crop = match (grid.map[cell], mix(field as u32 ^ 0xc3a5) % 6) {
             (Tile::SolBas, 0..=3) | (_, 0..=2) => Crop::Grass,
             (Tile::SolBas, _) | (_, 3) => Crop::Flowers,
-            _ if land == Land::Cols => Crop::Flowers,
+            _ if biome == Biome::Cols => Crop::Flowers,
             _ => Crop::Wheat,
         };
         // Wheat stands in rows, thick; grass and flowers are scattered.
@@ -80,8 +80,8 @@ mod tests {
     #[test]
     fn the_same_map_grows_the_same() {
         assert_eq!(
-            sprigs(&Grid::parse(MAP), 1.0, Land::Bocage),
-            sprigs(&Grid::parse(MAP), 1.0, Land::Bocage)
+            sprigs(&Grid::parse(MAP), 1.0, Biome::Bocage),
+            sprigs(&Grid::parse(MAP), 1.0, Biome::Bocage)
         );
     }
 
@@ -96,7 +96,7 @@ mod tests {
             .chain(grid.goals.values())
             .copied()
             .collect();
-        let sprigs = sprigs(&grid, 1.0, Land::Bocage);
+        let sprigs = sprigs(&grid, 1.0, Biome::Bocage);
         assert!(sprigs.len() > 100, "{}", sprigs.len());
         for s in sprigs {
             assert!(matches!(grid.tiles[s.cell], Tile::Sol | Tile::SolBas), "cell {}", s.cell);
@@ -109,10 +109,10 @@ mod tests {
     #[test]
     fn an_inked_cell_has_nothing_growing() {
         let mut grid = Grid::parse(MAP);
-        let before = sprigs(&grid, 1.0, Land::Bocage);
+        let before = sprigs(&grid, 1.0, Biome::Bocage);
         let cell = before[0].cell;
         grid.tiles[cell] = Tile::Barricade;
-        let after = sprigs(&grid, 1.0, Land::Bocage);
+        let after = sprigs(&grid, 1.0, Biome::Bocage);
         assert!(
             after.iter().all(|s| s.cell != cell),
             "cell {cell} still grows {:?}",
@@ -125,7 +125,7 @@ mod tests {
     fn less_density_grows_less() {
         let grid = Grid::parse(MAP);
         let (full, sparse) =
-            (sprigs(&grid, 1.0, Land::Bocage).len(), sprigs(&grid, 0.35, Land::Bocage).len());
+            (sprigs(&grid, 1.0, Biome::Bocage).len(), sprigs(&grid, 0.35, Biome::Bocage).len());
         assert!(sparse * 2 < full && sparse > 0, "{sparse} of {full}");
     }
 
@@ -133,7 +133,7 @@ mod tests {
     #[test]
     fn no_wheat_in_the_meadows() {
         let grid = Grid::parse(MAP);
-        let wheat: Vec<_> = sprigs(&grid, 1.0, Land::Bocage)
+        let wheat: Vec<_> = sprigs(&grid, 1.0, Biome::Bocage)
             .into_iter()
             .filter(|s| s.crop == Crop::Wheat)
             .collect();
@@ -144,7 +144,7 @@ mod tests {
     #[test]
     fn the_cols_grow_flowers_not_wheat() {
         let grid = Grid::parse(MAP);
-        let (bocage, alpine) = (sprigs(&grid, 1.0, Land::Bocage), sprigs(&grid, 1.0, Land::Cols));
+        let (bocage, alpine) = (sprigs(&grid, 1.0, Biome::Bocage), sprigs(&grid, 1.0, Biome::Cols));
         assert!(bocage.iter().any(|s| s.crop == Crop::Wheat), "the bocage has wheat to replace");
         assert!(alpine.iter().all(|s| s.crop != Crop::Wheat), "{alpine:?}");
         let flowers = |sprigs: &[Sprig]| sprigs.iter().filter(|s| s.crop == Crop::Flowers).count();

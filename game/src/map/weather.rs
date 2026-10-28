@@ -5,9 +5,9 @@ use bevy::prelude::*;
 
 use std::f32::consts::FRAC_PI_2;
 
+use super::biome::Biome;
 use super::fields::mix;
 use super::grid::{Grid, Tile};
-use super::lands::Land;
 use crate::level::Level;
 use crate::settings::Settings;
 use crate::theme::WATER;
@@ -23,11 +23,11 @@ pub enum Weather {
 
 /// The weather in world `world` (an index of `WORLDS`), with its event under way or not.
 pub fn weather(world: usize, event_on: bool) -> Weather {
-    match (Land::of(world), event_on) {
-        (Land::Bocage, true) => Weather::Rain,
-        (Land::Cols, true) => Weather::Snow(1.0),
-        (Land::Cols, false) => Weather::Snow(0.3),
-        (Land::Bocage, false) => Weather::Clear,
+    match (Biome::of(world), event_on) {
+        (Biome::Bocage, true) => Weather::Rain,
+        (Biome::Cols, true) => Weather::Snow(1.0),
+        (Biome::Cols, false) => Weather::Snow(0.3),
+        (Biome::Bocage, false) => Weather::Clear,
     }
 }
 
