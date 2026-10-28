@@ -10,7 +10,7 @@ mod props;
 mod spawn;
 
 pub use chain::drag_chain;
-pub use exit::{Kind, exits, leave};
+pub use exit::{ExitKind, exits, leave};
 pub use gait::{Stride, animate};
 pub use look::{EnemyLook, setup};
 pub use spawn::{FLOAT, spawn_figure};

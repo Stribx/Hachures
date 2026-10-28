@@ -55,31 +55,38 @@ pub fn fields(grid: &Grid) -> Vec<Option<usize>> {
 /// brambles inked on it; la Crue drowns a meadow's), else what `cell_color` says.
 pub fn ground(grid: &Grid) -> Vec<Color> {
     let fields = fields(grid);
-    let count = fields.iter().flatten().max().map_or(0, |&f| f + 1);
+    let count = fields.iter().flatten().max().map_or(0, |&field| field + 1);
     let mut wash: Vec<Option<usize>> = vec![None; count];
     for i in 0..fields.len() {
-        let Some(f) = fields[i] else { continue };
-        if wash[f].is_some() {
+        let Some(field) = fields[i] else { continue };
+        if wash[field].is_some() {
             continue;
         }
         let washes = if kind(grid.map[i]) == Tile::Sol { PASTURES.len() } else { MEADOWS.len() };
         // The washes its neighbours on the same ground already have.
         let taken: Vec<usize> = (0..fields.len())
-            .filter(|&c| fields[c] == Some(f))
-            .flat_map(|c| grid.neighbours(c))
-            .filter_map(|j| {
-                fields[j].filter(|&g| g != f && kind(grid.map[j]) == kind(grid.map[i])).and_then(|g| wash[g])
+            .filter(|&member| fields[member] == Some(field))
+            .flat_map(|member| grid.neighbours(member))
+            .filter_map(|neighbour| {
+                fields[neighbour]
+                    .filter(|&other| other != field && kind(grid.map[neighbour]) == kind(grid.map[i]))
+                    .and_then(|other| wash[other])
             })
             .collect();
-        let first = mix(f as u32 ^ 0x5bd1) as usize;
-        wash[f] = (0..washes).map(|k| (first + k) % washes).find(|w| !taken.contains(w)).or(Some(first % washes));
+        let first = mix(field as u32 ^ 0x5bd1) as usize;
+        wash[field] = (0..washes)
+            .map(|offset| (first + offset) % washes)
+            .find(|candidate| !taken.contains(candidate))
+            .or(Some(first % washes));
     }
     (0..fields.len())
-        .map(|i| match (fields[i].and_then(|f| wash[f]), grid.tiles[i]) {
-            (Some(w), Tile::Sol | Tile::SolBas | Tile::Barricade | Tile::Ronces) if kind(grid.map[i]) == Tile::Sol => {
-                PASTURES[w]
+        .map(|i| match (fields[i].and_then(|field| wash[field]), grid.tiles[i]) {
+            (Some(pick), Tile::Sol | Tile::SolBas | Tile::Barricade | Tile::Ronces)
+                if kind(grid.map[i]) == Tile::Sol =>
+            {
+                PASTURES[pick]
             }
-            (Some(w), Tile::Sol | Tile::SolBas | Tile::Barricade | Tile::Ronces) => MEADOWS[w],
+            (Some(pick), Tile::Sol | Tile::SolBas | Tile::Barricade | Tile::Ronces) => MEADOWS[pick],
             _ => cell_color(grid, i),
         })
         .collect()

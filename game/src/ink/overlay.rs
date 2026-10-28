@@ -6,7 +6,6 @@ use super::{Selection, Verdict};
 use crate::Step;
 use crate::level::Level;
 use crate::map;
-use crate::map::cell_pos;
 use crate::map::flow::FlowField;
 use crate::map::grid::{Grid, Tile};
 use crate::schedule::over_world;
@@ -48,7 +47,7 @@ fn draw(
 /// from a hash of its index: 2 to 4 strokes, each a little longer or steeper, the same every frame.
 fn hachures(gizmos: &mut Gizmos, level: &Level, i: usize, color: Color, shift: Vec3) {
     let grid = level.terrain.grid();
-    let at = cell_pos(grid, i);
+    let at = map::cell_pos(grid, i);
     let top = Vec3::new(at.x, map::look(grid.tiles[i]).height + 0.02, at.z) + shift;
     let h = (i as u32).wrapping_mul(2_654_435_761);
     let n = 2 + h % 3;
@@ -96,7 +95,7 @@ fn calque(gizmos: &mut Gizmos, level: &Level, selection: &Selection) {
     }
     let grid = level.terrain.grid();
     let field = &level.terrain.fields()[selection.shown];
-    let at = |i| cell_pos(grid, i);
+    let at = |i| map::cell_pos(grid, i);
     for i in 0..grid.tiles.len() {
         if let Some(n) = field.next_step(grid, i) {
             gizmos.arrow(at(i), at(i).lerp(at(n), 0.6), SEPIA);
@@ -109,7 +108,7 @@ fn route(gizmos: &mut Gizmos, level: &Level, shown: usize) {
     let grid = level.terrain.grid();
     let field = &level.terrain.fields()[shown];
     for &spawn in grid.spawns_for(&level.species[shown]) {
-        gizmos.linestrip(field.path(grid, spawn).into_iter().map(|i| cell_pos(grid, i)), INK);
+        gizmos.linestrip(field.path(grid, spawn).into_iter().map(|i| map::cell_pos(grid, i)), INK);
     }
 }
 
@@ -128,7 +127,7 @@ fn cursor(gizmos: &mut Gizmos, level: &Level, i: usize, refused: bool) {
             gizmos.linestrip([c(-1., -1.), c(1., -1.), c(1., 1.), c(-1., 1.), c(-1., -1.)], fade);
         }
     }
-    let corner = |dx: f32, dz: f32| cell_pos(grid, i) + Vec3::new(dx * 0.48, 0.0, dz * 0.48);
+    let corner = |dx: f32, dz: f32| map::cell_pos(grid, i) + Vec3::new(dx * 0.48, 0.0, dz * 0.48);
     gizmos.linestrip(
         [corner(-1., -1.), corner(1., -1.), corner(1., 1.), corner(-1., 1.), corner(-1., -1.)],
         if refused { Color::srgb(0.9, 0.1, 0.1) } else { INK },
@@ -139,6 +138,9 @@ fn cursor(gizmos: &mut Gizmos, level: &Level, i: usize, refused: bool) {
 fn trait_de_crayon(pencil: &mut Gizmos<Pencil>, level: &Level, shown: usize, what_if: &Grid, field: &FlowField) {
     let grid = level.terrain.grid();
     for &spawn in grid.spawns_for(&level.species[shown]) {
-        pencil.linestrip(field.path(what_if, spawn).into_iter().map(|i| cell_pos(grid, i)), Color::srgb(0.3, 0.2, 0.1));
+        pencil.linestrip(
+            field.path(what_if, spawn).into_iter().map(|i| map::cell_pos(grid, i)),
+            Color::srgb(0.3, 0.2, 0.1),
+        );
     }
 }

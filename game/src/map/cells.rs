@@ -11,7 +11,7 @@ use super::props::{Props, barricade_shape, prop_parts, spawn_prop};
 use super::seams::spawn_seams;
 use crate::campaign::skills::Skill;
 use crate::level::Level;
-use crate::look::{InkMaterial, ink, shore_image, varnished, water};
+use crate::look::{InkMaterial, shore_image, varnished, water};
 use crate::theme::WOOD;
 
 /// A terrain block.
@@ -156,7 +156,7 @@ fn block(
                 Tile::Glace => water(color, shore.clone(), rect, 0.0),
                 // Mud is a pool of brown varnish.
                 Tile::Boue => varnished(color, 0.6),
-                _ => ink(color),
+                _ => crate::look::ink(color),
             };
             (meshes.add(Cuboid::new(1.0, height, 1.0)), materials.add(paint))
         })

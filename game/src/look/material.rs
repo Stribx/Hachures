@@ -122,55 +122,57 @@ const SHORE_REACH: f32 = 8.0;
 /// unit, for `water`: land where `wet` is false. Beyond the rectangle the water goes on, as off the edge of a sheet: a
 /// river leaving it is not closed by a bank. Returns the image and its rect.
 pub fn shore_image(min: Vec2, size: Vec2, per_unit: f32, wet: impl Fn(Vec2) -> bool) -> (Image, Vec4) {
-    let (w, h) = ((size.x * per_unit).ceil() as usize, (size.y * per_unit).ceil() as usize);
+    let (width, height) = ((size.x * per_unit).ceil() as usize, (size.y * per_unit).ceil() as usize);
     let at = |x: usize, y: usize| min + (Vec2::new(x as f32, y as f32) + 0.5) / per_unit;
     // Two-pass chamfer distance, in texels, from the nearest dry texel.
-    let mut d: Vec<f32> = (0..w * h).map(|i| if wet(at(i % w, i / w)) { f32::MAX } else { 0.0 }).collect();
+    let mut distance: Vec<f32> =
+        (0..width * height).map(|i| if wet(at(i % width, i / width)) { f32::MAX } else { 0.0 }).collect();
     let diagonal = std::f32::consts::SQRT_2;
     for (pass, steps) in [
         (0, [(-1, 0, 1.0), (0, -1, 1.0), (-1, -1, diagonal), (1, -1, diagonal)]),
         (1, [(1, 0, 1.0), (0, 1, 1.0), (1, 1, diagonal), (-1, 1, diagonal)]),
     ] {
-        for k in 0..w * h {
-            let i = if pass == 0 { k } else { w * h - 1 - k };
-            let (x, y) = (i % w, i / w);
-            let mut best = d[i];
+        for visited in 0..width * height {
+            let i = if pass == 0 { visited } else { width * height - 1 - visited };
+            let (x, y) = (i % width, i / width);
+            let mut best = distance[i];
             for (dx, dy, cost) in steps {
                 let (nx, ny) = (x as i64 + dx, y as i64 + dy);
-                if nx >= 0 && ny >= 0 && (nx as usize) < w && (ny as usize) < h {
-                    best = best.min(d[ny as usize * w + nx as usize] + cost);
+                if nx >= 0 && ny >= 0 && (nx as usize) < width && (ny as usize) < height {
+                    best = best.min(distance[ny as usize * width + nx as usize] + cost);
                 }
             }
-            d[i] = best;
+            distance[i] = best;
         }
     }
     // No bank at all: open water everywhere (and no overflow in the blur).
-    for t in &mut d {
-        *t = t.min(SHORE_REACH * per_unit);
+    for texel in &mut distance {
+        *texel = texel.min(SHORE_REACH * per_unit);
     }
     // Blurred a little, so the lines round the corners as an engraver's hand would.
     let radius = (0.4 * per_unit).round().max(1.0) as usize;
     for _ in 0..2 {
-        for (step, len) in [(1, w), (w, h)] {
-            let blurred: Vec<f32> = (0..w * h)
+        for (step, len) in [(1, width), (width, height)] {
+            let blurred: Vec<f32> = (0..width * height)
                 .map(|i| {
-                    let at = if step == 1 { i % w } else { i / w };
+                    let at = if step == 1 { i % width } else { i / width };
                     let (lo, hi) = (at.saturating_sub(radius), (at + radius).min(len - 1));
-                    (lo..=hi).map(|k| d[i - at * step + k * step]).sum::<f32>() / (hi - lo + 1) as f32
+                    (lo..=hi).map(|k| distance[i - at * step + k * step]).sum::<f32>() / (hi - lo + 1) as f32
                 })
                 .collect();
-            d = blurred;
+            distance = blurred;
         }
     }
     // Stored as a square root: finest by the bank, where the lines are closest.
-    let data = d.iter().map(|t| ((t / per_unit / SHORE_REACH).min(1.0).sqrt() * 255.0) as u8).collect::<Vec<u8>>();
+    let data =
+        distance.iter().map(|t| ((t / per_unit / SHORE_REACH).min(1.0).sqrt() * 255.0) as u8).collect::<Vec<u8>>();
     let mut image = Image::new(
-        Extent3d { width: w as u32, height: h as u32, depth_or_array_layers: 1 },
+        Extent3d { width: width as u32, height: height as u32, depth_or_array_layers: 1 },
         TextureDimension::D2,
         data,
         TextureFormat::R8Unorm,
         RenderAssetUsages::RENDER_WORLD,
     );
     image.sampler = ImageSampler::linear();
-    (image, Vec4::new(min.x, min.y, per_unit / w as f32, per_unit / h as f32))
+    (image, Vec4::new(min.x, min.y, per_unit / width as f32, per_unit / height as f32))
 }

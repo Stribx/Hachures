@@ -7,7 +7,7 @@ use bevy::prelude::*;
 use serde::Deserialize;
 
 use super::boss::{Borne, Boss};
-use super::figure::{EnemyLook, Kind, leave};
+use super::figure::{EnemyLook, ExitKind, leave};
 use super::shards::shatter;
 use super::{Enemy, Shot, Shots};
 use crate::campaign::skills::Skill;
@@ -105,15 +105,15 @@ pub(super) fn take_down(
     }
 }
 
-/// The tower's base and its weapon, on top of the cell at `i`.
-pub fn spawn_tower(commands: &mut Commands, assets: &AssetServer, grid: &Grid, i: usize, weapon: Weapon) {
-    let (x, z) = grid.coords(i);
+/// The tower's base and its weapon, on top of `cell`.
+pub fn spawn_tower(commands: &mut Commands, assets: &AssetServer, grid: &Grid, cell: usize, weapon: Weapon) {
+    let (x, z) = grid.coords(cell);
     let scene = |path: &'static str| WorldAssetRoot(assets.load(GltfAssetLabel::Scene(0).from_asset(path)));
     // Both land in the cell like the other pieces; the base makes the sound of a wooden figure set down.
     let (base, top) = (Transform::from_xyz(x as f32, 0.2, z as f32), Transform::from_xyz(x as f32, 0.8, z as f32));
     commands.spawn((
         LevelEntity,
-        TowerBase(i),
+        TowerBase(cell),
         scene(TOWER_BASE),
         BASE_WOOD,
         base,
@@ -121,7 +121,7 @@ pub fn spawn_tower(commands: &mut Commands, assets: &AssetServer, grid: &Grid, i
     ));
     commands.spawn((
         LevelEntity,
-        Tower { cell: i, weapon, ready_in: 0.0 },
+        Tower { cell, weapon, ready_in: 0.0 },
         scene(weapon_model(weapon)),
         WEAPON_WOOD,
         top,
@@ -179,7 +179,7 @@ fn defeat(level: &mut Level, enemies: &Targets, look: &EnemyLook, commands: &mut
             shatter(commands, look, transform.translation);
             bornes_down.push((enemy.cell, Edit::DropBorne));
         } else {
-            leave(commands, look, enemy.species, transform, Kind::Fall);
+            leave(commands, look, enemy.species, transform, ExitKind::Fall);
             level.loot(level.species[enemy.species].loot);
         }
         if boss.is_some() {

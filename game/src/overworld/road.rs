@@ -4,7 +4,7 @@ use std::sync::LazyLock;
 
 use bevy::prelude::*;
 
-use super::plan::{Pawn, ground};
+use super::plan::{self, Pawn};
 use super::{OverworldRoot, ROAD, SHEETS};
 use crate::campaign::save::Save;
 use crate::ink::overlay::Pencil;
@@ -36,7 +36,7 @@ pub(super) fn unroll(
 /// The road's dotted line, just over the ground: worked out once, as finding the ground under a point means
 /// measuring its distance to every stretch of the road (it was redone for every point, every frame).
 static INKED_ROAD: LazyLock<Vec<Vec<Vec3>>> =
-    LazyLock::new(|| ROAD.iter().map(|leg| leg.iter().map(|&p| ground(p) + Vec3::Y * 0.15).collect()).collect());
+    LazyLock::new(|| ROAD.iter().map(|leg| leg.iter().map(|&p| plan::ground(p) + Vec3::Y * 0.15).collect()).collect());
 
 /// The road walked, in dotted ink, on the Grand Plan.
 pub(super) fn draw_road(

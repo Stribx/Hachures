@@ -29,12 +29,19 @@ pub fn plugin(app: &mut App) {
             Update,
             (
                 toggles.in_set(Step::Input).before(crate::overworld::onward::between_levels),
-                (hud::update_label, hud::counter_tip, update_margin, fresh_ink, places::label_places, places::tooltip)
+                (
+                    hud::update_label,
+                    hud::counter_tip,
+                    update_margin,
+                    fresh_ink,
+                    places::label_places,
+                    places::price_tip,
+                )
                     .in_set(Step::Render),
                 // The card of an enemy gives way to the tip of a tool, and covers the price of the cell.
                 (tool_tip::tool_tip, enemy_card::enemy_card)
                     .chain()
-                    .after(places::tooltip)
+                    .after(places::price_tip)
                     .in_set(Step::Render)
                     .run_if(in_state(Screen::Playing)),
                 (stamp::stamp_wave, stamp::strike_stamps).in_set(Step::Render),

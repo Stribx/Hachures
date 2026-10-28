@@ -35,7 +35,7 @@ fn fbm(p: Vec2) -> f32 {
 }
 
 /// How far into world 2's mountains `x` lies, from 0 to 1.
-pub(super) fn cols(x: f32) -> f32 {
+pub(super) fn mountain_share(x: f32) -> f32 {
     ((x - 112.0) / 16.0).clamp(0.0, 1.0)
 }
 
@@ -58,7 +58,7 @@ pub(super) fn smoothstep(edge0: f32, edge1: f32, x: f32) -> f32 {
 
 /// Height of the land at `p`: rolling hills in world 1, mountains in world 2, flat around every sheet.
 pub fn height(p: Vec2) -> f32 {
-    let amplitude = 4.0 + 7.0 * cols(p.x);
+    let amplitude = 4.0 + 7.0 * mountain_share(p.x);
     let mut h = (fbm(p * 0.05) - 0.34) * amplitude * 1.6;
     let sheet = SHEETS.iter().map(|s| s.distance(p)).fold(f32::MAX, f32::min);
     h = h * smoothstep(0.0, 1.0, (sheet - 0.5) / 6.0) - 0.05 * (1.0 - smoothstep(0.0, 6.0, sheet));
@@ -74,7 +74,7 @@ pub(super) fn wood(p: Vec2) -> f32 {
 
 /// How snowy the heights at `p`, `h` high, are, from 0 to 1.
 pub(super) fn snow(p: Vec2, h: f32) -> f32 {
-    cols(p.x) * smoothstep(2.0, 4.0, h)
+    mountain_share(p.x) * smoothstep(2.0, 4.0, h)
 }
 
 /// Colour of the land at `p`, `h` high, painted like the plaster of a plan-relief: the bocage's parcels on the open
@@ -84,9 +84,9 @@ fn land_color(p: Vec2, h: f32) -> Color {
     let swathes = PASTURE.mix(&WHEAT, smoothstep(0.35, 0.65, fbm(p * 0.04 + 7.0)));
     let meadow = swathes.mix(&WASHES[parcel(p).wash], openness(p));
     let mut color = meadow.mix(&HEDGE, smoothstep(0.47, 0.55, wood(p)));
-    color = color.mix(&Color::srgb(0.62, 0.66, 0.7), cols(p.x) * 0.8);
+    color = color.mix(&Color::srgb(0.62, 0.66, 0.7), mountain_share(p.x) * 0.8);
     color = color.mix(&Color::srgb(0.86, 0.78, 0.58), 1.0 - smoothstep(WATER + 0.05, WATER + 0.25, h));
-    let stone = Color::srgb(0.72, 0.68, 0.6).mix(&Color::srgb(0.93, 0.93, 0.92), cols(p.x));
+    let stone = Color::srgb(0.72, 0.68, 0.6).mix(&Color::srgb(0.93, 0.93, 0.92), mountain_share(p.x));
     color.mix(&stone, smoothstep(2.0, 4.0, h))
 }
 

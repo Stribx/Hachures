@@ -246,6 +246,7 @@
     "refusal.relief_closes": "le relief à venir fermerait la carte",
     "refusal.sepia": "pas assez de sépia",
     // sceaux
+    "sceaux.node": "{} ({}) : {}{}",
     "sceaux.note": "Un nœud acheté en cours de niveau vaut au suivant. Paliers 4 et 5 : plus tard.",
     "sceaux.owned": ", acquis",
     "sceaux.purse.one": "{} sceau à dépenser    Rôle des Noms : {}",
@@ -270,6 +271,7 @@
     "settings.mute_unfocused": "Muet en arrière-plan",
     "settings.occlusion": "Occlusion ambiante",
     "settings.pause_unfocused": "Pause en arrière-plan",
+    "settings.percent": "{} %",
     "settings.preset": "Qualité",
     "settings.preset.custom": "Personnalisée",
     "settings.preset.high": "Haute",

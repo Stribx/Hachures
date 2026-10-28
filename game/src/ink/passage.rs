@@ -8,15 +8,15 @@ use crate::map::grid::{Grid, Tile};
 use crate::map::terrain::Edit;
 
 impl Level {
-    /// Why `tool` can't be inked at `i`, if it can't.
+    /// Why `tool` can't be inked at `cell`, if it can't.
     #[must_use]
-    pub fn refusal(&self, i: usize, tool: usize) -> Option<&'static str> {
+    pub fn refusal(&self, cell: usize, tool: usize) -> Option<&'static str> {
         if TOOLS[tool].act == Act::Biffer {
-            return self.biffer_refusal(i);
+            return self.biffer_refusal(cell);
         }
         let Some(tile) = TOOLS[tool].act.lays() else {
             // Scraping leaves plain Sol, which every species walks: it can lengthen a route, never close one.
-            return if !self.terrain.base().scrapable(i) {
+            return if !self.terrain.base().scrapable(cell) {
                 Some(n_("refusal.nothing_to_scrape"))
             } else if self.sepia < self.tool_cost(tool) {
                 Some(n_("refusal.sepia"))
@@ -24,30 +24,30 @@ impl Level {
                 None
             };
         };
-        if !self.terrain.grid().tiles[i].buildable() {
+        if !self.terrain.grid().tiles[cell].buildable() {
             Some(n_("refusal.firm_ground"))
         } else if self.sepia < self.tool_cost(tool) {
             Some(n_("refusal.sepia"))
-        } else if self.walkers.iter().any(|w| w.cell == i) {
+        } else if self.walkers.iter().any(|w| w.cell == cell) {
             Some(n_("refusal.column"))
         } else {
-            self.closes(i, tile)
+            self.closes(cell, tile)
         }
     }
 
-    /// Le Droit de Passage: why `tile` at `i` would close the map, now or around the world event.
-    fn closes(&self, i: usize, tile: Tile) -> Option<&'static str> {
+    /// Le Droit de Passage: why `tile` at `cell` would close the map, now or around the world event.
+    fn closes(&self, cell: usize, tile: Tile) -> Option<&'static str> {
         let event = &self.world().event;
-        if self.changes.iter().any(|c| c.cells(self.terrain.base().width).any(|n| n == i)) {
+        if self.changes.iter().any(|c| c.cells(self.terrain.base().width).any(|n| n == cell)) {
             Some(n_("refusal.relief_changes"))
-        } else if !can_place(self.terrain.grid(), &self.species, &self.present, i, tile, &self.walkers) {
+        } else if !can_place(self.terrain.grid(), &self.species, &self.present, cell, tile, &self.walkers) {
             Some(n_("refusal.closed"))
-        } else if self.maps_ahead().iter().any(|map| !can_place(map, &self.species, &self.present, i, tile, &[])) {
+        } else if self.maps_ahead().iter().any(|map| !can_place(map, &self.species, &self.present, cell, tile, &[])) {
             Some(&event.refuse_next)
-        } else if self.event_on && !can_place(self.terrain.base(), &self.species, &self.present, i, tile, &[]) {
+        } else if self.event_on && !can_place(self.terrain.base(), &self.species, &self.present, cell, tile, &[]) {
             Some(&event.refuse_after)
         } else if !self.changes.is_empty()
-            && !can_place(&self.after_changes(), &self.species, &self.present, i, tile, &[])
+            && !can_place(&self.after_changes(), &self.species, &self.present, cell, tile, &[])
         {
             Some(n_("refusal.relief_closes"))
         } else {

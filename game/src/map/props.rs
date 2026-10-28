@@ -8,7 +8,7 @@ use bevy::prelude::*;
 use super::decor::{palisade, rubble};
 use super::grid::{Grid, Tile};
 use super::land::{Land, landing_sound};
-use crate::look::{Hachure, InkMaterial, ink};
+use crate::look::{self, Hachure, InkMaterial};
 
 /// One mesh of a prop and the colour it is inked in.
 pub(crate) struct PropPart {
@@ -211,7 +211,7 @@ pub(super) fn prop_parts(
             prop(tile, shape)
                 .into_iter()
                 .map(|part| {
-                    let mut paint = ink(part.color);
+                    let mut paint = look::ink(part.color);
                     paint.extension = Hachure::fine();
                     (meshes.add(part.mesh), materials.add(paint))
                 })

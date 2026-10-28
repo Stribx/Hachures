@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
 use super::hud::capitalized;
-use super::places::Tooltip;
+use super::places::PriceTip;
 use super::tool_tip::ToolTip;
 use super::widgets::{follow_cursor, tooltip};
 use crate::campaign::lexique::species_lines;
@@ -13,7 +13,7 @@ use crate::combat::boss::Borne;
 use crate::i18n::{number, t, tf};
 use crate::ink::Selection;
 use crate::level::Level;
-use crate::map::cell_pos;
+use crate::map;
 
 /// The words of the enemy standing on the hovered cell, next to the cursor.
 #[derive(Component)]
@@ -27,7 +27,8 @@ pub fn setup(mut commands: Commands, assets: Res<AssetServer>) {
 }
 
 /// The tip with the hovered cell's price (`places`), hidden under the card.
-type PriceTip<'w, 's> = Query<'w, 's, &'static mut Visibility, (With<Tooltip>, Without<ToolTip>, Without<EnemyCard>)>;
+type PriceTipQuery<'w, 's> =
+    Query<'w, 's, &'static mut Visibility, (With<PriceTip>, Without<ToolTip>, Without<EnemyCard>)>;
 
 /// Writes the card of the enemy nearest to the hovered cell's centre, unless a tool's tip is up.
 pub fn enemy_card(
@@ -37,10 +38,10 @@ pub fn enemy_card(
     enemies: Query<(&Enemy, &Transform), Without<Borne>>,
     tool_tip: Single<&Visibility, (With<ToolTip>, Without<EnemyCard>)>,
     card: Single<(&mut Text, &mut Node, &mut Visibility), With<EnemyCard>>,
-    mut price: PriceTip,
+    mut price: PriceTipQuery,
 ) {
     let (mut text, mut node, mut visibility) = card.into_inner();
-    let centre = selection.hovered.map(|i| cell_pos(level.terrain.grid(), i));
+    let centre = selection.hovered.map(|i| map::cell_pos(level.terrain.grid(), i));
     let nearest = centre.and_then(|c| {
         let flat = |p: Vec3| Vec2::new(p.x, p.z);
         enemies
@@ -81,7 +82,7 @@ mod tests {
         let mut app = App::new();
         let level = Level::new(Grid::parse("S.M"), species::load());
         let chaineur = species::index_of(&level.species, "chaineur").unwrap();
-        let at = cell_pos(level.terrain.grid(), 1);
+        let at = map::cell_pos(level.terrain.grid(), 1);
         app.add_plugins(MinimalPlugins).insert_resource(Selection { hovered, ..Selection::for_level(&level) });
         app.world_mut().spawn((Enemy::new(chaineur, 100.0, 1), Transform::from_translation(at)));
         app.insert_resource(level);

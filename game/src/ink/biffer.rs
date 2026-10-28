@@ -6,33 +6,33 @@ use crate::level::Level;
 use crate::map::terrain::Edit;
 
 impl Level {
-    /// Index in `inked` of Nève's last stroke on `i`, if it still lies there as she inked it.
-    pub(super) fn stroke(&self, i: usize) -> Option<usize> {
-        let s = self.inked.iter().rposition(|s| s.cell == i)?;
-        (TOOLS[self.inked[s].tool].act.lays() == Some(self.terrain.base().tiles[i])).then_some(s)
+    /// Index in `inked` of Nève's last stroke on `cell`, if it still lies there as she inked it.
+    pub(super) fn stroke(&self, cell: usize) -> Option<usize> {
+        let last = self.inked.iter().rposition(|stroke| stroke.cell == cell)?;
+        (TOOLS[self.inked[last].tool].act.lays() == Some(self.terrain.base().tiles[cell])).then_some(last)
     }
 
-    /// Sépia that biffing `i` returns: all it cost while the ink is wet (inked between waves, none sent since),
+    /// Sépia that biffing `cell` returns: all it cost while the ink is wet (inked between waves, none sent since),
     /// half once dry.
-    pub fn refund(&self, i: usize) -> Option<u32> {
-        let s = &self.inked[self.stroke(i)?];
-        let wet = s.laid_at == Some(self.wave.number) && !self.wave.running;
-        Some(if wet { s.paid } else { s.paid / 2 })
+    pub fn refund(&self, cell: usize) -> Option<u32> {
+        let stroke = &self.inked[self.stroke(cell)?];
+        let wet = stroke.laid_at == Some(self.wave.number) && !self.wave.running;
+        Some(if wet { stroke.paid } else { stroke.paid / 2 })
     }
 
-    /// Why Biffer can't be used at `i`. Returning the cell to what it was opens ways, never closes one, so le Droit
+    /// Why Biffer can't be used at `cell`. Returning the cell to what it was opens ways, never closes one, so le Droit
     /// de Passage doesn't apply; it costs nothing.
-    pub(super) fn biffer_refusal(&self, i: usize) -> Option<&'static str> {
-        self.stroke(i).is_none().then_some(n_("refusal.nothing_to_biffer"))
+    pub(super) fn biffer_refusal(&self, cell: usize) -> Option<&'static str> {
+        self.stroke(cell).is_none().then_some(n_("refusal.nothing_to_biffer"))
     }
 
-    /// Takes back the stroke at `i` and its sépia; the name it cost stays scratched out. The caller has checked
+    /// Takes back the stroke at `cell` and its sépia; the name it cost stays scratched out. The caller has checked
     /// `refusal`.
-    pub(super) fn biffer(&mut self, i: usize) {
-        let refund = self.refund(i).expect("a stroke to biffer");
-        let stroke = self.inked.remove(self.stroke(i).expect("a stroke to biffer"));
+    pub(super) fn biffer(&mut self, cell: usize) {
+        let refund = self.refund(cell).expect("a stroke to biffer");
+        let stroke = self.inked.remove(self.stroke(cell).expect("a stroke to biffer"));
         self.sepia += refund;
-        self.alter([(i, Edit::Unink(stroke.under))]);
+        self.alter([(cell, Edit::Unink(stroke.under))]);
     }
 }
 

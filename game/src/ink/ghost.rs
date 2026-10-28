@@ -8,7 +8,7 @@ use bevy::prelude::*;
 use super::{Act, Selection, TOOLS, Verdict};
 use crate::campaign::skills::Skill;
 use crate::level::Level;
-use crate::look::{Hachure, InkMaterial, ink};
+use crate::look::{self, Hachure, InkMaterial};
 use crate::map;
 use crate::map::grid::Tile;
 use crate::map::props::{barricade_shape, prop};
@@ -47,7 +47,7 @@ pub(super) fn ghost(
     let tile = if let Act::Lay(tile) = TOOLS[selection.tool].act { Some(tile) } else { None };
     let at = verdict.at.zip(tile).filter(|_| verdict.refusal.is_none());
     let entity = *held.ghost.get_or_insert_with(|| {
-        let mut pale = ink(Color::WHITE.with_alpha(0.45));
+        let mut pale = look::ink(Color::WHITE.with_alpha(0.45));
         pale.base.alpha_mode = AlphaMode::Blend;
         pale.extension = Hachure::fine();
         commands.spawn((MeshMaterial3d(stock.materials.add(pale)), Transform::default(), Visibility::Hidden)).id()

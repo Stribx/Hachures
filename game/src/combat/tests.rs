@@ -9,7 +9,7 @@ use super::enemies::{spawn_enemies, walk};
 use super::figure::chain::{Link, drag_chain};
 use super::figure::exit::Exit;
 use super::figure::kit::BOSS_REAR;
-use super::figure::{EnemyLook, Kind, Stride, animate, exits, spawn_figure};
+use super::figure::{EnemyLook, ExitKind, Stride, animate, exits, spawn_figure};
 use super::shards::Shard;
 use super::towers::{Tower, Weapon, fire};
 use super::{Enemy, Shots};
@@ -17,7 +17,7 @@ use crate::campaign::save::Save;
 use crate::ink::TOOLS;
 use crate::level::Level;
 use crate::level::data::{LEVELS, START_LIVES};
-use crate::map::cell_pos;
+use crate::map;
 use crate::map::grid::{Grid, Tile};
 use crate::map::species::{self, index_of};
 use crate::map::terrain::Edit;
@@ -41,7 +41,7 @@ fn app_with(level: Level) -> App {
 fn walker(level: &Level, species: &str, hp: f32) -> (Enemy, Transform) {
     let species = index_of(&level.species, species).unwrap();
     let cell = level.terrain.grid().spawns[0];
-    (Enemy::new(species, hp, cell), Transform::from_translation(cell_pos(level.terrain.grid(), cell)))
+    (Enemy::new(species, hp, cell), Transform::from_translation(map::cell_pos(level.terrain.grid(), cell)))
 }
 
 fn run(app: &mut App, seconds: u32) {
@@ -60,7 +60,7 @@ fn arbalete_spares_fuyards() {
     let mut level = Level::new(grid, species::load());
     level.sepia = 0;
     let tower_cell = level.terrain.grid().width + 3;
-    let tower_at = cell_pos(level.terrain.grid(), tower_cell);
+    let tower_at = map::cell_pos(level.terrain.grid(), tower_cell);
     let (chaineur, fuyard) = (walker(&level, "chaineur", 100.0), walker(&level, "fuyard", 100.0));
 
     let mut app = app_with(level);
@@ -83,7 +83,7 @@ fn arbalete_spares_fuyards() {
 fn lanterne_slows() {
     let level = Level::new(Grid::parse("S.....M"), species::load());
     let gens = walker(&level, "gens_du_col", 100.0);
-    let tower_at = cell_pos(level.terrain.grid(), 1);
+    let tower_at = map::cell_pos(level.terrain.grid(), 1);
     let mut app = app_with(level);
     app.world_mut()
         .spawn((Tower { cell: 1, weapon: Weapon::Lanterne, ready_in: 0.0 }, Transform::from_translation(tower_at)));
@@ -347,7 +347,7 @@ fn turns_ease_without_overshoot() {
         }
         let level = app.world().resource::<Level>();
         let transform = app.world().get::<Transform>(id).unwrap();
-        let to = cell_pos(level.terrain.grid(), next) - transform.translation;
+        let to = map::cell_pos(level.terrain.grid(), next) - transform.translation;
         if to.xz().length() < 0.05 {
             continue;
         }
@@ -362,7 +362,7 @@ fn turns_ease_without_overshoot() {
 }
 
 /// The kinds of the ghosts standing, and how many shards fly.
-fn ghosts_and_shards(app: &mut App) -> (Vec<Kind>, usize) {
+fn ghosts_and_shards(app: &mut App) -> (Vec<ExitKind>, usize) {
     let kinds = app.world_mut().query_filtered::<&Exit, Without<Enemy>>().iter(app.world()).map(|e| e.kind).collect();
     (kinds, app.world_mut().query::<&Shard>().iter(app.world()).count())
 }
@@ -373,7 +373,7 @@ fn a_defeated_enemy_leaves_a_ghost_then_shards() {
     let mut level = Level::new(Grid::parse("S.....M\n...^..R"), species::load());
     level.sepia = 0;
     let tower_cell = level.terrain.grid().width + 1;
-    let tower_at = cell_pos(level.terrain.grid(), tower_cell);
+    let tower_at = map::cell_pos(level.terrain.grid(), tower_cell);
     let chaineur = walker(&level, "chaineur", 0.5);
     let mut app = app_with(level);
     app.add_systems(Update, exits);
@@ -385,7 +385,7 @@ fn a_defeated_enemy_leaves_a_ghost_then_shards() {
     app.update();
 
     assert!(app.world().get_entity(id).is_err(), "it is gone on the frame it is defeated");
-    assert_eq!(ghosts_and_shards(&mut app), (vec![Kind::Fall], 0), "a ghost tips over first");
+    assert_eq!(ghosts_and_shards(&mut app), (vec![ExitKind::Fall], 0), "a ghost tips over first");
     run(&mut app, 1);
     let (ghosts, shards) = ghosts_and_shards(&mut app);
     assert!(ghosts.is_empty() && shards > 0, "then it breaks: {ghosts:?}, {shards} shards");
@@ -406,7 +406,7 @@ fn an_arrival_sinks_into_the_board() {
         }
     }
     assert!(app.world().get_entity(id).is_err(), "it arrived");
-    assert_eq!(ghosts_and_shards(&mut app), (vec![Kind::Sink], 0), "and sinks");
+    assert_eq!(ghosts_and_shards(&mut app), (vec![ExitKind::Sink], 0), "and sinks");
     run(&mut app, 1);
     assert_eq!(ghosts_and_shards(&mut app), (vec![], 0), "then nothing is left");
 }

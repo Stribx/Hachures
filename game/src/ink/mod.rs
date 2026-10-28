@@ -142,29 +142,29 @@ pub(crate) fn inking(
 }
 
 impl Level {
-    /// Sépia cost of tool `t`, skills included.
-    pub fn tool_cost(&self, t: usize) -> u32 {
-        let tool = &TOOLS[t];
-        let factor = if tool.act == Act::Raise(Weapon::Arbalete) && self.has(Skill::MineDePlomb) {
+    /// Sépia cost of tool `tool`, skills included.
+    pub fn tool_cost(&self, tool: usize) -> u32 {
+        let spec = &TOOLS[tool];
+        let factor = if spec.act == Act::Raise(Weapon::Arbalete) && self.has(Skill::MineDePlomb) {
             0.9
-        } else if tool.act == Act::Lay(Tile::Barricade) && self.has(Skill::Fascines) {
+        } else if spec.act == Act::Lay(Tile::Barricade) && self.has(Skill::Fascines) {
             0.7
         } else {
             1.0
         };
-        (tool.cost as f32 * factor).round() as u32
+        (spec.cost as f32 * factor).round() as u32
     }
 
-    /// Inks `tool` at `i`, paid in sépia, and in a Name if a place's name is written there. Biffer goes through here
+    /// Inks `tool` at `cell`, paid in sépia, and in a Name if a place's name is written there. Biffer goes through here
     /// too: free, it costs no Name and gives sépia back. The caller has checked `refusal`.
     ///
     /// # Panics
     ///
     /// If `refusal` would have refused: the sépia is a `u32`, and paying more than is left underflows.
-    pub fn ink(&mut self, i: usize, tool: usize) {
+    pub fn ink(&mut self, cell: usize, tool: usize) {
         let act = TOOLS[tool].act;
         if act == Act::Biffer {
-            return self.biffer(i);
+            return self.biffer(cell);
         }
         let paid = self.tool_cost(tool);
         self.sepia -= paid;
@@ -172,33 +172,35 @@ impl Level {
             self.used.push(tool);
         }
         // Gratter never costs a Name (docs, section 7).
-        if let (Some(_), Some(p)) = (act.lays(), self.place_at(i)) {
+        if let (Some(_), Some(p)) = (act.lays(), self.place_at(cell)) {
             self.erased.push(p);
             self.names -= 1;
             let line = n_("note.erased").to_string();
             self.margin.push(MarginNote { line, name: Some(self.places[p].name.clone()) });
         }
         if act.lays().is_some() {
-            let (under, laid_at) = (self.terrain.base().tiles[i], (!self.wave.running).then_some(self.wave.number));
-            self.inked.push(Inked { cell: i, tool, under, paid, laid_at });
+            let (under, laid_at) = (self.terrain.base().tiles[cell], (!self.wave.running).then_some(self.wave.number));
+            self.inked.push(Inked { cell, tool, under, paid, laid_at });
         }
-        let edit = self.edit(i, tool);
-        self.alter([(i, edit)]);
+        let edit = self.edit(cell, tool);
+        self.alter([(cell, edit)]);
     }
 
-    /// What inking `tool` at `i` does to the cell.
-    fn edit(&self, i: usize, tool: usize) -> Edit {
+    /// What inking `tool` at `cell` does to the cell.
+    fn edit(&self, cell: usize, tool: usize) -> Edit {
         match TOOLS[tool].act {
             Act::Lay(tile) => Edit::Ink(tile),
             Act::Raise(weapon) => Edit::Raise(weapon),
             Act::Scrape => Edit::Scrape,
-            Act::Biffer => Edit::Unink(self.stroke(i).map_or(self.terrain.base().tiles[i], |s| self.inked[s].under)),
+            Act::Biffer => {
+                Edit::Unink(self.stroke(cell).map_or(self.terrain.base().tiles[cell], |s| self.inked[s].under))
+            }
         }
     }
 
-    /// The map and the shown species' field if `tool` were inked at `i`.
-    pub fn what_if(&self, i: usize, tool: usize, shown: usize) -> (Grid, FlowField) {
-        self.terrain.preview(i, self.edit(i, tool), &self.species[shown])
+    /// The map and the shown species' field if `tool` were inked at `cell`.
+    pub fn what_if(&self, cell: usize, tool: usize, shown: usize) -> (Grid, FlowField) {
+        self.terrain.preview(cell, self.edit(cell, tool), &self.species[shown])
     }
 }
 

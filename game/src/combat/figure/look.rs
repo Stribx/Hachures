@@ -6,7 +6,7 @@ use super::chain::{LINK_MAJOR, LINK_MINOR};
 use super::kit::{Form, Paint, Role, casts_shadow, parts};
 use super::spawn::FLOAT;
 use crate::level::Level;
-use crate::look::{Hachure, InkMaterial, ink};
+use crate::look::{Hachure, InkMaterial};
 use crate::theme::{FELT, HIDE, IRON, LAMP, LIMESTONE, LINEN, SEAL, SEPIA, SLATE, WOOD};
 
 /// One part of a figurine, ready to spawn: its mesh, place, ink, role, side and whether it casts a shadow.
@@ -39,7 +39,7 @@ pub struct EnemyLook {
 
 /// Fine strokes, so a small piece does not turn to scribble; `gloss` for the varnished wood.
 fn figurine_ink(color: Color, gloss: f32) -> InkMaterial {
-    let mut material = ink(color);
+    let mut material = crate::look::ink(color);
     material.extension = Hachure::fine();
     material.extension.uniform.gloss = gloss;
     material
@@ -132,9 +132,9 @@ pub fn setup(
         link_mesh: meshes.add(Torus { minor_radius: LINK_MINOR, major_radius: LINK_MAJOR }),
         link_material: iron,
         shard_mesh: meshes.add(Cuboid::from_length(0.06)),
-        shard_material: materials.add(ink(Color::srgb(0.12, 0.08, 0.05))),
+        shard_material: materials.add(crate::look::ink(Color::srgb(0.12, 0.08, 0.05))),
         drop_mesh: meshes.add(Sphere::new(0.04)),
         blot_mesh: meshes.add(Cylinder::new(0.22, 0.005)),
-        sepia_material: materials.add(ink(SEPIA)),
+        sepia_material: materials.add(crate::look::ink(SEPIA)),
     });
 }

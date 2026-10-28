@@ -4,10 +4,10 @@ use bevy::prelude::*;
 
 use super::Enemy;
 use super::boss::{Borne, Boss};
-use super::figure::{EnemyLook, Kind, Stride, leave, spawn_figure};
+use super::figure::{EnemyLook, ExitKind, Stride, leave, spawn_figure};
 use crate::level::story::Trigger;
 use crate::level::{Level, LevelEntity, Walker};
-use crate::map::cell_pos;
+use crate::map;
 use crate::map::grid::Tile;
 use crate::map::species::Goal;
 use crate::map::terrain::Edit;
@@ -81,7 +81,7 @@ pub fn spawn_enemies(
     // Docs, section 8: ×1.5 per world, ×1.12 per wave (not for the boss).
     let wave_scale = if boss.is_some() { 1.0 } else { HP_PER_WAVE.powi(level.wave.number as i32 - 1) };
     let hp = level.hp(level.species[species].hp) * wave_scale;
-    let at = cell_pos(level.terrain.grid(), cell);
+    let at = map::cell_pos(level.terrain.grid(), cell);
     let scale = if boss.is_some() { BOSS_SCALE } else { SCALE };
     let enemy = spawn_figure(&mut commands, &look, species, at, scale);
     let mut enemy = commands.entity(enemy);
@@ -134,7 +134,7 @@ fn step(
         enemy.pinned -= dt;
     } else if let Some(next) = enemy.next {
         let step = species.speed * slow / species.cost(level.terrain.grid().tiles[enemy.cell]) * dt;
-        let to = cell_pos(level.terrain.grid(), next) - transform.translation;
+        let to = map::cell_pos(level.terrain.grid(), next) - transform.translation;
         if to.length() <= step {
             transform.translation += to;
             let left = enemy.cell;
@@ -174,7 +174,7 @@ fn lay(level: &mut Level, look: &EnemyLook, commands: &mut Commands, trail: Trai
                 LevelEntity,
                 Borne,
                 Enemy::new(species, level.hp(level.boss_file().borne_hp), cell),
-                Transform::from_translation(cell_pos(level.terrain.grid(), cell)),
+                Transform::from_translation(map::cell_pos(level.terrain.grid(), cell)),
                 Visibility::default(),
             ))
             .with_children(|borne| {
@@ -211,7 +211,7 @@ pub fn walk(
             if enemy.next.is_none() && field.dist[enemy.cell] == 0.0 {
                 reach_goal(level, enemy.species, boss.is_some(), &mut trail);
                 let goal = level.species[enemy.species].goal;
-                leave(&mut commands, &look, enemy.species, &transform, Kind::arriving(goal));
+                leave(&mut commands, &look, enemy.species, &transform, ExitKind::arriving(goal));
                 commands.entity(entity).try_despawn();
                 continue;
             }

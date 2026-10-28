@@ -141,9 +141,9 @@ pub fn animate(
         };
         stride.feel(enemy.hp, time.delta_secs());
         let delta = (here - last).xz();
-        let d = delta.length();
-        stride.walked += d;
-        if d > 1e-4 {
+        let moved = delta.length();
+        stride.walked += moved;
+        if moved > 1e-4 {
             let gap = ((-delta.y).atan2(delta.x) - stride.yaw + PI).rem_euclid(TAU) - PI;
             stride.yaw += gap * ease;
         }
@@ -158,11 +158,12 @@ pub fn animate(
             continue;
         };
         let sway = if enemy.pinned > 0.0 { stagger(stride.clock) } else { Transform::IDENTITY };
-        *at = body.rest * pose(gait, phase, d > 1e-5) * jolt(stride.since_hit) * sway;
+        *at = body.rest * pose(gait, phase, moved > 1e-5) * jolt(stride.since_hit) * sway;
         for &part in parts {
-            if let Ok((l, mut at)) = limbs.get_mut(part) {
+            if let Ok((joint, mut at)) = limbs.get_mut(part) {
                 // The wheels are sized in figure units: roll them by the distance in those units.
-                at.rotation = limb(l.role, gait, l.side, phase, stride.walked / transform.scale.x) * l.rest.rotation;
+                at.rotation =
+                    limb(joint.role, gait, joint.side, phase, stride.walked / transform.scale.x) * joint.rest.rotation;
             }
         }
     }

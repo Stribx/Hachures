@@ -8,7 +8,7 @@ use crate::i18n::{t, tf};
 use crate::ink::{Act, Selection, TOOLS, Verdict};
 use crate::level::{Level, LevelEntity};
 use crate::look::WorldCamera;
-use crate::map::cell_pos;
+use crate::map;
 use crate::schedule::{Screen, over_world};
 use crate::theme::{BODY_SIZE, Face, INK, font};
 
@@ -18,12 +18,12 @@ pub struct PlaceLabel(usize);
 
 /// What inking at the cursor would cost or why it is refused, next to the cursor.
 #[derive(Component)]
-pub struct Tooltip;
+pub struct PriceTip;
 
 const WIDTH: f32 = 240.0;
 
 pub fn setup(mut commands: Commands, assets: Res<AssetServer>) {
-    commands.spawn((Tooltip, widgets::tooltip(&assets)));
+    commands.spawn((PriceTip, widgets::tooltip(&assets)));
 }
 
 /// A place's label: its node, colour and visibility, and whether it is struck out.
@@ -61,7 +61,7 @@ pub fn label_places(
     for (entity, &PlaceLabel(k), mut node, mut color, mut visibility, struck) in &mut labels {
         *visibility = shown;
         let Some(place) = level.places.get(k) else { continue };
-        let center = place.at.iter().map(|&(x, y)| cell_pos(level.terrain.base(), y * width + x)).sum::<Vec3>()
+        let center = place.at.iter().map(|&(x, y)| map::cell_pos(level.terrain.base(), y * width + x)).sum::<Vec3>()
             / place.at.len() as f32;
         if let Ok(p) = camera.world_to_viewport(at, center) {
             node.left = px(p.x - WIDTH / 2.0);
@@ -76,12 +76,12 @@ pub fn label_places(
 }
 
 /// The price before the click: a refusal, the name this ink would scratch out, or what biffing gives back.
-pub fn tooltip(
+pub fn price_tip(
     level: Res<Level>,
     verdict: Res<Verdict>,
     selection: Res<Selection>,
     window: Single<&Window, With<PrimaryWindow>>,
-    tip: Single<(&mut Text, &mut Node, &mut Visibility), With<Tooltip>>,
+    tip: Single<(&mut Text, &mut Node, &mut Visibility), With<PriceTip>>,
 ) {
     let (mut text, mut node, mut visibility) = tip.into_inner();
     let said = price(&level, &verdict, TOOLS[selection.tool].act);

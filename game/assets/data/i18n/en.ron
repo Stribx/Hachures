@@ -244,6 +244,7 @@
     "refusal.relief_closes": "the coming relief would close the map",
     "refusal.sepia": "not enough sepia",
     // sceaux
+    "sceaux.node": "{} ({}): {}{}",
     "sceaux.note": "A node bought during a level counts from the next one. Tiers 4 and 5: later.",
     "sceaux.owned": ", owned",
     "sceaux.purse.one": "{} seal to spend    Roll of Names: {}",
@@ -268,6 +269,7 @@
     "settings.mute_unfocused": "Mute in background",
     "settings.occlusion": "Ambient occlusion",
     "settings.pause_unfocused": "Pause in background",
+    "settings.percent": "{}%",
     "settings.preset": "Quality",
     "settings.preset.custom": "Custom",
     "settings.preset.high": "High",

@@ -6,7 +6,7 @@ use super::env;
 use crate::combat::enemies::{BOSS_SCALE, SCALE};
 use crate::combat::figure::{EnemyLook, spawn_figure};
 use crate::level::{Level, LevelEntity};
-use crate::map::cell_pos;
+use crate::map;
 use crate::map::grid::{Grid, Tile};
 
 /// `n` distinct plain-Sol cells without a marker: a run of `n` in one row, the row nearest the middle first, else the
@@ -41,7 +41,7 @@ pub fn parade(mut done: Local<u32>, level: Res<Level>, look: Res<EnemyLook>, mut
     let boss = level.world().boss.as_ref();
     let cells = parade_cells(grid, level.species.len());
     for (index, (species, cell)) in level.species.iter().zip(cells).enumerate() {
-        let at = cell_pos(grid, cell);
+        let at = map::cell_pos(grid, cell);
         let is_boss = boss.is_some_and(|b| b.phases.iter().any(|p| p.species == species.name));
         let figure = spawn_figure(&mut commands, &look, index, at, if is_boss { BOSS_SCALE } else { SCALE });
         commands.entity(figure).insert(LevelEntity);

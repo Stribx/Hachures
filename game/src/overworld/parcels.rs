@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 
-use super::terrain::{WATER, cols, hash, height, road_distance, smoothstep, wood};
+use super::terrain::{WATER, hash, height, mountain_share, road_distance, smoothstep, wood};
 use crate::theme::{PASTURE, WHEAT};
 
 /// How wide a parcel is, in world units.
@@ -57,7 +57,7 @@ pub(super) fn openness(p: Vec2) -> f32 {
     let h = height(p);
     let dry = smoothstep(WATER + 0.25, WATER + 0.6, h) * (1.0 - smoothstep(1.5, 2.5, h));
     let clearing = 1.0 - smoothstep(0.42, 0.5, wood(p));
-    let lowland = 1.0 - smoothstep(0.1, 0.4, cols(p.x));
+    let lowland = 1.0 - smoothstep(0.1, 0.4, mountain_share(p.x));
     let off_road = smoothstep(1.2, 2.5, road_distance(p));
     dry * clearing * lowland * off_road
 }
@@ -99,7 +99,7 @@ mod tests {
                 if openness(p) > 0.5 {
                     assert!(height(p) > WATER, "water at {p}");
                     assert!(wood(p) < 0.52, "wood at {p}");
-                    assert!(cols(p.x) < 0.5, "mountain at {p}");
+                    assert!(mountain_share(p.x) < 0.5, "mountain at {p}");
                     assert!(road_distance(p) > 1.0, "road at {p}");
                 }
             }

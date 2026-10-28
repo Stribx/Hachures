@@ -9,7 +9,7 @@ use super::{BackTo, Screen, back, button, framed, label, open, page, text};
 use crate::campaign::LoadLevel;
 use crate::campaign::save::Save;
 use crate::campaign::skills::{BRANCHES, next_in};
-use crate::i18n::{t, tp};
+use crate::i18n::{t, tf, tp};
 use crate::level::Level;
 use crate::theme::{HEADING_SIZE, INK, SMALL_SIZE, SUBTITLE_SIZE, TITLE_SIZE, VEIL};
 use crate::ui::widgets::letter;
@@ -105,7 +105,7 @@ fn show_nodes(
         let owned = save.skills.contains(&node.skill);
         let next = next_in(b, &save.skills).is_some_and(|n| n.skill == node.skill) && save.sceaux() >= node.cost;
         let owned_said = if owned { t("sceaux.owned") } else { "" };
-        text.0 = format!("{} ({}) : {}{owned_said}", t(node.name), node.cost, t(node.effect));
+        text.0 = tf("sceaux.node", &[&t(node.name), &node.cost, &t(node.effect), &owned_said]);
         color.0 = if owned || next { INK } else { INK.with_alpha(0.4) };
     }
 }

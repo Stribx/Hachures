@@ -84,9 +84,10 @@ fn spawn_row(column: &mut ChildSpawnerCommands, assets: &AssetServer, field: Fie
             Node { flex_grow: 1.0, justify_content: JustifyContent::SpaceBetween, column_gap: px(24), ..default() },
             children![small(t(field.name())), (small(""), Value(field))],
         );
-        row.spawn((framed(340.0, words), field)).observe(change(move |s| field.next(s)));
-        for (arrow, dir) in [("‹", -1), ("›", 1)] {
-            row.spawn((framed(0.0, small(arrow)), NoNav)).observe(change(move |s| field.step(s, dir)));
+        row.spawn((framed(340.0, words), field)).observe(change(move |settings| field.advance(settings)));
+        for (arrow, direction) in [("‹", -1), ("›", 1)] {
+            row.spawn((framed(0.0, small(arrow)), NoNav))
+                .observe(change(move |settings| field.step(settings, direction)));
         }
     });
 }

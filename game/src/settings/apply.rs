@@ -45,18 +45,21 @@ fn apply_audio(
     window: Single<&Window, With<PrimaryWindow>>,
     mut music: Query<&mut AudioSink, With<Music>>,
 ) {
-    let Some(s) = due.check(&window) else { return };
-    i18n::set(&s.language);
+    let Some(settings) = due.check(&window) else { return };
+    i18n::set(&settings.language);
     for mut sink in &mut music {
-        sink.set_volume(s.music_volume(window.focused));
+        sink.set_volume(settings.music_volume(window.focused));
     }
 }
 
 fn apply_window(mut due: Due, mut window: Single<&mut Window, With<PrimaryWindow>>) {
-    let Some(s) = due.check(&window) else { return };
-    let mode =
-        if s.fullscreen { WindowMode::BorderlessFullscreen(MonitorSelection::Current) } else { WindowMode::Windowed };
-    let present = if s.vsync { PresentMode::AutoVsync } else { PresentMode::AutoNoVsync };
+    let Some(settings) = due.check(&window) else { return };
+    let mode = if settings.fullscreen {
+        WindowMode::BorderlessFullscreen(MonitorSelection::Current)
+    } else {
+        WindowMode::Windowed
+    };
+    let present = if settings.vsync { PresentMode::AutoVsync } else { PresentMode::AutoNoVsync };
     if window.mode != mode {
         window.mode = mode;
     }
@@ -76,10 +79,10 @@ fn apply_render(
     mut images: ResMut<Assets<Image>>,
     mut commands: Commands,
 ) {
-    let Some(s) = due.check(&window) else { return };
+    let Some(settings) = due.check(&window) else { return };
     // The board's picture at the render scale. Its own scale factor shrinks with it, so it keeps the window's
     // logical size: picking and the place labels need no conversion.
-    let scale = s.render_scale as f32 / 100.0;
+    let scale = settings.render_scale as f32 / 100.0;
     let wanted = (window.physical_size().as_vec2() * scale).as_uvec2().max(UVec2::ONE);
     // `get_mut` marks the image changed, so only when it does.
     if images.get(&frame.0).is_some_and(|image| image.size() != wanted) {
@@ -89,14 +92,14 @@ fn apply_render(
     let target = ImageRenderTarget { handle: frame.0.clone(), scale_factor: window.scale_factor() * scale };
     commands.entity(camera.0).insert(RenderTarget::Image(target));
     // Stretched over the window, a smaller picture blurs: sharpened back, as a game's upscaler would.
-    if s.render_scale < 100 {
+    if settings.render_scale < 100 {
         commands.entity(camera.0).insert(ContrastAdaptiveSharpening::default());
     } else {
         commands.entity(camera.0).remove::<ContrastAdaptiveSharpening>();
     }
     for mut sun in &mut suns {
-        if sun.shadow_maps_enabled != s.shadows {
-            sun.shadow_maps_enabled = s.shadows;
+        if sun.shadow_maps_enabled != settings.shadows {
+            sun.shadow_maps_enabled = settings.shadows;
         }
     }
     #[cfg(not(target_arch = "wasm32"))]
@@ -105,18 +108,18 @@ fn apply_render(
         use bevy::anti_alias::smaa::Smaa;
         use bevy::pbr::ScreenSpaceAmbientOcclusion;
         let mut camera = commands.entity(camera.0);
-        match occlusion(s.occlusion) {
+        match occlusion(settings.occlusion) {
             Some(ssao) => camera.insert(ssao),
             None => camera.remove::<ScreenSpaceAmbientOcclusion>(),
         };
-        match s.anti_aliasing {
+        match settings.anti_aliasing {
             0 => camera.remove::<(Fxaa, Smaa)>(),
             1 => camera.remove::<Smaa>().insert(Fxaa::default()),
             _ => camera.remove::<Fxaa>().insert(Smaa::default()),
         };
     }
     // `camera::drive` focuses the lens again from the next frame.
-    match (*camera, s.depth_of_field_shown()) {
+    match (*camera, settings.depth_of_field_shown()) {
         ((camera, false), true) => {
             commands.entity(camera).insert(lens());
         }
@@ -128,8 +131,8 @@ fn apply_render(
 }
 
 fn apply_ui_scale(mut due: Due, window: Single<&Window, With<PrimaryWindow>>, mut ui_scale: ResMut<UiScale>) {
-    let Some(s) = due.check(&window) else { return };
-    let scale = fitted(s.ui_scale as f32 / 100.0, window.size());
+    let Some(settings) = due.check(&window) else { return };
+    let scale = fitted(settings.ui_scale as f32 / 100.0, window.size());
     if ui_scale.0 != scale {
         ui_scale.0 = scale;
     }

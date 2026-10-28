@@ -6,7 +6,7 @@ use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 
 use super::grid::Tile;
-use crate::look::{Hachure, InkMaterial, ink};
+use crate::look::{self, Hachure, InkMaterial};
 use crate::settings::Settings;
 
 /// Light wood on wood: a barricade landing, and the settings page trying the effects volume.
@@ -31,7 +31,7 @@ const SETTLE: f32 = 0.14;
 /// the land answers with a puff of fibres and the piece's sound.
 #[derive(Component)]
 pub(crate) struct Land {
-    t: f32,
+    elapsed: f32,
     rest: Transform,
     sound: Option<&'static str>,
     landed: bool,
@@ -40,7 +40,7 @@ pub(crate) struct Land {
 impl Land {
     /// Landing at `rest`, making `sound` as it does.
     pub(crate) fn new(rest: Transform, sound: Option<&'static str>) -> Self {
-        Land { t: 0.0, rest, sound, landed: false }
+        Land { elapsed: 0.0, rest, sound, landed: false }
     }
 }
 
@@ -77,7 +77,7 @@ impl Landing<'_, '_> {
             .fibre
             .get_or_insert_with(|| {
                 // Earth-coloured, to show on the pale ground.
-                let mut paper = ink(Color::srgb(0.55, 0.45, 0.33));
+                let mut paper = look::ink(Color::srgb(0.55, 0.45, 0.33));
                 paper.extension = Hachure::fine();
                 (self.meshes.add(Cuboid::from_length(0.035)), self.materials.add(paper))
             })
@@ -101,11 +101,11 @@ pub(super) fn land(
     mut landing: Landing,
 ) {
     for (entity, mut land, mut transform, global) in &mut pieces {
-        land.t += time.delta_secs();
+        land.elapsed += time.delta_secs();
         let rest = land.rest;
-        if land.t < FALL {
+        if land.elapsed < FALL {
             // Falling faster and faster.
-            let k = land.t / FALL;
+            let k = land.elapsed / FALL;
             transform.translation = rest.translation + Vec3::Y * DROP * (1.0 - k * k);
             continue;
         }
@@ -114,10 +114,10 @@ pub(super) fn land(
             if let Some(sound) = land.sound {
                 landing.play(&mut commands, sound, time.elapsed_secs());
             }
-            landing.puff(&mut commands, global.translation(), land.t);
+            landing.puff(&mut commands, global.translation(), land.elapsed);
         }
         // Squashed on landing, springing back.
-        let s = 1.0 - ((land.t - FALL) / SETTLE).min(1.0);
+        let s = 1.0 - ((land.elapsed - FALL) / SETTLE).min(1.0);
         let squash = Vec3::new(1.0 + 0.1 * s * s, 1.0 - 0.2 * s * s, 1.0 + 0.1 * s * s);
         transform.translation = rest.translation;
         transform.scale = rest.scale * squash;

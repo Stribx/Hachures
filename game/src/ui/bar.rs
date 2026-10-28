@@ -91,20 +91,20 @@ fn spawn(commands: &mut Commands, assets: &AssetServer, icons: &ToolIcons, level
 /// The tools: a card each, its key in the corner, its cost under its name.
 fn spawn_tools(bar: &mut ChildSpawnerCommands, assets: &AssetServer, icons: &ToolIcons, level: &Level) {
     bar.spawn(Node { column_gap: px(8), ..default() }).with_children(|tools| {
-        for &t in &level.tools {
-            spawn_card(tools, assets, icons, t);
+        for &tool in &level.tools {
+            spawn_card(tools, assets, icons, tool);
         }
     });
 }
 
-/// The card of `TOOLS[t]`.
-fn spawn_card(tools: &mut ChildSpawnerCommands, assets: &AssetServer, icons: &ToolIcons, t: usize) {
-    let tool = &TOOLS[t];
+/// The card of `TOOLS[index]`.
+fn spawn_card(tools: &mut ChildSpawnerCommands, assets: &AssetServer, icons: &ToolIcons, index: usize) {
+    let tool = &TOOLS[index];
     tools
         .spawn((
             Button,
             Hovered::default(),
-            ToolButton(t),
+            ToolButton(index),
             Outline::default(),
             UiTransform::IDENTITY,
             BackgroundColor(SLIP),
@@ -118,17 +118,17 @@ fn spawn_card(tools: &mut ChildSpawnerCommands, assets: &AssetServer, icons: &To
                 ..default()
             },
         ))
-        .observe(move |_: On<Activate>, mut selection: ResMut<Selection>| selection.tool = t)
+        .observe(move |_: On<Activate>, mut selection: ResMut<Selection>| selection.tool = index)
         .with_children(|card| {
             card.spawn((
-                text(assets, (t + 1).to_string(), SMALL_SIZE),
+                text(assets, (index + 1).to_string(), SMALL_SIZE),
                 Node { position_type: PositionType::Absolute, top: px(2), left: px(6), ..default() },
             ))
             .insert(TextColor(INK_SOFT));
             // The piece itself, filmed in the studio.
-            card.spawn((Node { width: px(48), height: px(48), ..default() }, ImageNode::new(icons.0[t].clone())));
-            card.spawn((text(assets, crate::i18n::t(tool.label), SMALL_SIZE), ToolLabel(t)));
-            card.spawn((text(assets, "", SMALL_SIZE), ToolCost(t)));
+            card.spawn((Node { width: px(48), height: px(48), ..default() }, ImageNode::new(icons.0[index].clone())));
+            card.spawn((text(assets, t(tool.label), SMALL_SIZE), ToolLabel(index)));
+            card.spawn((text(assets, "", SMALL_SIZE), ToolCost(index)));
         });
 }
 

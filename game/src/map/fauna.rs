@@ -8,7 +8,7 @@ use super::grid::Grid;
 use super::growth::{Crop, sprigs};
 use super::lands::Land;
 use crate::level::Level;
-use crate::look::{Hachure, InkMaterial, ink};
+use crate::look::{Hachure, InkMaterial};
 use crate::schedule::Screen;
 use crate::settings::Settings;
 use crate::theme::WORLD_INK;
@@ -75,7 +75,7 @@ fn wings(
 }
 
 fn felt(color: Color) -> InkMaterial {
-    let mut material = ink(color);
+    let mut material = crate::look::ink(color);
     material.extension = Hachure::fine();
     material
 }
