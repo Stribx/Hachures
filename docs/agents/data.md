@@ -1,0 +1,10 @@
+# Game data
+
+The RON files under `game/assets/data/` and how to add a level. Read it before touching a level, world, species or tower file.
+
+- **Level** (`data/levels/<world>-<n>.ron`, read as `LevelData` in `level/data.rs`): `name` (an i18n key), `at` (where the sheet lies on the Marches), `world`, `sepia`, `tools`, `grants` (tools winning it earns for good), `events` (waves the world event starts at), `map` (rows of characters), `waves` (per wave, `(species, count)`), and optional `notes`, `challenge`, `choice`, `alt_refuge`, `shorter`, `changes` (scripted map changes: `(wave, at, becomes)`), `places` (named places).
+- **Map characters** (`Grid::parse`): `.` Sol, `,` Sol bas, `b` Boue, `r` Ronces, `~` Eau, `g` Gué, `#` Barricade, `^` Roc, `e` Éboulis, `p` Palissade. Markers stand on Sol: `S` spawn, `F` allies' start, `M` Cible, `B` Borne-Mère, `R` Refuge, `X` Sortie, `W` where the Refuge moves if `alt_refuge`'s choice went that way.
+- **World** (`data/worlds/<n>.ron`): its event (`cells` it hits, what they `becomes`, the tiles it `spares`, how many waves it `lasts`, the `announce`/`during`/`refuse_next`/`refuse_after` keys) and its boss (phases, each with its species and `until` HP fraction).
+- **Species** (`data/species.ron`): `goal`, `hostile`, `hp` (relative to the Chaîneur's 100), `speed`, `loot`, `weak_to`, `reading` (Pente prices tiles by `costs`; Ombre prices cells by the towers covering them) and `costs`: **a tile left out of `costs` is impassable** for that species.
+- **Towers** (`data/towers.ron`): damage, range and splash in tiles, cooldown, pin and slow in seconds.
+- **Adding a level**: write the file, add it to `LEVELS` in `level/data.rs` (the campaign order), give it an `at`, add its keys (`level.<id>.name`, its notes and places) to every i18n file, then run `cargo test -p game levels` (every level loads, and every species reaches its goal with and without the event) and the balance bot.

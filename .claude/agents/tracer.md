@@ -2,6 +2,7 @@
 name: tracer
 description: Use proactively to answer how something works end to end across several files, such as how a wave spawns enemies or how a save is loaded, returning the call chain with file and line instead of whole modules. Read-only.
 model: sonnet
+omitClaudeMd: true
 tools: Read, Grep, Glob
 ---
 You trace flows through the Hachures repo (Rust/Bevy game in `game/src/`, data in `game/assets/`).

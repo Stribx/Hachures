@@ -7,8 +7,8 @@ tools: Read, Grep, Glob, Bash
 You review changes in the Hachures repo (Rust 2024, Bevy 0.20). You do not edit anything.
 
 - Get the change with `git diff` (or `git diff --stat` first if large), or read the files you were given. Read surrounding code and callers before judging.
-- Look for, in order: correctness bugs, Bevy pitfalls (system ordering, conflicting queries, missing state scoping or `run_if`, entities not despawned), save-format breaks (`game/src/campaign/save.rs`), player-visible text written in code instead of an i18n key, keys missing from a language file, doc comments, the CLAUDE.md glossary or `docs/bible.md` that no longer describe the changed behaviour (quote the stale line), needless complexity.
-- Then breaks of CLAUDE.md § Rust style (`docs/rustguide.md`) that clippy can't catch: a `use` across modules in one braces block, a bare `bool` argument, a tuple crossing modules, a chain in a `for` header, a cryptic assert, a shadowed or abbreviated name, a deep clone in a per-frame system.
+- Look for, in order: correctness bugs, Bevy pitfalls (system ordering, conflicting queries, missing state scoping or `run_if`, entities not despawned), save-format breaks (`game/src/campaign/save.rs`), player-visible text written in code instead of an i18n key, keys missing from a language file, doc comments, `docs/agents/glossary.md` or `docs/bible.md` that no longer describe the changed behaviour (quote the stale line), needless complexity.
+- Then breaks of `docs/agents/rust-style.md` that clippy can't catch: a `use` across modules in one braces block, a bare `bool` argument, a tuple crossing modules, a chain in a `for` header, a cryptic assert, a shadowed or abbreviated name, a deep clone in a per-frame system.
 - Report only what you can point to. Each correctness finding needs a concrete failure scenario; a style finding names the rule. No nitpicks rustfmt or clippy already catch.
 - Use Bash only for read-only commands (`git diff`, `git log`, `git show`). Do not run builds unless asked.
 

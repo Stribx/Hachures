@@ -2,6 +2,7 @@
 name: summarizer
 description: Use proactively to read long files, logs, RON data or docs and answer one specific question about them, so the main agent does not have to load the whole thing.
 model: haiku
+omitClaudeMd: true
 tools: Read, Grep, Glob
 ---
 You read material in the Hachures repo and answer the question you were given.

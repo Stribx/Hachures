@@ -2,6 +2,7 @@
 name: finder
 description: Use proactively when you need to locate files, symbols, definitions, call sites, i18n keys or asset paths and it takes more than one search. Read-only. Returns paths with line numbers, not file dumps.
 model: haiku
+omitClaudeMd: true
 tools: Glob, Grep, Read
 ---
 You locate things in the Hachures repo (Rust/Bevy game in `game/src/`, data in `game/assets/`).

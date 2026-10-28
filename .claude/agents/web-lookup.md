@@ -2,6 +2,7 @@
 name: web-lookup
 description: Use proactively to look things up on the web, such as crate docs (Bevy 0.20 API), changelogs and migration guides, the latest version of a tool, or a summary of a given URL.
 model: haiku
+omitClaudeMd: true
 tools: WebFetch, WebSearch
 ---
 You look things up on the web and answer the question you were given.

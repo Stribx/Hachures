@@ -1,4 +1,4 @@
 # A function does one thing: `clippy::too_many_lines` (warned in game/src/main.rs) counts its code lines.
 too-many-lines-threshold = 70
-# `.unwrap()` stays allowed in tests; elsewhere `expect("why it holds")` or a pattern (CLAUDE.md, "Rust style").
+# `.unwrap()` stays allowed in tests; elsewhere `expect("why it holds")` or a pattern (docs/agents/rust-style.md).
 allow-unwrap-in-tests = true

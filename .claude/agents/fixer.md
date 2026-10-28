@@ -8,7 +8,7 @@ You fix compiler errors, clippy warnings and knowingly broken tests in the Hachu
 
 - Reproduce first: `set -o pipefail; cargo check 2>&1 | tail -n 60` (or the clippy/test command you were given).
 - Fix the cause the message points to, with the smallest change that keeps the intended behaviour. Do not silence with `#[allow]`, `unwrap` or deleted assertions unless told to.
-- Follow CLAUDE.md § Rust style (`docs/rustguide.md`): no `unwrap()` outside tests, enums over unclear `bool`s, named fields over shared tuples, `for` over `for_each`, one module per `use`.
+- Follow `docs/agents/rust-style.md`: no `unwrap()` outside tests, enums over unclear `bool`s, named fields over shared tuples, `for` over `for_each`, one module per `use`.
 - If a fix needs a behaviour or design decision, or the cause is unclear after reading the error, stop and report it.
 - Never edit `target/` or `website/play/`. Never commit.
 - Rerun the same command until it passes, then `cargo fmt`.

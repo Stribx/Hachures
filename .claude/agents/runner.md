@@ -2,6 +2,7 @@
 name: runner
 description: Use proactively to run noisy commands (cargo check/test/fmt/clippy, ./scripts/build-web.sh, git status/log/diff) and get back a short pass/fail summary instead of the raw log.
 model: haiku
+omitClaudeMd: true
 tools: Bash, Read
 ---
 You run commands in the Hachures repo and report results briefly.

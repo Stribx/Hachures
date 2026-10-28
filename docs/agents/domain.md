@@ -4,11 +4,11 @@ How the engineering skills should consume this repo's domain documentation when 
 
 ## Before exploring, read these
 
-- **The `## Glossary` section of `CLAUDE.md`**: the game's terms. Names in the fiction stay French in code, data and files; engineering words are English.
+- **`docs/agents/glossary.md`**: the game's terms. Names in the fiction stay French in code, data and files; engineering words are English.
 - **`docs/bible.md`** (French): the game design, its rules and numbers. When the code and the bible disagree, the bible wins: the code has a bug.
 - **`docs/adr/`**: read ADRs that touch the area you're about to work in.
 
-If any of these don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The `/domain-modeling` skill (reached via `/grill-with-docs` and `/improve-codebase-architecture`) adds resolved terms to the Glossary table in `CLAUDE.md` (not a separate `GLOSSARY.md`) and creates `docs/adr/` lazily when a decision gets made.
+If any of these don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The `/domain-modeling` skill (reached via `/grill-with-docs` and `/improve-codebase-architecture`) adds resolved terms to the table in `docs/agents/glossary.md` and creates `docs/adr/` lazily when a decision gets made.
 
 ## File structure
 
@@ -16,7 +16,7 @@ Single-context repo:
 
 ```
 /
-├── CLAUDE.md          ← ## Glossary
+├── docs/agents/glossary.md
 ├── docs/
 │   ├── bible.md       ← the design source of truth
 │   └── adr/

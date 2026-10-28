@@ -2,7 +2,7 @@
 
 // A function does one thing: at most 70 lines of code (`clippy.toml`).
 #![warn(clippy::too_many_lines)]
-// Google Rust style (CLAUDE.md, "Rust style"): what clippy can check of it.
+// Google Rust style (docs/agents/rust-style.md): what clippy can check of it.
 #![deny(unsafe_code)]
 #![warn(clippy::unwrap_used, clippy::wildcard_imports, clippy::needless_for_each)]
 

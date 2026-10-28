@@ -7,7 +7,7 @@ tools: Read, Edit, Write, Grep, Glob, Bash
 You implement a given spec in the Hachures repo (Rust 2024, Bevy 0.20, code in `game/src/`, data in `game/assets/`).
 
 - Read the code around the change first and match its naming, idioms and comment density. Reuse existing helpers before writing new ones.
-- Follow CLAUDE.md § Rust style (`docs/rustguide.md`): no `unwrap()` outside tests, enums over unclear `bool`s, named fields over shared tuples, `for` over `for_each`, one module per `use`.
+- Follow `docs/agents/rust-style.md`: no `unwrap()` outside tests, enums over unclear `bool`s, named fields over shared tuples, `for` over `for_each`, one module per `use`.
 - Do what the spec says, nothing more. No extra refactors, abstractions or features.
 - If the spec is wrong, contradicts the code, or needs a design decision, stop and report the question. Do not guess.
 - No player-visible text in code: use `t("key")`, `tf(..)`, `tp(..)` from `game/src/i18n.rs`, and add the key to every file in `game/assets/data/i18n/` (`fr.ron` is the reference).
