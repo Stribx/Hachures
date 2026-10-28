@@ -97,7 +97,10 @@ pub fn tool_lines(
 ) -> Vec<Line> {
     // Biffer costs nothing: what it gives back is its line (docs, section 7).
     if TOOLS[tool].act == Act::Biffer {
-        return vec![Line::new(n_("lexique.refund_wet"), &[]), Line::new(n_("lexique.refund_dry"), &[])];
+        return vec![
+            Line::new(n_("lexique.refund_wet"), &[]),
+            Line::new(n_("lexique.refund_dry"), &[]),
+        ];
     }
     let mut lines = vec![Line::new(n_("lexique.cost"), &[cost.to_string()])];
     match TOOLS[tool].act {
@@ -112,7 +115,11 @@ pub fn tool_lines(
                 .iter()
                 .map(|s| {
                     let price = s.cost(tile);
-                    let price = if price.is_finite() { number(price) } else { t("lexique.impassable").to_string() };
+                    let price = if price.is_finite() {
+                        number(price)
+                    } else {
+                        t("lexique.impassable").to_string()
+                    };
                     tf("lexique.step_one", &[&t(&s.label), &price])
                 })
                 .collect();
@@ -123,16 +130,23 @@ pub fn tool_lines(
     lines
 }
 
-fn weapon_lines(weapon: Weapon, stats: &TowerStats, species: &[Species], equerre: bool) -> Vec<Line> {
+fn weapon_lines(
+    weapon: Weapon,
+    stats: &TowerStats,
+    species: &[Species],
+    equerre: bool,
+) -> Vec<Line> {
     let range = if equerre { n_("lexique.range_equerre") } else { n_("lexique.range") };
     let mut lines = vec![
         Line::new(n_("lexique.damage"), &[number(stats.damage)]),
         Line::new(range, &[number(stats.range)]),
         Line::new(n_("lexique.cooldown"), &[number(stats.cooldown)]),
     ];
-    for (key, value) in
-        [(n_("lexique.splash"), stats.splash), (n_("lexique.pin"), stats.pin), (n_("lexique.slow"), stats.slow)]
-    {
+    for (key, value) in [
+        (n_("lexique.splash"), stats.splash),
+        (n_("lexique.pin"), stats.pin),
+        (n_("lexique.slow"), stats.slow),
+    ] {
         if value > 0.0 {
             lines.push(Line::new(key, &[number(value)]));
         }
@@ -191,7 +205,8 @@ mod tests {
     #[test]
     fn the_arbalete_is_strong_against_the_chaineur() {
         let species = load();
-        let names: Vec<&str> = strong_against(Weapon::Arbalete, &species).iter().map(|s| s.name.as_str()).collect();
+        let names: Vec<&str> =
+            strong_against(Weapon::Arbalete, &species).iter().map(|s| s.name.as_str()).collect();
         assert_eq!(names, ["chaineur"]);
     }
 
@@ -244,14 +259,19 @@ mod tests {
         let tools = entries(Tab::Outils, &species);
         assert_eq!(tools.len(), TOOLS.len());
         assert!(
-            (0..TOOLS.len()).all(|t| tools.iter().filter(|e| e.kind == EntryKind::Tool(t)).count() == 1),
+            (0..TOOLS.len())
+                .all(|t| tools.iter().filter(|e| e.kind == EntryKind::Tool(t)).count() == 1),
             "{:?}",
             tools.iter().map(|e| e.kind).collect::<Vec<_>>()
         );
         let all = entries(Tab::Especes, &species);
         assert_eq!(all.len(), species.len());
         assert!(
-            (0..species.len()).all(|s| all.iter().filter(|e| e.kind == EntryKind::Species(s)).count() == 1),
+            (0..species.len()).all(|s| all
+                .iter()
+                .filter(|e| e.kind == EntryKind::Species(s))
+                .count()
+                == 1),
             "{:?}",
             all.iter().map(|e| e.kind).collect::<Vec<_>>()
         );

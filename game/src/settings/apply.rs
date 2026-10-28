@@ -20,7 +20,10 @@ use crate::schedule::Screen;
 use crate::theme::{FELL, READABLE};
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(Update, (apply_audio, apply_window, apply_render, apply_ui_scale, swap_fonts, pause_unfocused));
+    app.add_systems(
+        Update,
+        (apply_audio, apply_window, apply_render, apply_ui_scale, swap_fonts, pause_unfocused),
+    );
 }
 
 /// The settings, and when to read them again: they changed, or the window's focus or size did.
@@ -89,7 +92,8 @@ fn apply_render(
         let size = Extent3d { width: wanted.x, height: wanted.y, depth_or_array_layers: 1 };
         images.get_mut(&frame.0).expect("read just above").resize(size);
     }
-    let target = ImageRenderTarget { handle: frame.0.clone(), scale_factor: window.scale_factor() * scale };
+    let target =
+        ImageRenderTarget { handle: frame.0.clone(), scale_factor: window.scale_factor() * scale };
     commands.entity(camera.0).insert(RenderTarget::Image(target));
     // Stretched over the window, a smaller picture blurs: sharpened back, as a game's upscaler would.
     if settings.render_scale < 100 {
@@ -130,7 +134,11 @@ fn apply_render(
     }
 }
 
-fn apply_ui_scale(mut due: Due, window: Single<&Window, With<PrimaryWindow>>, mut ui_scale: ResMut<UiScale>) {
+fn apply_ui_scale(
+    mut due: Due,
+    window: Single<&Window, With<PrimaryWindow>>,
+    mut ui_scale: ResMut<UiScale>,
+) {
     let Some(settings) = due.check(&window) else { return };
     let scale = fitted(settings.ui_scale as f32 / 100.0, window.size());
     if ui_scale.0 != scale {

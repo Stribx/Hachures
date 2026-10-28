@@ -6,6 +6,7 @@ pub mod species;
 pub mod terrain;
 
 pub mod ambience;
+pub(crate) mod barricade;
 mod cells;
 pub mod daylight;
 mod decor;
@@ -32,10 +33,14 @@ use land::{fibres, land};
 pub fn plugin(app: &mut App) {
     app.add_systems(Update, (redraw_cells, grow, land, fibres).chain().in_set(Step::Render))
         .add_systems(Startup, ambience::start)
-        .add_systems(Update, (daylight::follow_the_waves, weather::fall, ambience::fade).in_set(Step::Render))
         .add_systems(
             Update,
-            ((fauna::settle, fauna::flutter).chain(), fauna::launch, fauna::cross).in_set(Step::Render),
+            (daylight::follow_the_waves, weather::fall, ambience::fade).in_set(Step::Render),
+        )
+        .add_systems(
+            Update,
+            ((fauna::settle, fauna::flutter).chain(), fauna::launch, fauna::cross)
+                .in_set(Step::Render),
         );
 }
 

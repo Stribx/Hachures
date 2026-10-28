@@ -11,7 +11,9 @@ use super::{Hachure, InkMaterial};
 
 /// Ink materials already made from a model's own (and its carving, if any), so every tower shares them.
 #[derive(Resource, Default)]
-pub(super) struct Inked(HashMap<(AssetId<StandardMaterial>, Option<Carved>, u32), Handle<InkMaterial>>);
+pub(super) struct Inked(
+    HashMap<(AssetId<StandardMaterial>, Option<Carved>, u32), Handle<InkMaterial>>,
+);
 
 /// A model carved for the plan-relief: its colour becomes `rgb`'s wood. If `painted`, its painted texture shows
 /// through the wood's tint, so its parts still read apart; if not, it is one piece of plain wood.
@@ -78,6 +80,9 @@ pub(super) fn ink_models(
     for entity in children.iter_descendants(ready.entity) {
         let Ok(material) = meshes.get(entity) else { continue };
         let Some(handle) = inking.of(&material.0, carving, wind) else { continue };
-        commands.entity(entity).remove::<MeshMaterial3d<StandardMaterial>>().insert(MeshMaterial3d(handle));
+        commands
+            .entity(entity)
+            .remove::<MeshMaterial3d<StandardMaterial>>()
+            .insert(MeshMaterial3d(handle));
     }
 }

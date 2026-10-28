@@ -89,7 +89,10 @@ pub fn boss_phases(mut level: ResMut<Level>, mut bosses: Query<(&mut Enemy, &mut
     let Some(boss_file) = level.world().boss.as_ref() else { return };
     let phases = &boss_file.phases;
     for (mut enemy, mut boss) in &mut bosses {
-        while boss.phase + 1 < phases.len() && enemy.hp > 0.0 && enemy.hp <= enemy.max_hp * phases[boss.phase].until {
+        while boss.phase + 1 < phases.len()
+            && enemy.hp > 0.0
+            && enemy.hp <= enemy.max_hp * phases[boss.phase].until
+        {
             boss.phase += 1;
             let phase = &phases[boss.phase];
             enemy.species = index_of(&level.species, &phase.species)

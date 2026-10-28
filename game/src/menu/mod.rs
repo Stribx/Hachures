@@ -135,9 +135,12 @@ fn escape(
     match screen.get() {
         Screen::Playing => next.set(Screen::Paused),
         Screen::Paused => next.set(Screen::Playing),
-        Screen::Settings | Screen::Sceaux | Screen::Lexique | Screen::Carnet | Screen::Controls | Screen::Credits => {
-            next.set(from.map_or(Screen::Title, |f| f.0))
-        }
+        Screen::Settings
+        | Screen::Sceaux
+        | Screen::Lexique
+        | Screen::Carnet
+        | Screen::Controls
+        | Screen::Credits => next.set(from.map_or(Screen::Title, |f| f.0)),
         Screen::ConfirmNew | Screen::Plan => next.set(Screen::Title),
         Screen::Splash | Screen::Title => {}
     }

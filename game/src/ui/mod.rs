@@ -2,12 +2,14 @@
 //! and the page at the end of a level.
 
 pub mod bar;
+mod counter_tip;
 mod enemy_card;
 mod hud;
 mod keys;
 mod margin;
 mod notebook;
 mod places;
+mod readout;
 mod stamp;
 mod studio;
 mod tool_tip;
@@ -31,7 +33,7 @@ pub fn plugin(app: &mut App) {
                 keys::toggles.in_set(Step::Input).before(crate::overworld::onward::between_levels),
                 (
                     hud::update_label,
-                    hud::counter_tip,
+                    counter_tip::counter_tip,
                     margin::update_margin,
                     margin::fresh_ink,
                     places::label_places,
@@ -45,7 +47,9 @@ pub fn plugin(app: &mut App) {
                     .in_set(Step::Render)
                     .run_if(in_state(Screen::Playing)),
                 (stamp::stamp_wave, stamp::strike_stamps).in_set(Step::Render),
-                (bar::sync, bar::look, notebook::sync).in_set(Step::Render).run_if(in_state(Screen::Playing)),
+                (bar::sync, bar::look, notebook::sync)
+                    .in_set(Step::Render)
+                    .run_if(in_state(Screen::Playing)),
                 show_during_play.run_if(state_changed::<Screen>),
                 keys::speed,
             ),
@@ -53,8 +57,12 @@ pub fn plugin(app: &mut App) {
 }
 
 /// The label and the margin only show during play, not behind the menus.
-fn show_during_play(screen: Res<State<Screen>>, mut texts: Query<&mut Visibility, With<DuringPlay>>) {
-    let shown = if *screen.get() == Screen::Playing { Visibility::Inherited } else { Visibility::Hidden };
+fn show_during_play(
+    screen: Res<State<Screen>>,
+    mut texts: Query<&mut Visibility, With<DuringPlay>>,
+) {
+    let shown =
+        if *screen.get() == Screen::Playing { Visibility::Inherited } else { Visibility::Hidden };
     for mut v in &mut texts {
         *v = shown;
     }

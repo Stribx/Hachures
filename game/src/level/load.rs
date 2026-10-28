@@ -75,25 +75,29 @@ impl Level {
                 }
             }
         }
-        let find = |name: &str| species::index_of(&species, name).unwrap_or_else(|| panic!("unknown species {name:?}"));
+        let find = |name: &str| {
+            species::index_of(&species, name).unwrap_or_else(|| panic!("unknown species {name:?}"))
+        };
         let mut waves: Vec<Vec<usize>> = data
             .waves
             .iter()
-            .map(|groups| spawn_order(groups.iter().map(|(name, count)| (find(name), *count)).collect()))
+            .map(|groups| {
+                spawn_order(groups.iter().map(|(name, count)| (find(name), *count)).collect())
+            })
             .collect();
         if let Some((cond, by)) = &data.shorter
             && holds(&save.choices, cond)
         {
-            let kept = waves
-                .len()
-                .checked_sub(*by)
-                .unwrap_or_else(|| panic!("level {}: `shorter` cuts more waves than it has", data.name));
+            let kept = waves.len().checked_sub(*by).unwrap_or_else(|| {
+                panic!("level {}: `shorter` cuts more waves than it has", data.name)
+            });
             waves.truncate(kept);
         }
         let mut present: Vec<usize> = waves.iter().flatten().copied().collect();
         // A boss changes species with its phases.
         let world = data.world.checked_sub(1).and_then(|w| WORLDS.get(w));
-        let world = world.unwrap_or_else(|| panic!("level {}: world {} does not exist", data.name, data.world));
+        let world = world
+            .unwrap_or_else(|| panic!("level {}: world {} does not exist", data.name, data.world));
         if let Some(boss) = &world.boss
             && present.contains(&find(&boss.phases[0].species))
         {
@@ -101,18 +105,7 @@ impl Level {
         }
         present.sort_unstable();
         present.dedup();
-        // The level's tools, then the powers earned by the levels already won, in campaign order, then Biffer,
-        // which every level has.
-        let won = (0..LEVELS.len()).filter(|&k| save.levels.get(k).is_some_and(|r| r.won));
-        let earned = won.flat_map(|k| LevelData::of(k).grants);
-        let mut tools: Vec<usize> = Vec::new();
-        let names = data.tools.iter().cloned().chain(earned).chain([String::from("biffer")]);
-        for name in names {
-            let t = tool_index(&name).unwrap_or_else(|| panic!("unknown tool {name:?}"));
-            if !tools.contains(&t) {
-                tools.push(t);
-            }
-        }
+        let tools = tools(&data, save);
         let moved = data.alt_refuge.as_ref().is_some_and(|cond| holds(&save.choices, cond));
         let map = data.map_text(if moved { Refuge::Moved } else { Refuge::Usual });
 
@@ -130,7 +123,8 @@ impl Level {
         level.places = data.places;
         level.notes = data.notes;
         level.challenge = data.challenge;
-        level.choice_locked = data.choice.as_ref().is_some_and(|c| save.choices.contains_key(&c.id));
+        level.choice_locked =
+            data.choice.as_ref().is_some_and(|c| save.choices.contains_key(&c.id));
         level.choice = data.choice;
         level.choices = save.choices.clone();
         level.skills = save.skills.clone();
@@ -139,6 +133,22 @@ impl Level {
         level.note(Trigger::Start);
         level
     }
+}
+
+/// The level's tools, then the powers earned by the levels already won, in campaign order, then Biffer, which
+/// every level has.
+fn tools(data: &LevelData, save: &Save) -> Vec<usize> {
+    let won = (0..LEVELS.len()).filter(|&k| save.levels.get(k).is_some_and(|r| r.won));
+    let earned = won.flat_map(|k| LevelData::of(k).grants);
+    let mut tools: Vec<usize> = Vec::new();
+    let names = data.tools.iter().cloned().chain(earned).chain([String::from("biffer")]);
+    for name in names {
+        let t = tool_index(&name).unwrap_or_else(|| panic!("unknown tool {name:?}"));
+        if !tools.contains(&t) {
+            tools.push(t);
+        }
+    }
+    tools
 }
 
 #[cfg(test)]

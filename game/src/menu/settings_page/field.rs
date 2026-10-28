@@ -44,7 +44,10 @@ pub(super) const COLUMNS: [&[(&str, &[Field])]; 2] = [
             &[Field::Master, Field::Music, Field::Effects, Field::Ambient, Field::MuteUnfocused],
         ),
         (n_("settings.group.game"), &[Field::PauseUnfocused, Field::Language]),
-        (n_("settings.group.accessibility"), &[Field::UiScale, Field::ReadableFont, Field::ReducedMotion]),
+        (
+            n_("settings.group.accessibility"),
+            &[Field::UiScale, Field::ReadableFont, Field::ReducedMotion],
+        ),
     ],
     &[
         (n_("settings.group.display"), &[Field::Fullscreen, Field::Vsync, Field::RenderScale]),
@@ -56,7 +59,8 @@ pub(super) const COLUMNS: [&[(&str, &[Field])]; 2] = [
 ];
 
 /// Values of the choice settings.
-const OCCLUSION: [&str; 3] = [n_("common.off"), n_("settings.preset.low"), n_("settings.preset.high")];
+const OCCLUSION: [&str; 3] =
+    [n_("common.off"), n_("settings.preset.low"), n_("settings.preset.high")];
 const ANTI_ALIASING: [&str; 3] = [n_("common.off"), n_("settings.aa.fxaa"), n_("settings.aa.smaa")];
 
 impl Field {
@@ -141,7 +145,12 @@ impl Field {
         let around = |i: usize, len: usize| (i as i32 + direction).rem_euclid(len as i32) as usize;
         if self == Field::Preset {
             let preset = PRESETS[around(settings.preset().unwrap_or(2), PRESETS.len())];
-            (settings.shadows, settings.occlusion, settings.anti_aliasing, settings.depth_of_field) = preset;
+            (
+                settings.shadows,
+                settings.occlusion,
+                settings.anti_aliasing,
+                settings.depth_of_field,
+            ) = preset;
         } else if let Some((v, low, high)) = self.range(settings) {
             *v = (*v as i32 + 10 * direction).clamp(low as i32, high as i32) as u32;
         } else if let Some(on) = self.switch(settings) {
@@ -190,7 +199,11 @@ mod tests {
         Field::Preset.step(&mut settings, 1);
         assert_eq!((settings.preset(), settings.occlusion), (Some(3), 2));
         Field::Preset.step(&mut settings, 1);
-        assert_eq!((settings.preset(), settings.shadows), (Some(0), false), "Ultra goes round to Low");
+        assert_eq!(
+            (settings.preset(), settings.shadows),
+            (Some(0), false),
+            "Ultra goes round to Low"
+        );
         Field::AntiAliasing.step(&mut settings, -1);
         assert_eq!((settings.preset(), settings.anti_aliasing), (None, 0));
         assert_eq!(Field::AntiAliasing.value(&settings), t("common.off"));

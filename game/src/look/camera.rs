@@ -66,7 +66,12 @@ pub(super) fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
     commands.spawn((Camera2d, Camera { order: 1, ..default() }));
     commands.spawn((
         ImageNode::new(frame.clone()),
-        Node { position_type: PositionType::Absolute, width: percent(100), height: percent(100), ..default() },
+        Node {
+            position_type: PositionType::Absolute,
+            width: percent(100),
+            height: percent(100),
+            ..default()
+        },
         GlobalZIndex(i32::MIN),
         Pickable::IGNORE,
     ));
@@ -79,7 +84,11 @@ pub(super) fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
         Tonemapping::Linear,
         DebandDither::Enabled,
         Paper::default(),
-        DistanceFog { color: SHEET, falloff: FogFalloff::Linear { start: 45.0, end: 120.0 }, ..default() },
+        DistanceFog {
+            color: SHEET,
+            falloff: FogFalloff::Linear { start: 45.0, end: 120.0 },
+            ..default()
+        },
         lens(),
         // Soft-edged shadows.
         ShadowFilteringMethod::Gaussian,
@@ -88,7 +97,12 @@ pub(super) fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
     // The sun from the north-west, where the Empire lies. `hachure.wesl` draws the varnish glints from here too.
     commands.spawn((
         Sun,
-        DirectionalLight { color: SUNLIGHT, illuminance: 10_000.0, shadow_maps_enabled: true, ..default() },
+        DirectionalLight {
+            color: SUNLIGHT,
+            illuminance: 10_000.0,
+            shadow_maps_enabled: true,
+            ..default()
+        },
         Transform::from_xyz(-4.0, 9.0, -3.0).looking_at(Vec3::ZERO, Vec3::Y),
         CascadeShadowConfigBuilder { num_cascades: 2, maximum_distance: 60.0, ..default() }.build(),
     ));

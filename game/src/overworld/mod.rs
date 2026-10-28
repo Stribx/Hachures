@@ -11,6 +11,7 @@ mod clouds;
 mod marches;
 pub mod onward;
 mod parcels;
+mod pawn;
 pub mod plan;
 mod props;
 mod road;
@@ -27,7 +28,10 @@ pub fn plugin(app: &mut App) {
     app.add_plugins((travel::plugin, plan::plugin))
         .add_systems(Startup, (marches::spawn, bocage::spawn_bocage).chain())
         .add_systems(Update, marches::follow_level.before(camera::aim))
-        .add_systems(Update, onward::between_levels.before(crate::campaign::load_level).in_set(Step::Input));
+        .add_systems(
+            Update,
+            onward::between_levels.before(crate::campaign::load_level).in_set(Step::Input),
+        );
 }
 
 /// Everything around the board being played; shifted so that board sits at the origin.

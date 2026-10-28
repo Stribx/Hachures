@@ -50,15 +50,18 @@ pub fn enemy_card(
             .filter(|&(_, d)| d <= NEAR)
             .min_by(|a, b| a.1.total_cmp(&b.1))
     });
-    let (Some((enemy, _)), Some(cursor), true) = (nearest, window.cursor_position(), **tool_tip == Visibility::Hidden)
+    let (Some((enemy, _)), Some(cursor), true) =
+        (nearest, window.cursor_position(), **tool_tip == Visibility::Hidden)
     else {
         *visibility = Visibility::Hidden;
         return;
     };
     let species = &level.species[enemy.species()];
     let (hp, max) = enemy.health();
-    let mut lines =
-        vec![capitalized(t(&species.label)), tf("lexique.hp_now", &[&number(hp.max(0.0).ceil()), &number(max)])];
+    let mut lines = vec![
+        capitalized(t(&species.label)),
+        tf("lexique.hp_now", &[&number(hp.max(0.0).ceil()), &number(max)]),
+    ];
     lines.extend(species_lines(species).iter().map(|l| l.shown()));
     let words = lines.join("\n");
     if text.0 != words {
@@ -83,14 +86,18 @@ mod tests {
         let level = Level::new(Grid::parse("S.M"), species::load());
         let chaineur = species::index_of(&level.species, "chaineur").unwrap();
         let at = map::cell_pos(level.terrain.grid(), 1);
-        app.add_plugins(MinimalPlugins).insert_resource(Selection { hovered, ..Selection::for_level(&level) });
+        app.add_plugins(MinimalPlugins)
+            .insert_resource(Selection { hovered, ..Selection::for_level(&level) });
         app.world_mut().spawn((Enemy::new(chaineur, 100.0, 1), Transform::from_translation(at)));
         app.insert_resource(level);
         let mut window = Window::default();
         window.set_cursor_position(Some(Vec2::new(100.0, 50.0)));
         app.world_mut().spawn((window, PrimaryWindow));
         app.world_mut().spawn((ToolTip, Visibility::Hidden));
-        let card = app.world_mut().spawn((EnemyCard, Text::default(), Node::default(), Visibility::Hidden)).id();
+        let card = app
+            .world_mut()
+            .spawn((EnemyCard, Text::default(), Node::default(), Visibility::Hidden))
+            .id();
         app.add_systems(Update, enemy_card);
         (app, card)
     }
@@ -101,7 +108,10 @@ mod tests {
         app.update();
         assert_eq!(*app.world().get::<Visibility>(card).unwrap(), Visibility::Inherited);
         let words = &app.world().get::<Text>(card).unwrap().0;
-        assert!(words.starts_with(&format!("Chaîneur\n{}", tf("lexique.hp_now", &[&100, &100]))), "{words}");
+        assert!(
+            words.starts_with(&format!("Chaîneur\n{}", tf("lexique.hp_now", &[&100, &100]))),
+            "{words}"
+        );
         assert!(words.contains(&tf("lexique.weak", &[&t("tool.arbalete")])), "{words}");
     }
 

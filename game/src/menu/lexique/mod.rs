@@ -18,7 +18,9 @@ use crate::ui::widgets::letter;
 pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Lexique), spawn).add_systems(
         Update,
-        (list::rebuild, list::pick, list::show, detail::show).chain().run_if(in_state(Screen::Lexique)),
+        (list::rebuild, list::pick, list::show, detail::show)
+            .chain()
+            .run_if(in_state(Screen::Lexique)),
     );
     app.add_systems(Update, key_l);
 }
@@ -62,13 +64,13 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
         page.spawn(sheet()).with_children(|p| {
             p.spawn(text(&assets, t("lexique.title"), TITLE_SIZE));
             list::spawn_tabs(p, &assets);
-            p.spawn(Node { column_gap: px(32), align_items: AlignItems::FlexStart, ..default() }).with_children(
-                |row| {
+            p.spawn(Node { column_gap: px(32), align_items: AlignItems::FlexStart, ..default() })
+                .with_children(|row| {
                     list::spawn_list(row);
                     detail::spawn(row, &assets);
-                },
-            );
-            p.spawn(primary(BUTTON_WIDTH, text(&assets, t("common.back"), BODY_SIZE))).observe(back);
+                });
+            p.spawn(primary(BUTTON_WIDTH, text(&assets, t("common.back"), BODY_SIZE)))
+                .observe(back);
         });
     });
 }
@@ -164,7 +166,10 @@ mod tests {
         let names = rows(&mut app);
         assert_eq!(names.len(), TOOLS.len());
         assert_eq!(names[arbalete], t(TOOLS[arbalete].label));
-        assert!(names.iter().enumerate().all(|(i, n)| i == arbalete || n == t("lexique.locked")), "{names:?}");
+        assert!(
+            names.iter().enumerate().all(|(i, n)| i == arbalete || n == t("lexique.locked")),
+            "{names:?}"
+        );
     }
 
     #[test]

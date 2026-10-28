@@ -6,7 +6,7 @@ use bevy::prelude::*;
 use super::props::props;
 use super::sheets::{SHEETS, sheet_mesh};
 use super::terrain::{EAST, NORTH, SOUTH, WATER, WEST, height, land_mesh, road_mesh};
-use super::{OverworldRoot, camera, plan};
+use super::{OverworldRoot, camera, pawn};
 use crate::campaign::save::Save;
 use crate::level::Level;
 use crate::look::{InkMaterial, Swaying, ink, shore_image, water};
@@ -48,7 +48,10 @@ pub(super) fn spawn(
                 NotShadowReceiver,
                 NotShadowCaster,
             ));
-            let (size, middle) = (Vec2::new(EAST - WEST, SOUTH - NORTH), Vec2::new(EAST + WEST, SOUTH + NORTH) / 2.0);
+            let (size, middle) = (
+                Vec2::new(EAST - WEST, SOUTH - NORTH),
+                Vec2::new(EAST + WEST, SOUTH + NORTH) / 2.0,
+            );
             root.spawn((
                 Mesh3d(meshes.add(Plane3d::new(Vec3::Y, size / 2.0))),
                 MeshMaterial3d(water),
@@ -75,7 +78,9 @@ pub(super) fn spawn(
 
     for (model, transform) in props() {
         let mut prop = commands.spawn((
-            WorldAssetRoot(assets.load(GltfAssetLabel::Scene(0).from_asset(format!("models/{model}.glb")))),
+            WorldAssetRoot(
+                assets.load(GltfAssetLabel::Scene(0).from_asset(format!("models/{model}.glb"))),
+            ),
             transform,
             ChildOf(root),
         ));
@@ -93,7 +98,7 @@ pub(super) fn follow_level(
     mut root: Single<&mut Transform, With<OverworldRoot>>,
     mut miniatures: Query<(&Miniature, &mut Visibility)>,
     mut rig: ResMut<camera::CameraRig>,
-    mut pawn: ResMut<plan::Pawn>,
+    mut pawn: ResMut<pawn::Pawn>,
 ) {
     if *shown == Some(level.index) {
         return;
@@ -107,6 +112,7 @@ pub(super) fn follow_level(
     // Nève stands on the sheet being played, however it was loaded.
     pawn.stand(level.index);
     for (miniature, mut visibility) in &mut miniatures {
-        *visibility = if miniature.0 == level.index { Visibility::Hidden } else { Visibility::Inherited };
+        *visibility =
+            if miniature.0 == level.index { Visibility::Hidden } else { Visibility::Inherited };
     }
 }

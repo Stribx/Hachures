@@ -18,7 +18,10 @@ pub struct Pencil;
 pub fn plugin(app: &mut App) {
     app.insert_gizmo_config(
         Pencil,
-        GizmoConfig { line: GizmoLineConfig { style: GizmoLineStyle::Dotted, width: 4.0, ..default() }, ..default() },
+        GizmoConfig {
+            line: GizmoLineConfig { style: GizmoLineStyle::Dotted, width: 4.0, ..default() },
+            ..default()
+        },
     )
     .add_systems(Update, draw.in_set(Step::Render).run_if(not(over_world)));
 }
@@ -135,7 +138,13 @@ fn cursor(gizmos: &mut Gizmos, level: &Level, i: usize, refused: bool) {
 }
 
 /// Le trait de crayon: the route of species `shown` if the current tool were inked under the hand.
-fn trait_de_crayon(pencil: &mut Gizmos<Pencil>, level: &Level, shown: usize, what_if: &Grid, field: &FlowField) {
+fn trait_de_crayon(
+    pencil: &mut Gizmos<Pencil>,
+    level: &Level,
+    shown: usize,
+    what_if: &Grid,
+    field: &FlowField,
+) {
     let grid = level.terrain.grid();
     for &spawn in grid.spawns_for(&level.species[shown]) {
         pencil.linestrip(

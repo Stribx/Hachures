@@ -9,15 +9,21 @@ use bevy::ui::{Pressed, VisualBox};
 use bevy::ui_widgets::Button;
 
 use crate::settings::Settings;
-use crate::theme::{BODY_SIZE, Face, INK, LIT, PANEL_SHADOW, PAPER, PRESSED, SEAL, SEAL_DEEP, SLIP, font};
+use crate::theme::{
+    BODY_SIZE, Face, INK, LIT, PANEL_SHADOW, PAPER, PRESSED, SEAL, SEAL_DEEP, SLIP, font,
+};
 
 /// Whether the letter `c` was just typed, wherever it sits on the keyboard (A is A on AZERTY too).
 pub(crate) fn letter(keys: &ButtonInput<Key>, c: &str) -> bool {
-    keys.just_pressed(Key::Character(c.into())) || keys.just_pressed(Key::Character(c.to_uppercase().into()))
+    keys.just_pressed(Key::Character(c.into()))
+        || keys.just_pressed(Key::Character(c.to_uppercase().into()))
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(Update, (lift_panels, skin, reveal_icons, primary_ink, button_look, rise).chain());
+    app.add_systems(
+        Update,
+        (lift_panels, skin, reveal_icons, primary_ink, button_look, rise).chain(),
+    );
 }
 
 /// Ink text in the game's font.
@@ -32,7 +38,11 @@ pub(crate) fn tooltip(assets: &AssetServer) -> impl Bundle {
         font(assets, Face::Italic, BODY_SIZE),
         TextColor(INK),
         BackgroundColor(PAPER),
-        Node { position_type: PositionType::Absolute, padding: UiRect::axes(px(8), px(2)), ..default() },
+        Node {
+            position_type: PositionType::Absolute,
+            padding: UiRect::axes(px(8), px(2)),
+            ..default()
+        },
         Visibility::Hidden,
         // Over the panels.
         GlobalZIndex(50),
@@ -123,7 +133,12 @@ pub(crate) fn skin(
         };
         commands.entity(entity).insert((
             // The frame covers the whole node, around its padding, not just the words inside.
-            ImageNode { image: image.clone(), image_mode, visual_box: VisualBox::BorderBox, ..default() },
+            ImageNode {
+                image: image.clone(),
+                image_mode,
+                visual_box: VisualBox::BorderBox,
+                ..default()
+            },
             BackgroundColor(Color::NONE),
             BorderColor::all(Color::NONE),
         ));
@@ -165,7 +180,8 @@ fn rise(
 }
 
 /// What `button_look` reads and moves on a button.
-type ButtonLook<'a> = (Entity, &'a Hovered, Has<Pressed>, Has<Primary>, &'a mut BackgroundColor, &'a mut UiTransform);
+type ButtonLook<'a> =
+    (Entity, &'a Hovered, Has<Pressed>, Has<Primary>, &'a mut BackgroundColor, &'a mut UiTransform);
 
 /// Buttons darken under the mouse or the keyboard focus, and more while pressed. Under the mouse they also lift
 /// 2 px, and pressed they give a little (0.97), unless motion is reduced; the focus from the keyboard only darkens,

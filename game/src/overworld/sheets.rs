@@ -61,7 +61,10 @@ pub static ROAD: LazyLock<Vec<Vec<Vec2>>> = LazyLock::new(|| {
                 .map(|i| {
                     let t = i as f32 / 48.0;
                     let s = 1.0 - t;
-                    start * (s * s * s) + c1 * (3.0 * s * s * t) + c2 * (3.0 * s * t * t) + end * (t * t * t)
+                    start * (s * s * s)
+                        + c1 * (3.0 * s * s * t)
+                        + c2 * (3.0 * s * t * t)
+                        + end * (t * t * t)
                 })
                 .collect()
         })
@@ -71,12 +74,18 @@ pub static ROAD: LazyLock<Vec<Vec<Vec2>>> = LazyLock::new(|| {
 /// A sheet's blocks merged into one mesh, as the map draws them; a sheet not reached yet is blank paper.
 pub(super) fn sheet_mesh(sheet: &Sheet, reached: bool) -> Mesh {
     let grid = &sheet.grid;
-    let mut mesh =
-        block(Vec3::new(grid.width as f32 + 0.2, 0.3, grid.height as f32 + 0.2), sheet_bed(sheet), crate::theme::FRAME);
+    let mut mesh = block(
+        Vec3::new(grid.width as f32 + 0.2, 0.3, grid.height as f32 + 0.2),
+        sheet_bed(sheet),
+        crate::theme::FRAME,
+    );
     for (i, wash) in fields::ground(grid).into_iter().enumerate() {
         let (x, z) = grid.coords(i);
-        let (height, color) =
-            if reached { (map::look(grid.tiles[i]).height, wash) } else { (0.2, crate::theme::SHEET) };
+        let (height, color) = if reached {
+            (map::look(grid.tiles[i]).height, wash)
+        } else {
+            (0.2, crate::theme::SHEET)
+        };
         let at = Vec3::new(x as f32, height / 2.0, z as f32);
         mesh.merge(&block(Vec3::new(0.96, height, 0.96), at, color)).expect("same attributes");
     }
@@ -92,7 +101,10 @@ fn sheet_bed(sheet: &Sheet) -> Vec3 {
 fn block(size: Vec3, at: Vec3, color: Color) -> Mesh {
     let mesh = Mesh::from(Cuboid::from_size(size)).transformed_by(Transform::from_translation(at));
     let count = mesh.count_vertices();
-    mesh.with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, vec![color.to_linear().to_f32_array(); count])
+    mesh.with_inserted_attribute(
+        Mesh::ATTRIBUTE_COLOR,
+        vec![color.to_linear().to_f32_array(); count],
+    )
 }
 #[cfg(test)]
 mod tests {
@@ -111,7 +123,10 @@ mod tests {
         }
         for (_, transform) in props() {
             let p = transform.translation.xz();
-            assert!(SHEETS.iter().all(|s| s.distance(p) > CLEAR), "a prop stands on a sheet at {p}");
+            assert!(
+                SHEETS.iter().all(|s| s.distance(p) > CLEAR),
+                "a prop stands on a sheet at {p}"
+            );
         }
         for p in ROAD.iter().flatten() {
             assert!(height(*p) > WATER, "the road is under water at {p}");
@@ -121,7 +136,12 @@ mod tests {
             let (a, b, n) = (&SHEETS[k], &SHEETS[k + 1], leg.len());
             assert_eq!(leg[0].x, a.at.x + a.size().x - 0.4, "leg {k} starts on the east edge");
             assert_eq!(leg[n - 1].x, b.at.x - 0.6, "leg {k} ends on the west edge");
-            assert!((leg[1].y - leg[0].y).abs() < 0.05, "leg {k} leaves square: {} {}", leg[0], leg[1]);
+            assert!(
+                (leg[1].y - leg[0].y).abs() < 0.05,
+                "leg {k} leaves square: {} {}",
+                leg[0],
+                leg[1]
+            );
             assert!((leg[n - 1].y - leg[n - 2].y).abs() < 0.05, "leg {k} arrives square");
         }
     }

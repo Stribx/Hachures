@@ -4,7 +4,9 @@ use bevy::asset::RenderAssetUsages;
 use bevy::image::ImageSampler;
 use bevy::pbr::{ExtendedMaterial, MaterialExtension};
 use bevy::prelude::*;
-use bevy::render::render_resource::{AsBindGroup, Extent3d, ShaderType, TextureDimension, TextureFormat};
+use bevy::render::render_resource::{
+    AsBindGroup, Extent3d, ShaderType, TextureDimension, TextureFormat,
+};
 use bevy::shader::ShaderRef;
 
 use crate::theme::{SHEET, WORLD_INK};
@@ -121,12 +123,19 @@ const SHORE_REACH: f32 = 8.0;
 /// How far from the shore each point of the map rectangle `min`..`min + size` lies, at `per_unit` texels a world
 /// unit, for `water`: land where `wet` is false. Beyond the rectangle the water goes on, as off the edge of a sheet: a
 /// river leaving it is not closed by a bank. Returns the image and its rect.
-pub fn shore_image(min: Vec2, size: Vec2, per_unit: f32, wet: impl Fn(Vec2) -> bool) -> (Image, Vec4) {
-    let (width, height) = ((size.x * per_unit).ceil() as usize, (size.y * per_unit).ceil() as usize);
+pub fn shore_image(
+    min: Vec2,
+    size: Vec2,
+    per_unit: f32,
+    wet: impl Fn(Vec2) -> bool,
+) -> (Image, Vec4) {
+    let (width, height) =
+        ((size.x * per_unit).ceil() as usize, (size.y * per_unit).ceil() as usize);
     let at = |x: usize, y: usize| min + (Vec2::new(x as f32, y as f32) + 0.5) / per_unit;
     // Two-pass chamfer distance, in texels, from the nearest dry texel.
-    let mut distance: Vec<f32> =
-        (0..width * height).map(|i| if wet(at(i % width, i / width)) { f32::MAX } else { 0.0 }).collect();
+    let mut distance: Vec<f32> = (0..width * height)
+        .map(|i| if wet(at(i % width, i / width)) { f32::MAX } else { 0.0 })
+        .collect();
     let diagonal = std::f32::consts::SQRT_2;
     for (pass, steps) in [
         (0, [(-1, 0, 1.0), (0, -1, 1.0), (-1, -1, diagonal), (1, -1, diagonal)]),
@@ -157,15 +166,18 @@ pub fn shore_image(min: Vec2, size: Vec2, per_unit: f32, wet: impl Fn(Vec2) -> b
                 .map(|i| {
                     let at = if step == 1 { i % width } else { i / width };
                     let (lo, hi) = (at.saturating_sub(radius), (at + radius).min(len - 1));
-                    (lo..=hi).map(|k| distance[i - at * step + k * step]).sum::<f32>() / (hi - lo + 1) as f32
+                    (lo..=hi).map(|k| distance[i - at * step + k * step]).sum::<f32>()
+                        / (hi - lo + 1) as f32
                 })
                 .collect();
             distance = blurred;
         }
     }
     // Stored as a square root: finest by the bank, where the lines are closest.
-    let data =
-        distance.iter().map(|t| ((t / per_unit / SHORE_REACH).min(1.0).sqrt() * 255.0) as u8).collect::<Vec<u8>>();
+    let data = distance
+        .iter()
+        .map(|t| ((t / per_unit / SHORE_REACH).min(1.0).sqrt() * 255.0) as u8)
+        .collect::<Vec<u8>>();
     let mut image = Image::new(
         Extent3d { width: width as u32, height: height as u32, depth_or_array_layers: 1 },
         TextureDimension::D2,

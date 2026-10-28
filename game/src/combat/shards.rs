@@ -40,7 +40,10 @@ fn fan(
         commands.spawn((
             LevelEntity,
             NotShadowCaster,
-            Shard { velocity: Vec3::new(angle.cos() * speed, up, angle.sin() * speed), left: SHARD_LIFE },
+            Shard {
+                velocity: Vec3::new(angle.cos() * speed, up, angle.sin() * speed),
+                left: SHARD_LIFE,
+            },
             Mesh3d(mesh.clone()),
             MeshMaterial3d(material.clone()),
             Transform::from_translation(at),
@@ -69,7 +72,11 @@ pub fn break_up(commands: &mut Commands, look: &EnemyLook, species: usize, at: V
 }
 
 /// Shards fall and shrink away.
-pub fn shards(time: Res<Time>, mut shards: Query<(Entity, &mut Shard, &mut Transform)>, mut commands: Commands) {
+pub fn shards(
+    time: Res<Time>,
+    mut shards: Query<(Entity, &mut Shard, &mut Transform)>,
+    mut commands: Commands,
+) {
     let dt = time.delta_secs();
     for (entity, mut shard, mut transform) in &mut shards {
         shard.left -= dt;
@@ -84,7 +91,11 @@ pub fn shards(time: Res<Time>, mut shards: Query<(Entity, &mut Shard, &mut Trans
 }
 
 /// Blots shrink away (the material is shared, so by scale, not by alpha).
-pub fn blots(time: Res<Time>, mut blots: Query<(Entity, &mut Blot, &mut Transform)>, mut commands: Commands) {
+pub fn blots(
+    time: Res<Time>,
+    mut blots: Query<(Entity, &mut Blot, &mut Transform)>,
+    mut commands: Commands,
+) {
     for (entity, mut blot, mut transform) in &mut blots {
         blot.left -= time.delta_secs();
         if blot.left <= 0.0 {

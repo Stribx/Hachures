@@ -59,16 +59,19 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
         p.spawn((text(&assets, "", SUBTITLE_SIZE), Purse));
         p.spawn(Node { column_gap: px(24), ..default() }).with_children(|row| {
             for (b, branch) in BRANCHES.iter().enumerate() {
-                row.spawn(Node { flex_direction: FlexDirection::Column, row_gap: px(8), ..default() }).with_children(
-                    |column| {
-                        column.spawn(text(&assets, t(branch.name), HEADING_SIZE));
-                        for k in 0..branch.nodes.len() {
-                            column
-                                .spawn(framed(300.0, (text(&assets, "", SMALL_SIZE), NodeLabel(b, k))))
-                                .observe(buy(b, k));
-                        }
-                    },
-                );
+                row.spawn(Node {
+                    flex_direction: FlexDirection::Column,
+                    row_gap: px(8),
+                    ..default()
+                })
+                .with_children(|column| {
+                    column.spawn(text(&assets, t(branch.name), HEADING_SIZE));
+                    for k in 0..branch.nodes.len() {
+                        column
+                            .spawn(framed(300.0, (text(&assets, "", SMALL_SIZE), NodeLabel(b, k))))
+                            .observe(buy(b, k));
+                    }
+                });
             }
         });
         p.spawn(text(&assets, t("sceaux.note"), SMALL_SIZE));
@@ -77,10 +80,15 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
 }
 
 /// Button action: buy node `k` of `branch`, if it is the next one and the sceaux are there.
-fn buy(branch: usize, k: usize) -> impl Fn(On<Activate>, ResMut<Save>, Res<Level>, MessageWriter<LoadLevel>) {
+fn buy(
+    branch: usize,
+    k: usize,
+) -> impl Fn(On<Activate>, ResMut<Save>, Res<Level>, MessageWriter<LoadLevel>) {
     move |_, mut save, level, mut load| {
         let node = &BRANCHES[branch].nodes[k];
-        if next_in(branch, &save.skills).is_none_or(|n| n.skill != node.skill) || save.sceaux() < node.cost {
+        if next_in(branch, &save.skills).is_none_or(|n| n.skill != node.skill)
+            || save.sceaux() < node.cost
+        {
             return;
         }
         save.skills.push(node.skill);
@@ -103,7 +111,8 @@ fn show_nodes(
     for (&NodeLabel(b, k), mut text, mut color) in &mut nodes {
         let node = &BRANCHES[b].nodes[k];
         let owned = save.skills.contains(&node.skill);
-        let next = next_in(b, &save.skills).is_some_and(|n| n.skill == node.skill) && save.sceaux() >= node.cost;
+        let next = next_in(b, &save.skills).is_some_and(|n| n.skill == node.skill)
+            && save.sceaux() >= node.cost;
         let owned_said = if owned { t("sceaux.owned") } else { "" };
         text.0 = tf("sceaux.node", &[&t(node.name), &node.cost, &t(node.effect), &owned_said]);
         color.0 = if owned || next { INK } else { INK.with_alpha(0.4) };

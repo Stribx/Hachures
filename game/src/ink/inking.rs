@@ -79,7 +79,8 @@ impl Level {
             self.margin.push(MarginNote { line, name: Some(self.places[p].name.clone()) });
         }
         if act.lays().is_some() {
-            let (under, laid_at) = (self.terrain.base().tiles[cell], (!self.wave.running).then_some(self.wave.number));
+            let (under, laid_at) =
+                (self.terrain.base().tiles[cell], (!self.wave.running).then_some(self.wave.number));
             self.inked.push(Inked { cell, tool, under, paid, laid_at });
         }
         let edit = self.edit(cell, tool);
@@ -92,9 +93,9 @@ impl Level {
             Act::Lay(tile) => Edit::Ink(tile),
             Act::Raise(weapon) => Edit::Raise(weapon),
             Act::Scrape => Edit::Scrape,
-            Act::Biffer => {
-                Edit::Unink(self.stroke(cell).map_or(self.terrain.base().tiles[cell], |s| self.inked[s].under))
-            }
+            Act::Biffer => Edit::Unink(
+                self.stroke(cell).map_or(self.terrain.base().tiles[cell], |s| self.inked[s].under),
+            ),
         }
     }
 
@@ -152,9 +153,14 @@ mod tests {
             species::load(),
         );
         level.waves = vec![vec![]];
-        level.changes = vec![crate::level::data::Change { wave: 1, at: vec![(2, 0)], becomes: Tile::Roc }];
+        level.changes =
+            vec![crate::level::data::Change { wave: 1, at: vec![(2, 0)], becomes: Tile::Roc }];
         assert_eq!(level.refusal(2, 0), Some(n_("refusal.relief_changes")));
-        assert_eq!(level.refusal(12, 0), Some("refusal.relief_closes"), "the bottom road will be the only one");
+        assert_eq!(
+            level.refusal(12, 0),
+            Some("refusal.relief_closes"),
+            "the bottom road will be the only one"
+        );
         level.start_wave();
         assert_eq!(level.terrain.base().tiles[2], Tile::Roc);
         assert!(level.changes.is_empty(), "{} changes left", level.changes.len());
@@ -175,14 +181,21 @@ mod tests {
         level.events = vec![2];
         let ice = level.terrain.base().under(&level.world().event);
         assert_eq!(ice.tiles[2], Tile::Glace);
-        assert_eq!((1..=4).map(|w| level.event_at(w)).collect::<Vec<_>>(), [false, true, true, false], "two waves");
+        assert_eq!(
+            (1..=4).map(|w| level.event_at(w)).collect::<Vec<_>>(),
+            [false, true, true, false],
+            "two waves"
+        );
     }
 
     /// Le prix du nom: inking over a named place costs one Name, once, however many of its cells are inked.
     #[test]
     fn inking_a_place_scratches_its_name() {
         let mut level = Level::new(Grid::parse("S.....M"), species::load());
-        level.places = vec![crate::level::data::Place { name: "place.pre_commun".into(), at: vec![(2, 0), (3, 0)] }];
+        level.places = vec![crate::level::data::Place {
+            name: "place.pre_commun".into(),
+            at: vec![(2, 0), (3, 0)],
+        }];
         assert_eq!(level.place_at(2), Some(0));
         let boue = tool_index("boue").unwrap();
         level.ink(2, boue);
@@ -193,13 +206,22 @@ mod tests {
 
         let mut save = Save::default();
         level.finish(&mut save);
-        assert_eq!(save.levels[0].erased, ["place.pre_commun"], "the carnet and the Grand Plan remember it");
+        assert_eq!(
+            save.levels[0].erased,
+            ["place.pre_commun"],
+            "the carnet and the Grand Plan remember it"
+        );
     }
 
     #[test]
     fn skills_change_costs() {
         let save = Save {
-            skills: vec![Skill::MineDePlomb, Skill::BoueProfonde, Skill::RoncesMeres, Skill::Fascines],
+            skills: vec![
+                Skill::MineDePlomb,
+                Skill::BoueProfonde,
+                Skill::RoncesMeres,
+                Skill::Fascines,
+            ],
             ..Default::default()
         };
         // 1-1, after the prologue: it has brambles to spread.
@@ -210,7 +232,9 @@ mod tests {
         assert_eq!(chaineur.cost(Tile::Boue), 4.0, "Boue profonde: 3 + 1");
 
         let mut level = level;
-        let ronces = |level: &Level| level.terrain.base().tiles.iter().filter(|&&t| t == Tile::Ronces).count();
+        let ronces = |level: &Level| {
+            level.terrain.base().tiles.iter().filter(|&&t| t == Tile::Ronces).count()
+        };
         let before = ronces(&level);
         level.grow_ronces();
         assert_eq!(ronces(&level), before + 1, "Ronces-mères: one more bramble per wave");

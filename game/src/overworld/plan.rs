@@ -9,10 +9,10 @@ use bevy::light::NotShadowCaster;
 use bevy::prelude::*;
 
 use super::card::{card, spawn_page};
+use super::pawn::{Figure, Pawn, route, spot, walk};
 use super::road::{draw_road, unroll};
-use super::terrain::{WATER, height};
 use super::travel::Travel;
-use super::{OverworldRoot, ROAD, SHEETS};
+use super::{OverworldRoot, SHEETS};
 use crate::campaign::save::Save;
 use crate::level::Level;
 use crate::look::{InkMaterial, ink};
@@ -25,69 +25,16 @@ pub fn plugin(app: &mut App) {
         // Under the Marches' root, once it exists.
         .add_systems(Startup, spawn.after(super::marches::spawn))
         .add_systems(OnEnter(Screen::Plan), (spawn_page, seals))
-        .add_systems(Update, (walk_to, keys.run_if(in_state(Screen::Plan)), walk, unroll, draw_road, card).chain())
+        .add_systems(
+            Update,
+            (walk_to, keys.run_if(in_state(Screen::Plan)), walk, unroll, draw_road, card).chain(),
+        )
         .add_systems(Update, show_over_world.run_if(state_changed::<Screen>));
-}
-
-/// Nève on the map: where she stands or walks to, in the Marches' own coordinates (under `OverworldRoot`).
-#[derive(Resource)]
-pub struct Pawn {
-    /// The sheet she stands on, or walks to.
-    pub node: usize,
-    pub pos: Vec3,
-    pub(super) route: VecDeque<Vec3>,
-    speed: f32,
-    /// Distance walked, for her step.
-    walked: f32,
-}
-
-impl Pawn {
-    /// Put her on sheet `i`, without walking.
-    pub fn stand(&mut self, i: usize) {
-        self.node = i;
-        self.pos = spot(i);
-        self.route.clear();
-    }
-}
-
-/// Where Nève stands on sheet `i`: its middle, on top of the blocks.
-fn spot(i: usize) -> Vec3 {
-    ground(SHEETS[i].center())
-}
-
-/// The ground under `p`: the top of a sheet's blocks, or the land (never under water).
-pub(super) fn ground(p: Vec2) -> Vec3 {
-    let on_sheet = SHEETS.iter().any(|s| s.distance(p) == 0.0);
-    Vec3::new(p.x, if on_sheet { 0.25 } else { height(p).max(WATER) }, p.y)
-}
-
-/// The way from sheet `from` to sheet `to`, one leg after the other, either way.
-fn route(from: usize, to: usize) -> VecDeque<Vec3> {
-    let mut points = Vec::new();
-    let leg = |k: usize| {
-        let mut leg = vec![SHEETS[k].center()];
-        leg.extend(&ROAD[k]);
-        leg.push(SHEETS[k + 1].center());
-        leg
-    };
-    if to > from {
-        for k in from..to {
-            points.extend(leg(k));
-        }
-    } else {
-        for k in (to..from).rev() {
-            points.extend(leg(k).into_iter().rev());
-        }
-    }
-    points.into_iter().map(ground).collect()
 }
 
 /// Walk Nève to sheet `.0` on the Grand Plan (after a level won: on to the next one).
 #[derive(Message)]
 pub struct WalkTo(pub usize);
-
-#[derive(Component)]
-struct Figure;
 
 /// Shown only over the world: Nève and the seals.
 #[derive(Component)]
@@ -112,7 +59,13 @@ fn spawn(
     mut materials: ResMut<Assets<InkMaterial>>,
 ) {
     let pos = spot(level.index);
-    commands.insert_resource(Pawn { node: level.index, pos, route: VecDeque::new(), speed: 0.0, walked: 0.0 });
+    commands.insert_resource(Pawn {
+        node: level.index,
+        pos,
+        route: VecDeque::new(),
+        speed: 0.0,
+        walked: 0.0,
+    });
     // Nève: a long travelling coat, a head, a folded map held out.
     let coat = materials.add(ink(Color::srgb(0.3, 0.22, 0.16)));
     let paper = materials.add(ink(PAPER));
@@ -178,7 +131,11 @@ fn seals(
     }
 }
 
-fn walk_to(mut walks: MessageReader<WalkTo>, mut pawn: ResMut<Pawn>, mut next: ResMut<NextState<Screen>>) {
+fn walk_to(
+    mut walks: MessageReader<WalkTo>,
+    mut pawn: ResMut<Pawn>,
+    mut next: ResMut<NextState<Screen>>,
+) {
     let Some(&WalkTo(to)) = walks.read().last() else { return };
     next.set(Screen::Plan);
     let from = pawn.node;
@@ -205,34 +162,6 @@ fn keys(
     } else if keys.any_just_pressed([KeyCode::Enter, KeyCode::Space]) && pawn.route.is_empty() {
         travel.write(Travel { to: pawn.node, again: false });
     }
-}
-
-/// Nève walks her route: she sets off, keeps a pace, and slows to a stop; a small step bobs her up and down.
-fn walk(time: Res<Time>, mut pawn: ResMut<Pawn>, mut figure: Single<&mut Transform, With<Figure>>) {
-    const PACE: f32 = 7.0;
-    let dt = time.delta_secs();
-    let pawn = &mut *pawn;
-    if let Some(&next) = pawn.route.front() {
-        let left: f32 = pawn.route.iter().fold((pawn.pos, 0.0), |(p, d), &q| (q, d + p.distance(q))).1;
-        pawn.speed = (pawn.speed + 18.0 * dt).min(PACE).min(1.2 + left * 2.5);
-        let step = pawn.speed * dt;
-        let to = next - pawn.pos;
-        if to.length() <= step {
-            pawn.pos = next;
-            pawn.route.pop_front();
-        } else {
-            pawn.pos += to.normalize() * step;
-            if to.xz().length() > 0.01 {
-                let facing = Vec3::new(to.x, 0.0, to.z);
-                figure.look_to(-facing, Vec3::Y);
-            }
-        }
-        pawn.walked += step;
-    } else {
-        pawn.speed = 0.0;
-    }
-    let bob = if pawn.route.is_empty() { 0.0 } else { (pawn.walked * 5.0).sin().abs() * 0.18 };
-    figure.translation = pawn.pos + Vec3::Y * bob;
 }
 
 /// Nève and the seals stand on the Grand Plan and under the title, not on the board in play.

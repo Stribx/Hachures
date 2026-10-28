@@ -39,7 +39,12 @@ pub fn start_waves(
 }
 
 /// Sends the next wave, if the last one is over and the level isn't.
-pub fn send_wave(level: &mut Level, commands: &mut Commands, assets: &AssetServer, settings: &Settings) {
+pub fn send_wave(
+    level: &mut Level,
+    commands: &mut Commands,
+    assets: &AssetServer,
+    settings: &Settings,
+) {
     let more = (level.wave.number as usize) < level.waves.len();
     if !level.wave.running && more && level.lives > 0 && level.start_wave() {
         // ponytail: a thud stands in for the rumble of the flood until there is a real sound.
@@ -79,7 +84,8 @@ pub fn spawn_enemies(
     let first_phase = level.world().boss.as_ref().map(|b| &b.phases[0]);
     let boss = first_phase.filter(|p| level.species[species].name == p.species);
     // Docs, section 8: ×1.5 per world, ×1.12 per wave (not for the boss).
-    let wave_scale = if boss.is_some() { 1.0 } else { HP_PER_WAVE.powi(level.wave.number as i32 - 1) };
+    let wave_scale =
+        if boss.is_some() { 1.0 } else { HP_PER_WAVE.powi(level.wave.number as i32 - 1) };
     let hp = level.hp(level.species[species].hp) * wave_scale;
     let at = map::cell_pos(level.terrain.grid(), cell);
     let scale = if boss.is_some() { BOSS_SCALE } else { SCALE };
@@ -179,7 +185,11 @@ fn lay(level: &mut Level, look: &EnemyLook, commands: &mut Commands, trail: Trai
             ))
             .with_children(|borne| {
                 for piece in &look.borne {
-                    borne.spawn((Mesh3d(piece.mesh.clone()), MeshMaterial3d(piece.material.clone()), piece.at));
+                    borne.spawn((
+                        Mesh3d(piece.mesh.clone()),
+                        MeshMaterial3d(piece.material.clone()),
+                        piece.at,
+                    ));
                 }
             });
     }

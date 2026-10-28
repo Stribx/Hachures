@@ -26,7 +26,9 @@ pub(super) fn props() -> Vec<(&'static str, Transform)> {
             let snow = snow(p, h) > 0.35;
             let model = match () {
                 _ if !clear || h < WATER + 0.2 => None,
-                _ if steep > 0.6 && roll < 0.25 => Some(if snow { "snow-detail-rocks" } else { "detail-rocks-large" }),
+                _ if steep > 0.6 && roll < 0.25 => {
+                    Some(if snow { "snow-detail-rocks" } else { "detail-rocks-large" })
+                }
                 _ if (wood && roll < 0.8) || roll < 0.06 => Some(match (snow, roll < 0.35) {
                     (true, true) => "snow-detail-tree-large",
                     (true, false) => "snow-detail-tree",

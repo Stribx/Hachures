@@ -69,7 +69,8 @@ pub fn pose(gait: Gait, phase: f32, moving: bool) -> Transform {
         // The box rocks hard and jitters.
         Gait::Panique => (0.0, (3.0 * phase).sin() * 0.05, s * 0.06),
     };
-    Transform::from_xyz(0.0, y, 0.0).with_rotation(Quat::from_rotation_x(roll) * Quat::from_rotation_z(pitch))
+    Transform::from_xyz(0.0, y, 0.0)
+        .with_rotation(Quat::from_rotation_x(roll) * Quat::from_rotation_z(pitch))
 }
 
 /// The turn of a wheel, a leg (`side` is +1 or -1, which way it swings first) or the yoke, to compose with its rest
@@ -77,7 +78,9 @@ pub fn pose(gait: Gait, phase: f32, moving: bool) -> Transform {
 pub fn limb(role: Role, gait: Gait, side: f32, phase: f32, walked: f32) -> Quat {
     match role {
         Role::Wheel => Quat::from_rotation_z(-walked / WHEEL_RADIUS),
-        Role::Leg => Quat::from_rotation_z((phase + if side > 0.0 { 0.0 } else { PI }).sin() * SWING),
+        Role::Leg => {
+            Quat::from_rotation_z((phase + if side > 0.0 { 0.0 } else { PI }).sin() * SWING)
+        }
         // The oxen bolting knock the yoke about the forward axis.
         Role::Yoke if gait == Gait::Panique => Quat::from_rotation_x((2.0 * phase).sin() * 0.25),
         Role::Yoke => Quat::IDENTITY,
@@ -163,7 +166,8 @@ pub fn animate(
             if let Ok((joint, mut at)) = limbs.get_mut(part) {
                 // The wheels are sized in figure units: roll them by the distance in those units.
                 at.rotation =
-                    limb(joint.role, gait, joint.side, phase, stride.walked / transform.scale.x) * joint.rest.rotation;
+                    limb(joint.role, gait, joint.side, phase, stride.walked / transform.scale.x)
+                        * joint.rest.rotation;
             }
         }
     }

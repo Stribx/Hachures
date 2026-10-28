@@ -15,8 +15,11 @@ pub fn daylight(wave: u32, waves: usize) -> (Vec3, Color) {
     let elevation = high + (low - high) * t;
     // Swinging a little toward the west as it lowers.
     let azimuth = noon.z.atan2(noon.x) + 0.25 * t;
-    let at =
-        Vec3::new(elevation.cos() * azimuth.cos(), elevation.sin(), elevation.cos() * azimuth.sin()) * noon.length();
+    let at = Vec3::new(
+        elevation.cos() * azimuth.cos(),
+        elevation.sin(),
+        elevation.cos() * azimuth.sin(),
+    ) * noon.length();
     (at, SUNLIGHT.mix(&EVENING, t * 0.8))
 }
 
@@ -70,7 +73,8 @@ mod tests {
     #[test]
     fn the_sun_moves_on_with_every_wave() {
         for waves in [3, 12] {
-            let elevations: Vec<f32> = (0..=waves as u32).map(|w| elevation(daylight(w, waves).0)).collect();
+            let elevations: Vec<f32> =
+                (0..=waves as u32).map(|w| elevation(daylight(w, waves).0)).collect();
             assert!(elevations.windows(2).all(|e| e[1] < e[0]), "{elevations:?}");
         }
     }

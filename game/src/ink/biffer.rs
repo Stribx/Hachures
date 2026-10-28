@@ -9,7 +9,8 @@ impl Level {
     /// Index in `inked` of Nève's last stroke on `cell`, if it still lies there as she inked it.
     pub(super) fn stroke(&self, cell: usize) -> Option<usize> {
         let last = self.inked.iter().rposition(|stroke| stroke.cell == cell)?;
-        (TOOLS[self.inked[last].tool].act.lays() == Some(self.terrain.base().tiles[cell])).then_some(last)
+        (TOOLS[self.inked[last].tool].act.lays() == Some(self.terrain.base().tiles[cell]))
+            .then_some(last)
     }
 
     /// Sépia that biffing `cell` returns: all it cost while the ink is wet (inked between waves, none sent since),
@@ -76,7 +77,11 @@ mod tests {
         level.ink(2, tool("biffer"));
         assert_eq!(level.sepia, sepia + 10);
         assert_eq!(level.terrain.base().tiles[2], Tile::Sol);
-        assert_eq!(level.refusal(2, tool("biffer")), Some("refusal.nothing_to_biffer"), "nothing is left to take");
+        assert_eq!(
+            level.refusal(2, tool("biffer")),
+            Some("refusal.nothing_to_biffer"),
+            "nothing is left to take"
+        );
     }
 
     /// What comes back is what was paid, skills included: a barricade with Fascines cost 7.
@@ -138,7 +143,11 @@ mod tests {
         let mut level = level("S.#.p.M\n.......");
         level.alter([(8, Edit::Ink(Tile::Ronces)), (9, Edit::PlantBorne)]);
         for i in [1, 2, 4, 8, 9] {
-            assert_eq!(level.refusal(i, tool("biffer")), Some("refusal.nothing_to_biffer"), "cell {i}");
+            assert_eq!(
+                level.refusal(i, tool("biffer")),
+                Some("refusal.nothing_to_biffer"),
+                "cell {i}"
+            );
             assert_eq!(level.refund(i), None);
         }
     }

@@ -194,7 +194,7 @@ Follow `docs/rustguide.md` (Google's Rust style guide) as **application code**: 
 - **`mod.rs`** holds the plugin, re-exports and small shared types; the implementation lives in leaf files.
 - **Per-frame systems** don't deep-clone and don't write unchanged values: `set_if_neq`, `run_if(resource_changed::<R>)`.
 - **No `unsafe`** (`#![deny(unsafe_code)]`), no `Rc`/`Arc` without a reason, no macros where a function does.
-- **Format:** `rustfmt.toml` (moving to the guide's `max_width = 100`). `imports_granularity` and `hex_literal_case` are nightly-only, so review checks those.
+- **Format:** `rustfmt.toml` is the guide's `max_width = 100`. Stable rustfmt doesn't wrap comments: keep new ones within 100 columns. `imports_granularity` and `hex_literal_case` are nightly-only, so review checks those.
 
 The lints live in `game/src/main.rs`; CI's `clippy -D warnings` fails on them.
 

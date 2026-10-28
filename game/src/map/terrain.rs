@@ -146,9 +146,9 @@ impl Terrain {
     fn walked(&self, mut base: Grid, towers: &[(usize, Weapon)]) -> Grid {
         base.cover = (0..base.tiles.len())
             .map(|i| {
-                let covering = towers
-                    .iter()
-                    .filter(|&&(t, weapon)| base.within(i, t, tower_reach(&self.reach, &base, towers, t, weapon)));
+                let covering = towers.iter().filter(|&&(t, weapon)| {
+                    base.within(i, t, tower_reach(&self.reach, &base, towers, t, weapon))
+                });
                 covering.count() as f32 * self.reach.shadow
             })
             .collect();
@@ -160,7 +160,13 @@ impl Terrain {
 }
 
 /// Reach of the tower at `cell` among `towers`; Équerre adds 1 when another tower stands beside it.
-fn tower_reach(reach: &Reach, grid: &Grid, towers: &[(usize, Weapon)], cell: usize, weapon: Weapon) -> f32 {
+fn tower_reach(
+    reach: &Reach,
+    grid: &Grid,
+    towers: &[(usize, Weapon)],
+    cell: usize,
+    weapon: Weapon,
+) -> f32 {
     let paired = reach.equerre && grid.neighbours(cell).any(|n| towers.iter().any(|t| t.0 == n));
     reach.ranges[&weapon] + if paired { 1.0 } else { 0.0 }
 }
@@ -234,7 +240,10 @@ mod tests {
         terrain.alter([(1, Edit::Scrape), (2, Edit::Scrape), (4, Edit::Scrape)], &species);
         let base = terrain.base();
         assert!(base.bornes.is_empty());
-        assert_eq!((base.tiles[1], base.tiles[2], base.tiles[4]), (Tile::Chaussee, Tile::Sol, Tile::Sol));
+        assert_eq!(
+            (base.tiles[1], base.tiles[2], base.tiles[4]),
+            (Tile::Chaussee, Tile::Sol, Tile::Sol)
+        );
         assert_eq!((base.map[2], base.map[4]), (Tile::Sol, Tile::Sol));
     }
 
@@ -258,11 +267,16 @@ mod tests {
     #[test]
     fn unink_returns_the_cell_and_lifts_the_shadow() {
         let species = species::load();
-        let (harde, chaineur) = (index_of(&species, "harde").unwrap(), index_of(&species, "chaineur").unwrap());
+        let (harde, chaineur) =
+            (index_of(&species, "harde").unwrap(), index_of(&species, "chaineur").unwrap());
         let map = Grid::parse("S.......M\n.........\n#########");
         let mut terrain = Terrain::new(map, Reach { equerre: true, ..reach() }, &species);
-        let (shade, road) = (terrain.fields()[harde].dist.clone(), terrain.fields()[chaineur].dist.clone());
-        terrain.alter([(4, Edit::Raise(Weapon::Arbalete)), (13, Edit::Ink(Tile::Barricade))], &species);
+        let (shade, road) =
+            (terrain.fields()[harde].dist.clone(), terrain.fields()[chaineur].dist.clone());
+        terrain.alter(
+            [(4, Edit::Raise(Weapon::Arbalete)), (13, Edit::Ink(Tile::Barricade))],
+            &species,
+        );
         terrain.alter([(4, Edit::Unink(Tile::Sol)), (13, Edit::Unink(Tile::Sol))], &species);
         assert_eq!((terrain.base().tiles[4], terrain.base().tiles[13]), (Tile::Sol, Tile::Sol));
         assert!(terrain.base().cover.iter().all(|&c| c == 0.0), "no tower casts a shadow");
@@ -275,7 +289,8 @@ mod tests {
     #[test]
     fn equerre_pairs_towers() {
         let species = species::load();
-        let mut terrain = Terrain::new(Grid::parse("S.....M"), Reach { equerre: true, ..reach() }, &species);
+        let mut terrain =
+            Terrain::new(Grid::parse("S.....M"), Reach { equerre: true, ..reach() }, &species);
         terrain.alter([(2, Edit::Raise(Weapon::Arbalete))], &species);
         assert_eq!(terrain.reach(2, Weapon::Arbalete), 3.0);
         terrain.alter([(3, Edit::Raise(Weapon::Arbalete))], &species);
@@ -287,7 +302,8 @@ mod tests {
     fn reach_answers_for_a_cell_without_a_tower() {
         let species = species::load();
         let arbalete = |equerre| {
-            let mut terrain = Terrain::new(Grid::parse("S.....M"), Reach { equerre, ..reach() }, &species);
+            let mut terrain =
+                Terrain::new(Grid::parse("S.....M"), Reach { equerre, ..reach() }, &species);
             let alone = terrain.reach(4, Weapon::Arbalete);
             terrain.alter([(3, Edit::Raise(Weapon::Arbalete))], &species);
             (alone, terrain.reach(4, Weapon::Arbalete))

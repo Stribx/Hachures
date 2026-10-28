@@ -41,7 +41,10 @@ const LANGUAGES: &[Language] = &[
 static TABLES: LazyLock<Vec<HashMap<String, String>>> = LazyLock::new(|| {
     LANGUAGES
         .iter()
-        .map(|l| ron::from_str(l.lines).unwrap_or_else(|err| panic!("invalid i18n/{}.ron: {err}", l.code)))
+        .map(|l| {
+            ron::from_str(l.lines)
+                .unwrap_or_else(|err| panic!("invalid i18n/{}.ron: {err}", l.code))
+        })
         .collect()
 });
 
@@ -123,7 +126,10 @@ fn missing(key: &str, lang: usize) {
         let mut seen = SEEN.lock().unwrap_or_else(|e| e.into_inner());
         if !seen.iter().any(|s| s == key) {
             seen.push(key.to_string());
-            bevy::log::warn!("no line for {key:?} in assets/data/i18n/{}.ron", LANGUAGES[lang].code);
+            bevy::log::warn!(
+                "no line for {key:?} in assets/data/i18n/{}.ron",
+                LANGUAGES[lang].code
+            );
         }
     }
     #[cfg(not(debug_assertions))]
@@ -132,7 +138,10 @@ fn missing(key: &str, lang: usize) {
 
 /// The key under `prefix` whose French line is `text`: for saves that kept the French text itself.
 pub fn french_key(prefix: &str, text: &str) -> Option<&'static str> {
-    TABLES[0].iter().find(|(k, line)| k.starts_with(prefix) && *line == text).map(|(k, _)| k.as_str())
+    TABLES[0]
+        .iter()
+        .find(|(k, line)| k.starts_with(prefix) && *line == text)
+        .map(|(k, _)| k.as_str())
 }
 
 /// `template` with its slots filled from `args`: `{}` takes the next one, `{1}` the second.
@@ -218,7 +227,11 @@ mod tests {
                 for call in ["t(\"", "tf(\"", "n_(\"", "tp(\""] {
                     for (at, _) in line.match_indices(call) {
                         // `t(` and not `at(`.
-                        if line[..at].chars().last().is_some_and(|c| c.is_alphanumeric() || c == '_') {
+                        if line[..at]
+                            .chars()
+                            .last()
+                            .is_some_and(|c| c.is_alphanumeric() || c == '_')
+                        {
                             continue;
                         }
                         let key = literal(&line[at + call.len()..]);
@@ -261,8 +274,14 @@ mod tests {
         }
         for world in WORLDS.iter() {
             let event = &world.event;
-            let said =
-                [&world.name, &world.defends, &event.announce, &event.during, &event.refuse_next, &event.refuse_after];
+            let said = [
+                &world.name,
+                &world.defends,
+                &event.announce,
+                &event.during,
+                &event.refuse_next,
+                &event.refuse_after,
+            ];
             keys.extend(said.map(String::clone));
             if let Some(boss) = &world.boss {
                 keys.insert(boss.name.clone());
@@ -292,20 +311,27 @@ mod tests {
         used.extend(["language.name".into(), "language.decimal".into()]);
         let french = &TABLES[0];
         let missing: Vec<&String> = used.iter().filter(|k| !french.contains_key(*k)).collect();
-        let forms: Vec<String> = counted.iter().flat_map(|k| [format!("{k}.one"), format!("{k}.other")]).collect();
-        let forms_missing: Vec<&String> = forms.iter().filter(|k| !french.contains_key(*k)).collect();
-        let unused: Vec<&String> = french.keys().filter(|k| !used.contains(*k) && !form_of(k, &counted)).collect();
+        let forms: Vec<String> =
+            counted.iter().flat_map(|k| [format!("{k}.one"), format!("{k}.other")]).collect();
+        let forms_missing: Vec<&String> =
+            forms.iter().filter(|k| !french.contains_key(*k)).collect();
+        let unused: Vec<&String> =
+            french.keys().filter(|k| !used.contains(*k) && !form_of(k, &counted)).collect();
         assert!(
             missing.is_empty() && forms_missing.is_empty() && unused.is_empty(),
             "i18n/fr.ron:\n  missing: {missing:#?}\n  counted forms missing: {forms_missing:#?}\n  no longer used: {unused:#?}"
         );
         for (k, language) in LANGUAGES.iter().enumerate().skip(1) {
             let table = &TABLES[k];
-            let missing: Vec<&String> = french.keys().filter(|key| !table.contains_key(*key)).collect();
+            let missing: Vec<&String> =
+                french.keys().filter(|key| !table.contains_key(*key)).collect();
             // A language may have more counted forms than French (`.few`, `.many`).
-            let extra: Vec<&String> =
-                table.keys().filter(|key| !french.contains_key(*key) && !form_of(key, &counted)).collect();
-            let empty: Vec<&String> = table.iter().filter(|(_, l)| l.trim().is_empty()).map(|(k, _)| k).collect();
+            let extra: Vec<&String> = table
+                .keys()
+                .filter(|key| !french.contains_key(*key) && !form_of(key, &counted))
+                .collect();
+            let empty: Vec<&String> =
+                table.iter().filter(|(_, l)| l.trim().is_empty()).map(|(k, _)| k).collect();
             let slips: Vec<&String> = table
                 .iter()
                 .filter(|(key, l)| french.get(*key).is_some_and(|fr| slots(fr) != slots(l)))

@@ -26,7 +26,9 @@ mod tests {
     use super::*;
 
     fn is_identity(t: Transform) -> bool {
-        t.translation.length() < 1e-5 && t.rotation.xyz().length() < 1e-5 && t.scale.distance(Vec3::ONE) < 1e-5
+        t.translation.length() < 1e-5
+            && t.rotation.xyz().length() < 1e-5
+            && t.scale.distance(Vec3::ONE) < 1e-5
     }
 
     #[test]

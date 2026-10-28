@@ -41,7 +41,12 @@ const RAIN: Color = Color::srgba(0.3, 0.38, 0.5, 0.5);
 const SNOW: Color = Color::srgba(0.98, 0.98, 1.0, 0.9);
 
 /// Draws this frame's weather over the board: none on Low, a quarter of it under reduced motion.
-pub(super) fn fall(level: Res<Level>, settings: Res<Settings>, time: Res<Time>, mut gizmos: Gizmos) {
+pub(super) fn fall(
+    level: Res<Level>,
+    settings: Res<Settings>,
+    time: Res<Time>,
+    mut gizmos: Gizmos,
+) {
     let weather = weather(level.world, level.event_on);
     if weather == Weather::Clear || !settings.shadows {
         return;
@@ -85,10 +90,17 @@ fn ripples(gizmos: &mut Gizmos, grid: &Grid, t: f32) {
         let spread = (t * 0.7 + (h & 255) as f32 / 255.0).fract();
         let shift = Vec2::new((h >> 8 & 255) as f32, (h >> 16 & 255) as f32) / 255.0 - 0.5;
         let (x, z) = grid.coords(i);
-        let at =
-            Vec3::new(x as f32 + shift.x * 0.6, super::look(grid.tiles[i]).height + 0.01, z as f32 + shift.y * 0.6);
+        let at = Vec3::new(
+            x as f32 + shift.x * 0.6,
+            super::look(grid.tiles[i]).height + 0.01,
+            z as f32 + shift.y * 0.6,
+        );
         let ring = WATER.lighter(0.25).with_alpha(0.7 * (1.0 - spread));
-        gizmos.circle(Isometry3d::new(at, Quat::from_rotation_x(FRAC_PI_2)), 0.04 + spread * 0.22, ring);
+        gizmos.circle(
+            Isometry3d::new(at, Quat::from_rotation_x(FRAC_PI_2)),
+            0.04 + spread * 0.22,
+            ring,
+        );
     }
 }
 
@@ -104,7 +116,8 @@ mod tests {
 
     #[test]
     fn the_cols_have_snow_and_le_gel_a_storm() {
-        let (Weather::Snow(drift), Weather::Snow(storm)) = (weather(1, false), weather(1, true)) else {
+        let (Weather::Snow(drift), Weather::Snow(storm)) = (weather(1, false), weather(1, true))
+        else {
             panic!("snow in the Cols");
         };
         assert!(drift > 0.0 && drift < storm, "{drift} {storm}");

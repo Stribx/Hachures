@@ -99,14 +99,17 @@ pub fn closing_lines(notes: &[Note], choices: &BTreeMap<String, String>) -> Vec<
 
 /// Whether the choice "id=option" in `cond` went that way.
 pub fn holds(choices: &BTreeMap<String, String>, cond: &str) -> bool {
-    let (id, option) = cond.split_once('=').unwrap_or_else(|| panic!("condition {cond:?} is not id=option"));
+    let (id, option) =
+        cond.split_once('=').unwrap_or_else(|| panic!("condition {cond:?} is not id=option"));
     choices.get(id).is_some_and(|picked| picked == option)
 }
 
 impl Level {
     /// Writes in the margin the notes `trigger` calls for.
     pub fn note(&mut self, trigger: Trigger) {
-        let (due, rest) = std::mem::take(&mut self.notes).into_iter().partition(|n| n.due(&trigger, &self.choices));
+        let (due, rest) = std::mem::take(&mut self.notes)
+            .into_iter()
+            .partition(|n| n.due(&trigger, &self.choices));
         self.notes = rest;
         for note in due {
             self.names += note.names;
@@ -133,7 +136,8 @@ impl Level {
         if self.choice_locked {
             return;
         }
-        let Some((id, option)) = self.choice.as_ref().and_then(|c| Some((c.id.clone(), c.options.get(k)?.0.clone())))
+        let Some((id, option)) =
+            self.choice.as_ref().and_then(|c| Some((c.id.clone(), c.options.get(k)?.0.clone())))
         else {
             return;
         };
@@ -151,7 +155,9 @@ mod tests {
 
     /// Index of the level offering the Refuge choice (1-3).
     fn refuge_choice() -> usize {
-        (0..LEVELS.len()).find(|&i| Level::load(i, &Save::default()).choice.is_some_and(|c| c.id == "refuge")).unwrap()
+        (0..LEVELS.len())
+            .find(|&i| Level::load(i, &Save::default()).choice.is_some_and(|c| c.id == "refuge"))
+            .unwrap()
     }
 
     /// Winning a level with a choice opens the next one only once the choice is made,
@@ -178,11 +184,14 @@ mod tests {
     /// The carnet closes 1-4 on what the Refuge choice left: Oudine speaks, or she is silent.
     #[test]
     fn closing_lines_follow_the_choice() {
-        let boss: crate::level::data::LevelData = ron::from_str(LEVELS[refuge_choice() + 1]).unwrap();
-        let lines = |option: &str| closing_lines(&boss.notes, &[("refuge".into(), option.into())].into());
+        let boss: crate::level::data::LevelData =
+            ron::from_str(LEVELS[refuge_choice() + 1]).unwrap();
+        let lines =
+            |option: &str| closing_lines(&boss.notes, &[("refuge".into(), option.into())].into());
         let (moulin, bois) = (lines("moulin"), lines("bois"));
         assert_ne!(moulin, bois);
-        let said = |lines: &[String], words: &str| lines.iter().any(|l| crate::i18n::t(l).contains(words));
+        let said =
+            |lines: &[String], words: &str| lines.iter().any(|l| crate::i18n::t(l).contains(words));
         assert!(said(&moulin, "parlera") && said(&bois, "se tait"), "{moulin:?} / {bois:?}");
     }
 
@@ -194,7 +203,10 @@ mod tests {
         let mut save = Save::default();
         save.choices.insert("refuge".into(), "bois".into());
         let mut bois = Level::load(boss_level, &save);
-        assert_ne!(moulin.terrain.base().goals[&Goal::Refuge], bois.terrain.base().goals[&Goal::Refuge]);
+        assert_ne!(
+            moulin.terrain.base().goals[&Goal::Refuge],
+            bois.terrain.base().goals[&Goal::Refuge]
+        );
 
         bois.note(Trigger::Boss("boss.grande_chaine.bornage".into()));
         assert_eq!(bois.names, -1);

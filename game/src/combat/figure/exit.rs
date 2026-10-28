@@ -52,7 +52,9 @@ pub fn exit_pose(kind: ExitKind, t: f32) -> Transform {
         // Ease-in, about the forward axis (X).
         ExitKind::Fall => Transform::from_rotation(Quat::from_rotation_x(FRAC_PI_2 * u * u)),
         ExitKind::Sink => Transform::from_xyz(0.0, -0.5 * u, 0.0),
-        ExitKind::Hop => Transform::from_xyz(0.0, 0.15 * (PI * u).sin(), 0.0).with_scale(Vec3::splat(1.0 - u)),
+        ExitKind::Hop => {
+            Transform::from_xyz(0.0, 0.15 * (PI * u).sin(), 0.0).with_scale(Vec3::splat(1.0 - u))
+        }
     }
 }
 
@@ -66,9 +68,19 @@ pub fn exit_life(kind: ExitKind) -> f32 {
 }
 
 /// Stands a ghost of `species` where `from` stood.
-pub fn leave(commands: &mut Commands, look: &EnemyLook, species: usize, from: &Transform, kind: ExitKind) {
+pub fn leave(
+    commands: &mut Commands,
+    look: &EnemyLook,
+    species: usize,
+    from: &Transform,
+    kind: ExitKind,
+) {
     let ghost = spawn_figure(commands, look, species, from.translation, from.scale.x);
-    commands.entity(ghost).insert((LevelEntity, *from, Exit { kind, age: 0.0, from: *from, species }));
+    commands.entity(ghost).insert((
+        LevelEntity,
+        *from,
+        Exit { kind, age: 0.0, from: *from, species },
+    ));
 }
 
 /// Plays the ghosts out; a figure that fell breaks into shards where it lay.
@@ -114,7 +126,11 @@ mod tests {
             assert!(still, "{kind:?} does not start at rest: {start:?}");
         }
         let end = |kind: ExitKind| exit_pose(kind, exit_life(kind));
-        assert!((end(ExitKind::Sink).translation.y + 0.5).abs() < 1e-3, "a pin pulled out: {:?}", end(ExitKind::Sink));
+        assert!(
+            (end(ExitKind::Sink).translation.y + 0.5).abs() < 1e-3,
+            "a pin pulled out: {:?}",
+            end(ExitKind::Sink)
+        );
         let tipped = end(ExitKind::Fall).rotation.angle_between(Quat::IDENTITY);
         assert!((tipped - FRAC_PI_2).abs() < 1e-3, "lies on its side: {tipped}");
         let hop = end(ExitKind::Hop);

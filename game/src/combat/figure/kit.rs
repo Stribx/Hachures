@@ -79,7 +79,9 @@ impl Form {
                 Form::Frustum { bottom: bottom * k, top: top * k, height: height * k }
             }
             Form::Sphere(r) => Form::Sphere(r * k),
-            Form::Cylinder { radius, height } => Form::Cylinder { radius: radius * k, height: height * k },
+            Form::Cylinder { radius, height } => {
+                Form::Cylinder { radius: radius * k, height: height * k }
+            }
             Form::Cuboid(size) => Form::Cuboid(size * k),
             Form::Torus { minor, major } => Form::Torus { minor: minor * k, major: major * k },
         }
@@ -149,7 +151,9 @@ impl Part {
     #[cfg(test)]
     pub fn bounds(&self) -> (Vec3, Vec3) {
         let half = match self.form {
-            Form::Frustum { bottom, top, height } => Vec3::new(bottom.max(top), height / 2.0, bottom.max(top)),
+            Form::Frustum { bottom, top, height } => {
+                Vec3::new(bottom.max(top), height / 2.0, bottom.max(top))
+            }
             Form::Sphere(r) => Vec3::splat(r),
             Form::Cylinder { radius, height } => Vec3::new(radius, height / 2.0, radius),
             Form::Cuboid(size) => size / 2.0,
@@ -182,17 +186,28 @@ pub(super) fn body(shape: Shape) -> (Vec<Part>, Anchors) {
                 at(Form::Frustum { bottom: 0.10, top: 0.055, height: 0.26 }, 0.0, 0.16, 0.0, Coat),
                 at(Form::Sphere(0.065), 0.0, 0.35, 0.0, Wood),
             ],
-            Anchors { chest: Vec3::new(0.0, 0.20, 0.0), front: 0.075, head: Vec3::new(0.0, 0.35, 0.0), crown: 0.415 },
+            Anchors {
+                chest: Vec3::new(0.0, 0.20, 0.0),
+                front: 0.075,
+                head: Vec3::new(0.0, 0.35, 0.0),
+                crown: 0.415,
+            },
         ),
         Shape::Echasses => (
             vec![
                 at(Form::Cylinder { radius: 0.14, height: 0.03 }, 0.0, 0.015, 0.0, Felt),
                 at(Form::Cylinder { radius: 0.018, height: 0.30 }, 0.0, 0.18, 0.05, Wood).leg(1.0),
-                at(Form::Cylinder { radius: 0.018, height: 0.30 }, 0.0, 0.18, -0.05, Wood).leg(-1.0),
+                at(Form::Cylinder { radius: 0.018, height: 0.30 }, 0.0, 0.18, -0.05, Wood)
+                    .leg(-1.0),
                 at(Form::Frustum { bottom: 0.08, top: 0.05, height: 0.16 }, 0.0, 0.41, 0.0, Coat),
                 at(Form::Sphere(0.06), 0.0, 0.55, 0.0, Wood),
             ],
-            Anchors { chest: Vec3::new(0.0, 0.42, 0.0), front: 0.068, head: Vec3::new(0.0, 0.55, 0.0), crown: 0.61 },
+            Anchors {
+                chest: Vec3::new(0.0, 0.42, 0.0),
+                front: 0.068,
+                head: Vec3::new(0.0, 0.55, 0.0),
+                crown: 0.61,
+            },
         ),
         Shape::Bete => {
             let mut parts = vec![
@@ -203,7 +218,8 @@ pub(super) fn body(shape: Shape) -> (Vec<Part>, Anchors) {
             for (x, z) in [(0.15, 0.09), (0.15, -0.09), (-0.15, 0.09), (-0.15, -0.09)] {
                 // Diagonal pairs swing together, as in a trot.
                 parts.push(
-                    at(Form::Cylinder { radius: 0.025, height: 0.12 }, x, 0.08, z, Coat).leg(x.signum() * z.signum()),
+                    at(Form::Cylinder { radius: 0.025, height: 0.12 }, x, 0.08, z, Coat)
+                        .leg(x.signum() * z.signum()),
                 );
             }
             (
@@ -225,14 +241,19 @@ fn chariot(lead: f32, height: f32) -> (Vec<Part>, Anchors) {
     let at = Part::at;
     // The box rests on the axles, 0.14 up.
     let (middle, top) = (0.14 + height / 2.0, 0.14 + height);
-    let mut parts = vec![at(Form::Cuboid(Vec3::new(0.5, height, 0.3)), lead, middle, 0.0, Paint::Coat)];
+    let mut parts =
+        vec![at(Form::Cuboid(Vec3::new(0.5, height, 0.3)), lead, middle, 0.0, Paint::Coat)];
     for (x, z) in [(0.15, 0.17), (0.15, -0.17), (-0.15, 0.17), (-0.15, -0.17)] {
         let wheel = at(Form::Cylinder { radius: 0.1, height: 0.04 }, lead + x, 0.1, z, Paint::Wood);
         parts.push(wheel.turned(Quat::from_rotation_x(FRAC_PI_2)).role(Role::Wheel));
     }
     // No head: the props sit on the box.
-    let anchors =
-        Anchors { chest: Vec3::new(lead, middle, 0.0), front: 0.255, head: Vec3::new(lead, top, 0.0), crown: top };
+    let anchors = Anchors {
+        chest: Vec3::new(lead, middle, 0.0),
+        front: 0.255,
+        head: Vec3::new(lead, top, 0.0),
+        crown: top,
+    };
     (parts, anchors)
 }
 
@@ -281,7 +302,8 @@ mod tests {
     fn parts_stay_on_their_cell_and_above_ground() {
         for s in species::load() {
             // The Grande Chaîne spans two cells in length, and one across.
-            let (long, scale) = if s.carries.contains(&Carry::Boeufs) { (1.0, BOSS_SCALE) } else { (0.45, SCALE) };
+            let (long, scale) =
+                if s.carries.contains(&Carry::Boeufs) { (1.0, BOSS_SCALE) } else { (0.45, SCALE) };
             for part in parts(s.shape, &s.carries, s.hostile) {
                 let (min, max) = part.bounds();
                 assert!(min.y >= -0.001, "{} {part:?} sinks to {}", s.name, min.y);
@@ -304,16 +326,24 @@ mod tests {
         let ahead = |p: &&Part| p.at.translation.x > boxy.at.translation.x;
         let hide: Vec<&Part> = parts.iter().filter(|p| p.paint == Paint::Hide).collect();
         assert_eq!(hide.iter().filter(|p| p.role == Role::Leg).count(), 8, "two oxen of four legs");
-        assert_eq!(hide.iter().filter(|p| matches!(p.form, Form::Cuboid(_))).count(), 4, "a body and a head each");
+        assert_eq!(
+            hide.iter().filter(|p| matches!(p.form, Form::Cuboid(_))).count(),
+            4,
+            "a body and a head each"
+        );
         assert!(hide.iter().all(ahead), "the oxen walk in front of the cart: {hide:?}");
         assert_eq!(parts.iter().filter(|p| p.paint == Paint::Linen).count(), 4, "two horns each");
-        let yoke = parts.iter().find(|p| p.paint == Paint::Wood && matches!(p.form, Form::Cuboid(c) if c.z > 0.2));
+        let yoke = parts
+            .iter()
+            .find(|p| p.paint == Paint::Wood && matches!(p.form, Form::Cuboid(c) if c.z > 0.2));
         let yoke = yoke.expect("a yoke across both necks");
         assert!(ahead(&yoke) && yoke.at.translation.z == 0.0, "{yoke:?}");
-        let lamp = parts.iter().find(|p| p.paint == Paint::Lamp && matches!(p.form, Form::Sphere(_)));
+        let lamp =
+            parts.iter().find(|p| p.paint == Paint::Lamp && matches!(p.form, Form::Sphere(_)));
         assert!(lamp.expect("a sighting lantern").at.translation.x > boxy.at.translation.x);
         let top = boxy.bounds().1.y;
-        let head = parts.iter().find(|p| p.paint == Paint::Wood && matches!(p.form, Form::Sphere(_)));
+        let head =
+            parts.iter().find(|p| p.paint == Paint::Wood && matches!(p.form, Form::Sphere(_)));
         assert!(head.expect("Gast's head").bounds().0.y >= top, "Gast stands on the box");
         assert!(parts.iter().any(|p| p.paint == Paint::Slate), "in the Chancellerie's cloth");
         // The rompue phase keeps the same cart.
@@ -349,7 +379,8 @@ mod tests {
         let boss = of("grande_chaine");
         let legs: Vec<&Part> = boss.iter().filter(|p| p.role == Role::Leg).collect();
         for sign in [1.0, -1.0] {
-            let ox: Vec<&Part> = legs.iter().copied().filter(|p| p.at.translation.z * sign > 0.0).collect();
+            let ox: Vec<&Part> =
+                legs.iter().copied().filter(|p| p.at.translation.z * sign > 0.0).collect();
             assert_trots(&ox, "ox");
         }
         let stilts = of("echassier");
@@ -380,9 +411,15 @@ mod tests {
         let all = species::load();
         let chaineur = all.iter().find(|s| s.name == "chaineur").unwrap();
         let parts = parts(chaineur.shape, &chaineur.carries, chaineur.hostile);
-        assert!(parts.iter().any(|p| p.paint == Paint::Iron && matches!(p.form, Form::Torus { .. })), "{parts:?}");
+        assert!(
+            parts.iter().any(|p| p.paint == Paint::Iron && matches!(p.form, Form::Torus { .. })),
+            "{parts:?}"
+        );
         let head = parts.iter().find(|p| matches!(p.form, Form::Sphere(_))).unwrap();
-        let hat = parts.iter().find(|p| matches!(p.form, Form::Cuboid(_)) && p.paint == Paint::Wood).unwrap();
+        let hat = parts
+            .iter()
+            .find(|p| matches!(p.form, Form::Cuboid(_)) && p.paint == Paint::Wood)
+            .unwrap();
         assert!(hat.bounds().0.y >= head.at.translation.y, "hat {hat:?} under head {head:?}");
     }
 
@@ -440,9 +477,10 @@ mod tests {
     fn no_coat_is_sealing_wax() {
         let seal = crate::theme::SEAL.to_srgba();
         for s in species::load() {
-            let d =
-                ((s.color.0 - seal.red).powi(2) + (s.color.1 - seal.green).powi(2) + (s.color.2 - seal.blue).powi(2))
-                    .sqrt();
+            let d = ((s.color.0 - seal.red).powi(2)
+                + (s.color.1 - seal.green).powi(2)
+                + (s.color.2 - seal.blue).powi(2))
+            .sqrt();
             assert!(d > 0.25, "{} is {d:.2} from the seal", s.name);
         }
     }
@@ -455,7 +493,11 @@ mod tests {
             parts(s.shape, &s.carries, s.hostile)
         };
         let heads = |parts: &[Part]| -> Vec<Part> {
-            parts.iter().filter(|p| p.paint == Paint::Wood && matches!(p.form, Form::Sphere(_))).copied().collect()
+            parts
+                .iter()
+                .filter(|p| p.paint == Paint::Wood && matches!(p.form, Form::Sphere(_)))
+                .copied()
+                .collect()
         };
         let fuyard = of("fuyard");
         assert_eq!(count(&fuyard, Paint::Seal), 0);
@@ -466,7 +508,14 @@ mod tests {
 
         let jalonneur = of("jalonneur");
         let top = |p: &Part| p.bounds().1.y;
-        let head_top = jalonneur.iter().filter(|p| matches!(p.form, Form::Sphere(_))).map(top).fold(f32::MIN, f32::max);
-        assert!(jalonneur.iter().any(|p| top(p) > head_top + 0.05), "the jalon stands above the head");
+        let head_top = jalonneur
+            .iter()
+            .filter(|p| matches!(p.form, Form::Sphere(_)))
+            .map(top)
+            .fold(f32::MIN, f32::max);
+        assert!(
+            jalonneur.iter().any(|p| top(p) > head_top + 0.05),
+            "the jalon stands above the head"
+        );
     }
 }

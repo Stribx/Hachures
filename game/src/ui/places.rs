@@ -27,7 +27,14 @@ pub fn setup(mut commands: Commands, assets: Res<AssetServer>) {
 }
 
 /// A place's label: its node, colour and visibility, and whether it is struck out.
-type Label<'a> = (Entity, &'a PlaceLabel, &'a mut Node, &'a mut TextColor, &'a mut Visibility, Has<Strikethrough>);
+type Label<'a> = (
+    Entity,
+    &'a PlaceLabel,
+    &'a mut Node,
+    &'a mut TextColor,
+    &'a mut Visibility,
+    Has<Strikethrough>,
+);
 
 /// Writes the level's names over their cells (under the menus' paper), and strikes out the ones inked over.
 pub fn label_places(
@@ -61,7 +68,11 @@ pub fn label_places(
     for (entity, &PlaceLabel(k), mut node, mut color, mut visibility, struck) in &mut labels {
         *visibility = shown;
         let Some(place) = level.places.get(k) else { continue };
-        let center = place.at.iter().map(|&(x, y)| map::cell_pos(level.terrain.base(), y * width + x)).sum::<Vec3>()
+        let center = place
+            .at
+            .iter()
+            .map(|&(x, y)| map::cell_pos(level.terrain.base(), y * width + x))
+            .sum::<Vec3>()
             / place.at.len() as f32;
         if let Ok(p) = camera.world_to_viewport(at, center) {
             node.left = px(p.x - WIDTH / 2.0);
@@ -101,7 +112,10 @@ fn price(level: &Level, verdict: &Verdict, act: Act) -> Option<String> {
         Some(why) => Some(t(why).to_string()),
         None if act == Act::Biffer => level.refund(i).map(|r| tf("places.refund", &[&r])),
         // Only a tool that lays a tile scratches a name out; Gratter never does (docs, section 7).
-        None => act.lays().and(level.place_at(i)).map(|p| tf("places.erases", &[&t(&level.places[p].name)])),
+        None => act
+            .lays()
+            .and(level.place_at(i))
+            .map(|p| tf("places.erases", &[&t(&level.places[p].name)])),
     }
 }
 
@@ -149,6 +163,9 @@ mod tests {
     #[test]
     fn a_refusal_says_why() {
         let refused = Verdict { refusal: Some("refusal.nothing_to_biffer"), ..at(2) };
-        assert_eq!(price(&level(), &refused, act("biffer")), Some(t("refusal.nothing_to_biffer").to_string()));
+        assert_eq!(
+            price(&level(), &refused, act("biffer")),
+            Some(t("refusal.nothing_to_biffer").to_string())
+        );
     }
 }

@@ -20,9 +20,11 @@ pub(super) fn seams(grid: &Grid) -> Vec<(Vec3, Vec3)> {
     for i in 0..grid.tiles.len() {
         let (x, z) = grid.coords(i);
         let (x, z) = (x as f32, z as f32);
-        let neighbours = [(i + 1, ((0.5, -0.5), (0.5, 0.5))), (i + grid.width, ((-0.5, 0.5), (0.5, 0.5)))];
+        let neighbours =
+            [(i + 1, ((0.5, -0.5), (0.5, 0.5))), (i + grid.width, ((-0.5, 0.5), (0.5, 0.5)))];
         for (j, (a, b)) in neighbours {
-            let beside = if j == i + 1 { x as usize + 1 < grid.width } else { j < grid.tiles.len() };
+            let beside =
+                if j == i + 1 { x as usize + 1 < grid.width } else { j < grid.tiles.len() };
             let tile = grid.tiles[i];
             if !beside || !matches!(tile, Tile::Sol | Tile::SolBas) || grid.tiles[j] != tile {
                 continue;
@@ -47,7 +49,9 @@ pub(super) fn spawn_seams(
         (0..STITCHES).map(move |k| {
             let at = a.lerp(b, (k as f32 + 0.5) / STITCHES as f32);
             let along = (b - a).normalize();
-            Mesh::from(Cuboid::new(0.03, 0.012, 0.03).mesh()).scaled_by(Vec3::ONE + along.abs() * 3.5).translated_by(at)
+            Mesh::from(Cuboid::new(0.03, 0.012, 0.03).mesh())
+                .scaled_by(Vec3::ONE + along.abs() * 3.5)
+                .translated_by(at)
         })
     });
     let Some(mesh) = stitches.reduce(|mut all, stitch| {
@@ -83,7 +87,10 @@ mod tests {
             let (dx, dz) = if a.x == b.x { (0.5, 0.0) } else { (0.0, 0.5) };
             let cell = |x: f32, z: f32| z.round() as usize * grid.width + x.round() as usize;
             let (i, j) = (cell(mid.x - dx, mid.z - dz), cell(mid.x + dx, mid.z + dz));
-            assert!(fields[i].is_some() && fields[j].is_some() && fields[i] != fields[j], "{a} {b}");
+            assert!(
+                fields[i].is_some() && fields[j].is_some() && fields[i] != fields[j],
+                "{a} {b}"
+            );
             assert_eq!(grid.tiles[i], grid.tiles[j]);
         }
     }

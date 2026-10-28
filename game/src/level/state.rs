@@ -127,8 +127,9 @@ impl Level {
 
     /// The place at cell `i` whose name is still on the sheet, if any.
     pub fn place_at(&self, i: usize) -> Option<usize> {
-        (0..self.places.len())
-            .find(|&p| !self.erased.contains(&p) && self.places[p].covers(i, self.terrain.base().width))
+        (0..self.places.len()).find(|&p| {
+            !self.erased.contains(&p) && self.places[p].covers(i, self.terrain.base().width)
+        })
     }
 
     pub fn has(&self, skill: Skill) -> bool {
@@ -137,7 +138,10 @@ impl Level {
 
     /// Every wave sent and beaten.
     pub fn won(&self) -> bool {
-        self.lives > 0 && !self.waves.is_empty() && self.wave.number as usize == self.waves.len() && !self.wave.running
+        self.lives > 0
+            && !self.waves.is_empty()
+            && self.wave.number as usize == self.waves.len()
+            && !self.wave.running
     }
 
     /// Once won: the sceaux and Names go to the save, and the next level opens.

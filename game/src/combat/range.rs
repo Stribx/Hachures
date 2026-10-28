@@ -4,7 +4,8 @@ use std::f32::consts::FRAC_PI_2;
 
 use bevy::prelude::*;
 
-use super::towers::{Tower, Weapon};
+use super::stand::Tower;
+use super::towers::Weapon;
 use crate::ink::overlay::Pencil;
 use crate::ink::verdict::Verdict;
 use crate::ink::{Act, Selection, TOOLS};
@@ -15,7 +16,10 @@ use crate::theme::INK;
 /// Draws the circle flat on the board, in the pencil's dotted line, of the reach `weapon` has at `cell`,
 /// with or without a tower there yet.
 fn circle(gizmos: &mut Gizmos<Pencil>, level: &Level, cell: usize, weapon: Weapon, alpha: f32) {
-    let flat = Isometry3d::new(map::cell_pos(level.terrain.grid(), cell), Quat::from_rotation_x(FRAC_PI_2));
+    let flat = Isometry3d::new(
+        map::cell_pos(level.terrain.grid(), cell),
+        Quat::from_rotation_x(FRAC_PI_2),
+    );
     gizmos.circle(flat, level.terrain.reach(cell, weapon), INK.with_alpha(alpha)).resolution(64);
 }
 

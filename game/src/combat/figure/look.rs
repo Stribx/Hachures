@@ -58,7 +58,11 @@ fn mesh(form: Form) -> Mesh {
 }
 
 /// A limestone marker standing on the ground, capped in seal-red.
-fn borne(meshes: &mut Assets<Mesh>, stone: Handle<InkMaterial>, cap: Handle<InkMaterial>) -> Vec<Piece> {
+fn borne(
+    meshes: &mut Assets<Mesh>,
+    stone: Handle<InkMaterial>,
+    cap: Handle<InkMaterial>,
+) -> Vec<Piece> {
     let at = |y: f32| Transform::from_xyz(0.0, y - FLOAT, 0.0);
     vec![
         Piece {

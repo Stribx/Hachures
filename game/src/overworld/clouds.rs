@@ -51,7 +51,12 @@ pub(super) fn spawn_clouds(assets: Res<AssetServer>, mut commands: Commands) {
     commands
         .spawn((
             Clouds,
-            Node { width: percent(100), height: percent(100), position_type: PositionType::Absolute, ..default() },
+            Node {
+                width: percent(100),
+                height: percent(100),
+                position_type: PositionType::Absolute,
+                ..default()
+            },
             GlobalZIndex(100),
             Pickable::IGNORE,
             Visibility::Hidden,
@@ -59,7 +64,12 @@ pub(super) fn spawn_clouds(assets: Res<AssetServer>, mut commands: Commands) {
         .with_children(|layer| {
             layer.spawn((
                 Fill,
-                Node { width: percent(100), height: percent(100), position_type: PositionType::Absolute, ..default() },
+                Node {
+                    width: percent(100),
+                    height: percent(100),
+                    position_type: PositionType::Absolute,
+                    ..default()
+                },
                 BackgroundColor(SHEET.with_alpha(0.0)),
             ));
             for (i, &(x, y)) in closed.iter().enumerate() {
@@ -67,7 +77,10 @@ pub(super) fn spawn_clouds(assets: Res<AssetServer>, mut commands: Commands) {
                 let away = (closed - middle).try_normalize().unwrap_or(Vec2::Y);
                 layer.spawn((
                     Cloud { open: closed + away * 1.1, closed },
-                    Skin { image: assets.load(format!("ui/cloud-{}.png", i % 4 + 1)), slice: BorderRect::ZERO },
+                    Skin {
+                        image: assets.load(format!("ui/cloud-{}.png", i % 4 + 1)),
+                        slice: BorderRect::ZERO,
+                    },
                     Node {
                         width: percent(CLOUD_WIDTH * 100.0),
                         aspect_ratio: Some(CLOUD_RATIO),

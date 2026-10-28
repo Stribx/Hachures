@@ -103,7 +103,10 @@ impl Save {
 
     /// Nothing played yet: the Lexique may already hold the first sheet's tools.
     pub fn is_new(&self) -> bool {
-        self.reached == 0 && self.levels.is_empty() && self.skills.is_empty() && self.choices.is_empty()
+        self.reached == 0
+            && self.levels.is_empty()
+            && self.skills.is_empty()
+            && self.choices.is_empty()
     }
 
     pub fn sceaux(&self) -> u32 {
@@ -145,7 +148,12 @@ mod tests {
         assert_eq!(storage::read::<Save>(&path), None, "no save yet");
 
         let mut save = Save { reached: 2, skills: vec![Skill::MineDePlomb], ..default() };
-        *save.record_mut(1) = Record { won: true, challenge: true, names: 3, erased: vec!["place.pre_commun".into()] };
+        *save.record_mut(1) = Record {
+            won: true,
+            challenge: true,
+            names: 3,
+            erased: vec!["place.pre_commun".into()],
+        };
         save.choices.insert("refuge".into(), "bois".into());
         save.seen.insert("tool.arbalete".into());
         storage::write(&path, &save).unwrap();
@@ -157,7 +165,11 @@ mod tests {
         )
         .unwrap();
         let old = old.upgrade();
-        assert_eq!((old.reached, old.levels.len(), old.sceaux()), (3, 3, 4), "before the prologue: one level up");
+        assert_eq!(
+            (old.reached, old.levels.len(), old.sceaux()),
+            (3, 3, 4),
+            "before the prologue: one level up"
+        );
         let settings_only: Save = ron::from_str("(settings: (music: 40))").unwrap();
         assert_eq!(settings_only.upgrade().reached, 0, "not started: the prologue comes first");
         assert_eq!(Save::default().upgrade(), Save::default(), "a new save is never moved");
@@ -165,11 +177,19 @@ mod tests {
             "(version: 1, reached: 2, levels: [(won: true, challenge: false, names: 0, erased: [\"le Pont du Bief\"])])",
         )
         .unwrap();
-        assert_eq!(french.upgrade().levels[0].erased, ["place.pont_du_bief"], "the French name becomes its key");
+        assert_eq!(
+            french.upgrade().levels[0].erased,
+            ["place.pont_du_bief"],
+            "the French name becomes its key"
+        );
 
         std::fs::write(&path, "not a save").unwrap();
         assert_eq!(storage::read::<Save>(&path), None);
-        assert_eq!(std::fs::read_to_string(dir.join("save.ron.bak")).unwrap(), "not a save", "kept aside, not lost");
+        assert_eq!(
+            std::fs::read_to_string(dir.join("save.ron.bak")).unwrap(),
+            "not a save",
+            "kept aside, not lost"
+        );
         let _ = std::fs::remove_dir_all(&dir);
     }
 

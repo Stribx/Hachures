@@ -27,7 +27,8 @@ pub(super) fn update_margin(
     if *written == now {
         return;
     }
-    let grew = written.is_some_and(|(index, len, _)| index == level.index && len < level.margin.len());
+    let grew =
+        written.is_some_and(|(index, len, _)| index == level.index && len < level.margin.len());
     *written = now;
     let (margin, mut node) = margin.into_inner();
     node.display = if level.margin.is_empty() { Display::None } else { Display::Flex };

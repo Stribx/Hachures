@@ -4,7 +4,7 @@ use bevy::prelude::*;
 
 use super::camera::{CameraRig, aim, drive, zoom};
 use super::clouds::{ink_clouds, place_clouds, spawn_clouds};
-use super::plan::Pawn;
+use super::pawn::Pawn;
 use crate::campaign::LoadLevel;
 use crate::level::Level;
 use crate::schedule::Screen;
@@ -57,7 +57,13 @@ fn start_trip(
         return;
     }
     let phase = if *screen.get() == Screen::Plan { Phase::Dive } else { Phase::Cover };
-    commands.insert_resource(Trip { to: travel.to, again: travel.again, phase, t: 0.0, cover: 0.0 });
+    commands.insert_resource(Trip {
+        to: travel.to,
+        again: travel.again,
+        phase,
+        t: 0.0,
+        cover: 0.0,
+    });
 }
 
 /// Dive, close the clouds, swap the level behind them, open them on the new board.
@@ -87,7 +93,8 @@ fn trip(
             trip.cover = ease_out(trip.t / CLOSE);
             if trip.t >= CLOSE {
                 // The level on the board is resumed if it is the one asked for and still under way.
-                let resume = trip.to == level.index && !trip.again && !level.finished && level.lives > 0;
+                let resume =
+                    trip.to == level.index && !trip.again && !level.finished && level.lives > 0;
                 if !resume {
                     load.write(LoadLevel(trip.to));
                 }

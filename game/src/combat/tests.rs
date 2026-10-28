@@ -11,7 +11,8 @@ use super::figure::exit::Exit;
 use super::figure::kit::BOSS_REAR;
 use super::figure::{EnemyLook, ExitKind, Stride, animate, exits, spawn_figure};
 use super::shards::Shard;
-use super::towers::{Tower, Weapon, fire};
+use super::stand::Tower;
+use super::towers::{Weapon, fire};
 use super::{Enemy, Shots};
 use crate::campaign::save::Save;
 use crate::ink::TOOLS;
@@ -41,7 +42,10 @@ fn app_with(level: Level) -> App {
 fn walker(level: &Level, species: &str, hp: f32) -> (Enemy, Transform) {
     let species = index_of(&level.species, species).unwrap();
     let cell = level.terrain.grid().spawns[0];
-    (Enemy::new(species, hp, cell), Transform::from_translation(map::cell_pos(level.terrain.grid(), cell)))
+    (
+        Enemy::new(species, hp, cell),
+        Transform::from_translation(map::cell_pos(level.terrain.grid(), cell)),
+    )
 }
 
 fn run(app: &mut App, seconds: u32) {
@@ -85,8 +89,10 @@ fn lanterne_slows() {
     let gens = walker(&level, "gens_du_col", 100.0);
     let tower_at = map::cell_pos(level.terrain.grid(), 1);
     let mut app = app_with(level);
-    app.world_mut()
-        .spawn((Tower { cell: 1, weapon: Weapon::Lanterne, ready_in: 0.0 }, Transform::from_translation(tower_at)));
+    app.world_mut().spawn((
+        Tower { cell: 1, weapon: Weapon::Lanterne, ready_in: 0.0 },
+        Transform::from_translation(tower_at),
+    ));
     let gens = app.world_mut().spawn(gens).id();
     app.update();
     let enemy = app.world().get::<Enemy>(gens).unwrap();
@@ -110,8 +116,12 @@ fn a_borne_off_the_map_breaks() {
     }
     app.world_mut().resource_mut::<Level>().alter([(1, Edit::DropBorne)]);
     app.update();
-    let left: Vec<usize> =
-        app.world_mut().query_filtered::<&Enemy, With<Borne>>().iter(app.world()).map(|e| e.cell).collect();
+    let left: Vec<usize> = app
+        .world_mut()
+        .query_filtered::<&Enemy, With<Borne>>()
+        .iter(app.world())
+        .map(|e| e.cell)
+        .collect();
     assert_eq!(left, vec![3]);
 }
 
@@ -149,7 +159,11 @@ fn grande_chaine_phases() {
     let level = app.world().resource::<Level>();
     let rompue = index_of(&level.species, "grande_chaine_rompue").unwrap();
     assert_eq!(level.boss.as_deref(), Some("boss.grande_chaine.chaine_rompue"));
-    assert_eq!(app.world().get::<Enemy>(boss).unwrap().species, rompue, "la Chaîne rompue reads l'Ombre");
+    assert_eq!(
+        app.world().get::<Enemy>(boss).unwrap().species,
+        rompue,
+        "la Chaîne rompue reads l'Ombre"
+    );
 }
 
 /// The boss drags twenty links along the road its cart drove, and they go with it.
@@ -168,8 +182,12 @@ fn the_chain_follows_and_goes_with_the_boss() {
     let boss = app.world_mut().spawn((boss, Boss::default())).id();
 
     run(&mut app, 2);
-    let links: Vec<Vec3> =
-        app.world_mut().query::<(&Link, &Transform)>().iter(app.world()).map(|(_, t)| t.translation).collect();
+    let links: Vec<Vec3> = app
+        .world_mut()
+        .query::<(&Link, &Transform)>()
+        .iter(app.world())
+        .map(|(_, t)| t.translation)
+        .collect();
     assert_eq!(links.len(), 20);
     let boss_at = app.world().get::<Transform>(boss).unwrap().translation;
     let rear = boss_at - Vec3::X * BOSS_REAR;
@@ -178,7 +196,11 @@ fn the_chain_follows_and_goes_with_the_boss() {
 
     app.world_mut().despawn(boss);
     app.update();
-    assert_eq!(app.world_mut().query::<&Link>().iter(app.world()).count(), 0, "the chain goes with the boss");
+    assert_eq!(
+        app.world_mut().query::<&Link>().iter(app.world()).count(),
+        0,
+        "the chain goes with the boss"
+    );
 }
 
 /// A naive player, to balance the levels without playing them: before each wave it spends
@@ -189,8 +211,10 @@ fn the_chain_follows_and_goes_with_the_boss() {
 #[test]
 #[ignore]
 fn balance() {
-    let mut table =
-        format!("{:<32} {:>5} {:>5} {:>5} {:>7} {:>6}\n", "level", "won", "Rôle", "Noms", "towers", "sépia");
+    let mut table = format!(
+        "{:<32} {:>5} {:>5} {:>5} {:>7} {:>6}\n",
+        "level", "won", "Rôle", "Noms", "towers", "sépia"
+    );
     for index in 0..LEVELS.len() {
         let mut save = Save::default();
         save.choices.insert("refuge".into(), "moulin".into());
@@ -268,20 +292,28 @@ fn bot_build(app: &mut App) -> usize {
             let stats = &level.tower_stats[&TOOLS[t].act.weapon().unwrap()];
             let dps = stats.damage / stats.cooldown * if stats.splash > 0.0 { 2.0 } else { 1.0 };
             for cell in 0..level.terrain.grid().tiles.len() {
-                let covered = route.iter().filter(|&&c| level.terrain.grid().within(c, cell, stats.range)).count();
+                let covered = route
+                    .iter()
+                    .filter(|&&c| level.terrain.grid().within(c, cell, stats.range))
+                    .count();
                 if covered > 0 {
                     candidates.push((covered as f32 * dps / cost as f32, t, cell));
                 }
             }
         }
         candidates.sort_by(|a, b| b.0.total_cmp(&a.0));
-        let Some(&(_, t, cell)) = candidates.iter().find(|&&(_, t, cell)| level.refusal(cell, t).is_none()) else {
+        let Some(&(_, t, cell)) =
+            candidates.iter().find(|&&(_, t, cell)| level.refusal(cell, t).is_none())
+        else {
             return built;
         };
         level.ink(cell, t);
         let weapon = TOOLS[t].act.weapon().unwrap();
         let (x, z) = level.terrain.grid().coords(cell);
-        app.world_mut().spawn((Tower { cell, weapon, ready_in: 0.0 }, Transform::from_xyz(x as f32, 0.8, z as f32)));
+        app.world_mut().spawn((
+            Tower { cell, weapon, ready_in: 0.0 },
+            Transform::from_xyz(x as f32, 0.8, z as f32),
+        ));
         built += 1;
     }
 }
@@ -363,7 +395,12 @@ fn turns_ease_without_overshoot() {
 
 /// The kinds of the ghosts standing, and how many shards fly.
 fn ghosts_and_shards(app: &mut App) -> (Vec<ExitKind>, usize) {
-    let kinds = app.world_mut().query_filtered::<&Exit, Without<Enemy>>().iter(app.world()).map(|e| e.kind).collect();
+    let kinds = app
+        .world_mut()
+        .query_filtered::<&Exit, Without<Enemy>>()
+        .iter(app.world())
+        .map(|e| e.kind)
+        .collect();
     (kinds, app.world_mut().query::<&Shard>().iter(app.world()).count())
 }
 
@@ -432,7 +469,7 @@ fn a_new_species_is_noted_once() {
 /// A biffed tower comes down, base and weapon; the tower beside it stays.
 #[test]
 fn a_biffed_tower_comes_down() {
-    use super::towers::{TowerBase, take_down};
+    use super::stand::{TowerBase, take_down};
     use crate::ink::TowerBiffed;
     let mut app = App::new();
     app.add_plugins(MinimalPlugins).add_message::<TowerBiffed>().add_systems(Update, take_down);

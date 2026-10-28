@@ -39,25 +39,60 @@ pub const BRANCHES: [Branch; 3] = [
     Branch {
         name: n_("skill.trait"),
         nodes: [
-            node(Skill::MineDePlomb, n_("skill.mine_de_plomb.name"), 1, n_("skill.mine_de_plomb.effect")),
+            node(
+                Skill::MineDePlomb,
+                n_("skill.mine_de_plomb.name"),
+                1,
+                n_("skill.mine_de_plomb.effect"),
+            ),
             node(Skill::Equerre, n_("skill.equerre.name"), 2, n_("skill.equerre.effect")),
-            node(Skill::ContreVisee, n_("skill.contre_visee.name"), 3, n_("skill.contre_visee.effect")),
+            node(
+                Skill::ContreVisee,
+                n_("skill.contre_visee.name"),
+                3,
+                n_("skill.contre_visee.effect"),
+            ),
         ],
     },
     Branch {
         name: n_("skill.relief"),
         nodes: [
-            node(Skill::BoueProfonde, n_("skill.boue_profonde.name"), 1, n_("skill.boue_profonde.effect")),
-            node(Skill::RoncesMeres, n_("skill.ronces_meres.name"), 2, n_("skill.ronces_meres.effect")),
+            node(
+                Skill::BoueProfonde,
+                n_("skill.boue_profonde.name"),
+                1,
+                n_("skill.boue_profonde.effect"),
+            ),
+            node(
+                Skill::RoncesMeres,
+                n_("skill.ronces_meres.name"),
+                2,
+                n_("skill.ronces_meres.effect"),
+            ),
             node(Skill::Fascines, n_("skill.fascines.name"), 3, n_("skill.fascines.effect")),
         ],
     },
     Branch {
         name: n_("skill.legende"),
         nodes: [
-            node(Skill::LectureFine, n_("skill.lecture_fine.name"), 1, n_("skill.lecture_fine.effect")),
-            node(Skill::SceauxBrises, n_("skill.sceaux_brises.name"), 2, n_("skill.sceaux_brises.effect")),
-            node(Skill::OmbrePortee, n_("skill.ombre_portee.name"), 3, n_("skill.ombre_portee.effect")),
+            node(
+                Skill::LectureFine,
+                n_("skill.lecture_fine.name"),
+                1,
+                n_("skill.lecture_fine.effect"),
+            ),
+            node(
+                Skill::SceauxBrises,
+                n_("skill.sceaux_brises.name"),
+                2,
+                n_("skill.sceaux_brises.effect"),
+            ),
+            node(
+                Skill::OmbrePortee,
+                n_("skill.ombre_portee.name"),
+                3,
+                n_("skill.ombre_portee.effect"),
+            ),
         ],
     },
 ];

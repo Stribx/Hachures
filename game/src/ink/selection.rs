@@ -14,7 +14,9 @@ pub fn plugin(app: &mut App) {
     app.add_systems(Startup, init)
         .add_systems(Update, (hover, reset.after(load_level)).in_set(Step::Input))
         // No stale pencil line behind the menus.
-        .add_systems(OnExit(Screen::Playing), |mut selection: ResMut<Selection>| selection.hovered = None);
+        .add_systems(OnExit(Screen::Playing), |mut selection: ResMut<Selection>| {
+            selection.hovered = None
+        });
 }
 
 #[derive(Resource, Debug, Clone, PartialEq)]
@@ -46,7 +48,11 @@ fn init(mut commands: Commands, level: Res<Level>) {
 }
 
 /// A level was just loaded: back to its first tool and species.
-pub(super) fn reset(mut loads: MessageReader<LoadLevel>, level: Res<Level>, mut selection: ResMut<Selection>) {
+pub(super) fn reset(
+    mut loads: MessageReader<LoadLevel>,
+    level: Res<Level>,
+    mut selection: ResMut<Selection>,
+) {
     if loads.read().last().is_some() {
         *selection = Selection::for_level(&level);
     }
@@ -86,6 +92,9 @@ mod tests {
     #[test]
     fn a_bare_level_starts_on_the_first_tool_and_species() {
         let level = Level::new(Grid::parse("S...M"), species::load());
-        assert_eq!(Selection::for_level(&level), Selection { tool: 0, shown: 0, calque: false, hovered: None });
+        assert_eq!(
+            Selection::for_level(&level),
+            Selection { tool: 0, shown: 0, calque: false, hovered: None }
+        );
     }
 }

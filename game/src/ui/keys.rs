@@ -40,6 +40,10 @@ pub(super) fn speed(fast: Res<Fast>, screen: Res<State<Screen>>, mut time: ResMu
 
 /// Shows the route of the next species the level sends.
 pub(super) fn next_species(selection: &mut Selection, level: &Level) {
-    let next = level.present.iter().position(|&k| k == selection.shown).map_or(0, |p| (p + 1) % level.present.len());
+    let next = level
+        .present
+        .iter()
+        .position(|&k| k == selection.shown)
+        .map_or(0, |p| (p + 1) % level.present.len());
     selection.shown = level.present[next];
 }

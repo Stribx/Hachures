@@ -86,8 +86,9 @@ impl Settings {
         if let Some(settings) = storage::load(Settings::FILE) {
             return settings;
         }
-        let settings =
-            storage::load::<Legacy>(crate::campaign::save::Save::FILE).and_then(|l| l.settings).unwrap_or_default();
+        let settings = storage::load::<Legacy>(crate::campaign::save::Save::FILE)
+            .and_then(|l| l.settings)
+            .unwrap_or_default();
         settings.store();
         settings
     }
@@ -120,7 +121,9 @@ impl Settings {
 
     /// The quality preset these graphics match, an index of `PRESETS`; none if the player tuned them by hand.
     pub(crate) fn preset(&self) -> Option<usize> {
-        PRESETS.iter().position(|&p| p == (self.shadows, self.occlusion, self.anti_aliasing, self.depth_of_field))
+        PRESETS.iter().position(|&p| {
+            p == (self.shadows, self.occlusion, self.anti_aliasing, self.depth_of_field)
+        })
     }
 }
 
@@ -137,7 +140,8 @@ mod tests {
 
     #[test]
     fn volume_follows_a_curve_and_the_focus() {
-        let at = |master, music| Settings { master, music, ..default() }.music_volume(true).to_linear();
+        let at =
+            |master, music| Settings { master, music, ..default() }.music_volume(true).to_linear();
         assert_eq!(at(100, 0), 0.0);
         assert_eq!(at(100, 100), 1.0);
         assert_eq!(at(100, 50), 0.25);
@@ -154,6 +158,9 @@ mod tests {
         let older: Legacy = ron::from_str("(reached: 1)").unwrap();
         assert_eq!(older.settings, None, "a save from before the settings: the defaults");
         let odd: Legacy = ron::from_str("(reached: 1, settings: (music: \"loud\"))").unwrap();
-        assert_eq!(odd.settings, None, "settings it cannot read are dropped, the save is still read");
+        assert_eq!(
+            odd.settings, None,
+            "settings it cannot read are dropped, the save is still read"
+        );
     }
 }

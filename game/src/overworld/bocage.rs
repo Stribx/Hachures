@@ -63,7 +63,8 @@ pub(super) fn spawn_bocage(
         felt.extension.uniform.wind = wind;
         materials.add(felt)
     };
-    let (hedge, wheat) = (material(HEDGE_WIND, &mut materials), material(WHEAT_WIND, &mut materials));
+    let (hedge, wheat) =
+        (material(HEDGE_WIND, &mut materials), material(WHEAT_WIND, &mut materials));
     let strips = ((EAST - WEST) / STRIP).ceil() as usize;
     let mut parts: Vec<(Vec<Mesh>, Vec<Mesh>)> = (0..strips).map(|_| Default::default()).collect();
     for g in growth() {
@@ -71,8 +72,12 @@ pub(super) fn spawn_bocage(
         let strip = &mut parts[((p.x - WEST) / STRIP) as usize];
         let foot = Vec3::new(p.x, height(p) - 0.05, p.y);
         match g {
-            Growth::Hedge(_) => strip.0.extend(hedge_lumps(p).into_iter().map(|m| m.translated_by(foot))),
-            Growth::Wheat(_) => strip.1.extend(wheat_stalks(p).into_iter().map(|m| m.translated_by(foot))),
+            Growth::Hedge(_) => {
+                strip.0.extend(hedge_lumps(p).into_iter().map(|m| m.translated_by(foot)))
+            }
+            Growth::Wheat(_) => {
+                strip.1.extend(wheat_stalks(p).into_iter().map(|m| m.translated_by(foot)))
+            }
         }
     }
     for (hedges, stalks) in parts {
@@ -83,7 +88,11 @@ pub(super) fn spawn_bocage(
             }) else {
                 continue;
             };
-            commands.spawn((Mesh3d(meshes.add(mesh)), MeshMaterial3d(material.clone()), ChildOf(*root)));
+            commands.spawn((
+                Mesh3d(meshes.add(mesh)),
+                MeshMaterial3d(material.clone()),
+                ChildOf(*root),
+            ));
         }
     }
 }
@@ -96,7 +105,11 @@ fn hedge_lumps(p: Vec2) -> Vec<Mesh> {
         .into_iter()
         .map(|(shift, r)| {
             let mesh = Sphere::new(r).mesh().ico(1).expect("a small ico sphere");
-            let mesh = mesh.scaled_by(Vec3::new(1.0, 0.85, 1.0)).translated_by(Vec3::new(shift, r * 0.8, -shift * 0.6));
+            let mesh = mesh.scaled_by(Vec3::new(1.0, 0.85, 1.0)).translated_by(Vec3::new(
+                shift,
+                r * 0.8,
+                -shift * 0.6,
+            ));
             weighed(mesh, green, 0.75)
         })
         .collect()
@@ -109,7 +122,8 @@ fn wheat_stalks(p: Vec2) -> Vec<Mesh> {
         .flat_map(|k| {
             let at = Vec3::new(hash(p + k as f32) - 0.5, 0.0, hash(p - k as f32) - 0.5) * 0.6;
             let h = 0.45 + hash(p * 2.0 + k as f32) * 0.15;
-            let stalk = Mesh::from(Cuboid::new(0.05, h, 0.05)).translated_by(at + Vec3::Y * h / 2.0);
+            let stalk =
+                Mesh::from(Cuboid::new(0.05, h, 0.05)).translated_by(at + Vec3::Y * h / 2.0);
             let head = Mesh::from(Cuboid::new(0.09, 0.16, 0.09)).translated_by(at + Vec3::Y * h);
             [weighed(stalk, WHEAT, 0.7), weighed(head, ear, 0.7)]
         })
@@ -119,8 +133,12 @@ fn wheat_stalks(p: Vec2) -> Vec<Mesh> {
 /// `mesh` coloured, its vertices' alpha the share of the wind they take: 0 at the ground, 1 at `tallest`.
 fn weighed(mesh: Mesh, color: Color, tallest: f32) -> Mesh {
     let [r, g, b, _] = color.to_linear().to_f32_array();
-    let Some(positions) = mesh.attribute(Mesh::ATTRIBUTE_POSITION).and_then(|p| p.as_float3()) else { return mesh };
-    let colors: Vec<[f32; 4]> = positions.iter().map(|p| [r, g, b, (p[1] / tallest).clamp(0.0, 1.0)]).collect();
+    let Some(positions) = mesh.attribute(Mesh::ATTRIBUTE_POSITION).and_then(|p| p.as_float3())
+    else {
+        return mesh;
+    };
+    let colors: Vec<[f32; 4]> =
+        positions.iter().map(|p| [r, g, b, (p[1] / tallest).clamp(0.0, 1.0)]).collect();
     mesh.with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, colors)
 }
 
@@ -133,7 +151,8 @@ mod tests {
     #[test]
     fn the_bocage_keeps_off_the_sheets_and_the_road() {
         let growth = growth();
-        let (hedges, wheat) = (growth.iter().filter(|g| matches!(g, Growth::Hedge(_))).count(), growth.len());
+        let (hedges, wheat) =
+            (growth.iter().filter(|g| matches!(g, Growth::Hedge(_))).count(), growth.len());
         assert!(hedges > 300 && wheat > hedges, "{hedges} hedges of {wheat}");
         for g in growth {
             let (Growth::Hedge(p) | Growth::Wheat(p)) = g;

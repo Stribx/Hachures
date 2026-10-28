@@ -51,7 +51,8 @@ impl Level {
         self.wave = Wave { number, running: true, queue, ..default() };
         self.lives_at_wave_start = self.lives;
         // Scripted changes due now fall on the empty map.
-        let (due, rest): (Vec<_>, _) = std::mem::take(&mut self.changes).into_iter().partition(|c| c.wave == number);
+        let (due, rest): (Vec<_>, _) =
+            std::mem::take(&mut self.changes).into_iter().partition(|c| c.wave == number);
         self.changes = rest;
         let width = self.terrain.base().width;
         self.alter(due.iter().flat_map(|c| c.edits(width)));
@@ -132,10 +133,18 @@ mod tests {
         let (c, e, boss) = (k("chaineur"), k("echassier"), k("grande_chaine"));
         let mut queue = vec![c, c, c, e, c, c, c, e];
         level.mix(&mut queue);
-        assert_eq!(queue, vec![c, c, e, e, c, c, e, e], "taut: every third of the commonest becomes another");
+        assert_eq!(
+            queue,
+            vec![c, c, e, e, c, c, e, e],
+            "taut: every third of the commonest becomes another"
+        );
         let mut lone = vec![c, c, c, boss];
         level.mix(&mut lone);
-        assert_eq!(lone, vec![c, c, c, boss], "nothing else to mix with: a species sent alone stays alone");
+        assert_eq!(
+            lone,
+            vec![c, c, c, boss],
+            "nothing else to mix with: a species sent alone stays alone"
+        );
 
         level.tension = 0;
         level.start_wave();

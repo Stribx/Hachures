@@ -17,7 +17,8 @@ pub use state::{Inked, Level, Walker};
 
 pub fn plugin(app: &mut App) {
     // Once the Rôle is lost, the sheet stands still until Enter plays again.
-    app.configure_sets(Update, Step::Simulate.run_if(alive)).add_systems(Update, finish_level.in_set(Step::Simulate));
+    app.configure_sets(Update, Step::Simulate.run_if(alive))
+        .add_systems(Update, finish_level.in_set(Step::Simulate));
 }
 
 /// Some of the Rôle is left: the simulation goes on.
@@ -70,13 +71,22 @@ mod tests {
         for save in [Save::default(), other] {
             for index in 0..LEVELS.len() {
                 let level = Level::load(index, &save);
-                assert!((1..=12).contains(&level.waves.len()), "{}: up to 12 waves (docs)", level.name);
+                assert!(
+                    (1..=12).contains(&level.waves.len()),
+                    "{}: up to 12 waves (docs)",
+                    level.name
+                );
                 for (k, species) in level.species.iter().enumerate() {
                     if !level.waves.iter().flatten().any(|&s| s == k) {
                         continue;
                     }
                     let spawns = level.terrain.base().spawns_for(species);
-                    assert!(!spawns.is_empty(), "{}: nowhere for {} to spawn", level.name, species.name);
+                    assert!(
+                        !spawns.is_empty(),
+                        "{}: nowhere for {} to spawn",
+                        level.name,
+                        species.name
+                    );
                     let event = &level.world().event;
                     let later = level.after_changes();
                     let base = level.terrain.base();
@@ -103,7 +113,12 @@ mod tests {
                 for &(x, y) in &place.at {
                     let base = level.terrain.base();
                     let i = y * base.width + x;
-                    assert!(base.tiles[i].buildable(), "{}: {} at ({x}, {y})", level.name, place.name);
+                    assert!(
+                        base.tiles[i].buildable(),
+                        "{}: {} at ({x}, {y})",
+                        level.name,
+                        place.name
+                    );
                 }
             }
         }
@@ -124,7 +139,10 @@ mod tests {
         let (col, boss_level) = (at("2-1"), at("1-4"));
         assert_eq!(names(&col), ["chaineur", "gens_du_col", "harde"]);
         let boss = names(&boss_level);
-        assert!(boss.contains(&"grande_chaine") && boss.contains(&"grande_chaine_rompue"), "{boss:?}");
+        assert!(
+            boss.contains(&"grande_chaine") && boss.contains(&"grande_chaine_rompue"),
+            "{boss:?}"
+        );
     }
 
     /// A replay can't rewrite the Rôle: the first win's Names and scratched-out places stand.
@@ -144,7 +162,9 @@ mod tests {
     /// Handing the deserters over in 2-2 drops the last two waves of 2-3, and costs a Name.
     #[test]
     fn deserters_choice_shortens_the_escort() {
-        let escort = (0..LEVELS.len()).find(|&i| Level::load(i, &Save::default()).name == "level.2-3.name").unwrap();
+        let escort = (0..LEVELS.len())
+            .find(|&i| Level::load(i, &Save::default()).name == "level.2-3.name")
+            .unwrap();
         let mut save = Save::default();
         save.choices.insert("deserteurs".into(), "escorter".into());
         let full = Level::load(escort, &save);

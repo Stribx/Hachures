@@ -14,7 +14,9 @@ use crate::map::grid::{Grid, Tile};
 pub fn parade_cells(grid: &Grid, n: usize) -> Vec<usize> {
     let free = |i: usize| {
         grid.tiles[i] == Tile::Sol
-            && ![&grid.spawns, &grid.fuyard_spawns, &grid.bornes].iter().any(|marks| marks.contains(&i))
+            && ![&grid.spawns, &grid.fuyard_spawns, &grid.bornes]
+                .iter()
+                .any(|marks| marks.contains(&i))
             && !grid.goals.values().any(|&g| g == i)
     };
     let mut rows: Vec<usize> = (0..grid.height).collect();
@@ -31,7 +33,12 @@ pub fn parade_cells(grid: &Grid, n: usize) -> Vec<usize> {
 }
 
 /// Once the level is loaded, one figure of each species in a row: no `Enemy`, so none walks, is shot at or holds a wave.
-pub fn parade(mut done: Local<u32>, level: Res<Level>, look: Res<EnemyLook>, mut commands: Commands) {
+pub fn parade(
+    mut done: Local<u32>,
+    level: Res<Level>,
+    look: Res<EnemyLook>,
+    mut commands: Commands,
+) {
     // Wait for the level asked for to be loaded, as `demo` does.
     *done += 1;
     if *done != 3 || env("HACHURES_PARADE").is_none() {
@@ -43,7 +50,8 @@ pub fn parade(mut done: Local<u32>, level: Res<Level>, look: Res<EnemyLook>, mut
     for (index, (species, cell)) in level.species.iter().zip(cells).enumerate() {
         let at = map::cell_pos(grid, cell);
         let is_boss = boss.is_some_and(|b| b.phases.iter().any(|p| p.species == species.name));
-        let figure = spawn_figure(&mut commands, &look, index, at, if is_boss { BOSS_SCALE } else { SCALE });
+        let figure =
+            spawn_figure(&mut commands, &look, index, at, if is_boss { BOSS_SCALE } else { SCALE });
         commands.entity(figure).insert(LevelEntity);
     }
 }

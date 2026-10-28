@@ -77,7 +77,9 @@ mod tests {
 
     #[test]
     fn the_wind_always_blows() {
-        for (world, event_on, wet) in [(0, false, false), (0, true, true), (1, false, true), (1, true, false)] {
+        for (world, event_on, wet) in
+            [(0, false, false), (0, true, true), (1, false, true), (1, true, false)]
+        {
             assert!(ambience(world, event_on, wet)[WIND] > 0.0);
         }
     }
@@ -104,7 +106,10 @@ mod tests {
     #[test]
     fn the_cols_have_their_cold_wind() {
         assert!(ambience(1, false, false)[SNOW] > 0.0);
-        assert!(ambience(1, true, false)[SNOW] > ambience(1, false, false)[SNOW], "louder in le Gel");
+        assert!(
+            ambience(1, true, false)[SNOW] > ambience(1, false, false)[SNOW],
+            "louder in le Gel"
+        );
         assert_eq!(ambience(0, true, true)[SNOW], 0.0);
     }
 }

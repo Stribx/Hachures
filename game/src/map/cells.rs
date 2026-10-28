@@ -4,10 +4,11 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 
+use super::barricade::barricade_shape;
 use super::decor::palisade_shape;
 use super::fields::ground;
 use super::grid::{Grid, Tile};
-use super::props::{Props, barricade_shape, prop_parts, spawn_prop};
+use super::props::{Props, prop_parts, spawn_prop};
 use super::seams::spawn_seams;
 use crate::campaign::skills::Skill;
 use crate::level::Level;
@@ -31,7 +32,9 @@ fn is_water(tile: Tile) -> bool {
 fn crossing(grid: &Grid, i: usize) -> bool {
     let (x, z) = grid.coords(i);
     let wet = |dx: isize, dz: isize| {
-        let (Some(nx), Some(nz)) = (x.checked_add_signed(dx), z.checked_add_signed(dz)) else { return false };
+        let (Some(nx), Some(nz)) = (x.checked_add_signed(dx), z.checked_add_signed(dz)) else {
+            return false;
+        };
         nx < grid.width && nz < grid.height && is_water(grid.tiles[nz * grid.width + nx])
     };
     !is_water(grid.tiles[i])
@@ -108,11 +111,17 @@ fn lay_water_lines(
     images: &mut Assets<Image>,
     materials: &mut Assets<InkMaterial>,
 ) -> Vec4 {
-    let wet: Vec<bool> = (0..grid.tiles.len()).map(|i| is_water(grid.tiles[i]) || crossing(grid, i)).collect();
-    let (image, rect) = shore_image(Vec2::splat(-0.5), Vec2::new(grid.width as f32, grid.height as f32), 8.0, |p| {
-        let (x, z) = ((p.x + 0.5) as usize, (p.y + 0.5) as usize);
-        x < grid.width && z < grid.height && wet[z * grid.width + x]
-    });
+    let wet: Vec<bool> =
+        (0..grid.tiles.len()).map(|i| is_water(grid.tiles[i]) || crossing(grid, i)).collect();
+    let (image, rect) = shore_image(
+        Vec2::splat(-0.5),
+        Vec2::new(grid.width as f32, grid.height as f32),
+        8.0,
+        |p| {
+            let (x, z) = ((p.x + 0.5) as usize, (p.y + 0.5) as usize);
+            x < grid.width && z < grid.height && wet[z * grid.width + x]
+        },
+    );
     if drawn.shore == Handle::default() {
         drawn.shore = images.add(image);
     } else {
@@ -120,7 +129,10 @@ fn lay_water_lines(
     }
     for (_, material) in drawn.made.values() {
         // `get_mut` marks the material changed, so only when it does.
-        if materials.get(material).is_some_and(|m| m.extension.shore.is_some() && m.extension.uniform.shore != rect) {
+        if materials
+            .get(material)
+            .is_some_and(|m| m.extension.shore.is_some() && m.extension.uniform.shore != rect)
+        {
             materials.get_mut(material).expect("read just above").extension.uniform.shore = rect;
         }
     }
@@ -165,7 +177,12 @@ fn block(
 }
 
 /// The model's base: a slab of waxed walnut under the relief.
-fn spawn_base(commands: &mut Commands, grid: &Grid, meshes: &mut Assets<Mesh>, materials: &mut Assets<InkMaterial>) {
+fn spawn_base(
+    commands: &mut Commands,
+    grid: &Grid,
+    meshes: &mut Assets<Mesh>,
+    materials: &mut Assets<InkMaterial>,
+) {
     let center = Vec3::new((grid.width - 1) as f32 / 2.0, 0.0, (grid.height - 1) as f32 / 2.0);
     let (w, h) = (grid.width as f32, grid.height as f32);
     commands.spawn((

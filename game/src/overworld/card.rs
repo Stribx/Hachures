@@ -3,7 +3,8 @@
 use bevy::prelude::*;
 use bevy::ui_widgets::Activate;
 
-use super::plan::{Pawn, WalkTo};
+use super::pawn::Pawn;
+use super::plan::WalkTo;
 use super::travel::Travel;
 use crate::campaign::save::Save;
 use crate::i18n::{t, tf};
@@ -81,33 +82,36 @@ pub(super) fn card(
     let most = 1 + level.challenge.is_some() as u32;
     let last = save.reached.min(LEVELS.len() - 1);
     commands.entity(entity).despawn_related::<Children>().with_children(|c| {
-        c.spawn(text(&assets, t(&WORLDS[level.world].name), SMALL_SIZE)).insert(TextColor(INK.with_alpha(0.65)));
+        c.spawn(text(&assets, t(&WORLDS[level.world].name), SMALL_SIZE))
+            .insert(TextColor(INK.with_alpha(0.65)));
         c.spawn(text(&assets, t(&level.name), HEADING_SIZE));
         let earned = record.won as u32 + record.challenge as u32;
         c.spawn(text(&assets, tf("plan.seals", &[&earned, &most]), BODY_SIZE));
         for name in &record.erased {
-            c.spawn(text(&assets, t(name), SMALL_SIZE)).insert((Strikethrough, TextColor(INK.with_alpha(0.6))));
+            c.spawn(text(&assets, t(name), SMALL_SIZE))
+                .insert((Strikethrough, TextColor(INK.with_alpha(0.6))));
         }
-        c.spawn(Node { column_gap: px(10), margin: UiRect::top(px(10)), ..default() }).with_children(|row| {
-            if i > 0 {
-                row.spawn(framed(0.0, text(&assets, "‹", SUBTITLE_SIZE))).observe(
-                    move |_: On<Activate>, mut walks: MessageWriter<WalkTo>| {
-                        walks.write(WalkTo(i - 1));
+        c.spawn(Node { column_gap: px(10), margin: UiRect::top(px(10)), ..default() })
+            .with_children(|row| {
+                if i > 0 {
+                    row.spawn(framed(0.0, text(&assets, "‹", SUBTITLE_SIZE))).observe(
+                        move |_: On<Activate>, mut walks: MessageWriter<WalkTo>| {
+                            walks.write(WalkTo(i - 1));
+                        },
+                    );
+                }
+                row.spawn(framed(200.0, text(&assets, t("plan.trace"), SUBTITLE_SIZE))).observe(
+                    move |_: On<Activate>, mut travel: MessageWriter<Travel>| {
+                        travel.write(Travel { to: i, again: false });
                     },
                 );
-            }
-            row.spawn(framed(200.0, text(&assets, t("plan.trace"), SUBTITLE_SIZE))).observe(
-                move |_: On<Activate>, mut travel: MessageWriter<Travel>| {
-                    travel.write(Travel { to: i, again: false });
-                },
-            );
-            if i < last {
-                row.spawn(framed(0.0, text(&assets, "›", SUBTITLE_SIZE))).observe(
-                    move |_: On<Activate>, mut walks: MessageWriter<WalkTo>| {
-                        walks.write(WalkTo(i + 1));
-                    },
-                );
-            }
-        });
+                if i < last {
+                    row.spawn(framed(0.0, text(&assets, "›", SUBTITLE_SIZE))).observe(
+                        move |_: On<Activate>, mut walks: MessageWriter<WalkTo>| {
+                            walks.write(WalkTo(i + 1));
+                        },
+                    );
+                }
+            });
     });
 }

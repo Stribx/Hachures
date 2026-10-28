@@ -88,7 +88,8 @@ impl Landing<'_, '_> {
                 Fibre { velocity: Vec3::new(angle.cos() * 1.1, 1.3, angle.sin() * 1.1), life: 1.0 },
                 Mesh3d(mesh.clone()),
                 MeshMaterial3d(material.clone()),
-                Transform::from_translation(at + Vec3::Y * 0.03).with_rotation(Quat::from_rotation_y(angle)),
+                Transform::from_translation(at + Vec3::Y * 0.03)
+                    .with_rotation(Quat::from_rotation_y(angle)),
             ));
         }
     }
@@ -128,7 +129,11 @@ pub(super) fn land(
     }
 }
 
-pub(crate) fn fibres(time: Res<Time>, mut fibres: Query<(Entity, &mut Fibre, &mut Transform)>, mut commands: Commands) {
+pub(crate) fn fibres(
+    time: Res<Time>,
+    mut fibres: Query<(Entity, &mut Fibre, &mut Transform)>,
+    mut commands: Commands,
+) {
     let dt = time.delta_secs();
     for (entity, mut fibre, mut transform) in &mut fibres {
         fibre.velocity.y -= 7.0 * dt;

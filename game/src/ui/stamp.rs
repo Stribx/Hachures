@@ -16,7 +16,12 @@ const HOLD: f32 = 1.2;
 const FADE: f32 = 0.4;
 
 /// A wave sets off: its number is stamped across the middle of the sheet.
-pub fn stamp_wave(level: Res<Level>, mut stamped: Local<u32>, assets: Res<AssetServer>, mut commands: Commands) {
+pub fn stamp_wave(
+    level: Res<Level>,
+    mut stamped: Local<u32>,
+    assets: Res<AssetServer>,
+    mut commands: Commands,
+) {
     let number = level.wave.number;
     if !level.wave.running || number == *stamped {
         if !level.wave.running && number < *stamped {
@@ -61,7 +66,8 @@ pub fn strike_stamps(
         let strike = (t / STRIKE).min(1.0);
         let ease = 1.0 - (1.0 - strike).powi(3);
         transform.scale = Vec2::splat(1.08 - 0.08 * ease);
-        let alpha = if t < STRIKE + HOLD { ease } else { 1.0 - ((t - STRIKE - HOLD) / FADE).min(1.0) };
+        let alpha =
+            if t < STRIKE + HOLD { ease } else { 1.0 - ((t - STRIKE - HOLD) / FADE).min(1.0) };
         color.0 = SEAL.with_alpha(alpha * 0.9);
         if t > STRIKE + HOLD + FADE {
             commands.entity(parent.parent()).despawn();

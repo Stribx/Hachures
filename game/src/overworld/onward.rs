@@ -17,7 +17,9 @@ pub fn between_levels(
     mut travel: MessageWriter<Travel>,
     mut walks: MessageWriter<WalkTo>,
 ) {
-    let digit = [KeyCode::Digit1, KeyCode::Digit2, KeyCode::Digit3].iter().position(|&k| keys.just_pressed(k));
+    let digit = [KeyCode::Digit1, KeyCode::Digit2, KeyCode::Digit3]
+        .iter()
+        .position(|&k| keys.just_pressed(k));
     if let (true, Some(digit)) = (level.finished, digit) {
         level.choose(digit, &mut save);
         save.store();

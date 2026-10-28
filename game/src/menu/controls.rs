@@ -59,12 +59,16 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
     commands.spawn(page(Screen::Controls, VEIL)).with_children(|page| {
         page.spawn(sheet()).with_children(|p| {
             p.spawn(text(&assets, t("menu.controls"), TITLE_SIZE));
-            p.spawn(Node { column_gap: px(48), align_items: AlignItems::FlexStart, ..default() }).with_children(
-                |columns| {
+            p.spawn(Node { column_gap: px(48), align_items: AlignItems::FlexStart, ..default() })
+                .with_children(|columns| {
                     // The board's keys on the left, the rest on the right.
                     for groups in [&KEYS[..1], &KEYS[1..]] {
                         columns
-                            .spawn(Node { flex_direction: FlexDirection::Column, row_gap: px(6), ..default() })
+                            .spawn(Node {
+                                flex_direction: FlexDirection::Column,
+                                row_gap: px(6),
+                                ..default()
+                            })
                             .with_children(|column| {
                                 for &(heading, keys) in groups {
                                     column
@@ -74,17 +78,19 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                                         if key == DESKTOP_ONLY && cfg!(target_arch = "wasm32") {
                                             continue;
                                         }
-                                        column.spawn(Node { column_gap: px(16), ..default() }).with_children(|row| {
-                                            row.spawn(text(&assets, t(key), BODY_SIZE))
-                                                .insert(Node { width: px(130), ..default() });
-                                            row.spawn(text(&assets, t(action), BODY_SIZE)).insert(TextColor(INK_SOFT));
-                                        });
+                                        column
+                                            .spawn(Node { column_gap: px(16), ..default() })
+                                            .with_children(|row| {
+                                                row.spawn(text(&assets, t(key), BODY_SIZE))
+                                                    .insert(Node { width: px(130), ..default() });
+                                                row.spawn(text(&assets, t(action), BODY_SIZE))
+                                                    .insert(TextColor(INK_SOFT));
+                                            });
                                     }
                                 }
                             });
                     }
-                },
-            );
+                });
             p.spawn(primary(BUTTON_WIDTH, label(&assets, t("common.back")))).observe(back);
         });
     });
@@ -97,7 +103,8 @@ mod tests {
     /// The row the web build leaves out is one of the sheet's rows: a typo would show it on the web.
     #[test]
     fn the_desktop_only_key_is_a_row() {
-        let rows: Vec<&str> = KEYS.iter().flat_map(|&(_, keys)| keys.iter().map(|&(key, _)| key)).collect();
+        let rows: Vec<&str> =
+            KEYS.iter().flat_map(|&(_, keys)| keys.iter().map(|&(key, _)| key)).collect();
         assert!(rows.contains(&DESKTOP_ONLY), "{DESKTOP_ONLY} not in {rows:?}");
     }
 }

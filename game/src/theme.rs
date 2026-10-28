@@ -90,5 +90,9 @@ pub enum Face {
 
 /// Text in the game's font, in the cut `face`.
 pub fn font(assets: &AssetServer, face: Face, size: f32) -> TextFont {
-    TextFont { font: assets.load(FELL[face as usize]).into(), font_size: FontSize::Px(size), ..default() }
+    TextFont {
+        font: assets.load(FELL[face as usize]).into(),
+        font_size: FontSize::Px(size),
+        ..default()
+    }
 }

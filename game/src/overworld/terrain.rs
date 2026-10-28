@@ -31,7 +31,8 @@ fn value_noise(p: Vec2) -> f32 {
 
 /// Four octaves of value noise, from 0 to 1.
 fn fbm(p: Vec2) -> f32 {
-    (0..4).map(|o| value_noise(p * 2f32.powi(o) + o as f32 * 17.0) / 2f32.powi(o + 1)).sum::<f32>() / 0.9375
+    (0..4).map(|o| value_noise(p * 2f32.powi(o) + o as f32 * 17.0) / 2f32.powi(o + 1)).sum::<f32>()
+        / 0.9375
 }
 
 /// How far into world 2's mountains `x` lies, from 0 to 1.
@@ -85,8 +86,10 @@ fn land_color(p: Vec2, h: f32) -> Color {
     let meadow = swathes.mix(&WASHES[parcel(p).wash], openness(p));
     let mut color = meadow.mix(&HEDGE, smoothstep(0.47, 0.55, wood(p)));
     color = color.mix(&Color::srgb(0.62, 0.66, 0.7), mountain_share(p.x) * 0.8);
-    color = color.mix(&Color::srgb(0.86, 0.78, 0.58), 1.0 - smoothstep(WATER + 0.05, WATER + 0.25, h));
-    let stone = Color::srgb(0.72, 0.68, 0.6).mix(&Color::srgb(0.93, 0.93, 0.92), mountain_share(p.x));
+    color =
+        color.mix(&Color::srgb(0.86, 0.78, 0.58), 1.0 - smoothstep(WATER + 0.05, WATER + 0.25, h));
+    let stone =
+        Color::srgb(0.72, 0.68, 0.6).mix(&Color::srgb(0.93, 0.93, 0.92), mountain_share(p.x));
     color.mix(&stone, smoothstep(2.0, 4.0, h))
 }
 
@@ -95,10 +98,13 @@ pub(super) fn land_mesh() -> Mesh {
     const STEP: f32 = 0.5;
     let (columns, rows) = (((EAST - WEST) / STEP) as usize, ((SOUTH - NORTH) / STEP) as usize);
     let corners: Vec<Vec3> = (0..=rows)
-        .flat_map(|r| (0..=columns).map(move |c| Vec2::new(WEST + c as f32 * STEP, NORTH + r as f32 * STEP)))
+        .flat_map(|r| {
+            (0..=columns).map(move |c| Vec2::new(WEST + c as f32 * STEP, NORTH + r as f32 * STEP))
+        })
         .map(|p| Vec3::new(p.x, height(p), p.y))
         .collect();
-    let colors: Vec<[f32; 4]> = corners.iter().map(|c| land_color(c.xz(), c.y).to_linear().to_f32_array()).collect();
+    let colors: Vec<[f32; 4]> =
+        corners.iter().map(|c| land_color(c.xz(), c.y).to_linear().to_f32_array()).collect();
     let width = columns as u32 + 1;
     let indices: Vec<u32> = (0..rows as u32)
         .flat_map(|r| {
@@ -125,7 +131,9 @@ pub(super) fn road_mesh() -> Mesh {
             let (a, b) = (w[0], w[1]);
             let side = (b - a).normalize().perp() * HALF_WIDTH;
             // Over the highest of the land under it, so no facet pokes through.
-            let lie = |p: Vec2| Vec3::new(p.x, height(p).max(height(p - side)).max(height(p + side)) + 0.06, p.y);
+            let lie = |p: Vec2| {
+                Vec3::new(p.x, height(p).max(height(p - side)).max(height(p + side)) + 0.06, p.y)
+            };
             if i == 0 {
                 positions.extend([lie(a - side), lie(a + side)]);
             }

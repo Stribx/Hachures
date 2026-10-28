@@ -8,6 +8,7 @@
 //! of each render pass (`render/<pass>/elapsed_gpu`, Vulkan and DX12 only): frame times alone can sit on the
 //! compositor's 60 Hz whatever the GPU does.
 
+mod demo;
 mod hover;
 mod parade;
 
@@ -16,14 +17,11 @@ use bevy::render::view::screenshot::{Screenshot, ScreenshotCaptured, save_to_dis
 use std::path::Path;
 
 use crate::campaign::LoadLevel;
-use crate::campaign::skills::Skill;
-use crate::combat::enemies::send_wave;
-use crate::combat::towers::{Weapon, spawn_tower};
-use crate::ink::{Selection, tool_index};
+use crate::combat::stand::spawn_tower;
+use crate::ink::tool_index;
 use crate::level::Level;
 use crate::look::WorldCamera;
 use crate::map::grid::Tile;
-use crate::map::terrain::Edit;
 use crate::overworld::plan::WalkTo;
 use crate::overworld::travel::{Travel, Trip};
 use crate::schedule::Screen;
@@ -44,7 +42,7 @@ pub fn plugin(app: &mut App) {
         app.add_systems(Startup, jump).add_systems(
             Update,
             (
-                demo,
+                demo::demo,
                 parade::parade,
                 act,
                 timed,
@@ -73,18 +71,16 @@ fn frame_times(time: Res<Time<Real>>, trip: Option<Res<Trip>>, mut second: Local
     let (count, total, worst) = &mut *second;
     (*count, *total, *worst) = (*count + 1, *total + dt, worst.max(dt));
     if *total >= 1.0 {
-        info!("frames: {count}, mean {:.1} ms, worst {:.1} ms", *total / *count as f32 * 1000.0, *worst * 1000.0);
+        info!(
+            "frames: {count}, mean {:.1} ms, worst {:.1} ms",
+            *total / *count as f32 * 1000.0,
+            *worst * 1000.0
+        );
         *second = (0, 0.0, 0.0);
     }
 }
 
-/// How many waves have been sent when `HACHURES_WAVE=arg` asks for the next one to be wave `arg`.
-fn waves_done(arg: &str, waves: usize) -> u32 {
-    let n: u32 = arg.parse().unwrap_or(1);
-    n.saturating_sub(1).min(waves.saturating_sub(1) as u32)
-}
-
-fn env(name: &str) -> Option<String> {
+pub(super) fn env(name: &str) -> Option<String> {
     std::env::var(name).ok()
 }
 
@@ -120,59 +116,15 @@ fn jump(
     }
 }
 
-/// One tower of each weapon on the middle row's first open cells, each turned a different way.
-fn demo(
-    mut done: Local<u32>,
-    mut level: ResMut<Level>,
-    mut selection: ResMut<Selection>,
-    settings: Res<Settings>,
-    assets: Res<AssetServer>,
-    mut commands: Commands,
-) {
-    // Wait for the level asked for to be loaded.
-    *done += 1;
-    if *done != 3 {
-        return;
-    }
-    if env("HACHURES_CALQUE").is_some() {
-        selection.calque = true;
-    }
-    // `HACHURES_WAVE` sends the first wave (wave `n` for a number) with or without the demo's towers.
-    if let Some(arg) = env("HACHURES_WAVE") {
-        level.wave.number = waves_done(&arg, level.waves.len());
-        send_wave(&mut level, &mut commands, &assets, &settings);
-    }
-    if env("HACHURES_DEMO").is_none() {
-        return;
-    }
-    let grid = level.terrain.grid();
-    let open = (0..grid.tiles.len()).filter(|&i| grid.tiles[i] == Tile::Sol && grid.coords(i).1 == 2);
-    let weapons = [Weapon::Arbalete, Weapon::Mortier, Weapon::Harpon, Weapon::Lanterne];
-    for (i, weapon) in open.step_by(3).zip(weapons) {
-        spawn_tower(&mut commands, &assets, grid, i, weapon);
-    }
-    // And barricades to see their props: a wall of three with a branch down (a T), and one alone further on.
-    // `HACHURES_FASCINES=1` learns the skill that shows on them.
-    let width = grid.width;
-    let wall = |i: usize| [i, i + 1, i + 2, i + 1 + width, i + 5];
-    let start = (0..grid.tiles.len()).find(|&i| {
-        let (x, z) = grid.coords(i);
-        z == 1 && x + 5 < width && wall(i).iter().all(|&j| grid.tiles[j] == Tile::Sol)
-    });
-    let walls: Vec<(usize, Edit)> = start.into_iter().flat_map(wall).map(|j| (j, Edit::Ink(Tile::Barricade))).collect();
-    if env("HACHURES_FASCINES").is_some() {
-        level.skills.push(Skill::Fascines);
-    }
-    // Even with no wall, the cells are drawn again: the skill shows on them.
-    level.alter(walls);
-}
-
 /// `HACHURES_CAM=x,y,z,tx,ty,tz`: the camera there, looking at the target.
 fn camera(mut camera: Single<&mut Transform, With<WorldCamera>>) {
-    let Some(v) = env("HACHURES_CAM").map(|s| s.split(',').filter_map(|n| n.parse().ok()).collect::<Vec<f32>>()) else {
+    let Some(v) = env("HACHURES_CAM")
+        .map(|s| s.split(',').filter_map(|n| n.parse().ok()).collect::<Vec<f32>>())
+    else {
         return;
     };
-    **camera = Transform::from_xyz(v[0], v[1], v[2]).looking_at(Vec3::new(v[3], v[4], v[5]), Vec3::Y);
+    **camera =
+        Transform::from_xyz(v[0], v[1], v[2]).looking_at(Vec3::new(v[3], v[4], v[5]), Vec3::Y);
 }
 
 /// `HACHURES_WALK=n@t` and `HACHURES_TRAVEL=n@t`: at `t` seconds, walk Nève to sheet `n`, or go and play it.
@@ -188,7 +140,8 @@ fn act(
     mut commands: Commands,
 ) {
     let due = |name: &str| {
-        let (n, t) = env(name)?.split_once('@').map(|(n, t)| (n.parse().ok(), t.parse::<f32>().ok()))?;
+        let (n, t) =
+            env(name)?.split_once('@').map(|(n, t)| (n.parse().ok(), t.parse::<f32>().ok()))?;
         (time.elapsed_secs() >= t?).then_some(n?)
     };
     if let (false, Some(n)) = (done[0], due("HACHURES_WALK")) {
@@ -203,9 +156,11 @@ fn act(
     if !done[2] && ink_at.is_some_and(|t| time.elapsed_secs() >= t) {
         done[2] = true;
         let grid = level.terrain.grid();
-        let open: Vec<usize> =
-            (0..grid.tiles.len()).filter(|&i| grid.tiles[i] == Tile::Sol && grid.coords(i).1 == 3).collect();
-        let tools = ["barricade", "arbalète"].map(|name| tool_index(name).expect("a tool of TOOLS"));
+        let open: Vec<usize> = (0..grid.tiles.len())
+            .filter(|&i| grid.tiles[i] == Tile::Sol && grid.coords(i).1 == 3)
+            .collect();
+        let tools =
+            ["barricade", "arbalète"].map(|name| tool_index(name).expect("a tool of TOOLS"));
         for (tool, &i) in tools.into_iter().zip(open.iter().step_by(4)) {
             // As a click would: only where it isn't refused, or the sépia would run below zero.
             if level.refusal(i, tool).is_some() {
@@ -221,8 +176,8 @@ fn act(
 
 /// `HACHURES_AT=t` or `t1,t2,…`: one screenshot at each time (`out-1.png`, … when several), then quit.
 fn timed(time: Res<Time>, mut taken: Local<usize>, mut commands: Commands) {
-    let times: Vec<f32> =
-        env("HACHURES_AT").map_or(vec![4.0], |s| s.split(',').filter_map(|t| t.parse().ok()).collect());
+    let times: Vec<f32> = env("HACHURES_AT")
+        .map_or(vec![4.0], |s| s.split(',').filter_map(|t| t.parse().ok()).collect());
     if *taken >= times.len() || time.elapsed_secs() < times[*taken] {
         return;
     }
@@ -254,18 +209,13 @@ mod tests {
     use super::*;
 
     #[test]
-    fn wave_n_is_sent_after_n_minus_one() {
-        assert_eq!(waves_done("1", 5), 0);
-        assert_eq!(waves_done("yes", 5), 0);
-        assert_eq!(waves_done("0", 5), 0);
-        assert_eq!(waves_done("3", 5), 2);
-        assert_eq!(waves_done("9", 5), 4, "the last wave at most");
-    }
-
-    #[test]
     fn several_shots_are_numbered_before_the_extension() {
         assert_eq!(numbered("shots/out.png", 2), "shots/out-2.png");
         assert_eq!(numbered("out", 1), "out-1", "a name with no extension is numbered too");
-        assert_eq!(numbered("my.png.d/out.png", 3), "my.png.d/out-3.png", "only the file's own extension");
+        assert_eq!(
+            numbered("my.png.d/out.png", 3),
+            "my.png.d/out-3.png",
+            "only the file's own extension"
+        );
     }
 }

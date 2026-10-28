@@ -37,14 +37,18 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
             p.spawn(text(&assets, t("menu.credits"), TITLE_SIZE));
             p.spawn(text(&assets, t("credits.subtitle"), SUBTITLE_SIZE));
             for (asset, author, licence) in rows(include_str!("../../assets/CREDITS.md")) {
-                p.spawn(Node { flex_direction: FlexDirection::Column, align_items: AlignItems::Center, ..default() })
-                    .with_children(|row| {
-                        row.spawn(text(&assets, asset, BODY_SIZE));
-                        // The licence's file is named in `CREDITS.md`, shipped beside the fonts.
-                        let licence = licence.split(" (").next().unwrap_or(licence);
-                        row.spawn(text(&assets, format!("{author} · {licence}"), SMALL_SIZE))
-                            .insert(TextColor(INK_SOFT));
-                    });
+                p.spawn(Node {
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    ..default()
+                })
+                .with_children(|row| {
+                    row.spawn(text(&assets, asset, BODY_SIZE));
+                    // The licence's file is named in `CREDITS.md`, shipped beside the fonts.
+                    let licence = licence.split(" (").next().unwrap_or(licence);
+                    row.spawn(text(&assets, format!("{author} · {licence}"), SMALL_SIZE))
+                        .insert(TextColor(INK_SOFT));
+                });
             }
             p.spawn(primary(BUTTON_WIDTH, label(&assets, t("common.back")))).observe(back);
         });

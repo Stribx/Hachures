@@ -26,8 +26,14 @@ pub(crate) fn rubble() -> Vec<PropPart> {
         if light { &mut pale } else { &mut dark }.push(block);
     }
     vec![
-        PropPart { mesh: merge(pale).expect("a prop has parts"), color: Color::srgb(0.62, 0.6, 0.55) },
-        PropPart { mesh: merge(dark).expect("a prop has parts"), color: Color::srgb(0.5, 0.48, 0.44) },
+        PropPart {
+            mesh: merge(pale).expect("a prop has parts"),
+            color: Color::srgb(0.62, 0.6, 0.55),
+        },
+        PropPart {
+            mesh: merge(dark).expect("a prop has parts"),
+            color: Color::srgb(0.5, 0.48, 0.44),
+        },
     ]
 }
 
@@ -49,20 +55,25 @@ pub(crate) fn palisade(shape: u8) -> Vec<PropPart> {
     for k in 0..5 {
         let x = -0.4 + 0.2 * k as f32;
         let height = 0.5 + 0.025 * ((k * 3) % 5) as f32;
-        wood.push(Mesh::from(Cylinder { radius: 0.05, half_height: height / 2.0 }).translated_by(Vec3::new(
+        wood.push(
+            Mesh::from(Cylinder { radius: 0.05, half_height: height / 2.0 })
+                .translated_by(Vec3::new(x, height / 2.0, 0.0)),
+        );
+        tips.push(Mesh::from(Cone { radius: 0.05, height: 0.1 }).translated_by(Vec3::new(
             x,
-            height / 2.0,
+            height + 0.05,
             0.0,
         )));
-        tips.push(Mesh::from(Cone { radius: 0.05, height: 0.1 }).translated_by(Vec3::new(x, height + 0.05, 0.0)));
     }
     // The rails run edge to edge, so a line of palissades is one fence.
     for y in [0.15, 0.4] {
-        let rail = Mesh::from(Cylinder { radius: 0.03, half_height: 0.5 }).rotated_by(Quat::from_rotation_z(FRAC_PI_2));
+        let rail = Mesh::from(Cylinder { radius: 0.03, half_height: 0.5 })
+            .rotated_by(Quat::from_rotation_z(FRAC_PI_2));
         wood.push(rail.translated_by(Vec3::new(0.0, y, 0.0)));
     }
     let paint = |parts: Vec<Mesh>, color| {
-        let mesh = merge(parts.into_iter().map(|m| m.rotated_by(turn)).collect()).expect("a prop has parts");
+        let mesh = merge(parts.into_iter().map(|m| m.rotated_by(turn)).collect())
+            .expect("a prop has parts");
         PropPart { mesh, color }
     };
     vec![paint(wood, Color::srgb(0.36, 0.26, 0.2)), paint(tips, Color::srgb(0.7, 0.2, 0.15))]

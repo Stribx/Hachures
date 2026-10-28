@@ -4,7 +4,7 @@ use bevy::pbr::{DistanceFog, FogFalloff};
 use bevy::post_process::dof::DepthOfField;
 use bevy::prelude::*;
 
-use super::plan::Pawn;
+use super::pawn::Pawn;
 use super::travel::{Phase, Trip};
 use super::{OverworldRoot, SHEETS};
 use crate::level::Level;
@@ -129,7 +129,8 @@ pub(super) fn drive(
     // The settings may have taken the lens off.
     if let Some(lens) = lens.as_deref_mut() {
         lens.focal_distance = distance;
-        lens.aperture_f_stops = PLAY_F_STOPS * (framing(Vec3::ZERO, 1.0).0.length() / distance).powi(2);
+        lens.aperture_f_stops =
+            PLAY_F_STOPS * (framing(Vec3::ZERO, 1.0).0.length() / distance).powi(2);
     }
 }
 

@@ -10,8 +10,13 @@ const SIZE: f32 = 6.0;
 
 /// The washes the parcels are coloured with: pasture, wheat, fallow, sainfoin in flower (pink: a blue crop would
 /// read as water), a second pasture. Neighbours never share one (see `parcel`).
-pub(super) const WASHES: [Color; 5] =
-    [PASTURE, WHEAT, Color::srgb(0.76, 0.62, 0.44), Color::srgb(0.8, 0.64, 0.62), Color::srgb(0.6, 0.71, 0.44)];
+pub(super) const WASHES: [Color; 5] = [
+    PASTURE,
+    WHEAT,
+    Color::srgb(0.76, 0.62, 0.44),
+    Color::srgb(0.8, 0.64, 0.62),
+    Color::srgb(0.6, 0.71, 0.44),
+];
 /// Which of `WASHES` is the wheat, whose parcels grow clumps of it.
 pub(super) const WHEAT_WASH: usize = 1;
 
@@ -42,8 +47,10 @@ fn nearest(p: Vec2) -> (IVec2, f32) {
         let k = c.as_vec2();
         (k + 0.5 + (Vec2::new(hash(k), hash(k + 7.3)) - 0.5) * 0.7) * SIZE
     };
-    let mut sites: Vec<(IVec2, Vec2)> =
-        (-1..=1).flat_map(|dz| (-1..=1).map(move |dx| cell + IVec2::new(dx, dz))).map(|c| (c, centre(c))).collect();
+    let mut sites: Vec<(IVec2, Vec2)> = (-1..=1)
+        .flat_map(|dz| (-1..=1).map(move |dx| cell + IVec2::new(dx, dz)))
+        .map(|c| (c, centre(c)))
+        .collect();
     sites.sort_by(|a, b| a.1.distance_squared(p).total_cmp(&b.1.distance_squared(p)));
     let ((id, a), (_, b)) = (sites[0], sites[1]);
     // Distance to the perpendicular bisector of the two nearest centres.

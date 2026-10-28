@@ -13,7 +13,8 @@ use crate::overworld::travel::Travel;
 use crate::theme::{INK, INK_SOFT, SEAL, SUBTITLE_SIZE, TITLE_SIZE, VEIL};
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(OnEnter(Screen::Paused), spawn).add_systems(Update, show_confirms.run_if(in_state(Screen::Paused)));
+    app.add_systems(OnEnter(Screen::Paused), spawn)
+        .add_systems(Update, show_confirms.run_if(in_state(Screen::Paused)));
 }
 
 /// A button that asks twice, for what loses the level under way: the first press arms it ("Sûr ? …" in the seal's
@@ -66,7 +67,9 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>, level: Res<Level>) {
         // A browser tab is closed, not quit.
         #[cfg(not(target_arch = "wasm32"))]
         p.spawn(confirm(&assets, n_("pause.quit"))).observe(
-            |act: On<Activate>, mut confirms: Query<&mut Confirm>, mut exit: MessageWriter<AppExit>| {
+            |act: On<Activate>,
+             mut confirms: Query<&mut Confirm>,
+             mut exit: MessageWriter<AppExit>| {
                 if confirmed(act.entity, &mut confirms) {
                     exit.write(AppExit::Success);
                 }

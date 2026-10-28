@@ -90,7 +90,12 @@ fn spawn(commands: &mut Commands, assets: &AssetServer, icons: &ToolIcons, level
 }
 
 /// The tools: a card each, its key in the corner, its cost under its name.
-fn spawn_tools(bar: &mut ChildSpawnerCommands, assets: &AssetServer, icons: &ToolIcons, level: &Level) {
+fn spawn_tools(
+    bar: &mut ChildSpawnerCommands,
+    assets: &AssetServer,
+    icons: &ToolIcons,
+    level: &Level,
+) {
     bar.spawn(Node { column_gap: px(8), ..default() }).with_children(|tools| {
         for &tool in &level.tools {
             spawn_card(tools, assets, icons, tool);
@@ -99,7 +104,12 @@ fn spawn_tools(bar: &mut ChildSpawnerCommands, assets: &AssetServer, icons: &Too
 }
 
 /// The card of `TOOLS[index]`.
-fn spawn_card(tools: &mut ChildSpawnerCommands, assets: &AssetServer, icons: &ToolIcons, index: usize) {
+fn spawn_card(
+    tools: &mut ChildSpawnerCommands,
+    assets: &AssetServer,
+    icons: &ToolIcons,
+    index: usize,
+) {
     let tool = &TOOLS[index];
     tools
         .spawn((
@@ -123,11 +133,19 @@ fn spawn_card(tools: &mut ChildSpawnerCommands, assets: &AssetServer, icons: &To
         .with_children(|card| {
             card.spawn((
                 text(assets, (index + 1).to_string(), SMALL_SIZE),
-                Node { position_type: PositionType::Absolute, top: px(2), left: px(6), ..default() },
+                Node {
+                    position_type: PositionType::Absolute,
+                    top: px(2),
+                    left: px(6),
+                    ..default()
+                },
             ))
             .insert(TextColor(INK_SOFT));
             // The piece itself, filmed in the studio.
-            card.spawn((Node { width: px(48), height: px(48), ..default() }, ImageNode::new(icons.0[index].clone())));
+            card.spawn((
+                Node { width: px(48), height: px(48), ..default() },
+                ImageNode::new(icons.0[index].clone()),
+            ));
             card.spawn((text(assets, t(tool.label), SMALL_SIZE), ToolLabel(index)));
             card.spawn((text(assets, "", SMALL_SIZE), ToolCost(index)));
         });
@@ -136,26 +154,37 @@ fn spawn_card(tools: &mut ChildSpawnerCommands, assets: &AssetServer, icons: &To
 /// What the turn asks: the next wave first, in the seal's red.
 fn spawn_actions(bar: &mut ChildSpawnerCommands, assets: &AssetServer) {
     let small = |s: &str| text(assets, s.to_string(), SMALL_SIZE);
-    bar.spawn(Node { column_gap: px(8), align_items: AlignItems::Center, ..default() }).with_children(|actions| {
-        actions.spawn(primary(0.0, text(assets, t("bar.send_wave"), BODY_SIZE))).observe(
-            |_: On<Activate>,
-             mut level: ResMut<Level>,
-             mut commands: Commands,
-             assets: Res<AssetServer>,
-             settings: Res<Settings>| { send_wave(&mut level, &mut commands, &assets, &settings) },
-        );
-        actions
-            .spawn(framed(0.0, (small(""), SpeedLabel)))
-            .observe(|_: On<Activate>, mut fast: ResMut<Fast>| fast.0 = !fast.0);
-        actions
-            .spawn(framed(0.0, small(t("bar.calque"))))
-            .observe(|_: On<Activate>, mut selection: ResMut<Selection>| selection.calque = !selection.calque);
-        actions.spawn(framed(0.0, (small(""), RouteLabel))).observe(
-            |_: On<Activate>, level: Res<Level>, mut selection: ResMut<Selection>| next_species(&mut selection, &level),
-        );
-        actions.spawn(framed(0.0, small(t("bar.sceaux")))).observe(open_sceaux(Screen::Playing));
-        actions.spawn(framed(0.0, small(t("bar.lexique")))).observe(open_lexique(Screen::Playing));
-    });
+    bar.spawn(Node { column_gap: px(8), align_items: AlignItems::Center, ..default() })
+        .with_children(|actions| {
+            actions.spawn(primary(0.0, text(assets, t("bar.send_wave"), BODY_SIZE))).observe(
+                |_: On<Activate>,
+                 mut level: ResMut<Level>,
+                 mut commands: Commands,
+                 assets: Res<AssetServer>,
+                 settings: Res<Settings>| {
+                    send_wave(&mut level, &mut commands, &assets, &settings)
+                },
+            );
+            actions
+                .spawn(framed(0.0, (small(""), SpeedLabel)))
+                .observe(|_: On<Activate>, mut fast: ResMut<Fast>| fast.0 = !fast.0);
+            actions.spawn(framed(0.0, small(t("bar.calque")))).observe(
+                |_: On<Activate>, mut selection: ResMut<Selection>| {
+                    selection.calque = !selection.calque
+                },
+            );
+            actions.spawn(framed(0.0, (small(""), RouteLabel))).observe(
+                |_: On<Activate>, level: Res<Level>, mut selection: ResMut<Selection>| {
+                    next_species(&mut selection, &level)
+                },
+            );
+            actions
+                .spawn(framed(0.0, small(t("bar.sceaux"))))
+                .observe(open_sceaux(Screen::Playing));
+            actions
+                .spawn(framed(0.0, small(t("bar.lexique"))))
+                .observe(open_lexique(Screen::Playing));
+        });
 }
 
 /// What the bar reads: the level, what is picked, the speed.
@@ -186,7 +215,11 @@ pub fn look(
     }
     for (&ToolCost(tool), mut text, mut color) in &mut costs {
         let cost = level.tool_cost(tool);
-        text.0 = if TOOLS[tool].act == Act::Biffer { t("bar.refund").to_string() } else { tf("bar.cost", &[&cost]) };
+        text.0 = if TOOLS[tool].act == Act::Biffer {
+            t("bar.refund").to_string()
+        } else {
+            tf("bar.cost", &[&cost])
+        };
         color.0 = if level.sepia >= cost { INK_SOFT } else { SEAL };
     }
     for mut text in &mut route {

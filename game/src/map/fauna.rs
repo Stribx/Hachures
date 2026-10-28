@@ -16,12 +16,16 @@ use crate::theme::WORLD_INK;
 /// At most this many butterflies on a board.
 const BUTTERFLIES: usize = 6;
 /// The colours of their wings: brimstone, cabbage white, orange tip.
-const WINGS: [Color; 3] = [Color::srgb(0.95, 0.88, 0.4), Color::srgb(0.96, 0.95, 0.9), Color::srgb(0.95, 0.6, 0.3)];
+const WINGS: [Color; 3] =
+    [Color::srgb(0.95, 0.88, 0.4), Color::srgb(0.96, 0.95, 0.9), Color::srgb(0.95, 0.6, 0.3)];
 
 /// Where the butterflies flit: over cells in flower, a few of them spread over the board, the same each time.
 pub fn butterfly_homes(grid: &Grid, land: Land) -> Vec<Vec3> {
-    let mut cells: Vec<usize> =
-        sprigs(grid, 1.0, land).into_iter().filter(|s| s.crop == Crop::Flowers).map(|s| s.cell).collect();
+    let mut cells: Vec<usize> = sprigs(grid, 1.0, land)
+        .into_iter()
+        .filter(|s| s.crop == Crop::Flowers)
+        .map(|s| s.cell)
+        .collect();
     cells.dedup();
     cells.sort_by_key(|&c| mix(c as u32 ^ 0xb177));
     cells.truncate(BUTTERFLIES);
@@ -218,8 +222,11 @@ mod tests {
     #[test]
     fn butterflies_keep_to_the_flowers() {
         let grid = Grid::parse(MAP);
-        let flowers: Vec<usize> =
-            sprigs(&grid, 1.0, Land::Bocage).into_iter().filter(|s| s.crop == Crop::Flowers).map(|s| s.cell).collect();
+        let flowers: Vec<usize> = sprigs(&grid, 1.0, Land::Bocage)
+            .into_iter()
+            .filter(|s| s.crop == Crop::Flowers)
+            .map(|s| s.cell)
+            .collect();
         let homes = butterfly_homes(&grid, Land::Bocage);
         assert!(!homes.is_empty() && homes.len() <= BUTTERFLIES, "{homes:?}");
         for home in homes {

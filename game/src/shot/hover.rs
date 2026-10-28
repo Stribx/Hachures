@@ -7,7 +7,7 @@ use bevy::prelude::*;
 
 use super::env;
 use crate::combat::Enemy;
-use crate::combat::towers::Tower;
+use crate::combat::stand::Tower;
 use crate::ink::Selection;
 use crate::level::Level;
 use crate::ui::bar::ToolButton;
@@ -32,9 +32,10 @@ pub(super) fn hover(
     let width = level.terrain.grid().width;
     let cell = match env("HACHURES_HOVER").as_deref() {
         Some("tower") => towers.iter().next().map(|t| t.cell),
-        Some("enemy") => {
-            enemies.iter().next().map(|p| p.translation.z.round() as usize * width + p.translation.x.round() as usize)
-        }
+        Some("enemy") => enemies
+            .iter()
+            .next()
+            .map(|p| p.translation.z.round() as usize * width + p.translation.x.round() as usize),
         Some(n) => n.parse().ok(),
         None => return,
     };

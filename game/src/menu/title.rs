@@ -18,7 +18,8 @@ use crate::menu::BUTTON_WIDTH;
 use crate::theme::{HEADING_SIZE, INK_SOFT, PAPER, SMALL_SIZE, SUBTITLE_SIZE, VEIL};
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(OnEnter(Screen::Title), spawn).add_systems(OnEnter(Screen::ConfirmNew), spawn_confirm);
+    app.add_systems(OnEnter(Screen::Title), spawn)
+        .add_systems(OnEnter(Screen::ConfirmNew), spawn_confirm);
 }
 
 fn spawn(mut commands: Commands, assets: Res<AssetServer>, save: Res<Save>, level: Res<Level>) {
@@ -47,24 +48,33 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>, save: Res<Save>, leve
             p.spawn(text(&assets, crate::NAME, 72.0));
             p.spawn(text(&assets, t("title.tagline"), SUBTITLE_SIZE));
             // A new campaign starts with the prologue; one under way goes back to the Grand Plan.
-            p.spawn(primary(BUTTON_WIDTH, label(&assets, if new { t("title.play") } else { t("title.continue") })))
-                .observe(go(if new { Screen::Playing } else { Screen::Plan }));
+            p.spawn(primary(
+                BUTTON_WIDTH,
+                label(&assets, if new { t("title.play") } else { t("title.continue") }),
+            ))
+            .observe(go(if new { Screen::Playing } else { Screen::Plan }));
             if !new {
                 // Where the campaign stands, under the button that goes back to it.
                 let n = save.sceaux();
                 let progress = tp("title.progress", n, &[&t(&level.name), &n]);
                 p.spawn(text(&assets, progress, SMALL_SIZE)).insert(TextColor(INK_SOFT));
-                p.spawn(button(label(&assets, t("sceaux.title")))).observe(open_sceaux(Screen::Title));
-                p.spawn(button(label(&assets, t("menu.lexique")))).observe(open_lexique(Screen::Title));
+                p.spawn(button(label(&assets, t("sceaux.title"))))
+                    .observe(open_sceaux(Screen::Title));
+                p.spawn(button(label(&assets, t("menu.lexique"))))
+                    .observe(open_lexique(Screen::Title));
                 if written(&save) {
-                    p.spawn(button(label(&assets, t("title.carnet")))).observe(open_carnet(Screen::Title));
+                    p.spawn(button(label(&assets, t("title.carnet"))))
+                        .observe(open_carnet(Screen::Title));
                 }
             }
-            p.spawn(button(label(&assets, t("menu.controls")))).observe(open_controls(Screen::Title));
-            p.spawn(button(label(&assets, t("menu.settings")))).observe(open_settings(Screen::Title));
+            p.spawn(button(label(&assets, t("menu.controls"))))
+                .observe(open_controls(Screen::Title));
+            p.spawn(button(label(&assets, t("menu.settings"))))
+                .observe(open_settings(Screen::Title));
             p.spawn(button(label(&assets, t("menu.credits")))).observe(open_credits(Screen::Title));
             if !new {
-                p.spawn(button(label(&assets, t("title.new_game")))).observe(go(Screen::ConfirmNew));
+                p.spawn(button(label(&assets, t("title.new_game"))))
+                    .observe(go(Screen::ConfirmNew));
             }
             // A browser tab is closed, not quit.
             #[cfg(not(target_arch = "wasm32"))]
@@ -77,7 +87,12 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>, save: Res<Save>, leve
         // The build, small in the corner, for bug reports.
         page.spawn(text(&assets, concat!("v", env!("CARGO_PKG_VERSION")), SMALL_SIZE)).insert((
             TextColor(INK_SOFT),
-            Node { position_type: PositionType::Absolute, right: px(16), bottom: px(12), ..default() },
+            Node {
+                position_type: PositionType::Absolute,
+                right: px(16),
+                bottom: px(12),
+                ..default()
+            },
         ));
     });
 }

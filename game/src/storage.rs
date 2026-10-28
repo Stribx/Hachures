@@ -77,7 +77,8 @@ pub(crate) fn write<T: Serialize>(path: &Path, value: &T) -> io::Result<()> {
     if let Some(dir) = path.parent() {
         fs::create_dir_all(dir)?;
     }
-    let text = ron::ser::to_string_pretty(value, ron::ser::PrettyConfig::default()).map_err(io::Error::other)?;
+    let text = ron::ser::to_string_pretty(value, ron::ser::PrettyConfig::default())
+        .map_err(io::Error::other)?;
     let tmp = path.with_extension("ron.tmp");
     fs::write(&tmp, text)?;
     fs::rename(&tmp, path)
@@ -97,7 +98,9 @@ fn path(name: &str) -> Option<PathBuf> {
     } else if cfg!(target_os = "macos") {
         home().map(|h| h.join("Library/Application Support"))
     } else {
-        std::env::var_os("XDG_DATA_HOME").map(PathBuf::from).or_else(|| home().map(|h| h.join(".local/share")))
+        std::env::var_os("XDG_DATA_HOME")
+            .map(PathBuf::from)
+            .or_else(|| home().map(|h| h.join(".local/share")))
     };
     Some(base?.join("hachures").join(format!("{name}.ron")))
 }

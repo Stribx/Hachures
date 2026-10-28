@@ -30,8 +30,14 @@ pub(super) struct EntryRow(pub usize);
 pub(super) fn spawn_tabs(page: &mut ChildSpawnerCommands, assets: &AssetServer) {
     page.spawn(Node { column_gap: px(12), ..default() }).with_children(|tabs| {
         for tab in Tab::ALL {
-            tabs.spawn((framed(160.0, label(assets, t(tab.name()))), TabButton(tab), Outline::default()))
-                .observe(move |_: On<Activate>, mut view: ResMut<LexiqueView>| *view = LexiqueView { tab, entry: 0 });
+            tabs.spawn((
+                framed(160.0, label(assets, t(tab.name()))),
+                TabButton(tab),
+                Outline::default(),
+            ))
+            .observe(move |_: On<Activate>, mut view: ResMut<LexiqueView>| {
+                *view = LexiqueView { tab, entry: 0 }
+            });
         }
     });
 }
@@ -59,8 +65,12 @@ pub(super) fn rebuild(
     let count = entries(view.tab, &level.species).len();
     commands.entity(*list).despawn_children().with_children(|rows| {
         for i in 0..count {
-            rows.spawn((framed(0.0, text(&assets, "", SMALL_SIZE)), EntryRow(i), Outline::default()))
-                .observe(move |_: On<Activate>, mut view: ResMut<LexiqueView>| view.entry = i);
+            rows.spawn((
+                framed(0.0, text(&assets, "", SMALL_SIZE)),
+                EntryRow(i),
+                Outline::default(),
+            ))
+            .observe(move |_: On<Activate>, mut view: ResMut<LexiqueView>| view.entry = i);
         }
     });
 }
@@ -103,7 +113,8 @@ pub(super) fn show(
         let Some(&child) = children.first() else { continue };
         let Ok((mut text, mut color)) = texts.get_mut(child) else { continue };
         let seen = save.seen.contains(&entry.id);
-        let (words, ink) = if seen { (t(&entry.id), INK) } else { (t("lexique.locked"), INK.with_alpha(0.4)) };
+        let (words, ink) =
+            if seen { (t(&entry.id), INK) } else { (t("lexique.locked"), INK.with_alpha(0.4)) };
         if text.0 != words {
             text.0 = words.to_string();
         }

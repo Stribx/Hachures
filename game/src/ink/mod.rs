@@ -27,7 +27,11 @@ pub fn plugin(app: &mut App) {
         .init_resource::<Verdict>()
         .add_systems(
             Update,
-            inking.in_set(Step::Input).after(selection::hover).after(selection::reset).after(load_level),
+            inking
+                .in_set(Step::Input)
+                .after(selection::hover)
+                .after(selection::reset)
+                .after(load_level),
         )
         .add_systems(Update, verdict::judge.after(inking).before(Step::Render))
         .add_systems(Update, ghost::ghost.after(fibres).in_set(Step::Render));

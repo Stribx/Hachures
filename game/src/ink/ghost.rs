@@ -10,8 +10,9 @@ use crate::campaign::skills::Skill;
 use crate::level::Level;
 use crate::look::{self, Hachure, InkMaterial};
 use crate::map;
+use crate::map::barricade::barricade_shape;
 use crate::map::grid::Tile;
-use crate::map::props::{barricade_shape, prop};
+use crate::map::props::prop;
 
 /// The assets the ghost's piece is made of.
 #[derive(SystemParam)]
@@ -50,16 +51,29 @@ pub(super) fn ghost(
         let mut pale = look::ink(Color::WHITE.with_alpha(0.45));
         pale.base.alpha_mode = AlphaMode::Blend;
         pale.extension = Hachure::fine();
-        commands.spawn((MeshMaterial3d(stock.materials.add(pale)), Transform::default(), Visibility::Hidden)).id()
+        commands
+            .spawn((
+                MeshMaterial3d(stock.materials.add(pale)),
+                Transform::default(),
+                Visibility::Hidden,
+            ))
+            .id()
     });
     let Some((i, tile)) = at else {
         commands.entity(entity).insert(Visibility::Hidden);
         return;
     };
-    let shape = if tile == Tile::Barricade { barricade_shape(grid, i, level.has(Skill::Fascines)) } else { 0 };
+    let shape = if tile == Tile::Barricade {
+        barricade_shape(grid, i, level.has(Skill::Fascines))
+    } else {
+        0
+    };
     let (x, z) = grid.coords(i);
-    let height = if tile == Tile::Boue { map::look(Tile::Boue).height } else { map::look(Tile::Sol).height };
-    commands.entity(entity).insert((Transform::from_xyz(x as f32, height, z as f32), Visibility::Inherited));
+    let height =
+        if tile == Tile::Boue { map::look(Tile::Boue).height } else { map::look(Tile::Sol).height };
+    commands
+        .entity(entity)
+        .insert((Transform::from_xyz(x as f32, height, z as f32), Visibility::Inherited));
     if held.shown == Some((tile, shape)) {
         return;
     }
@@ -67,7 +81,10 @@ pub(super) fn ghost(
     let mesh = held.made.entry((tile, shape)).or_insert_with(|| {
         let parts = prop(tile, shape).into_iter().map(|part| {
             let n = part.mesh.count_vertices();
-            part.mesh.with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, vec![part.color.to_linear().to_f32_array(); n])
+            part.mesh.with_inserted_attribute(
+                Mesh::ATTRIBUTE_COLOR,
+                vec![part.color.to_linear().to_f32_array(); n],
+            )
         });
         let whole = parts.reduce(|mut all, part| {
             all.merge(&part).expect("the parts share their attributes");

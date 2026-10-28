@@ -42,7 +42,12 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>, save: Res<Save>) {
             for (i, record) in won {
                 let data = LevelData::of(i);
                 pages
-                    .spawn(Node { width: px(420), flex_direction: FlexDirection::Column, row_gap: px(2), ..default() })
+                    .spawn(Node {
+                        width: px(420),
+                        flex_direction: FlexDirection::Column,
+                        row_gap: px(2),
+                        ..default()
+                    })
                     .with_children(|level| {
                         level.spawn(text(&assets, t(&data.name), SUBTITLE_SIZE));
                         if record.erased.is_empty() {

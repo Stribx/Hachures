@@ -8,6 +8,7 @@ pub mod figure;
 mod noted;
 mod range;
 mod shards;
+pub mod stand;
 #[cfg(test)]
 mod tests;
 pub mod towers;
@@ -23,9 +24,16 @@ pub fn plugin(app: &mut App) {
         Update,
         (
             enemies::start_waves.in_set(Step::Input),
-            (towers::raise_towers, towers::take_down).in_set(Step::Input).after(crate::ink::inking),
+            (stand::raise_towers, stand::take_down).in_set(Step::Input).after(crate::ink::inking),
             boss::drop_bornes.in_set(Step::Input).after(crate::ink::inking),
-            (enemies::spawn_enemies, noted::notice, enemies::walk, towers::fire, boss::boss_phases, shards::shards)
+            (
+                enemies::spawn_enemies,
+                noted::notice,
+                enemies::walk,
+                towers::fire,
+                boss::boss_phases,
+                shards::shards,
+            )
                 .chain()
                 .in_set(Step::Simulate)
                 .before(crate::level::finish_level),

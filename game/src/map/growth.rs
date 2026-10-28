@@ -77,15 +77,23 @@ mod tests {
 
     #[test]
     fn the_same_map_grows_the_same() {
-        assert_eq!(sprigs(&Grid::parse(MAP), 1.0, Land::Bocage), sprigs(&Grid::parse(MAP), 1.0, Land::Bocage));
+        assert_eq!(
+            sprigs(&Grid::parse(MAP), 1.0, Land::Bocage),
+            sprigs(&Grid::parse(MAP), 1.0, Land::Bocage)
+        );
     }
 
     /// Things grow on open ground only: never on a marker, rock, water or brambles.
     #[test]
     fn only_open_ground_grows() {
         let grid = Grid::parse(MAP);
-        let marked: Vec<usize> =
-            grid.spawns.iter().chain(&grid.fuyard_spawns).chain(grid.goals.values()).copied().collect();
+        let marked: Vec<usize> = grid
+            .spawns
+            .iter()
+            .chain(&grid.fuyard_spawns)
+            .chain(grid.goals.values())
+            .copied()
+            .collect();
         let sprigs = sprigs(&grid, 1.0, Land::Bocage);
         assert!(sprigs.len() > 100, "{}", sprigs.len());
         for s in sprigs {
@@ -114,7 +122,8 @@ mod tests {
     #[test]
     fn less_density_grows_less() {
         let grid = Grid::parse(MAP);
-        let (full, sparse) = (sprigs(&grid, 1.0, Land::Bocage).len(), sprigs(&grid, 0.35, Land::Bocage).len());
+        let (full, sparse) =
+            (sprigs(&grid, 1.0, Land::Bocage).len(), sprigs(&grid, 0.35, Land::Bocage).len());
         assert!(sparse * 2 < full && sparse > 0, "{sparse} of {full}");
     }
 
@@ -122,7 +131,10 @@ mod tests {
     #[test]
     fn no_wheat_in_the_meadows() {
         let grid = Grid::parse(MAP);
-        let wheat: Vec<_> = sprigs(&grid, 1.0, Land::Bocage).into_iter().filter(|s| s.crop == Crop::Wheat).collect();
+        let wheat: Vec<_> = sprigs(&grid, 1.0, Land::Bocage)
+            .into_iter()
+            .filter(|s| s.crop == Crop::Wheat)
+            .collect();
         assert!(wheat.iter().all(|s| grid.map[s.cell] != Tile::SolBas), "{wheat:?}");
     }
 
@@ -134,6 +146,11 @@ mod tests {
         assert!(bocage.iter().any(|s| s.crop == Crop::Wheat), "the bocage has wheat to replace");
         assert!(alpine.iter().all(|s| s.crop != Crop::Wheat), "{alpine:?}");
         let flowers = |sprigs: &[Sprig]| sprigs.iter().filter(|s| s.crop == Crop::Flowers).count();
-        assert!(flowers(&alpine) > flowers(&bocage), "{} against {}", flowers(&alpine), flowers(&bocage));
+        assert!(
+            flowers(&alpine) > flowers(&bocage),
+            "{} against {}",
+            flowers(&alpine),
+            flowers(&bocage)
+        );
     }
 }

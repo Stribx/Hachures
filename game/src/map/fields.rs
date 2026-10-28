@@ -7,8 +7,12 @@ use super::grid::{Grid, Tile};
 use crate::theme::{MEADOW, PASTURE};
 
 /// The washes of dry pasture, the Sol's family: sap greens and a touch of gold, never as yellow as straw.
-const PASTURES: [Color; 4] =
-    [PASTURE, Color::srgb(0.72, 0.77, 0.5), Color::srgb(0.59, 0.71, 0.44), Color::srgb(0.7, 0.73, 0.47)];
+const PASTURES: [Color; 4] = [
+    PASTURE,
+    Color::srgb(0.72, 0.77, 0.5),
+    Color::srgb(0.59, 0.71, 0.44),
+    Color::srgb(0.7, 0.73, 0.47),
+];
 /// The washes of wet meadow, the Sol bas's family: bluer greens, darker than any pasture.
 const MEADOWS: [Color; 3] = [MEADOW, Color::srgb(0.48, 0.65, 0.55), Color::srgb(0.57, 0.7, 0.56)];
 
@@ -19,8 +23,14 @@ pub fn fields(grid: &Grid) -> Vec<Option<usize>> {
     let n = grid.map.len();
     let marked: Vec<usize> =
         grid.spawns.iter().chain(&grid.fuyard_spawns).chain(grid.goals.values()).copied().collect();
-    let open = |i: usize| matches!(grid.map[i], Tile::Sol | Tile::SolBas | Tile::Ronces) && !marked.contains(&i);
-    let seed = grid.map.iter().enumerate().fold(grid.width as u32, |h, (i, &t)| mix(h ^ (t as u32 + 1) ^ i as u32));
+    let open = |i: usize| {
+        matches!(grid.map[i], Tile::Sol | Tile::SolBas | Tile::Ronces) && !marked.contains(&i)
+    };
+    let seed = grid
+        .map
+        .iter()
+        .enumerate()
+        .fold(grid.width as u32, |h, (i, &t)| mix(h ^ (t as u32 + 1) ^ i as u32));
     // Fields are started in an order of their own, scattered over the board, and grown cell by cell up to a size of
     // their own, over the same ground.
     let mut order: Vec<usize> = (0..n).filter(|&i| open(i)).collect();
@@ -40,10 +50,9 @@ pub fn fields(grid: &Grid) -> Vec<Option<usize>> {
             }
             field[i] = Some(id);
             size += 1;
-            queue.extend(
-                grid.neighbours(i)
-                    .filter(|&j| open(j) && field[j].is_none() && kind(grid.map[j]) == kind(grid.map[start])),
-            );
+            queue.extend(grid.neighbours(i).filter(|&j| {
+                open(j) && field[j].is_none() && kind(grid.map[j]) == kind(grid.map[start])
+            }));
         }
         sizes.push(size);
     }
@@ -69,7 +78,9 @@ pub fn ground(grid: &Grid) -> Vec<Color> {
             .flat_map(|member| grid.neighbours(member))
             .filter_map(|neighbour| {
                 fields[neighbour]
-                    .filter(|&other| other != field && kind(grid.map[neighbour]) == kind(grid.map[i]))
+                    .filter(|&other| {
+                        other != field && kind(grid.map[neighbour]) == kind(grid.map[i])
+                    })
                     .and_then(|other| wash[other])
             })
             .collect();
@@ -86,7 +97,9 @@ pub fn ground(grid: &Grid) -> Vec<Color> {
             {
                 PASTURES[pick]
             }
-            (Some(pick), Tile::Sol | Tile::SolBas | Tile::Barricade | Tile::Ronces) => MEADOWS[pick],
+            (Some(pick), Tile::Sol | Tile::SolBas | Tile::Barricade | Tile::Ronces) => {
+                MEADOWS[pick]
+            }
             _ => cell_color(grid, i),
         })
         .collect()
@@ -99,8 +112,9 @@ fn absorb_crumbs(grid: &Grid, field: &mut [Option<usize>], sizes: &mut [usize]) 
         if sizes[f] >= 3 {
             continue;
         }
-        let joins =
-            grid.neighbours(i).filter_map(|j| field[j].filter(|&g| g != f && kind(grid.map[j]) == kind(grid.map[i])));
+        let joins = grid
+            .neighbours(i)
+            .filter_map(|j| field[j].filter(|&g| g != f && kind(grid.map[j]) == kind(grid.map[i])));
         if let Some(g) = joins.min_by_key(|&g| sizes[g]).filter(|&g| sizes[g] + sizes[f] <= 12) {
             for cell in field.iter_mut().filter(|c| **c == Some(f)) {
                 *cell = Some(g);
@@ -153,10 +167,16 @@ mod tests {
     #[test]
     fn fields_lie_on_open_ground_only() {
         let grid = Grid::parse(MAP);
-        let marked: Vec<usize> =
-            grid.spawns.iter().chain(&grid.fuyard_spawns).chain(grid.goals.values()).copied().collect();
+        let marked: Vec<usize> = grid
+            .spawns
+            .iter()
+            .chain(&grid.fuyard_spawns)
+            .chain(grid.goals.values())
+            .copied()
+            .collect();
         for (i, field) in fields(&grid).iter().enumerate() {
-            let open = matches!(grid.map[i], Tile::Sol | Tile::SolBas | Tile::Ronces) && !marked.contains(&i);
+            let open = matches!(grid.map[i], Tile::Sol | Tile::SolBas | Tile::Ronces)
+                && !marked.contains(&i);
             assert_eq!(field.is_some(), open, "cell {i}");
         }
     }
@@ -169,7 +189,11 @@ mod tests {
         let mut kinds = HashMap::new();
         for (i, f) in fields.iter().enumerate() {
             if let Some(f) = f {
-                assert_eq!(*kinds.entry(*f).or_insert(kind(grid.map[i])), kind(grid.map[i]), "field {f}");
+                assert_eq!(
+                    *kinds.entry(*f).or_insert(kind(grid.map[i])),
+                    kind(grid.map[i]),
+                    "field {f}"
+                );
             }
         }
     }
@@ -210,7 +234,9 @@ mod tests {
         let fields = fields(&grid);
         for (i, wash) in ground(&grid).into_iter().enumerate() {
             match (fields[i], grid.tiles[i]) {
-                (Some(_), Tile::Sol | Tile::Ronces) => assert!(PASTURES.contains(&wash), "cell {i}"),
+                (Some(_), Tile::Sol | Tile::Ronces) => {
+                    assert!(PASTURES.contains(&wash), "cell {i}")
+                }
                 (Some(_), Tile::SolBas) => assert!(MEADOWS.contains(&wash), "cell {i}"),
                 _ => assert_eq!(wash, cell_color(&grid, i), "cell {i}"),
             }

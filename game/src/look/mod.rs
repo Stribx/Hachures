@@ -20,10 +20,13 @@ use models::{Inked, ink_models};
 pub use paper::Paper;
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins((MaterialPlugin::<InkMaterial>::default(), FullscreenMaterialPlugin::<Paper>::default()))
-        .insert_resource(ClearColor(SHEET))
-        .insert_resource(GlobalAmbientLight { color: AMBIENT, brightness: 900.0, ..default() })
-        .init_resource::<Inked>()
-        .add_systems(Startup, camera::setup)
-        .add_observer(ink_models);
+    app.add_plugins((
+        MaterialPlugin::<InkMaterial>::default(),
+        FullscreenMaterialPlugin::<Paper>::default(),
+    ))
+    .insert_resource(ClearColor(SHEET))
+    .insert_resource(GlobalAmbientLight { color: AMBIENT, brightness: 900.0, ..default() })
+    .init_resource::<Inked>()
+    .add_systems(Startup, camera::setup)
+    .add_observer(ink_models);
 }

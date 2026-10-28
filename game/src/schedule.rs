@@ -47,7 +47,11 @@ pub fn over_world(screen: Res<State<Screen>>) -> bool {
 pub fn plugin(app: &mut App) {
     app.init_state::<Screen>().configure_sets(
         Update,
-        (Step::Input.run_if(in_state(Screen::Playing)), Step::Simulate.run_if(in_state(Screen::Playing)), Step::Render)
+        (
+            Step::Input.run_if(in_state(Screen::Playing)),
+            Step::Simulate.run_if(in_state(Screen::Playing)),
+            Step::Render,
+        )
             .chain(),
     );
 }

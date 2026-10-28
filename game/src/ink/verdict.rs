@@ -19,7 +19,9 @@ pub struct Verdict {
 
 impl Verdict {
     pub fn of(level: &Level, selection: &Selection) -> Verdict {
-        let Some(i) = selection.hovered.filter(|_| !level.finished) else { return Verdict::default() };
+        let Some(i) = selection.hovered.filter(|_| !level.finished) else {
+            return Verdict::default();
+        };
         let refusal = level.refusal(i, selection.tool);
         let pencil = refusal.is_none().then(|| level.what_if(i, selection.tool, selection.shown));
         Verdict { at: Some(i), refusal, pencil }
@@ -57,7 +59,10 @@ mod tests {
         let (mut level, selection) = hovering(3);
         level.sepia = 0;
         let verdict = Verdict::of(&level, &selection);
-        assert_eq!((verdict.at, verdict.refusal, verdict.pencil.is_none()), (Some(3), Some("refusal.sepia"), true));
+        assert_eq!(
+            (verdict.at, verdict.refusal, verdict.pencil.is_none()),
+            (Some(3), Some("refusal.sepia"), true)
+        );
     }
 
     /// Where the tool may go, the pencil line is the route the ink will leave.
@@ -69,6 +74,10 @@ mod tests {
         inked.ink(3, selection.tool);
         let (_, field) = verdict.pencil.expect("a barricade off the only way is allowed");
         assert_eq!(field.dist, inked.terrain.fields()[selection.shown].dist);
-        assert_ne!(field.dist, level.terrain.fields()[selection.shown].dist, "the barricade moves the route");
+        assert_ne!(
+            field.dist,
+            level.terrain.fields()[selection.shown].dist,
+            "the barricade moves the route"
+        );
     }
 }

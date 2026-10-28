@@ -60,7 +60,8 @@ pub fn tool_tip(
     }
     keyed.0 = keyed.0.filter(|&(_, left)| left > 0.0);
     let hovered = cards.iter().find(|(_, hovered, ..)| hovered.get());
-    let shown = hovered.or_else(|| keyed.0.and_then(|(tool, _)| cards.iter().find(|(card, ..)| card.0 == tool)));
+    let shown = hovered
+        .or_else(|| keyed.0.and_then(|(tool, _)| cards.iter().find(|(card, ..)| card.0 == tool)));
     let Some((&ToolButton(tool), _, size, at)) = shown else {
         *visibility = Visibility::Hidden;
         return;
@@ -70,7 +71,8 @@ pub fn tool_tip(
         text.0 = words;
     }
     // Just above the card, its left edge on the card's.
-    let (left, top) = ((at.translation.x - size.size().x / 2.0), (at.translation.y - size.size().y / 2.0));
+    let (left, top) =
+        ((at.translation.x - size.size().x / 2.0), (at.translation.y - size.size().y / 2.0));
     node.left = px(left * size.inverse_scale_factor);
     node.top = Val::Auto;
     // In UI units, as the card's own size: the window in logical pixels would miss any UI scale.
@@ -81,8 +83,15 @@ pub fn tool_tip(
 
 /// The name, what it is, and its numbers: the species not yet met are left out of them.
 fn words(level: &Level, save: &Save, tool: usize) -> String {
-    let met: Vec<_> = level.species.iter().filter(|s| save.seen.contains(&s.label)).cloned().collect();
-    let lines = tool_lines(tool, level.tool_cost(tool), &level.tower_stats, &met, level.has(Skill::Equerre));
+    let met: Vec<_> =
+        level.species.iter().filter(|s| save.seen.contains(&s.label)).cloned().collect();
+    let lines = tool_lines(
+        tool,
+        level.tool_cost(tool),
+        &level.tower_stats,
+        &met,
+        level.has(Skill::Equerre),
+    );
     let label = TOOLS[tool].label;
     let mut all = vec![capitalized(t(label)), t(&format!("{label}.text")).to_string()];
     all.extend(lines.iter().map(|l| l.shown()));
@@ -104,9 +113,15 @@ mod tests {
         app.add_plugins(MinimalPlugins).insert_resource(level).init_resource::<Save>();
         app.init_resource::<ButtonInput<KeyCode>>();
         app.world_mut().spawn((Window::default(), PrimaryWindow));
-        let tip = app.world_mut().spawn((ToolTip, Text::default(), Node::default(), Visibility::Hidden)).id();
+        let tip = app
+            .world_mut()
+            .spawn((ToolTip, Text::default(), Node::default(), Visibility::Hidden))
+            .id();
         let card = (ComputedNode::default(), UiGlobalTransform::default());
-        let arbalete = app.world_mut().spawn((ToolButton(tool_index("arbalète").unwrap()), Hovered(true), card)).id();
+        let arbalete = app
+            .world_mut()
+            .spawn((ToolButton(tool_index("arbalète").unwrap()), Hovered(true), card))
+            .id();
         app.add_systems(Update, tool_tip);
 
         app.update();
@@ -129,7 +144,10 @@ mod tests {
         app.add_plugins(MinimalPlugins).insert_resource(level).init_resource::<Save>();
         app.init_resource::<ButtonInput<KeyCode>>();
         app.world_mut().spawn((Window::default(), PrimaryWindow));
-        let tip = app.world_mut().spawn((ToolTip, Text::default(), Node::default(), Visibility::Hidden)).id();
+        let tip = app
+            .world_mut()
+            .spawn((ToolTip, Text::default(), Node::default(), Visibility::Hidden))
+            .id();
         let card = (ComputedNode::default(), UiGlobalTransform::default());
         app.world_mut().spawn((ToolButton(arbalete), Hovered(false), card));
         app.add_systems(Update, tool_tip);
@@ -137,7 +155,9 @@ mod tests {
         app.world_mut().resource_mut::<ButtonInput<KeyCode>>().press(TOOLS[arbalete].key);
         app.update();
         assert_eq!(*app.world().get::<Visibility>(tip).unwrap(), Visibility::Inherited);
-        app.world_mut().resource_mut::<ButtonInput<KeyCode>>().clear_just_pressed(TOOLS[arbalete].key);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .clear_just_pressed(TOOLS[arbalete].key);
         app.update();
         assert_eq!(*app.world().get::<Visibility>(tip).unwrap(), Visibility::Inherited);
     }

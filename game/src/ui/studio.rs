@@ -10,7 +10,7 @@ use bevy::render::render_resource::TextureFormat;
 use bevy::world_serialization::WorldInstanceReady;
 
 use super::bar::Bar;
-use crate::combat::towers::{BASE_WOOD, TOWER_BASE, WEAPON_WOOD, weapon_model};
+use crate::combat::stand::{BASE_WOOD, TOWER_BASE, WEAPON_WOOD, weapon_model};
 use crate::ink::{Act, TOOLS, Tool};
 use crate::look::{Hachure, InkMaterial, ink, varnished};
 use crate::map;
@@ -43,7 +43,10 @@ const SIZE: u32 = 128;
 const STUDIO: Vec3 = Vec3::new(0.0, -500.0, 0.0);
 
 pub fn plugin(app: &mut App) {
-    app.init_resource::<Filming>().add_systems(PreStartup, setup).add_systems(Update, film).add_observer(into_layer);
+    app.init_resource::<Filming>()
+        .add_systems(PreStartup, setup)
+        .add_systems(Update, film)
+        .add_observer(into_layer);
 }
 
 fn setup(
@@ -64,7 +67,8 @@ fn setup(
     for (t, tool) in TOOLS.iter().enumerate() {
         let layer = RenderLayers::layer(t + 1);
         let at = STUDIO + Vec3::X * 10.0 * t as f32;
-        let image = images.add(Image::new_target_texture(SIZE, SIZE, TextureFormat::Rgba8UnormSrgb, None));
+        let image =
+            images.add(Image::new_target_texture(SIZE, SIZE, TextureFormat::Rgba8UnormSrgb, None));
         spawn_camera(&mut commands, &image, t, at, &layer);
         spawn_ground(&mut commands, &mut meshes, &mut materials, tool, at, &layer);
         spawn_piece(&mut commands, &assets, &mut meshes, &mut materials, tool, at, &layer);
@@ -74,7 +78,13 @@ fn setup(
 }
 
 /// The camera of `TOOLS[t]`, filming into `image`.
-fn spawn_camera(commands: &mut Commands, image: &Handle<Image>, t: usize, at: Vec3, layer: &RenderLayers) {
+fn spawn_camera(
+    commands: &mut Commands,
+    image: &Handle<Image>,
+    t: usize,
+    at: Vec3,
+    layer: &RenderLayers,
+) {
     // A tower stands taller than a piece of terrain: frame it wider, look higher.
     let (frame, aim) = if TOOLS[t].act.weapon().is_some() { (1.3, 0.5) } else { (1.05, 0.12) };
     commands.spawn((
@@ -142,14 +152,23 @@ fn spawn_piece(
         // ponytail: Biffer borrows Gratter's scraper; its own piece (a quill striking out) when the art is drawn.
         Act::Scrape | Act::Biffer => scraper(),
         Act::Raise(weapon) => {
-            let scene = |path: &'static str| WorldAssetRoot(assets.load(GltfAssetLabel::Scene(0).from_asset(path)));
-            commands.spawn((StudioModel, scene(TOWER_BASE), BASE_WOOD, Transform::from_translation(at), layer.clone()));
+            let scene = |path: &'static str| {
+                WorldAssetRoot(assets.load(GltfAssetLabel::Scene(0).from_asset(path)))
+            };
+            commands.spawn((
+                StudioModel,
+                scene(TOWER_BASE),
+                BASE_WOOD,
+                Transform::from_translation(at),
+                layer.clone(),
+            ));
             commands.spawn((
                 StudioModel,
                 scene(weapon_model(weapon)),
                 WEAPON_WOOD,
                 // Turned a little, so its shape shows rather than its front.
-                Transform::from_translation(at + Vec3::Y * 0.6).with_rotation(Quat::from_rotation_y(0.6)),
+                Transform::from_translation(at + Vec3::Y * 0.6)
+                    .with_rotation(Quat::from_rotation_y(0.6)),
                 layer.clone(),
             ));
             return;
@@ -180,7 +199,11 @@ fn into_layer(
 }
 
 /// The bar is up: film for a second's worth of frames, then rest.
-fn film(bar: Query<(), Added<Bar>>, mut filming: ResMut<Filming>, mut cameras: Query<&mut Camera, With<StudioCamera>>) {
+fn film(
+    bar: Query<(), Added<Bar>>,
+    mut filming: ResMut<Filming>,
+    mut cameras: Query<&mut Camera, With<StudioCamera>>,
+) {
     if !bar.is_empty() {
         filming.0 = 60;
     }

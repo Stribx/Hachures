@@ -18,8 +18,10 @@ use field::{COLUMNS, Field};
 struct Value(Field);
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(OnEnter(Screen::Settings), spawn)
-        .add_systems(Update, (adjust, show_values, preview, relabel).run_if(in_state(Screen::Settings)));
+    app.add_systems(OnEnter(Screen::Settings), spawn).add_systems(
+        Update,
+        (adjust, show_values, preview, relabel).run_if(in_state(Screen::Settings)),
+    );
 }
 
 /// Button action: open the settings page, coming back to `from`.
@@ -28,7 +30,9 @@ pub fn open_settings(from: Screen) -> impl Fn(On<Activate>, Commands, ResMut<Nex
 }
 
 /// Button action: change the settings with `edit`, then save them.
-fn change(edit: impl Fn(&mut Settings) + Send + Sync + 'static) -> impl Fn(On<Activate>, ResMut<Settings>) {
+fn change(
+    edit: impl Fn(&mut Settings) + Send + Sync + 'static,
+) -> impl Fn(On<Activate>, ResMut<Settings>) {
     move |_, mut settings| {
         edit(&mut settings);
         settings.store();
@@ -39,27 +43,34 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
     commands.spawn(page(Screen::Settings, VEIL)).with_children(|page| {
         page.spawn(sheet()).with_children(|p| {
             p.spawn(text(&assets, t("menu.settings"), TITLE_SIZE));
-            p.spawn(Node { column_gap: px(48), align_items: AlignItems::FlexStart, ..default() }).with_children(
-                |columns| {
+            p.spawn(Node { column_gap: px(48), align_items: AlignItems::FlexStart, ..default() })
+                .with_children(|columns| {
                     for groups in COLUMNS {
                         spawn_column(columns, &assets, groups);
                     }
-                },
-            );
-            p.spawn(Node { column_gap: px(16), margin: UiRect::top(px(8)), ..default() }).with_children(|actions| {
-                actions
-                    .spawn(button(label(&assets, t("settings.reset"))))
-                    .observe(change(|s| *s = Settings { language: s.language.clone(), ..default() }));
-                actions.spawn(primary(BUTTON_WIDTH, label(&assets, t("common.back")))).observe(back);
-            });
+                });
+            p.spawn(Node { column_gap: px(16), margin: UiRect::top(px(8)), ..default() })
+                .with_children(|actions| {
+                    actions.spawn(button(label(&assets, t("settings.reset")))).observe(change(
+                        |s| *s = Settings { language: s.language.clone(), ..default() },
+                    ));
+                    actions
+                        .spawn(primary(BUTTON_WIDTH, label(&assets, t("common.back"))))
+                        .observe(back);
+                });
         });
     });
 }
 
 /// A column of the page: each group under its heading.
-fn spawn_column(columns: &mut ChildSpawnerCommands, assets: &AssetServer, groups: &[(&str, &[Field])]) {
-    columns.spawn(Node { flex_direction: FlexDirection::Column, row_gap: px(8), ..default() }).with_children(
-        |column| {
+fn spawn_column(
+    columns: &mut ChildSpawnerCommands,
+    assets: &AssetServer,
+    groups: &[(&str, &[Field])],
+) {
+    columns
+        .spawn(Node { flex_direction: FlexDirection::Column, row_gap: px(8), ..default() })
+        .with_children(|column| {
             for &(heading, fields) in groups {
                 column
                     .spawn(text(assets, t(heading), HEADING_SIZE))
@@ -67,13 +78,13 @@ fn spawn_column(columns: &mut ChildSpawnerCommands, assets: &AssetServer, groups
                 // The browser chooses its own frame pacing, and WebGL2 has no ambient
                 // occlusion; it keeps its MSAA.
                 let web = [Field::Vsync, Field::Occlusion, Field::AntiAliasing];
-                let shown = fields.iter().filter(|f| !cfg!(target_arch = "wasm32") || !web.contains(f));
+                let shown =
+                    fields.iter().filter(|f| !cfg!(target_arch = "wasm32") || !web.contains(f));
                 for &field in shown {
                     spawn_row(column, assets, field);
                 }
             }
-        },
-    );
+        });
 }
 
 /// A row: the setting's name and value, and the two small arrows.
@@ -81,10 +92,16 @@ fn spawn_row(column: &mut ChildSpawnerCommands, assets: &AssetServer, field: Fie
     let small = |s: &str| text(assets, s.to_string(), BODY_SIZE);
     column.spawn(Node { column_gap: px(6), ..default() }).with_children(|row| {
         let words = (
-            Node { flex_grow: 1.0, justify_content: JustifyContent::SpaceBetween, column_gap: px(24), ..default() },
+            Node {
+                flex_grow: 1.0,
+                justify_content: JustifyContent::SpaceBetween,
+                column_gap: px(24),
+                ..default()
+            },
             children![small(t(field.name())), (small(""), Value(field))],
         );
-        row.spawn((framed(340.0, words), field)).observe(change(move |settings| field.advance(settings)));
+        row.spawn((framed(340.0, words), field))
+            .observe(change(move |settings| field.advance(settings)));
         for (arrow, direction) in [("‹", -1), ("›", 1)] {
             row.spawn((framed(0.0, small(arrow)), NoNav))
                 .observe(change(move |settings| field.step(settings, direction)));
@@ -135,7 +152,11 @@ fn preview(
 }
 
 /// The language changed: the page is written again in it.
-fn relabel(settings: Res<Settings>, mut shown: Local<Option<String>>, mut next: ResMut<NextState<Screen>>) {
+fn relabel(
+    settings: Res<Settings>,
+    mut shown: Local<Option<String>>,
+    mut next: ResMut<NextState<Screen>>,
+) {
     let language = &settings.language;
     if shown.replace(language.clone()).is_some_and(|before| before != *language) {
         next.set(Screen::Settings);

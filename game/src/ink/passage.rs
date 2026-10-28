@@ -40,11 +40,24 @@ impl Level {
         let event = &self.world().event;
         if self.changes.iter().any(|c| c.cells(self.terrain.base().width).any(|n| n == cell)) {
             Some(n_("refusal.relief_changes"))
-        } else if !can_place(self.terrain.grid(), &self.species, &self.present, cell, tile, &self.walkers) {
+        } else if !can_place(
+            self.terrain.grid(),
+            &self.species,
+            &self.present,
+            cell,
+            tile,
+            &self.walkers,
+        ) {
             Some(n_("refusal.closed"))
-        } else if self.maps_ahead().iter().any(|map| !can_place(map, &self.species, &self.present, cell, tile, &[])) {
+        } else if self
+            .maps_ahead()
+            .iter()
+            .any(|map| !can_place(map, &self.species, &self.present, cell, tile, &[]))
+        {
             Some(&event.refuse_next)
-        } else if self.event_on && !can_place(self.terrain.base(), &self.species, &self.present, cell, tile, &[]) {
+        } else if self.event_on
+            && !can_place(self.terrain.base(), &self.species, &self.present, cell, tile, &[])
+        {
             Some(&event.refuse_after)
         } else if !self.changes.is_empty()
             && !can_place(&self.after_changes(), &self.species, &self.present, cell, tile, &[])
@@ -66,7 +79,8 @@ impl Level {
             // Same changes fallen, same map: build it once.
             if self.event_at(w) && !seen.contains(&fallen) {
                 seen.push(fallen);
-                let edits = self.changes.iter().filter(|c| c.wave <= w).flat_map(|c| c.edits(width));
+                let edits =
+                    self.changes.iter().filter(|c| c.wave <= w).flat_map(|c| c.edits(width));
                 maps.push(self.terrain.ahead(edits).under(event));
             }
         }
@@ -147,7 +161,11 @@ mod tests {
         let c = 22;
         assert_eq!(level.refusal(c, tool_index("barricade").unwrap()), Some("world.1.refuse_next"));
         level.events = vec![];
-        assert_eq!(level.refusal(c, tool_index("barricade").unwrap()), None, "without the flood, B stays open");
+        assert_eq!(
+            level.refusal(c, tool_index("barricade").unwrap()),
+            None,
+            "without the flood, B stays open"
+        );
     }
 
     #[test]
@@ -185,7 +203,10 @@ mod tests {
         assert_eq!(level.refusal(2, gratter), None);
         let sepia = level.sepia;
         level.ink(2, gratter);
-        assert_eq!((level.terrain.base().tiles[2], level.terrain.base().map[2]), (Tile::Sol, Tile::Sol));
+        assert_eq!(
+            (level.terrain.base().tiles[2], level.terrain.base().map[2]),
+            (Tile::Sol, Tile::Sol)
+        );
         assert_eq!(level.sepia, sepia - level.tool_cost(gratter));
         assert_eq!(level.refusal(2, gratter), Some("refusal.nothing_to_scrape"));
     }
@@ -197,7 +218,10 @@ mod tests {
         let gratter = tool_index("gratter").unwrap();
         assert_eq!(level.refusal(2, gratter), None);
         level.ink(2, gratter);
-        assert_eq!((level.terrain.base().tiles[2], level.terrain.base().map[2]), (Tile::Sol, Tile::Sol));
+        assert_eq!(
+            (level.terrain.base().tiles[2], level.terrain.base().map[2]),
+            (Tile::Sol, Tile::Sol)
+        );
         assert_eq!(level.refusal(2, gratter), Some("refusal.nothing_to_scrape"));
     }
 
@@ -210,7 +234,15 @@ mod tests {
     #[test]
     fn gratter_refuses_what_is_not_decor() {
         let gratter = tool_index("gratter").unwrap();
-        for tile in [Tile::Barricade, Tile::Boue, Tile::Ronces, Tile::Chaussee, Tile::Glace, Tile::Eau, Tile::Roc] {
+        for tile in [
+            Tile::Barricade,
+            Tile::Boue,
+            Tile::Ronces,
+            Tile::Chaussee,
+            Tile::Glace,
+            Tile::Eau,
+            Tile::Roc,
+        ] {
             let mut level = level("S...M");
             level.alter([(2, Edit::Ink(tile))]);
             assert_eq!(level.refusal(2, gratter), Some("refusal.nothing_to_scrape"), "{tile:?}");

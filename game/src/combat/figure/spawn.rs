@@ -18,25 +18,40 @@ pub struct Body {
 
 /// Stands the figure of the species numbered `index` in the level's list at `at`, `scale` times the kit's size: only
 /// what is seen, no walker.
-pub fn spawn_figure(commands: &mut Commands, look: &EnemyLook, index: usize, at: Vec3, scale: f32) -> Entity {
+pub fn spawn_figure(
+    commands: &mut Commands,
+    look: &EnemyLook,
+    index: usize,
+    at: Vec3,
+    scale: f32,
+) -> Entity {
     commands
-        .spawn((Transform::from_translation(at).with_scale(Vec3::splat(scale)), Visibility::default()))
+        .spawn((
+            Transform::from_translation(at).with_scale(Vec3::splat(scale)),
+            Visibility::default(),
+        ))
         .with_children(|root| {
             // The kit's ground is y = 0, and the root floats `FLOAT` above the board.
             let ground = Transform::from_xyz(0.0, -FLOAT / scale, 0.0);
-            root.spawn((Body { rest: ground }, ground, Visibility::default())).with_children(|body| {
-                let pieces = look.figures.get(index).into_iter().flatten();
-                for piece in pieces {
-                    let (at, role, side) = (piece.at, piece.role, piece.side);
-                    let mut part = body.spawn((Mesh3d(piece.mesh.clone()), MeshMaterial3d(piece.material.clone()), at));
-                    if !piece.casts_shadow {
-                        part.insert(NotShadowCaster);
+            root.spawn((Body { rest: ground }, ground, Visibility::default())).with_children(
+                |body| {
+                    let pieces = look.figures.get(index).into_iter().flatten();
+                    for piece in pieces {
+                        let (at, role, side) = (piece.at, piece.role, piece.side);
+                        let mut part = body.spawn((
+                            Mesh3d(piece.mesh.clone()),
+                            MeshMaterial3d(piece.material.clone()),
+                            at,
+                        ));
+                        if !piece.casts_shadow {
+                            part.insert(NotShadowCaster);
+                        }
+                        if role != Role::Body {
+                            part.insert(Limb { role, rest: at, side });
+                        }
                     }
-                    if role != Role::Body {
-                        part.insert(Limb { role, rest: at, side });
-                    }
-                }
-            });
+                },
+            );
         })
         .id()
 }

@@ -73,7 +73,12 @@ pub fn can_place(
     tile: Tile,
     walkers: &[Walker],
 ) -> bool {
-    let marked = grid.spawns.iter().chain(&grid.fuyard_spawns).chain(grid.goals.values()).chain(&grid.bornes);
+    let marked = grid
+        .spawns
+        .iter()
+        .chain(&grid.fuyard_spawns)
+        .chain(grid.goals.values())
+        .chain(&grid.bornes);
     if marked.copied().any(|m| m == i) {
         return false;
     }
@@ -81,11 +86,13 @@ pub fn can_place(
     next.tiles[i] = tile;
     // Bornes fall (shot or scraped): only the lasting goals vouch for a path.
     next.bornes.clear();
-    present.iter().map(|&k| (k, &species[k])).filter(|(_, s)| next.goals.contains_key(&s.goal)).all(|(k, s)| {
-        let field = FlowField::new(&next, s);
-        let walking = walkers.iter().filter(|w| w.species == k).map(|w| w.cell);
-        next.spawns_for(s).iter().copied().chain(walking).all(|c| field.dist[c].is_finite())
-    })
+    present.iter().map(|&k| (k, &species[k])).filter(|(_, s)| next.goals.contains_key(&s.goal)).all(
+        |(k, s)| {
+            let field = FlowField::new(&next, s);
+            let walking = walkers.iter().filter(|w| w.species == k).map(|w| w.cell);
+            next.spawns_for(s).iter().copied().chain(walking).all(|c| field.dist[c].is_finite())
+        },
+    )
 }
 
 #[cfg(test)]
@@ -106,10 +113,22 @@ mod tests {
             ",
         );
         let gap = 2 * grid.width + 2;
-        assert!(!can_place(&grid, &species, &all, gap, Tile::Barricade, &[]), "closing the only gap must be refused");
-        assert!(can_place(&grid, &species, &all, gap, Tile::Boue, &[]), "mud slows but leaves a path");
-        assert!(can_place(&grid, &species, &all, grid.width, Tile::Barricade, &[]), "blocking a side cell is fine");
-        assert!(!can_place(&grid, &species, &all, grid.spawns[0], Tile::Barricade, &[]), "spawns stay free");
+        assert!(
+            !can_place(&grid, &species, &all, gap, Tile::Barricade, &[]),
+            "closing the only gap must be refused"
+        );
+        assert!(
+            can_place(&grid, &species, &all, gap, Tile::Boue, &[]),
+            "mud slows but leaves a path"
+        );
+        assert!(
+            can_place(&grid, &species, &all, grid.width, Tile::Barricade, &[]),
+            "blocking a side cell is fine"
+        );
+        assert!(
+            !can_place(&grid, &species, &all, grid.spawns[0], Tile::Barricade, &[]),
+            "spawns stay free"
+        );
 
         // A Chaîneur at (2, 1), rock left, right and below: closing (2, 0) traps it,
         // even though the spawn still reaches the Moulin along the bottom row.
