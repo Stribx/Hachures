@@ -35,7 +35,7 @@ screenshots/, .taste-skill/, .impeccable/   local only, ignored by git
 | `level/` | one level: the `Level` resource, its data files, waves, story notes and choices, the world's event |
 | `campaign/` | the save, and loading a level (`LoadLevel`) |
 | `map/` | the terrain: the grid, species and their flow fields, the blocks, props and landing on screen |
-| `ink/` | Nève's tools: the selection, the click that inks, le Droit de Passage (`passage.rs`), the overlay, the ghost |
+| `ink/` | Nève's tools: the selection, the click that inks, le Droit de Passage (`passage.rs`), Biffer (`biffer.rs`), the overlay, the ghost |
 | `combat/` | towers, enemies and their figurines (`combat/figure/`), waves sent, shards, la Grande Chaîne |
 | `overworld/` | les Marches and the Grand Plan: terrain, sheets, road, Nève's walk, the camera rig, clouds, trips |
 | `ui/` | what the player reads during play: label, margin notes, tool bar, place names, the end-of-level page; `widgets` is the shared UI toolkit |
@@ -106,7 +106,8 @@ The game's world keeps its French names in code, data and files (they are names 
 | Chaîneur, Échassier, Jalonneur, Gens du Col… | the imperial species | `data/species.ron` |
 | la Grande Chaîne | world 1's boss, in phases | `combat/boss.rs`, `World.boss` |
 | bornes, Borne-Mère | imperial markers the boss plants; the Jalonneurs' goal | `Grid.bornes`, `Goal::BorneMere` |
-| Gratter | a power: scrapes a borne off a cell (the ground under it stays), or returns an Éboulis or a Palissade to plain Sol, and nothing else (never Nève's own ink). Never costs a Name and is never needed to win a level; a scrape is final for Nève. Earned by beating world 1's boss | `TOOLS` "gratter", `Act::Scrape`, `LevelData.grants` |
+| Gratter | a power: scrapes a borne off a cell (the ground under it stays), or returns an Éboulis or a Palissade to plain Sol, and nothing else (never Nève's own ink: that is Biffer's job). Never costs a Name and is never needed to win a level; a scrape is final for Nève. Earned by beating world 1's boss | `TOOLS` "gratter", `Act::Scrape`, `LevelData.grants` |
+| Biffer / le repentir | a tool: takes back one of Nève's own strokes (tower or aménagement laid with `Level::ink`) and returns the cell to what it was. Wet ink (laid between waves, no wave sent since) refunds what it cost; dry ink half, rounded down. The Name it cost stays scratched out. Free; every level has it | `TOOLS` "biffer", `Act::Biffer`, `Level.inked`, `ink/biffer.rs` |
 | Éboulis | fallen stone on a cell, slow to walk; Gratter scrapes it | `Tile::Eboulis`, map char `e` |
 | Palissade | an imperial barricade the level or world data lays: impassable, but never closes the map; Gratter scrapes it | `Tile::Palissade`, map char `p` |
 | the terrain | the sheet's ground as drawn, as inked and as walked under the world event, and the routes over it. Every lasting change goes through it, as *the land changing* (a scripted change, a scrape: la Crue reads the new ground) or as *ink on the land* (the tools, the Chaussée, Ronces-mères: drowned on low ground unless spared) | `map::terrain::Terrain`, `Edit`, `Level::alter` |

@@ -428,3 +428,22 @@ fn a_new_species_is_noted_once() {
     app.update();
     assert_eq!(app.world().resource::<Level>().margin.len(), 1, "already known");
 }
+
+/// A biffed tower comes down, base and weapon; the tower beside it stays.
+#[test]
+fn a_biffed_tower_comes_down() {
+    use super::towers::{TowerBase, take_down};
+    use crate::ink::TowerBiffed;
+    let mut app = App::new();
+    app.add_plugins(MinimalPlugins).add_message::<TowerBiffed>().add_systems(Update, take_down);
+    for cell in [3, 4] {
+        app.world_mut().spawn(Tower { cell, weapon: Weapon::Arbalete, ready_in: 0.0 });
+        app.world_mut().spawn(TowerBase(cell));
+    }
+    app.world_mut().write_message(TowerBiffed { cell: 3 });
+    app.update();
+    let world = app.world_mut();
+    let towers: Vec<usize> = world.query::<&Tower>().iter(world).map(|t| t.cell).collect();
+    let bases: Vec<usize> = world.query::<&TowerBase>().iter(world).map(|b| b.0).collect();
+    assert_eq!((towers, bases), (vec![4], vec![4]));
+}

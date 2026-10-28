@@ -1,5 +1,6 @@
 //! Nève's tools: what she may ink where, what it costs, and the click that inks it.
 
+mod biffer;
 mod ghost;
 pub mod overlay;
 mod passage;
@@ -13,8 +14,8 @@ use crate::campaign::load_level;
 use crate::campaign::skills::Skill;
 use crate::combat::towers::Weapon;
 use crate::i18n::n_;
-use crate::level::Level;
 use crate::level::story::MarginNote;
+use crate::level::{Inked, Level};
 use crate::map::flow::FlowField;
 use crate::map::grid::{Grid, Tile};
 use crate::map::land::fibres;
@@ -25,6 +26,7 @@ pub use verdict::Verdict;
 pub fn plugin(app: &mut App) {
     app.add_plugins((overlay::plugin, selection::plugin))
         .add_message::<TowerInked>()
+        .add_message::<TowerBiffed>()
         .init_resource::<Verdict>()
         .add_systems(
             Update,
@@ -41,6 +43,12 @@ pub struct TowerInked {
     pub weapon: Weapon,
 }
 
+/// The tower on `cell` was biffed; combat takes it down.
+#[derive(Message)]
+pub struct TowerBiffed {
+    pub cell: usize,
+}
+
 /// What a tool does to the cell it is inked on.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Act {
@@ -50,6 +58,8 @@ pub enum Act {
     Raise(Weapon),
     /// Scrapes the cell (Gratter): an imperial borne comes off, an Éboulis or a Palissade returns to plain Sol.
     Scrape,
+    /// Takes back one of Nève's own strokes (Biffer): the cell is what it was before.
+    Biffer,
 }
 
 impl Act {
@@ -58,22 +68,12 @@ impl Act {
         match self {
             Act::Lay(tile) => Some(tile),
             Act::Raise(_) => Some(Tile::Tour),
-            Act::Scrape => None,
+            Act::Scrape | Act::Biffer => None,
         }
     }
 
     pub const fn weapon(self) -> Option<Weapon> {
         if let Act::Raise(weapon) = self { Some(weapon) } else { None }
-    }
-}
-
-impl From<Act> for Edit {
-    fn from(act: Act) -> Edit {
-        match act {
-            Act::Lay(tile) => Edit::Ink(tile),
-            Act::Raise(weapon) => Edit::Raise(weapon),
-            Act::Scrape => Edit::Scrape,
-        }
     }
 }
 
@@ -92,7 +92,7 @@ const fn tool(key: KeyCode, name: &'static str, label: &'static str, cost: u32, 
     Tool { key, name, label, cost, act }
 }
 
-pub const TOOLS: [Tool; 8] = [
+pub const TOOLS: [Tool; 9] = [
     tool(KeyCode::Digit1, "barricade", n_("tool.barricade"), 10, Act::Lay(Tile::Barricade)),
     tool(KeyCode::Digit2, "boue", n_("tool.boue"), 15, Act::Lay(Tile::Boue)),
     tool(KeyCode::Digit3, "ronces", n_("tool.ronces"), 20, Act::Lay(Tile::Ronces)),
@@ -103,6 +103,8 @@ pub const TOOLS: [Tool; 8] = [
     tool(KeyCode::Digit7, "lanterne", n_("tool.lanterne"), 60, Act::Raise(Weapon::Lanterne)),
     // Not priced in the docs: tune with the balance bot.
     tool(KeyCode::Digit8, "gratter", n_("tool.gratter"), 25, Act::Scrape),
+    // Free: what it gives back is the price (docs, section 7). Last, so the balance bot's indices hold.
+    tool(KeyCode::Digit9, "biffer", n_("tool.biffer"), 0, Act::Biffer),
 ];
 
 /// Index in `TOOLS` of the tool called `name`.
@@ -117,6 +119,7 @@ pub(crate) fn inking(
     mut level: ResMut<Level>,
     mut selection: ResMut<Selection>,
     mut inked: MessageWriter<TowerInked>,
+    mut biffed: MessageWriter<TowerBiffed>,
 ) {
     if level.finished {
         return;
@@ -128,9 +131,13 @@ pub(crate) fn inking(
     if !mouse.just_pressed(MouseButton::Left) || level.refusal(i, selection.tool).is_some() {
         return;
     }
+    let tower = level.terrain.base().tiles[i] == Tile::Tour;
     level.ink(i, selection.tool);
-    if let Some(weapon) = TOOLS[selection.tool].act.weapon() {
+    let act = TOOLS[selection.tool].act;
+    if let Some(weapon) = act.weapon() {
         inked.write(TowerInked { cell: i, weapon });
+    } else if act == Act::Biffer && tower {
+        biffed.write(TowerBiffed { cell: i });
     }
 }
 
@@ -148,11 +155,15 @@ impl Level {
         (tool.cost as f32 * factor).round() as u32
     }
 
-    /// Inks `tool` at `i`, paid in sépia, and in a Name if a place's name is written there.
-    /// The caller has checked `refusal`.
+    /// Inks `tool` at `i`, paid in sépia, and in a Name if a place's name is written there. Biffer goes through here
+    /// too: free, it costs no Name and gives sépia back. The caller has checked `refusal`.
     pub fn ink(&mut self, i: usize, tool: usize) {
         let act = TOOLS[tool].act;
-        self.sepia -= self.tool_cost(tool);
+        if act == Act::Biffer {
+            return self.biffer(i);
+        }
+        let paid = self.tool_cost(tool);
+        self.sepia -= paid;
         if !self.used.contains(&tool) {
             self.used.push(tool);
         }
@@ -163,12 +174,27 @@ impl Level {
             let line = n_("note.erased").to_string();
             self.margin.push(MarginNote { line, name: Some(self.places[p].name.clone()) });
         }
-        self.alter([(i, act.into())]);
+        if act.lays().is_some() {
+            let (under, laid_at) = (self.terrain.base().tiles[i], (!self.wave.running).then_some(self.wave.number));
+            self.inked.push(Inked { cell: i, tool, under, paid, laid_at });
+        }
+        let edit = self.edit(i, tool);
+        self.alter([(i, edit)]);
+    }
+
+    /// What inking `tool` at `i` does to the cell.
+    fn edit(&self, i: usize, tool: usize) -> Edit {
+        match TOOLS[tool].act {
+            Act::Lay(tile) => Edit::Ink(tile),
+            Act::Raise(weapon) => Edit::Raise(weapon),
+            Act::Scrape => Edit::Scrape,
+            Act::Biffer => Edit::Unink(self.stroke(i).map_or(self.terrain.base().tiles[i], |s| self.inked[s].under)),
+        }
     }
 
     /// The map and the shown species' field if `tool` were inked at `i`.
     pub fn what_if(&self, i: usize, tool: usize, shown: usize) -> (Grid, FlowField) {
-        self.terrain.preview(i, TOOLS[tool].act.into(), &self.species[shown])
+        self.terrain.preview(i, self.edit(i, tool), &self.species[shown])
     }
 }
 
@@ -281,5 +307,33 @@ mod tests {
         let before = ronces(&level);
         level.grow_ronces();
         assert_eq!(ronces(&level), before + 1, "Ronces-mères: one more bramble per wave");
+    }
+
+    /// The click on Biffer takes the tower down through combat's message, and only when a tower was taken.
+    #[test]
+    fn biffing_a_tower_tells_combat() {
+        let biffer = tool_index("biffer").unwrap();
+        let mut level = Level::new(Grid::parse("S...M\n.....\n....."), species::load());
+        level.ink(7, tool_index("arbalète").unwrap());
+        level.ink(2, tool_index("barricade").unwrap());
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .add_message::<TowerInked>()
+            .add_message::<TowerBiffed>()
+            .init_resource::<ButtonInput<KeyCode>>()
+            .insert_resource(Selection { tool: biffer, ..Selection::for_level(&level) })
+            .insert_resource(level)
+            .add_systems(Update, inking);
+        for cell in [7, 2] {
+            app.world_mut().resource_mut::<Selection>().hovered = Some(cell);
+            let mut mouse = ButtonInput::<MouseButton>::default();
+            mouse.press(MouseButton::Left);
+            app.insert_resource(mouse);
+            app.update();
+        }
+        let messages = app.world().resource::<Messages<TowerBiffed>>();
+        let biffed: Vec<usize> = messages.get_cursor().read(messages).map(|m| m.cell).collect();
+        assert_eq!(biffed, vec![7], "the tower, not the barricade");
+        assert_eq!(app.world().resource::<Level>().terrain.base().tiles[7], Tile::Sol);
     }
 }

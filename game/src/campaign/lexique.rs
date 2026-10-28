@@ -84,6 +84,10 @@ pub fn tool_lines(
     species: &[Species],
     equerre: bool,
 ) -> Vec<Line> {
+    // Biffer costs nothing: what it gives back is its line (docs, section 7).
+    if TOOLS[tool].act == Act::Biffer {
+        return vec![Line::new(n_("lexique.refund_wet"), &[]), Line::new(n_("lexique.refund_dry"), &[])];
+    }
     let mut lines = vec![Line::new(n_("lexique.cost"), &[cost.to_string()])];
     match TOOLS[tool].act {
         Act::Raise(weapon) => lines.extend(weapon_lines(weapon, &stats[&weapon], species, equerre)),
@@ -103,7 +107,7 @@ pub fn tool_lines(
                 .collect();
             lines.push(Line::new(n_("lexique.step"), &[prices.join(", ")]));
         }
-        Act::Scrape => {}
+        Act::Scrape | Act::Biffer => {}
     }
     lines
 }

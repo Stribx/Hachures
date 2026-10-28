@@ -21,6 +21,8 @@ pub enum Edit {
     Land(Tile),
     /// Gratter: the borne comes off, else the cell returns to plain Sol. The caller has checked `Grid::scrapable`.
     Scrape,
+    /// Biffer: Nève's ink comes off, a tower with it, and the cell is the tile it was before.
+    Unink(Tile),
     /// La Grande Chaîne plants a borne on the cell.
     PlantBorne,
     /// The borne on the cell falls, shot down.
@@ -176,6 +178,10 @@ fn apply(base: &mut Grid, towers: &mut Vec<(usize, Weapon)>, i: usize, edit: Edi
         }
         Edit::Scrape if base.bornes.contains(&i) => base.bornes.retain(|&b| b != i),
         Edit::Scrape => apply(base, towers, i, Edit::Land(Tile::Sol)),
+        Edit::Unink(tile) => {
+            base.tiles[i] = tile;
+            towers.retain(|t| t.0 != i);
+        }
         Edit::PlantBorne => base.bornes.push(i),
         Edit::DropBorne => base.bornes.retain(|&b| b != i),
     }
@@ -247,6 +253,23 @@ mod tests {
         assert_eq!(terrain.base().under(&WORLDS[0].event).tiles[2], Tile::Palissade);
     }
 
+    /// Biffer: the tower comes off with its shadow, the barricade gives the road back; the cell is what it was.
+    #[test]
+    fn unink_returns_the_cell_and_lifts_the_shadow() {
+        let species = species::load();
+        let (harde, chaineur) = (index_of(&species, "harde").unwrap(), index_of(&species, "chaineur").unwrap());
+        let map = Grid::parse("S.......M\n.........\n#########");
+        let mut terrain = Terrain::new(map, Reach { equerre: true, ..reach() }, &species);
+        let (shade, road) = (terrain.fields()[harde].dist.clone(), terrain.fields()[chaineur].dist.clone());
+        terrain.alter([(4, Edit::Raise(Weapon::Arbalete)), (13, Edit::Ink(Tile::Barricade))], &species);
+        terrain.alter([(4, Edit::Unink(Tile::Sol)), (13, Edit::Unink(Tile::Sol))], &species);
+        assert_eq!((terrain.base().tiles[4], terrain.base().tiles[13]), (Tile::Sol, Tile::Sol));
+        assert!(terrain.base().cover.iter().all(|&c| c == 0.0), "no tower casts a shadow");
+        assert_eq!(terrain.fields()[harde].dist, shade);
+        assert_eq!(terrain.fields()[chaineur].dist, road);
+        assert_eq!(terrain.reach(5, Weapon::Arbalete), 3.0, "no tower is left to pair with");
+    }
+
     /// Équerre: a tower with another beside it reaches one tile further; alone, it doesn't.
     #[test]
     fn equerre_pairs_towers() {
@@ -276,9 +299,15 @@ mod tests {
     #[test]
     fn every_preview_is_what_the_ink_does() {
         let species = species::load();
-        let map = "S.,e..M\n.,,,,..";
-        let edits = [Edit::Ink(Tile::Barricade), Edit::Ink(Tile::Boue), Edit::Raise(Weapon::Mortier), Edit::Scrape];
-        for (i, edit) in [4, 2, 5, 3].into_iter().zip(edits) {
+        let map = "S.,e.#M\n.,,,,..";
+        let edits = [
+            Edit::Ink(Tile::Barricade),
+            Edit::Ink(Tile::Boue),
+            Edit::Raise(Weapon::Mortier),
+            Edit::Scrape,
+            Edit::Unink(Tile::Sol),
+        ];
+        for (i, edit) in [4, 2, 1, 3, 5].into_iter().zip(edits) {
             let mut terrain = Terrain::new(Grid::parse(map), reach(), &species);
             terrain.set_event(Some(&WORLDS[0].event), &species);
             let previews: Vec<_> = species.iter().map(|s| terrain.preview(i, edit, s)).collect();

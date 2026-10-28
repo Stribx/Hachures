@@ -78,7 +78,7 @@ mod tests {
         let seen = &app.world().resource::<Save>().seen;
         let level = app.world().resource::<Level>();
         assert_eq!(level.index, 1);
-        assert_eq!(seen.len(), 3, "1-1 shows three tools");
+        assert_eq!(seen.len(), 4, "1-1 shows three tools, and Biffer");
         assert!(level.tools.iter().all(|&t| seen.contains(TOOLS[t].label)));
     }
 }

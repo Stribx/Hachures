@@ -11,7 +11,7 @@ use super::widgets::{Panel, SLIP_RADIUS, framed, primary, text};
 use super::{DuringPlay, Fast, next_species};
 use crate::combat::enemies::send_wave;
 use crate::i18n::{t, tf};
-use crate::ink::{Selection, TOOLS};
+use crate::ink::{Act, Selection, TOOLS};
 use crate::level::{Level, LevelEntity};
 use crate::menu::{open_lexique, open_sceaux};
 use crate::schedule::Screen;
@@ -183,9 +183,9 @@ pub fn look(
     for (&ToolLabel(t), mut color) in &mut labels {
         color.0 = if level.sepia >= level.tool_cost(t) { INK } else { INK.with_alpha(0.4) };
     }
-    for (&ToolCost(t), mut text, mut color) in &mut costs {
-        let cost = level.tool_cost(t);
-        text.0 = tf("bar.cost", &[&cost]);
+    for (&ToolCost(tool), mut text, mut color) in &mut costs {
+        let cost = level.tool_cost(tool);
+        text.0 = if TOOLS[tool].act == Act::Biffer { t("bar.refund").to_string() } else { tf("bar.cost", &[&cost]) };
         color.0 = if level.sepia >= cost { INK_SOFT } else { SEAL };
     }
     for mut text in &mut route {

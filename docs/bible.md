@@ -66,7 +66,7 @@ Les **Marches** sont une bande de terres longue de plusieurs centaines de lieues
 4. **Les trois lectures.** Chaque peuple voit le relief selon sa nature. Certains lisent **la Pente** : ils jugent le terrain lui-même. D'autres lisent **l'Ombre** : ils fuient ce qui les menace, à commencer par les tours. D'autres encore lisent **le But** : seul compte l'endroit où ils vont. Une même vallée n'est donc pas la même vallée pour tous.
 5. **La terre hésite.** Quand deux cartes vraies se contredisent sur un même lieu, la terre oscille entre elles : elle inonde, gèle, s'effondre ou migre. On sent l'hésitation venir un peu avant, quand les hachures du sol frissonnent. C'est le grand secret du monde, révélé au monde 3 : les catastrophes des Marches sont des querelles de cartes.
 6. **Le sceau et la sépia.** Chaque légionnaire porte un sceau de cire et d'encre, sa part du Registre. Brisé, le sceau rend son encre. C'est la seule ressource en niveau.
-7. **Limites.** Nève ne peut tracer que sur les cases que le trait peut atteindre, sur la feuille du niveau. Elle ne peut pas effacer une créature, seulement le chemin qui la mène. Elle ne peut pas rendre un nom effacé : le monde 6 le confirme, et seul le secret de fin le contourne en partie.
+7. **Limites.** Nève ne peut tracer que sur les cases que le trait peut atteindre, sur la feuille du niveau. Elle ne peut pas effacer une créature, seulement le chemin qui la mène. Elle peut biffer son propre trait (le *repentir*), mais le nom qu'il a coûté ne revient pas. Elle ne peut pas rendre un nom effacé : le monde 6 le confirme, et seul le secret de fin le contourne en partie.
 
 ### Ce que l'histoire nous prête (ancrages réels, utilisés comme esprit et jamais cités en jeu)
 - **Le cadastre comme code.** La loi du 15 septembre 1807 a institué en France le premier cadastre général parcellaire, base d'un impôt foncier.\[13\] Napoléon voulait en faire un instrument juridique et un outil fiscal, et l'instruction de 1811 en faisait « le grand livre terrier de France ». Le chantier a duré plus de quarante ans.\[14\]\[15\]\[16\] La Chancellerie des Limites en tire sa bureaucratie patiente, ses registres, et l'idée qu'un plan fait foi en justice.
@@ -418,6 +418,7 @@ Choix de valeur : la progression des règles simultanées est 1, 1, 2, 2, 3, 3.
 | Palier | Pouvoir (nom en jeu) | Effet | Opération | Obtenu | Coût | Rouvre |
 |---|---|---|---|---|---|---|
 | 1 | **Tracer** | Poser tours et aménagements | [T] | Prologue | Sépia | — |
+| 1 | **Biffer** (le repentir) | Reprendre un trait de Nève, tour ou aménagement, et rendre la case à ce qu'elle était. L'encre fraîche (posée entre deux vagues, et aucune vague envoyée depuis) rend toute sa sépia ; l'encre sèche, la moitié (arrondie en dessous). Le nom rayé ne revient pas. Ne touche ni aux bornes, ni à la Palissade, ni à ce que la feuille ou l'Empire ont tracé | [T] | Prologue | Gratuit | — |
 | 2 | **Gratter** | Rendre une case au Sol nu : une borne, un éboulis ou une palissade, et rien d'autre (ni les traits de Nève, ni la Chaussée, ni la Glace). Ne coûte jamais de Nom ; jamais nécessaire pour gagner un niveau | [T] | Boss du monde 1 | Sépia, le même prix quelle que soit la cible | Le Moulin noyé, la Saline engloutie |
 | 3 | **Renommer** | Changer le type d'une case (Sol → Eau, etc.) | [T] | Boss du monde 2 | Sépia et un Nom si la case est nommée | Le Refuge enseveli, l'intérieur du Moulin noyé |
 | 4 | **Dater** | Suspendre ou déclencher en avance l'événement de monde, une fois par niveau | [T] ou [P] (celle de l'événement) | Boss du monde 4 | Sépia | La Salle des Premiers Plans, la Ville d'en dessous |
@@ -470,7 +471,7 @@ Pour les lecteurs de la Pente, le chemin dépend du terrain. Pour les lecteurs d
 | 5 | 506 | ≈ 1 761 |
 | 6 | 759 | ≈ 2 642 |
 
-Économie de départ, à valider en test : 120 sépia au début de chaque niveau. Barricade 10, boue 15, ronces 20, arbalète 50, harpon 70, mortier 90.
+Économie de départ, à valider en test : 120 sépia au début de chaque niveau. Barricade 10, boue 15, ronces 20, arbalète 50, harpon 70, mortier 90. Biffer rend le prix payé (encre fraîche) ou sa moitié (encre sèche).
 
 ---
 
@@ -486,6 +487,7 @@ Pour les lecteurs de la Pente, le chemin dépend du terrain. Pour les lecteurs d
 | Lecture du But | Refuge, borne, puits, sortie | [S] |
 | Événement de monde | La terre hésite (crue, gel, effondrements, dunes, écluses, mise au net) | [T], ou [P] pour la Mise au net |
 | Annonce une vague à l'avance | Frisson des hachures et indice sonore | Lecture des données, aucune opération |
+| Biffer (repentir) | Le trait se reprend, le nom reste rayé. Échappe au Droit de Passage : rendre la case ne ferme aucun chemin | [T], recalcul comme à la pose |
 | Gratter | Rendre une case au Sol nu. Échappe au Droit de Passage : toute espèce terrestre marche sur le Sol | [T] |
 | Palissade | Barricade impériale posée par les données (changement scripté ou phase de boss), infranchissable mais ne fermant jamais la carte | [T] |
 | Renommer et prix du nom | La case perd son nom, qui sort du Rôle | [T] et un compteur de progression |

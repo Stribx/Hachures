@@ -11,7 +11,7 @@ use super::figure::{EnemyLook, Kind, leave};
 use super::shards::shatter;
 use super::{Enemy, Shots};
 use crate::campaign::skills::Skill;
-use crate::ink::TowerInked;
+use crate::ink::{TowerBiffed, TowerInked};
 use crate::level::story::Trigger;
 use crate::level::{Level, LevelEntity};
 use crate::look::Carved;
@@ -56,6 +56,10 @@ pub struct Tower {
     pub ready_in: f32,
 }
 
+/// The base under the tower on a cell.
+#[derive(Component)]
+pub struct TowerBase(pub usize);
+
 /// A tower's base model; it stands 0.6 high, and the weapon sits on top.
 pub const TOWER_BASE: &str = "models/tower-round-bottom-a.glb";
 
@@ -85,6 +89,20 @@ pub(super) fn raise_towers(
     }
 }
 
+/// Takes down the towers just biffed, base and weapon.
+pub(super) fn take_down(
+    mut biffed: MessageReader<TowerBiffed>,
+    towers: Query<(Entity, &Tower)>,
+    bases: Query<(Entity, &TowerBase)>,
+    mut commands: Commands,
+) {
+    for &TowerBiffed { cell } in biffed.read() {
+        let weapon = towers.iter().filter(|(_, t)| t.cell == cell).map(|(e, _)| e);
+        let base = bases.iter().filter(|(_, b)| b.0 == cell).map(|(e, _)| e);
+        weapon.chain(base).for_each(|e| commands.entity(e).despawn());
+    }
+}
+
 /// The tower's base and its weapon, on top of the cell at `i`.
 pub fn spawn_tower(commands: &mut Commands, assets: &AssetServer, grid: &Grid, i: usize, weapon: Weapon) {
     let (x, z) = grid.coords(i);
@@ -93,6 +111,7 @@ pub fn spawn_tower(commands: &mut Commands, assets: &AssetServer, grid: &Grid, i
     let (base, top) = (Transform::from_xyz(x as f32, 0.2, z as f32), Transform::from_xyz(x as f32, 0.8, z as f32));
     commands.spawn((
         LevelEntity,
+        TowerBase(i),
         scene(TOWER_BASE),
         BASE_WOOD,
         base,

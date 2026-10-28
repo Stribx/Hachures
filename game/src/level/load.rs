@@ -39,6 +39,7 @@ impl Level {
             boss: None,
             tools: (0..TOOLS.len()).collect(),
             used: Vec::new(),
+            inked: Vec::new(),
             sepia: 120,
             loot_carry: 0.0,
             lives: START_LIVES,
@@ -89,10 +90,12 @@ impl Level {
         }
         present.sort_unstable();
         present.dedup();
-        // The level's tools, then the powers earned by the levels already won, in campaign order.
+        // The level's tools, then the powers earned by the levels already won, in campaign order, then Biffer,
+        // which every level has.
         let won = (0..LEVELS.len()).filter(|&k| save.levels.get(k).is_some_and(|r| r.won));
+        let earned = won.flat_map(|k| LevelData::of(k).grants);
         let mut tools: Vec<usize> = Vec::new();
-        for name in data.tools.iter().cloned().chain(won.flat_map(|k| LevelData::of(k).grants)) {
+        for name in data.tools.iter().cloned().chain(earned).chain([String::from("biffer")]) {
             let t = tool_index(&name).unwrap_or_else(|| panic!("unknown tool {name:?}"));
             if !tools.contains(&t) {
                 tools.push(t);
@@ -141,5 +144,14 @@ mod tests {
         let mut save = Save::default();
         *save.record(boss) = Record { won: true, ..Default::default() };
         assert!(Level::load(later, &save).tools.contains(&gratter), "once the boss is beaten");
+    }
+
+    /// Biffer is in every level's hand, last on the bar.
+    #[test]
+    fn every_level_has_biffer_last() {
+        let biffer = tool_index("biffer").unwrap();
+        for k in 0..LEVELS.len() {
+            assert_eq!(Level::load(k, &Save::default()).tools.last(), Some(&biffer), "level {k}");
+        }
     }
 }

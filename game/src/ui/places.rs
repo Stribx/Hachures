@@ -5,7 +5,7 @@ use bevy::window::PrimaryWindow;
 
 use super::widgets::{self, follow_cursor};
 use crate::i18n::{t, tf};
-use crate::ink::Verdict;
+use crate::ink::{Act, Selection, TOOLS, Verdict};
 use crate::level::{Level, LevelEntity};
 use crate::look::WorldCamera;
 use crate::map::cell_pos;
@@ -75,18 +75,16 @@ pub fn label_places(
     }
 }
 
-/// The price before the click: a refusal, or the name this ink would scratch out.
+/// The price before the click: a refusal, the name this ink would scratch out, or what biffing gives back.
 pub fn tooltip(
     level: Res<Level>,
     verdict: Res<Verdict>,
+    selection: Res<Selection>,
     window: Single<&Window, With<PrimaryWindow>>,
     tip: Single<(&mut Text, &mut Node, &mut Visibility), With<Tooltip>>,
 ) {
     let (mut text, mut node, mut visibility) = tip.into_inner();
-    let said = verdict.at.and_then(|i| match verdict.refusal {
-        Some(why) => Some(t(why).to_string()),
-        None => level.place_at(i).map(|p| tf("places.erases", &[&t(&level.places[p].name)])),
-    });
+    let said = price(&level, &verdict, TOOLS[selection.tool].act);
     let (Some(said), Some(cursor)) = (said, window.cursor_position()) else {
         *visibility = Visibility::Hidden;
         return;
@@ -94,4 +92,63 @@ pub fn tooltip(
     text.0 = said;
     follow_cursor(&mut node, cursor);
     *visibility = Visibility::Inherited;
+}
+
+/// What the tooltip says for `act` at the verdict's cell, if anything.
+fn price(level: &Level, verdict: &Verdict, act: Act) -> Option<String> {
+    let i = verdict.at?;
+    match verdict.refusal {
+        Some(why) => Some(t(why).to_string()),
+        None if act == Act::Biffer => level.refund(i).map(|r| tf("places.refund", &[&r])),
+        // Only a tool that lays a tile scratches a name out; Gratter never does (docs, section 7).
+        None => act.lays().and(level.place_at(i)).map(|p| tf("places.erases", &[&t(&level.places[p].name)])),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::ink::tool_index;
+    use crate::level::data::Place;
+    use crate::map::grid::Grid;
+    use crate::map::species;
+
+    /// A level with "le Pré commun" on cell 2 and a barricade Nève inked on cell 8.
+    fn level() -> Level {
+        let mut level = Level::new(Grid::parse("S...M\n.....\n....."), species::load());
+        level.places = vec![Place { name: "place.pre_commun".into(), at: vec![(2, 0)] }];
+        level.ink(8, tool_index("barricade").unwrap());
+        level
+    }
+
+    fn at(i: usize) -> Verdict {
+        Verdict { at: Some(i), refusal: None, pencil: None }
+    }
+
+    fn act(name: &str) -> Act {
+        TOOLS[tool_index(name).unwrap()].act
+    }
+
+    #[test]
+    fn biffer_says_what_comes_back() {
+        assert_eq!(price(&level(), &at(8), act("biffer")), Some(tf("places.refund", &[&10])));
+    }
+
+    #[test]
+    fn a_tile_laid_on_a_name_warns_it_is_erased() {
+        let erases = tf("places.erases", &[&t("place.pre_commun")]);
+        assert_eq!(price(&level(), &at(2), act("barricade")), Some(erases));
+    }
+
+    /// Gratter lays nothing, so it never scratches a name out (docs, section 7).
+    #[test]
+    fn gratter_never_warns_of_a_name() {
+        assert_eq!(price(&level(), &at(2), act("gratter")), None);
+    }
+
+    #[test]
+    fn a_refusal_says_why() {
+        let refused = Verdict { refusal: Some("refusal.nothing_to_biffer"), ..at(2) };
+        assert_eq!(price(&level(), &refused, act("biffer")), Some(t("refusal.nothing_to_biffer").to_string()));
+    }
 }

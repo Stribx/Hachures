@@ -16,7 +16,7 @@ use crate::Step;
 use crate::campaign::save::Save;
 use crate::campaign::skills::Skill;
 use crate::combat::towers::{TowerStats, Weapon};
-use crate::map::grid::Grid;
+use crate::map::grid::{Grid, Tile};
 use crate::map::species::Species;
 use crate::map::terrain::{Edit, Terrain};
 use data::{Change, LEVELS, Place};
@@ -75,6 +75,8 @@ pub struct Level {
     pub tools: Vec<usize>,
     /// Tools inked at least once, for the challenge.
     pub used: Vec<usize>,
+    /// Nève's strokes, in the order inked: what Biffer may take back.
+    pub inked: Vec<Inked>,
     pub sepia: u32,
     /// Fractions of sépia owed by Sceaux brisés.
     loot_carry: f32,
@@ -100,6 +102,20 @@ pub struct Level {
     /// buckles) to 2 (the sheet is taut). Waves won clean tighten it; waves that cost Rôle loosen it.
     pub tension: i32,
     lives_at_wave_start: u32,
+}
+
+/// One stroke Nève inked on the sheet.
+#[derive(Clone, Copy, Debug)]
+pub struct Inked {
+    pub cell: usize,
+    /// Index in `TOOLS`.
+    pub tool: usize,
+    /// The tile the cell was before.
+    pub under: Tile,
+    /// Sépia paid, skills included.
+    pub paid: u32,
+    /// `wave.number` when inked between waves; none when inked while a wave ran.
+    pub laid_at: Option<u32>,
 }
 
 impl Level {

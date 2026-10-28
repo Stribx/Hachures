@@ -139,7 +139,8 @@ fn spawn_piece(
     };
     let parts = match tool.act {
         Act::Lay(tile) => prop(tile, 0),
-        Act::Scrape => scraper(),
+        // ponytail: Biffer borrows Gratter's scraper; its own piece (a quill striking out) when the art is drawn.
+        Act::Scrape | Act::Biffer => scraper(),
         Act::Raise(weapon) => {
             let scene = |path: &'static str| WorldAssetRoot(assets.load(GltfAssetLabel::Scene(0).from_asset(path)));
             commands.spawn((StudioModel, scene(TOWER_BASE), BASE_WOOD, Transform::from_translation(at), layer.clone()));
