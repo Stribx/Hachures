@@ -81,7 +81,14 @@ pub const BODY_SIZE: f32 = 22.0;
 /// What is said in passing: keys, costs, notices, the credits' authors.
 pub const SMALL_SIZE: f32 = 18.0;
 
-/// Text in the game's font, regular or italic.
-pub fn font(assets: &AssetServer, italic: bool, size: f32) -> TextFont {
-    TextFont { font: assets.load(FELL[italic as usize]).into(), font_size: FontSize::Px(size), ..default() }
+/// The cut of the game's font; the order is `FELL`'s.
+#[derive(Clone, Copy)]
+pub enum Face {
+    Roman,
+    Italic,
+}
+
+/// Text in the game's font, in the cut `face`.
+pub fn font(assets: &AssetServer, face: Face, size: f32) -> TextFont {
+    TextFont { font: assets.load(FELL[face as usize]).into(), font_size: FontSize::Px(size), ..default() }
 }

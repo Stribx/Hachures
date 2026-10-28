@@ -16,17 +16,20 @@ use crate::menu::{open_carnet, open_sceaux};
 use crate::overworld::plan::WalkTo;
 use crate::overworld::travel::Travel;
 use crate::schedule::Screen;
-use crate::theme::{BODY_SIZE, HEADING_SIZE, INK, PAPER, SMALL_SIZE, SUBTITLE_SIZE, font};
+use crate::theme::{BODY_SIZE, Face, HEADING_SIZE, INK, PAPER, SMALL_SIZE, SUBTITLE_SIZE, font};
 
 /// The page, written for the option picked and the sceaux at the time: it is written again when they change.
 #[derive(Component, PartialEq)]
-pub struct Notebook(Option<String>, u32);
+pub struct Notebook {
+    picked: Option<String>,
+    sceaux: u32,
+}
 
 const WIDTH: f32 = 560.0;
 
 /// Ink text, faded by `alpha`.
 fn line(assets: &AssetServer, text: impl Into<String>, size: f32, alpha: f32) -> impl Bundle {
-    (Text::new(text), font(assets, false, size), TextColor(INK.with_alpha(alpha)))
+    (Text::new(text), font(assets, Face::Roman, size), TextColor(INK.with_alpha(alpha)))
 }
 
 /// Opens the page once the level is won or lost, and writes it again when the choice changes.
@@ -39,7 +42,7 @@ pub fn sync(
 ) {
     let over = level.finished || level.lives == 0;
     let picked = level.choice.as_ref().and_then(|c| level.choices.get(&c.id).cloned());
-    let now = Notebook(picked, save.sceaux());
+    let now = Notebook { picked, sceaux: save.sceaux() };
     match page.single() {
         Ok((page, written)) if !over || *written != now => commands.entity(page).despawn(),
         Err(_) if over => spawn(&mut commands, &assets, &level, now),
@@ -48,7 +51,7 @@ pub fn sync(
 }
 
 fn spawn(commands: &mut Commands, assets: &AssetServer, level: &Level, written: Notebook) {
-    let (picked, sceaux) = (written.0.clone(), written.1);
+    let (picked, sceaux) = (written.picked.clone(), written.sceaux);
     commands
         .spawn((
             written,

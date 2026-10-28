@@ -6,6 +6,7 @@ use super::cells::Cell;
 use super::fields::mix;
 use super::grid::Grid;
 use super::growth::{Crop, sprigs};
+use super::lands::Land;
 use crate::level::Level;
 use crate::look::{Hachure, InkMaterial, ink};
 use crate::schedule::Screen;
@@ -18,9 +19,9 @@ const BUTTERFLIES: usize = 6;
 const WINGS: [Color; 3] = [Color::srgb(0.95, 0.88, 0.4), Color::srgb(0.96, 0.95, 0.9), Color::srgb(0.95, 0.6, 0.3)];
 
 /// Where the butterflies flit: over cells in flower, a few of them spread over the board, the same each time.
-pub fn butterfly_homes(grid: &Grid, alpine: bool) -> Vec<Vec3> {
+pub fn butterfly_homes(grid: &Grid, land: Land) -> Vec<Vec3> {
     let mut cells: Vec<usize> =
-        sprigs(grid, 1.0, alpine).into_iter().filter(|s| s.crop == Crop::Flowers).map(|s| s.cell).collect();
+        sprigs(grid, 1.0, land).into_iter().filter(|s| s.crop == Crop::Flowers).map(|s| s.cell).collect();
     cells.dedup();
     cells.sort_by_key(|&c| mix(c as u32 ^ 0xb177));
     cells.truncate(BUTTERFLIES);
@@ -100,8 +101,8 @@ pub(super) fn settle(
         return;
     }
     let wing = meshes.add(Cuboid::new(0.1, 0.006, 0.09));
-    let alpine = level.world == super::grass::ALPINE;
-    for (k, home) in butterfly_homes(level.terrain.grid(), alpine).into_iter().enumerate() {
+    let land = Land::of(level.world);
+    for (k, home) in butterfly_homes(level.terrain.grid(), land).into_iter().enumerate() {
         let colour = materials.add(felt(WINGS[k % WINGS.len()]));
         commands
             .spawn((
@@ -218,18 +219,18 @@ mod tests {
     fn butterflies_keep_to_the_flowers() {
         let grid = Grid::parse(MAP);
         let flowers: Vec<usize> =
-            sprigs(&grid, 1.0, false).into_iter().filter(|s| s.crop == Crop::Flowers).map(|s| s.cell).collect();
-        let homes = butterfly_homes(&grid, false);
+            sprigs(&grid, 1.0, Land::Bocage).into_iter().filter(|s| s.crop == Crop::Flowers).map(|s| s.cell).collect();
+        let homes = butterfly_homes(&grid, Land::Bocage);
         assert!(!homes.is_empty() && homes.len() <= BUTTERFLIES, "{homes:?}");
         for home in homes {
             let cell = home.z.round() as usize * grid.width + home.x.round() as usize;
             assert!(flowers.contains(&cell), "cell {cell}");
         }
-        assert_eq!(butterfly_homes(&grid, false), butterfly_homes(&grid, false));
+        assert_eq!(butterfly_homes(&grid, Land::Bocage), butterfly_homes(&grid, Land::Bocage));
     }
 
     #[test]
     fn a_board_without_flowers_has_no_butterflies() {
-        assert!(butterfly_homes(&Grid::parse("S^^^M"), false).is_empty());
+        assert!(butterfly_homes(&Grid::parse("S^^^M"), Land::Bocage).is_empty());
     }
 }

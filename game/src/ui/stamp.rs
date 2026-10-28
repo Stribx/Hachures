@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use super::DuringPlay;
 use crate::i18n::tf;
 use crate::level::Level;
-use crate::theme::{SEAL, font};
+use crate::theme::{Face, SEAL, font};
 
 /// The wave's stamp: it strikes at 108 % and settles, holds, and fades.
 #[derive(Component)]
@@ -43,7 +43,7 @@ pub fn stamp_wave(level: Res<Level>, mut stamped: Local<u32>, assets: Res<AssetS
             c.spawn((
                 Stamp(0.0),
                 Text::new(tf("hud.wave_stamp", &[&number])),
-                font(&assets, false, 96.0),
+                font(&assets, Face::Roman, 96.0),
                 TextColor(SEAL.with_alpha(0.0)),
                 UiTransform::IDENTITY,
             ));

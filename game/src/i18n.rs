@@ -271,7 +271,7 @@ mod tests {
         }
         let species = species::load();
         // The Lexique's descriptions: `<label>.text`, built, not written out in the code.
-        for (tab, _) in crate::campaign::lexique::TABS {
+        for tab in crate::campaign::lexique::Tab::ALL {
             keys.extend(crate::campaign::lexique::entries(tab, &species).iter().map(|e| e.text()));
         }
         keys.extend(species.into_iter().map(|s| s.label));

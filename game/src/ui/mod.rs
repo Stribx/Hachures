@@ -18,7 +18,7 @@ use crate::Step;
 use crate::ink::Selection;
 use crate::level::Level;
 use crate::schedule::Screen;
-use crate::theme::{INK, PAPER, SMALL_SIZE, font};
+use crate::theme::{Face, INK, PAPER, SMALL_SIZE, font};
 use widgets::{Panel, letter};
 
 pub fn plugin(app: &mut App) {
@@ -142,7 +142,7 @@ fn update_margin(
     let (margin, mut node) = margin.into_inner();
     node.display = if level.margin.is_empty() { Display::None } else { Display::Flex };
     let recent = &level.margin[level.margin.len().saturating_sub(SHOWN)..];
-    let font = font(&assets, true, SMALL_SIZE);
+    let font = font(&assets, Face::Italic, SMALL_SIZE);
     commands.entity(margin).despawn_related::<Children>().with_children(|m| {
         for (k, note) in recent.iter().enumerate() {
             let newest = k + 1 == recent.len();

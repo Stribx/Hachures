@@ -9,7 +9,7 @@ use bevy::ui::{Pressed, VisualBox};
 use bevy::ui_widgets::Button;
 
 use crate::settings::Settings;
-use crate::theme::{BODY_SIZE, INK, LIT, PANEL_SHADOW, PAPER, PRESSED, SEAL, SEAL_DEEP, SLIP, font};
+use crate::theme::{BODY_SIZE, Face, INK, LIT, PANEL_SHADOW, PAPER, PRESSED, SEAL, SEAL_DEEP, SLIP, font};
 
 /// Whether the letter `c` was just typed, wherever it sits on the keyboard (A is A on AZERTY too).
 pub(crate) fn letter(keys: &ButtonInput<Key>, c: &str) -> bool {
@@ -22,14 +22,14 @@ pub fn plugin(app: &mut App) {
 
 /// Ink text in the game's font.
 pub(crate) fn text(assets: &AssetServer, text: impl Into<String>, size: f32) -> impl Bundle {
-    (Text::new(text), font(assets, false, size), TextColor(INK))
+    (Text::new(text), font(assets, Face::Roman, size), TextColor(INK))
 }
 
 /// A tooltip, hidden until a system writes its words and puts it next to the cursor.
 pub(crate) fn tooltip(assets: &AssetServer) -> impl Bundle {
     (
         Text::default(),
-        font(assets, true, BODY_SIZE),
+        font(assets, Face::Italic, BODY_SIZE),
         TextColor(INK),
         BackgroundColor(PAPER),
         Node { position_type: PositionType::Absolute, padding: UiRect::axes(px(8), px(2)), ..default() },
@@ -82,10 +82,13 @@ pub(crate) struct Primary;
 #[derive(Component)]
 pub(crate) struct Panel;
 
-/// A drawn image (`docs/art-prompts.md`) that takes over a node's flat paper once it has loaded, 9-sliced `.1` px
+/// A drawn image (`docs/art-prompts.md`) that takes over a node's flat paper once it has loaded, 9-sliced `slice` px
 /// in from its edges (zero: stretched whole). Until then, or if it never comes, the flat paper stays.
 #[derive(Component)]
-pub(crate) struct Skin(pub Handle<Image>, pub BorderRect);
+pub(crate) struct Skin {
+    pub image: Handle<Image>,
+    pub slice: BorderRect,
+}
 
 /// An icon's place, kept empty (taking no room) until its drawn image has loaded.
 #[derive(Component)]
@@ -109,12 +112,12 @@ pub(crate) fn skin(
     skins: Query<(Entity, &Skin), Without<ImageNode>>,
     mut commands: Commands,
 ) {
-    for (entity, Skin(image, inset)) in &skins {
+    for (entity, Skin { image, slice }) in &skins {
         if !assets.is_loaded(image) {
             continue;
         }
-        let image_mode = if *inset != BorderRect::ZERO {
-            NodeImageMode::Sliced(TextureSlicer { border: *inset, ..default() })
+        let image_mode = if *slice != BorderRect::ZERO {
+            NodeImageMode::Sliced(TextureSlicer { border: *slice, ..default() })
         } else {
             NodeImageMode::Stretch
         };

@@ -39,7 +39,7 @@ pub(super) fn growth() -> Vec<Growth> {
             if clear && openness(p) > 0.6 {
                 if seam(p) < 0.3 {
                     growth.push(Growth::Hedge(p));
-                } else if parcel(p).1 == WHEAT_WASH && seam(p) > 0.8 && hash(p * 3.3) < 0.25 {
+                } else if parcel(p).wash == WHEAT_WASH && seam(p) > 0.8 && hash(p * 3.3) < 0.25 {
                     growth.push(Growth::Wheat(p));
                 }
             }

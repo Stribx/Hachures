@@ -67,7 +67,7 @@ pub(super) fn spawn_clouds(assets: Res<AssetServer>, mut commands: Commands) {
                 let away = (closed - middle).try_normalize().unwrap_or(Vec2::Y);
                 layer.spawn((
                     Cloud { open: closed + away * 1.1, closed },
-                    Skin(assets.load(format!("ui/cloud-{}.png", i % 4 + 1)), BorderRect::ZERO),
+                    Skin { image: assets.load(format!("ui/cloud-{}.png", i % 4 + 1)), slice: BorderRect::ZERO },
                     Node {
                         width: percent(CLOUD_WIDTH * 100.0),
                         aspect_ratio: Some(CLOUD_RATIO),

@@ -15,12 +15,18 @@ pub(super) const WASHES: [Color; 5] =
 /// Which of `WASHES` is the wheat, whose parcels grow clumps of it.
 pub(super) const WHEAT_WASH: usize = 1;
 
-/// The parcel at `p`: its id (the grid cell of its centre) and its wash. Defined everywhere; `openness` says where
-/// the bocage actually shows.
-pub(super) fn parcel(p: Vec2) -> (IVec2, usize) {
+/// A parcel: its id (the grid cell of its centre) and its wash (an index into `WASHES`).
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(super) struct Parcel {
+    pub id: IVec2,
+    pub wash: usize,
+}
+
+/// The parcel at `p`. Defined everywhere; `openness` says where the bocage actually shows.
+pub(super) fn parcel(p: Vec2) -> Parcel {
     let (id, _) = nearest(p);
     // Along a row the washes step by one, down a column by two: over the 3 x 3 cells around, never a repeat.
-    (id, (id.x + 2 * id.y).rem_euclid(WASHES.len() as i32) as usize)
+    Parcel { id, wash: (id.x + 2 * id.y).rem_euclid(WASHES.len() as i32) as usize }
 }
 
 /// How far `p` lies from the nearest seam between two parcels, in world units.
@@ -75,8 +81,8 @@ mod tests {
             for x in (-35..230).step_by(3) {
                 let p = Vec2::new(x as f32, z as f32);
                 let (a, b) = (parcel(p), parcel(p + Vec2::new(0.4, 0.3)));
-                if a.0 != b.0 {
-                    assert_ne!(a.1, b.1, "at {p}");
+                if a.id != b.id {
+                    assert_ne!(a.wash, b.wash, "at {p}");
                     checked += 1;
                 }
             }
@@ -105,7 +111,7 @@ mod tests {
     fn a_seam_parts_two_parcels() {
         let p = Vec2::new(20.0, 3.0);
         let mut x = p.x;
-        while parcel(Vec2::new(x, p.y)).0 == parcel(p).0 {
+        while parcel(Vec2::new(x, p.y)).id == parcel(p).id {
             x += 0.01;
         }
         assert!(seam(Vec2::new(x, p.y)) < 0.05, "at x {x}");

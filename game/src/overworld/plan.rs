@@ -97,9 +97,12 @@ struct OverWorld;
 #[derive(Component)]
 struct Seal;
 
-/// Materials for the seals: won, reached.
+/// Materials for the seals of the sheets won and of those merely reached.
 #[derive(Resource)]
-struct SealInks(Handle<InkMaterial>, Handle<InkMaterial>);
+struct SealInks {
+    won: Handle<InkMaterial>,
+    reached: Handle<InkMaterial>,
+}
 
 fn spawn(
     level: Res<Level>,
@@ -138,11 +141,11 @@ fn spawn(
                 Transform::from_xyz(0.0, 0.8, 0.35).with_rotation(Quat::from_rotation_x(-0.5)),
             ));
         });
-    commands.insert_resource(SealInks(
-        materials.add(ink(SEAL)),
+    commands.insert_resource(SealInks {
+        won: materials.add(ink(SEAL)),
         // Reached, not won yet: a seal of bare paper.
-        materials.add(ink(PAPER)),
-    ));
+        reached: materials.add(ink(PAPER)),
+    });
 }
 
 /// A seal over each sheet reached, red once won; none over the blank sheets.
@@ -165,7 +168,7 @@ fn seals(
             Seal,
             OverWorld,
             Mesh3d(disc.clone()),
-            MeshMaterial3d(if won { inks.0.clone() } else { inks.1.clone() }),
+            MeshMaterial3d(if won { inks.won.clone() } else { inks.reached.clone() }),
             NotShadowCaster,
             // Standing up, facing the camera, over the sheet's far edge.
             Transform::from_xyz(c.x, 2.2, c.y - SHEETS[i].size().y / 2.0 + 0.5)

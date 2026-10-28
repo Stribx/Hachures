@@ -59,6 +59,14 @@ pub struct LevelData {
     pub places: Vec<Place>,
 }
 
+/// Where the Refuge stands on a map.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Refuge {
+    Usual,
+    /// On `W`, once the choice in `alt_refuge` went that way.
+    Moved,
+}
+
 impl LevelData {
     /// Level `index` of `LEVELS`, read from its file.
     ///
@@ -69,11 +77,14 @@ impl LevelData {
         ron::from_str(LEVELS[index]).expect("invalid level file")
     }
 
-    /// The map as text for `Grid::parse`. The Refuge stands on `R`, or on `W` once the choice in `alt_refuge`
-    /// went that way (`alt`); the cell not used is plain ground.
-    pub fn map_text(&self, alt: bool) -> String {
+    /// The map as text for `Grid::parse`. The Refuge stands on `R`, or on `W` once `refuge` is `Moved`; the cell
+    /// not used is plain ground.
+    pub fn map_text(&self, refuge: Refuge) -> String {
         let map = self.map.join("\n");
-        if alt { map.replace('R', ".").replace('W', "R") } else { map.replace('W', ".") }
+        match refuge {
+            Refuge::Moved => map.replace('R', ".").replace('W', "R"),
+            Refuge::Usual => map.replace('W', "."),
+        }
     }
 }
 
@@ -122,7 +133,7 @@ mod tests {
     fn the_refuge_moves_with_the_choice() {
         let mut data = LevelData::of(0);
         data.map = vec!["R.W".into()];
-        assert_eq!(data.map_text(false), "R..");
-        assert_eq!(data.map_text(true), "..R");
+        assert_eq!(data.map_text(Refuge::Usual), "R..");
+        assert_eq!(data.map_text(Refuge::Moved), "..R");
     }
 }

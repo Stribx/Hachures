@@ -10,7 +10,7 @@ use crate::level::{Level, LevelEntity};
 use crate::look::WorldCamera;
 use crate::map::cell_pos;
 use crate::schedule::{Screen, over_world};
-use crate::theme::{BODY_SIZE, INK, font};
+use crate::theme::{BODY_SIZE, Face, INK, font};
 
 /// The name of `level.places[.0]`, written over its cells.
 #[derive(Component)]
@@ -45,7 +45,7 @@ pub fn label_places(
                 LevelEntity,
                 PlaceLabel(k),
                 Text::new(t(&place.name)),
-                font(&assets, true, BODY_SIZE),
+                font(&assets, Face::Italic, BODY_SIZE),
                 TextColor(INK),
                 TextLayout::justify(Justify::Center),
                 Node { position_type: PositionType::Absolute, width: px(WIDTH), ..default() },

@@ -15,8 +15,18 @@ pub enum Tab {
     Especes,
 }
 
-/// The tabs in order, with the key of their name. A later tab is one more row.
-pub const TABS: [(Tab, &str); 2] = [(Tab::Outils, n_("lexique.tab.tools")), (Tab::Especes, n_("lexique.tab.species"))];
+impl Tab {
+    /// The tabs in order. A later tab is one more variant here and one more arm in `name`.
+    pub const ALL: [Tab; 2] = [Tab::Outils, Tab::Especes];
+
+    /// The key of its name.
+    pub const fn name(self) -> &'static str {
+        match self {
+            Tab::Outils => n_("lexique.tab.tools"),
+            Tab::Especes => n_("lexique.tab.species"),
+        }
+    }
+}
 
 /// What an entry describes, by index in `TOOLS` or in the species list.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]

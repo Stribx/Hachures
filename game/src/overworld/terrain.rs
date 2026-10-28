@@ -82,7 +82,7 @@ pub(super) fn snow(p: Vec2, h: f32) -> f32 {
 /// high. Every change is a blend, but for the parcels' seams.
 fn land_color(p: Vec2, h: f32) -> Color {
     let swathes = PASTURE.mix(&WHEAT, smoothstep(0.35, 0.65, fbm(p * 0.04 + 7.0)));
-    let meadow = swathes.mix(&WASHES[parcel(p).1], openness(p));
+    let meadow = swathes.mix(&WASHES[parcel(p).wash], openness(p));
     let mut color = meadow.mix(&HEDGE, smoothstep(0.47, 0.55, wood(p)));
     color = color.mix(&Color::srgb(0.62, 0.66, 0.7), cols(p.x) * 0.8);
     color = color.mix(&Color::srgb(0.86, 0.78, 0.58), 1.0 - smoothstep(WATER + 0.05, WATER + 0.25, h));
@@ -160,7 +160,7 @@ mod tests {
                 x += 0.01;
                 let now = at(x);
                 let jump = before.iter().zip(now).map(|(a, b)| (a - b).abs()).fold(0.0, f32::max);
-                let seam = parcel(Vec2::new(x - 0.01, z)).0 != parcel(Vec2::new(x, z)).0;
+                let seam = parcel(Vec2::new(x - 0.01, z)).id != parcel(Vec2::new(x, z)).id;
                 assert!(jump < 0.03 || seam, "a cut of {jump} in the land's colour at ({x}, {z})");
                 before = now;
             }

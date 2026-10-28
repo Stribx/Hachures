@@ -12,7 +12,7 @@ use crate::campaign::skills::Skill;
 use crate::i18n::{t, tf};
 use crate::ink::{Selection, Verdict};
 use crate::level::Level;
-use crate::theme::{INK, INK_SOFT, PAPER, SEAL, SMALL_SIZE, SUBTITLE_SIZE, font};
+use crate::theme::{Face, INK, INK_SOFT, PAPER, SEAL, SMALL_SIZE, SUBTITLE_SIZE, font};
 
 /// `text` with a capital first letter: "le Moulin" → "Le Moulin".
 pub fn capitalized(text: &str) -> String {
@@ -88,7 +88,7 @@ pub fn spawn(commands: &mut Commands, assets: &AssetServer) {
             },
         ))
         .with_children(|c| {
-            c.spawn((Line::Name, Text::default(), font(assets, false, SUBTITLE_SIZE), TextColor(INK)));
+            c.spawn((Line::Name, Text::default(), font(assets, Face::Roman, SUBTITLE_SIZE), TextColor(INK)));
             c.spawn(Node { column_gap: px(22), align_items: AlignItems::Center, ..default() }).with_children(|row| {
                 for counter in COUNTERS {
                     row.spawn((
@@ -98,20 +98,20 @@ pub fn spawn(commands: &mut Commands, assets: &AssetServer) {
                     ))
                     .with_children(|pair| {
                         pair.spawn((Icon(counter), IconSlot, Node { width: px(28), height: px(28), ..default() }))
-                            .insert(Skin(assets.load(counter.icon()), BorderRect::ZERO));
+                            .insert(Skin { image: assets.load(counter.icon()), slice: BorderRect::ZERO });
                         pair.spawn((
                             Figure(counter),
                             Text::default(),
-                            font(assets, false, SUBTITLE_SIZE),
+                            font(assets, Face::Roman, SUBTITLE_SIZE),
                             TextColor(INK),
                             TextLayout::no_wrap(),
                         ));
                     });
                 }
             });
-            c.spawn((Line::Defi, Text::default(), font(assets, true, SMALL_SIZE), TextColor(INK_SOFT)));
-            c.spawn((Line::Notice, Text::default(), font(assets, true, SMALL_SIZE), TextColor(SEAL)));
-            c.spawn((Line::Readout, Text::default(), font(assets, false, SMALL_SIZE), TextColor(INK_SOFT)));
+            c.spawn((Line::Defi, Text::default(), font(assets, Face::Italic, SMALL_SIZE), TextColor(INK_SOFT)));
+            c.spawn((Line::Notice, Text::default(), font(assets, Face::Italic, SMALL_SIZE), TextColor(SEAL)));
+            c.spawn((Line::Readout, Text::default(), font(assets, Face::Roman, SMALL_SIZE), TextColor(INK_SOFT)));
         });
 }
 

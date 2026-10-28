@@ -14,6 +14,7 @@ pub mod fields;
 mod grass;
 pub mod growth;
 pub(crate) mod land;
+pub mod lands;
 pub(crate) mod props;
 pub(crate) mod scraper;
 mod seams;

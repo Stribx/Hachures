@@ -3,7 +3,7 @@
 use std::collections::BTreeMap;
 
 use super::Level;
-use super::data::{LEVELS, LevelData, START_LIVES};
+use super::data::{LEVELS, LevelData, Refuge, START_LIVES};
 use super::story::{Trigger, holds};
 use super::waves::{Wave, spawn_order};
 use super::world::WORLDS;
@@ -113,8 +113,8 @@ impl Level {
                 tools.push(t);
             }
         }
-        let alt = data.alt_refuge.as_ref().is_some_and(|cond| holds(&save.choices, cond));
-        let map = data.map_text(alt);
+        let moved = data.alt_refuge.as_ref().is_some_and(|cond| holds(&save.choices, cond));
+        let map = data.map_text(if moved { Refuge::Moved } else { Refuge::Usual });
 
         let mut level = Level::new(Grid::parse(&map), species);
         level.index = index;

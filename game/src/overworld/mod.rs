@@ -24,7 +24,7 @@ use bevy::prelude::*;
 use crate::Step;
 use crate::campaign::save::Save;
 use crate::level::Level;
-use crate::level::data::{LEVELS, LevelData};
+use crate::level::data::{LEVELS, LevelData, Refuge};
 use crate::look::{InkMaterial, Swaying, ink, shore_image, water};
 use crate::map;
 use crate::map::fields::ground;
@@ -73,7 +73,7 @@ pub static SHEETS: LazyLock<Vec<Sheet>> = LazyLock::new(|| {
         .map(|i| {
             let data = LevelData::of(i);
             // The alternative Refuge only shows once played.
-            Sheet { at: Vec2::from(data.at), grid: Grid::parse(&data.map_text(false)) }
+            Sheet { at: Vec2::from(data.at), grid: Grid::parse(&data.map_text(Refuge::Usual)) }
         })
         .collect()
 });

@@ -6,7 +6,7 @@ use bevy::prelude::*;
 use bevy::ui_widgets::Activate;
 
 use super::LexiqueView;
-use crate::campaign::lexique::{TABS, Tab, entries};
+use crate::campaign::lexique::{Tab, entries};
 use crate::campaign::save::Save;
 use crate::i18n::t;
 use crate::level::Level;
@@ -29,8 +29,8 @@ pub(super) struct EntryRow(pub usize);
 /// A row of tab buttons: choosing one shows its entries, from the first.
 pub(super) fn spawn_tabs(page: &mut ChildSpawnerCommands, assets: &AssetServer) {
     page.spawn(Node { column_gap: px(12), ..default() }).with_children(|tabs| {
-        for &(tab, name) in &TABS {
-            tabs.spawn((framed(160.0, label(assets, t(name))), TabButton(tab), Outline::default()))
+        for tab in Tab::ALL {
+            tabs.spawn((framed(160.0, label(assets, t(tab.name()))), TabButton(tab), Outline::default()))
                 .observe(move |_: On<Activate>, mut view: ResMut<LexiqueView>| *view = LexiqueView { tab, entry: 0 });
         }
     });
