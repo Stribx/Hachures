@@ -216,17 +216,18 @@ pub fn look(
     }
     for (&ToolCost(tool), mut text, mut color) in &mut costs {
         let cost = level.tool_cost(tool);
-        text.0 = if TOOLS[tool].act == Act::Biffer {
+        let said = if TOOLS[tool].act == Act::Biffer {
             t("bar.refund").to_string()
         } else {
             tf("bar.cost", &[&cost])
         };
+        text.set_if_neq(Text(said));
         color.0 = if level.sepia >= cost { INK_SOFT } else { SEAL };
     }
     for mut text in &mut route {
-        text.0 = tf("bar.route", &[&t(&level.species[selection.shown].label)]);
+        text.set_if_neq(Text(tf("bar.route", &[&t(&level.species[selection.shown].label)])));
     }
     for mut text in &mut speed {
-        text.0 = tf("bar.speed", &[&if fast.0 { "×2" } else { "×1" }]);
+        text.set_if_neq(Text(tf("bar.speed", &[&if fast.0 { "×2" } else { "×1" }])));
     }
 }

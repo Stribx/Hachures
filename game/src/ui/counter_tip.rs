@@ -32,7 +32,7 @@ pub fn counter_tip(
         *visibility = Visibility::Hidden;
         return;
     };
-    text.0 = tip_text(counter, &level);
+    text.set_if_neq(Text(tip_text(counter, &level)));
     follow_cursor(&mut node, cursor);
     *visibility = Visibility::Inherited;
 }

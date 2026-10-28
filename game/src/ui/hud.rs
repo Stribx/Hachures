@@ -163,10 +163,10 @@ pub fn update_label(
                 format!("{} / {}", level.wave.number, level.waves.len()),
             ),
         };
-        text.0 = if drawn { value } else { format!("{word} {value}") };
+        text.set_if_neq(Text(if drawn { value } else { format!("{word} {value}") }));
     }
     for (line, mut text, mut node) in &mut lines {
-        text.0 = match line {
+        let words = match line {
             Line::Name => t(&level.name).to_string(),
             Line::Defi => level
                 .challenge
@@ -177,6 +177,10 @@ pub fn update_label(
             Line::Readout => readout(&level, &selection, &verdict),
         };
         // An empty line takes no room.
-        node.display = if text.0.is_empty() { Display::None } else { Display::Flex };
+        let display = if words.is_empty() { Display::None } else { Display::Flex };
+        if node.display != display {
+            node.display = display;
+        }
+        text.set_if_neq(Text(words));
     }
 }

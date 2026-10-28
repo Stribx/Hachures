@@ -104,7 +104,7 @@ pub fn price_tip(
         *visibility = Visibility::Hidden;
         return;
     };
-    text.0 = said;
+    text.set_if_neq(Text(said));
     follow_cursor(&mut node, cursor);
     *visibility = Visibility::Inherited;
 }

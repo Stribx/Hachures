@@ -107,14 +107,15 @@ fn show_nodes(
     mut nodes: Query<(&NodeLabel, &mut Text, &mut TextColor), Without<Purse>>,
 ) {
     let n = save.sceaux();
-    purse.0 = tp("sceaux.purse", n, &[&n, &save.names()]);
+    purse.set_if_neq(Text(tp("sceaux.purse", n, &[&n, &save.names()])));
     for (&NodeLabel(b, k), mut text, mut color) in &mut nodes {
         let node = &BRANCHES[b].nodes[k];
         let owned = save.skills.contains(&node.skill);
         let next = next_in(b, &save.skills).is_some_and(|n| n.skill == node.skill)
             && save.sceaux() >= node.cost;
         let owned_said = if owned { t("sceaux.owned") } else { "" };
-        text.0 = tf("sceaux.node", &[&t(node.name), &node.cost, &t(node.effect), &owned_said]);
+        let said = tf("sceaux.node", &[&t(node.name), &node.cost, &t(node.effect), &owned_said]);
+        text.set_if_neq(Text(said));
         color.0 = if owned || next { INK } else { INK.with_alpha(0.4) };
     }
 }

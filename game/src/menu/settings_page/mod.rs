@@ -132,7 +132,7 @@ fn adjust(
 
 fn show_values(settings: Res<Settings>, mut values: Query<(&Value, &mut Text)>) {
     for (Value(field), mut text) in &mut values {
-        text.0 = field.value(&settings);
+        text.set_if_neq(Text(field.value(&settings)));
     }
 }
 

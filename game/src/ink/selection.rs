@@ -68,7 +68,10 @@ pub(crate) fn hover(
     panels: Query<&Hovered>,
 ) {
     if panels.iter().any(Hovered::get) {
-        selection.hovered = None;
+        // Written only when it changes: the verdict is judged again on a change.
+        if selection.hovered.is_some() {
+            selection.hovered = None;
+        }
         return;
     }
     let (camera, camera_transform) = *camera;
@@ -77,11 +80,14 @@ pub(crate) fn hover(
         .cursor_position()
         .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor).ok())
         .and_then(|ray| ray.plane_intersection_point(Vec3::Y * 0.2, InfinitePlane3d::new(Vec3::Y)));
-    selection.hovered = hit.and_then(|p| {
+    let hovered = hit.and_then(|p| {
         let (x, z) = (p.x.round(), p.z.round());
         (x >= 0.0 && z >= 0.0 && (x as usize) < grid.width && (z as usize) < grid.height)
             .then(|| z as usize * grid.width + x as usize)
     });
+    if selection.hovered != hovered {
+        selection.hovered = hovered;
+    }
 }
 
 #[cfg(test)]
