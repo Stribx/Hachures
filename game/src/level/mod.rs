@@ -84,9 +84,8 @@ pub struct Level {
     /// Names kept in the Rôle: Fuyards reaching the Refuge, and notes.
     pub names: i32,
     pub fuyard_hurt: bool,
-    /// (species, cell) pairs: one for the cell each enemy on the map stands on, and a second for the cell it
-    /// walks to next, when it has one.
-    pub walkers: Vec<(usize, usize)>,
+    /// One for the cell each enemy on the map stands on, and a second for the cell it walks to next, when it has one.
+    pub walkers: Vec<Walker>,
     /// Notes still to come, and the margin written so far.
     notes: Vec<Note>,
     pub margin: Vec<MarginNote>,
@@ -106,6 +105,13 @@ pub struct Level {
 }
 
 /// One stroke Nève inked on the sheet.
+/// A species index and a cell where one of its walkers stands or is heading.
+#[derive(Clone, Copy, Debug)]
+pub struct Walker {
+    pub species: usize,
+    pub cell: usize,
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct Inked {
     pub cell: usize,

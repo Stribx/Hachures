@@ -13,10 +13,13 @@ use super::{Hachure, InkMaterial};
 #[derive(Resource, Default)]
 pub(super) struct Inked(HashMap<(AssetId<StandardMaterial>, Option<Carved>, u32), Handle<InkMaterial>>);
 
-/// A model carved for the plan-relief: its colour becomes `.0`'s wood. With `.1`, its painted texture shows
-/// through the wood's tint, so its parts still read apart; without, it is one piece of plain wood.
+/// A model carved for the plan-relief: its colour becomes `rgb`'s wood. If `painted`, its painted texture shows
+/// through the wood's tint, so its parts still read apart; if not, it is one piece of plain wood.
 #[derive(Component, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Carved(pub [u8; 3], pub bool);
+pub struct Carved {
+    pub rgb: [u8; 3],
+    pub painted: bool,
+}
 
 /// A model the wind moves: `.0` is how far it leans, per world unit of height squared (`Hachure::wind`).
 #[derive(Component, Clone, Copy)]
@@ -45,7 +48,7 @@ impl Inking<'_> {
             .entry((material.id(), carving, wind.to_bits()))
             .or_insert_with(|| {
                 let mut base = base.clone();
-                if let Some(Carved([r, g, b], painted)) = carving {
+                if let Some(Carved { rgb: [r, g, b], painted }) = carving {
                     base.base_color = Color::srgb_u8(r, g, b);
                     if !painted {
                         base.base_color_texture = None;

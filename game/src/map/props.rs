@@ -10,6 +10,12 @@ use super::grid::{Grid, Tile};
 use super::land::{Land, landing_sound};
 use crate::look::{Hachure, InkMaterial, ink};
 
+/// One mesh of a prop and the colour it is inked in.
+pub(crate) struct PropPart {
+    pub mesh: Mesh,
+    pub color: Color,
+}
+
 /// Prop meshes and materials made so far, by tile and shape (`barricade_shape`): one pair per part.
 pub(super) type Props = HashMap<(Tile, u8), Vec<(Handle<Mesh>, Handle<InkMaterial>)>>;
 
@@ -48,7 +54,7 @@ fn opposite(bit: u8) -> u8 {
 /// What stands on a cell, on the block's top at the origin: its parts, each with its colour. The shape says
 /// the effect: the barricade is a wall, the mud a trap sunk in the ground, the brambles a thicket that bites.
 /// `shape` is the barricade's (`barricade_shape`) or the palissade's (`palisade_shape`), 0 for the others.
-pub(crate) fn prop(tile: Tile, shape: u8) -> Vec<(Mesh, Color)> {
+pub(crate) fn prop(tile: Tile, shape: u8) -> Vec<PropPart> {
     match tile {
         Tile::Barricade => barricade(shape),
         Tile::Boue => mud(),
@@ -122,7 +128,7 @@ impl Beams {
 /// Un cheval de frise: beams run through by stakes crossed in X both along them and across them, so it bristles from
 /// every side the camera sees it. Alone, one beam across the cell; in a line, an arm out to each neighbour, meeting
 /// theirs at the cell's edge.
-fn barricade(shape: u8) -> Vec<(Mesh, Color)> {
+fn barricade(shape: u8) -> Vec<PropPart> {
     let mut beams = Beams { wood: Vec::new(), string: Vec::new(), sticks: Vec::new(), fascines: shape & FASCINES != 0 };
     // Turn about y taking +x to each direction: east, north (-z), west, south (+z).
     let arms = [(EAST, 0.0), (NORTH, FRAC_PI_2), (WEST, PI), (SOUTH, -FRAC_PI_2)];
@@ -141,26 +147,26 @@ fn barricade(shape: u8) -> Vec<(Mesh, Color)> {
     }
     // Model-maker's stuff: whittled sticks of pale wood, cream string, the fascines in darker twigs.
     let mut parts = vec![
-        (merge(beams.wood).expect("a prop has parts"), Color::srgb(0.6, 0.44, 0.27)),
-        (merge(beams.string).expect("a prop has parts"), Color::srgb(0.88, 0.82, 0.68)),
+        PropPart { mesh: merge(beams.wood).expect("a prop has parts"), color: Color::srgb(0.6, 0.44, 0.27) },
+        PropPart { mesh: merge(beams.string).expect("a prop has parts"), color: Color::srgb(0.88, 0.82, 0.68) },
     ];
     if let Some(sticks) = merge(beams.sticks) {
-        parts.push((sticks, Color::srgb(0.4, 0.28, 0.16)));
+        parts.push(PropPart { mesh: sticks, color: Color::srgb(0.4, 0.28, 0.16) });
     }
     parts
 }
 
 /// Mud: two ripple rings on the sunken slab.
-fn mud() -> Vec<(Mesh, Color)> {
+fn mud() -> Vec<PropPart> {
     let ring = |major_radius: f32, at: Vec3| {
         Mesh::from(Torus { minor_radius: 0.014, major_radius }).scaled_by(Vec3::new(1.0, 0.5, 1.0)).translated_by(at)
     };
     let parts = vec![ring(0.13, Vec3::new(0.08, 0.0, 0.05)), ring(0.26, Vec3::new(0.04, 0.0, 0.02))];
-    vec![(merge(parts).expect("a prop has parts"), Color::srgb(0.7, 0.58, 0.4))]
+    vec![PropPart { mesh: merge(parts).expect("a prop has parts"), color: Color::srgb(0.7, 0.58, 0.4) }]
 }
 
 /// Brambles: a low mound of moss, dark arches half sunk in it, thorns pointing out along their backs.
-fn brambles() -> Vec<(Mesh, Color)> {
+fn brambles() -> Vec<PropPart> {
     let mound = Mesh::from(Sphere::new(0.42)).scaled_by(Vec3::new(1.0, 0.18, 1.0));
     let mut parts = Vec::new();
     for (major, turn, at) in [
@@ -185,7 +191,10 @@ fn brambles() -> Vec<(Mesh, Color)> {
         }
     }
     // A felt mound and wire stems, painted the bramble's dull red.
-    vec![(mound, Color::srgb(0.5, 0.52, 0.36)), (merge(parts).expect("a prop has parts"), Color::srgb(0.38, 0.2, 0.17))]
+    vec![
+        PropPart { mesh: mound, color: Color::srgb(0.5, 0.52, 0.36) },
+        PropPart { mesh: merge(parts).expect("a prop has parts"), color: Color::srgb(0.38, 0.2, 0.17) },
+    ]
 }
 
 /// A tool's prop (`prop`), its meshes and fine-lined materials made once per tile and shape.
@@ -201,10 +210,10 @@ pub(super) fn prop_parts(
         .or_insert_with(|| {
             prop(tile, shape)
                 .into_iter()
-                .map(|(mesh, color)| {
-                    let mut paint = ink(color);
+                .map(|part| {
+                    let mut paint = ink(part.color);
                     paint.extension = Hachure::fine();
-                    (meshes.add(mesh), materials.add(paint))
+                    (meshes.add(part.mesh), materials.add(paint))
                 })
                 .collect()
         })

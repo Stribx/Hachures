@@ -6,7 +6,7 @@ use super::Enemy;
 use super::boss::{Borne, Boss};
 use super::figure::{EnemyLook, Kind, Stride, leave, spawn_figure};
 use crate::level::story::Trigger;
-use crate::level::{Level, LevelEntity};
+use crate::level::{Level, LevelEntity, Walker};
 use crate::map::cell_pos;
 use crate::map::grid::Tile;
 use crate::map::species::Goal;
@@ -178,8 +178,8 @@ fn lay(level: &mut Level, look: &EnemyLook, commands: &mut Commands, trail: Trai
                 Visibility::default(),
             ))
             .with_children(|borne| {
-                for &(ref mesh, at, ref material, ..) in &look.borne {
-                    borne.spawn((Mesh3d(mesh.clone()), MeshMaterial3d(material.clone()), at));
+                for piece in &look.borne {
+                    borne.spawn((Mesh3d(piece.mesh.clone()), MeshMaterial3d(piece.material.clone()), piece.at));
                 }
             });
     }
@@ -217,9 +217,9 @@ pub fn walk(
             }
         }
         step(level, &mut enemy, &mut transform, boss.as_deref_mut(), dt, &mut trail);
-        level.walkers.push((enemy.species, enemy.cell));
+        level.walkers.push(Walker { species: enemy.species, cell: enemy.cell });
         if let Some(next) = enemy.next {
-            level.walkers.push((enemy.species, next));
+            level.walkers.push(Walker { species: enemy.species, cell: next });
         }
     }
     lay(level, &look, &mut commands, trail);

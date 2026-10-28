@@ -65,9 +65,16 @@ impl Enemy {
     }
 }
 
-/// Shots drawn for a moment: (from, to, seconds left).
+/// Shots drawn for a moment.
 #[derive(Resource, Default)]
-struct Shots(Vec<(Vec3, Vec3, f32)>);
+struct Shots(Vec<Shot>);
+
+struct Shot {
+    from: Vec3,
+    to: Vec3,
+    /// Seconds left on screen.
+    left: f32,
+}
 
 /// Health bars over the enemies, and the shots fired.
 fn draw(time: Res<Time>, mut shots: ResMut<Shots>, enemies: Query<(&Enemy, &Transform)>, mut gizmos: Gizmos) {
@@ -79,9 +86,9 @@ fn draw(time: Res<Time>, mut shots: ResMut<Shots>, enemies: Query<(&Enemy, &Tran
         let ink = if frac < 0.35 { crate::theme::SEAL } else { crate::theme::WORLD_INK };
         gizmos.line(left + Vec3::Z * 0.01, left + Vec3::new(0.5 * frac, 0.0, 0.01), ink);
     }
-    for (from, to, left) in &mut shots.0 {
-        gizmos.line(*from, *to, Color::srgb(0.2, 0.1, 0.05));
-        *left -= time.delta_secs();
+    for shot in &mut shots.0 {
+        gizmos.line(shot.from, shot.to, Color::srgb(0.2, 0.1, 0.05));
+        shot.left -= time.delta_secs();
     }
-    shots.0.retain(|s| s.2 > 0.0);
+    shots.0.retain(|s| s.left > 0.0);
 }

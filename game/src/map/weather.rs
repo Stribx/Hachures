@@ -7,7 +7,6 @@ use std::f32::consts::FRAC_PI_2;
 
 use super::fields::mix;
 use super::grid::{Grid, Tile};
-use super::look;
 use crate::level::Level;
 use crate::settings::Settings;
 use crate::theme::WATER;
@@ -85,7 +84,8 @@ fn ripples(gizmos: &mut Gizmos, grid: &Grid, t: f32) {
         let spread = (t * 0.7 + (h & 255) as f32 / 255.0).fract();
         let shift = Vec2::new((h >> 8 & 255) as f32, (h >> 16 & 255) as f32) / 255.0 - 0.5;
         let (x, z) = grid.coords(i);
-        let at = Vec3::new(x as f32 + shift.x * 0.6, look(grid.tiles[i]).0 + 0.01, z as f32 + shift.y * 0.6);
+        let at =
+            Vec3::new(x as f32 + shift.x * 0.6, super::look(grid.tiles[i]).height + 0.01, z as f32 + shift.y * 0.6);
         let ring = WATER.lighter(0.25).with_alpha(0.7 * (1.0 - spread));
         gizmos.circle(Isometry3d::new(at, Quat::from_rotation_x(FRAC_PI_2)), 0.04 + spread * 0.22, ring);
     }

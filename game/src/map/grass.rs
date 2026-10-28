@@ -6,7 +6,6 @@ use bevy::prelude::*;
 use super::cells::Cell;
 use super::fields::ground;
 use super::growth::{Crop, Sprig, sprigs};
-use super::look;
 use crate::level::Level;
 use crate::look::{Hachure, InkMaterial, ink};
 use crate::settings::Settings;
@@ -60,7 +59,7 @@ pub(super) fn grow(
     let alpine = level.world == ALPINE;
     let pieces = sprigs(grid, density, alpine).into_iter().flat_map(|sprig| {
         let (x, z) = grid.coords(sprig.cell);
-        let foot = Vec3::new(x as f32 + sprig.at.x, look(grid.tiles[sprig.cell]).0, z as f32 + sprig.at.y);
+        let foot = Vec3::new(x as f32 + sprig.at.x, super::look(grid.tiles[sprig.cell]).height, z as f32 + sprig.at.y);
         sprig_parts(&sprig, washes[sprig.cell], alpine).into_iter().map(move |part| part.translated_by(foot))
     });
     let Some(mesh) = pieces.reduce(|mut all, part| {

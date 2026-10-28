@@ -5,10 +5,10 @@ use std::f32::consts::FRAC_PI_2;
 use bevy::prelude::*;
 
 use super::grid::{Grid, Tile};
-use super::props::merge;
+use super::props::{PropPart, merge};
 
 /// Fallen stone: blocks of varied sizes, each turned and partly sunk in the ground, in a pale and a dark tone.
-pub(crate) fn rubble() -> Vec<(Mesh, Color)> {
+pub(crate) fn rubble() -> Vec<PropPart> {
     // Size, turn about y, tilt about x, centre: below 0, so the block sits in the ground.
     let blocks = [
         (Vec3::new(0.3, 0.2, 0.24), 0.4, 0.1, Vec3::new(-0.1, -0.02, 0.05), true),
@@ -26,8 +26,8 @@ pub(crate) fn rubble() -> Vec<(Mesh, Color)> {
         if light { &mut pale } else { &mut dark }.push(block);
     }
     vec![
-        (merge(pale).expect("a prop has parts"), Color::srgb(0.62, 0.6, 0.55)),
-        (merge(dark).expect("a prop has parts"), Color::srgb(0.5, 0.48, 0.44)),
+        PropPart { mesh: merge(pale).expect("a prop has parts"), color: Color::srgb(0.62, 0.6, 0.55) },
+        PropPart { mesh: merge(dark).expect("a prop has parts"), color: Color::srgb(0.5, 0.48, 0.44) },
     ]
 }
 
@@ -43,7 +43,7 @@ pub(crate) fn palisade_shape(grid: &Grid, i: usize) -> u8 {
 
 /// A palisade: a row of pointed stakes in dark stained wood, bound by two rails, the tips dipped in the Chancellerie's
 /// vermilion. It runs along x, or along z when `shape` is 1.
-pub(crate) fn palisade(shape: u8) -> Vec<(Mesh, Color)> {
+pub(crate) fn palisade(shape: u8) -> Vec<PropPart> {
     let turn = Quat::from_rotation_y(if shape == 1 { FRAC_PI_2 } else { 0.0 });
     let (mut wood, mut tips) = (Vec::new(), Vec::new());
     for k in 0..5 {
@@ -62,7 +62,8 @@ pub(crate) fn palisade(shape: u8) -> Vec<(Mesh, Color)> {
         wood.push(rail.translated_by(Vec3::new(0.0, y, 0.0)));
     }
     let paint = |parts: Vec<Mesh>, color| {
-        (merge(parts.into_iter().map(|m| m.rotated_by(turn)).collect()).expect("a prop has parts"), color)
+        let mesh = merge(parts.into_iter().map(|m| m.rotated_by(turn)).collect()).expect("a prop has parts");
+        PropPart { mesh, color }
     };
     vec![paint(wood, Color::srgb(0.36, 0.26, 0.2)), paint(tips, Color::srgb(0.7, 0.2, 0.15))]
 }

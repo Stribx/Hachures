@@ -5,7 +5,6 @@ use bevy::prelude::*;
 use super::cells::Cell;
 use super::fields::fields;
 use super::grid::{Grid, Tile};
-use super::look;
 use crate::look::{Hachure, InkMaterial};
 
 /// The thread's colour: unbleached linen.
@@ -29,7 +28,7 @@ pub(super) fn seams(grid: &Grid) -> Vec<(Vec3, Vec3)> {
                 continue;
             }
             if fields[i].is_some() && fields[j].is_some() && fields[i] != fields[j] {
-                let top = look(tile).0 + 0.006;
+                let top = super::look(tile).height + 0.006;
                 seams.push((Vec3::new(x + a.0, top, z + a.1), Vec3::new(x + b.0, top, z + b.1)));
             }
         }

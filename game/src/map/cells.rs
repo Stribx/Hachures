@@ -7,7 +7,6 @@ use bevy::prelude::*;
 use super::decor::palisade_shape;
 use super::fields::ground;
 use super::grid::{Grid, Tile};
-use super::look;
 use super::props::{Props, barricade_shape, prop_parts, spawn_prop};
 use super::seams::spawn_seams;
 use crate::campaign::skills::Skill;
@@ -139,9 +138,12 @@ fn block(
     materials: &mut Assets<InkMaterial>,
 ) -> (f32, Handle<Mesh>, Handle<InkMaterial>) {
     let (height, color) = match tile {
-        Tile::Barricade | Tile::Ronces => (look(Tile::Sol).0, color),
-        Tile::Eboulis | Tile::Palissade => look(Tile::Sol),
-        _ => (look(tile).0, color),
+        Tile::Barricade | Tile::Ronces => (super::look(Tile::Sol).height, color),
+        Tile::Eboulis | Tile::Palissade => {
+            let sol = super::look(Tile::Sol);
+            (sol.height, sol.color)
+        }
+        _ => (super::look(tile).height, color),
     };
     let shore = &drawn.shore;
     let (mesh, material) = drawn

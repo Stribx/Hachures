@@ -5,9 +5,10 @@ use bevy::prelude::*;
 use super::{Selection, Verdict};
 use crate::Step;
 use crate::level::Level;
+use crate::map;
+use crate::map::cell_pos;
 use crate::map::flow::FlowField;
 use crate::map::grid::{Grid, Tile};
-use crate::map::{cell_pos, look};
 use crate::schedule::over_world;
 use crate::theme::{INK, SEPIA};
 
@@ -48,7 +49,7 @@ fn draw(
 fn hachures(gizmos: &mut Gizmos, level: &Level, i: usize, color: Color, shift: Vec3) {
     let grid = level.terrain.grid();
     let at = cell_pos(grid, i);
-    let top = Vec3::new(at.x, look(grid.tiles[i]).0 + 0.02, at.z) + shift;
+    let top = Vec3::new(at.x, map::look(grid.tiles[i]).height + 0.02, at.z) + shift;
     let h = (i as u32).wrapping_mul(2_654_435_761);
     let n = 2 + h % 3;
     for s in 0..n {
@@ -121,7 +122,7 @@ fn cursor(gizmos: &mut Gizmos, level: &Level, i: usize, refused: bool) {
         let (x, z) = grid.coords(j);
         let near = (x.abs_diff(hx).max(z.abs_diff(hz))) as f32;
         if near <= 2.0 {
-            let top = Vec3::new(x as f32, look(grid.tiles[j]).0 + 0.01, z as f32);
+            let top = Vec3::new(x as f32, map::look(grid.tiles[j]).height + 0.01, z as f32);
             let c = |dx: f32, dz: f32| top + Vec3::new(dx * 0.5, 0.0, dz * 0.5);
             let fade = INK.with_alpha(0.35 * (1.0 - near / 3.0));
             gizmos.linestrip([c(-1., -1.), c(1., -1.), c(1., 1.), c(-1., 1.), c(-1., -1.)], fade);

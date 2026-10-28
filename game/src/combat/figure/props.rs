@@ -23,7 +23,7 @@ fn ox(x: f32, z: f32) -> Vec<Part> {
         .map(|p| hide(p.scaled(OX)).shifted(Vec3::new(x, 0.0, z)))
         .collect();
     for side in [1.0, -1.0] {
-        let horn = at(Form::Cylinder(0.008, 0.05), x + 0.25 * OX, 0.215, z + side * 0.035, Linen);
+        let horn = at(Form::Cylinder { radius: 0.008, height: 0.05 }, x + 0.25 * OX, 0.215, z + side * 0.035, Linen);
         ox.push(horn.turned(Quat::from_rotation_x(side * 0.5)));
     }
     ox
@@ -62,7 +62,7 @@ fn assembly(carry: Carry, a: &Anchors) -> Vec<Part> {
         }
         // A post at the front of the box, a glowing lantern on it.
         Carry::Visee => vec![
-            at(Form::Cylinder(0.01, 0.14), cx + 0.2, a.crown + 0.07, 0.0, Wood),
+            at(Form::Cylinder { radius: 0.01, height: 0.14 }, cx + 0.2, a.crown + 0.07, 0.0, Wood),
             at(Form::Sphere(0.035), cx + 0.2, a.crown + 0.17, 0.0, Lamp),
         ],
         _ => Vec::new(),
@@ -84,13 +84,16 @@ pub(super) fn props(carry: Carry, a: &Anchors) -> Vec<Part> {
         ],
         // Held at the side, on the ground: a linen pole with three iron bands.
         Carry::Jalon => {
-            let mut parts = vec![at(Form::Cylinder(0.015, 0.55), cx + 0.02, 0.275, 0.11, Linen)];
-            parts.extend([0.10, 0.275, 0.45].map(|y| at(Form::Cylinder(0.017, 0.06), cx + 0.02, y, 0.11, Iron)));
+            let mut parts = vec![at(Form::Cylinder { radius: 0.015, height: 0.55 }, cx + 0.02, 0.275, 0.11, Linen)];
+            parts.extend(
+                [0.10, 0.275, 0.45]
+                    .map(|y| at(Form::Cylinder { radius: 0.017, height: 0.06 }, cx + 0.02, y, 0.11, Iron)),
+            );
             parts
         }
         // The brim around the crown, the crown of the hat above it.
         Carry::Paille => vec![
-            at(Form::Cylinder(0.13, 0.015), hx, a.crown - 0.02, 0.0, Linen),
+            at(Form::Cylinder { radius: 0.13, height: 0.015 }, hx, a.crown - 0.02, 0.0, Linen),
             at(Form::Frustum { bottom: 0.06, top: 0.035, height: 0.05 }, hx, a.crown + 0.0125, 0.0, Linen),
         ],
         Carry::Fichu => {
@@ -108,7 +111,7 @@ pub(super) fn props(carry: Carry, a: &Anchors) -> Vec<Part> {
                 .turned(Quat::from_rotation_z(FRAC_PI_2)),
         ],
         Carry::Piolet => vec![
-            at(Form::Cylinder(0.012, 0.32), cx + 0.03, 0.16, -0.11, Wood),
+            at(Form::Cylinder { radius: 0.012, height: 0.32 }, cx + 0.03, 0.16, -0.11, Wood),
             at(Form::Cuboid(Vec3::new(0.07, 0.015, 0.015)), cx + 0.03, 0.32, -0.11, Iron),
         ],
         Carry::Bats => {
@@ -116,7 +119,10 @@ pub(super) fn props(carry: Carry, a: &Anchors) -> Vec<Part> {
         }
         // Half sunk in the box, it reads as a hood.
         Carry::Bache => {
-            vec![at(Form::Cylinder(0.14, 0.46), cx, 0.36, 0.0, Linen).turned(Quat::from_rotation_z(FRAC_PI_2))]
+            vec![
+                at(Form::Cylinder { radius: 0.14, height: 0.46 }, cx, 0.36, 0.0, Linen)
+                    .turned(Quat::from_rotation_z(FRAC_PI_2)),
+            ]
         }
         // A small figurine standing on the ground beside the front of the cart.
         Carry::Boeufs | Carry::Joug | Carry::Gast | Carry::Visee => assembly(carry, a),

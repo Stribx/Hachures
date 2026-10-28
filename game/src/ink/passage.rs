@@ -28,7 +28,7 @@ impl Level {
             Some(n_("refusal.firm_ground"))
         } else if self.sepia < self.tool_cost(tool) {
             Some(n_("refusal.sepia"))
-        } else if self.walkers.iter().any(|w| w.1 == i) {
+        } else if self.walkers.iter().any(|w| w.cell == i) {
             Some(n_("refusal.column"))
         } else {
             self.closes(i, tile)
@@ -90,6 +90,7 @@ impl Level {
 mod tests {
     use super::*;
     use crate::ink::tool_index;
+    use crate::level::Walker;
     use crate::level::data::{Change, Place};
     use crate::map::grid::Grid;
     use crate::map::species::{self, index_of};
@@ -239,7 +240,7 @@ mod tests {
     fn gratter_ignores_walkers_and_changes() {
         let gratter = tool_index("gratter").unwrap();
         let mut level = level("S.e.M");
-        level.walkers.push((level.present[0], 2));
+        level.walkers.push(Walker { species: level.present[0], cell: 2 });
         assert_eq!(level.refusal(2, gratter), None, "under a walker");
         level.walkers.clear();
         level.changes = vec![Change { wave: 2, at: vec![(2, 0)], becomes: Tile::Roc }];

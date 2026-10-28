@@ -5,6 +5,7 @@ use std::collections::BinaryHeap;
 
 use super::grid::{Grid, Tile};
 use super::species::{Goal, Species};
+use crate::level::Walker;
 
 /// Walking cost from every cell to the species' goal (∞ = cut off).
 pub struct FlowField {
@@ -63,14 +64,14 @@ pub fn fields(grid: &Grid, species: &[Species]) -> Vec<FlowField> {
 }
 
 /// Le Droit de Passage: painting `tile` at `i` is refused if any `present` species (indices in `species`)
-/// would lose every path to its goal, from its spawns or from where its `walkers` (species index, cell) stand.
+/// would lose every path to its goal, from its spawns or from where its `walkers` stand.
 pub fn can_place(
     grid: &Grid,
     species: &[Species],
     present: &[usize],
     i: usize,
     tile: Tile,
-    walkers: &[(usize, usize)],
+    walkers: &[Walker],
 ) -> bool {
     let marked = grid.spawns.iter().chain(&grid.fuyard_spawns).chain(grid.goals.values()).chain(&grid.bornes);
     if marked.copied().any(|m| m == i) {
@@ -82,7 +83,7 @@ pub fn can_place(
     next.bornes.clear();
     present.iter().map(|&k| (k, &species[k])).filter(|(_, s)| next.goals.contains_key(&s.goal)).all(|(k, s)| {
         let field = FlowField::new(&next, s);
-        let walking = walkers.iter().filter(|w| w.0 == k).map(|w| w.1);
+        let walking = walkers.iter().filter(|w| w.species == k).map(|w| w.cell);
         next.spawns_for(s).iter().copied().chain(walking).all(|c| field.dist[c].is_finite())
     })
 }
@@ -121,7 +122,7 @@ mod tests {
             .....
             ",
         );
-        let walker = (chaineur, pocket.width + 2);
+        let walker = Walker { species: chaineur, cell: pocket.width + 2 };
         assert!(can_place(&pocket, &species, &all, 2, Tile::Tour, &[]));
         assert!(
             !can_place(&pocket, &species, &all, 2, Tile::Tour, &[walker]),

@@ -9,8 +9,8 @@ use super::{Act, Selection, TOOLS, Verdict};
 use crate::campaign::skills::Skill;
 use crate::level::Level;
 use crate::look::{Hachure, InkMaterial, ink};
+use crate::map;
 use crate::map::grid::Tile;
-use crate::map::look;
 use crate::map::props::{barricade_shape, prop};
 
 /// The assets the ghost's piece is made of.
@@ -58,16 +58,16 @@ pub(super) fn ghost(
     };
     let shape = if tile == Tile::Barricade { barricade_shape(grid, i, level.has(Skill::Fascines)) } else { 0 };
     let (x, z) = grid.coords(i);
-    let height = if tile == Tile::Boue { look(Tile::Boue).0 } else { look(Tile::Sol).0 };
+    let height = if tile == Tile::Boue { map::look(Tile::Boue).height } else { map::look(Tile::Sol).height };
     commands.entity(entity).insert((Transform::from_xyz(x as f32, height, z as f32), Visibility::Inherited));
     if held.shown == Some((tile, shape)) {
         return;
     }
     held.shown = Some((tile, shape));
     let mesh = held.made.entry((tile, shape)).or_insert_with(|| {
-        let parts = prop(tile, shape).into_iter().map(|(mesh, color)| {
-            let n = mesh.count_vertices();
-            mesh.with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, vec![color.to_linear().to_f32_array(); n])
+        let parts = prop(tile, shape).into_iter().map(|part| {
+            let n = part.mesh.count_vertices();
+            part.mesh.with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, vec![part.color.to_linear().to_f32_array(); n])
         });
         let whole = parts.reduce(|mut all, part| {
             all.merge(&part).expect("the parts share their attributes");

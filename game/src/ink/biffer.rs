@@ -40,8 +40,8 @@ impl Level {
 mod tests {
     use crate::campaign::skills::Skill;
     use crate::ink::tool_index;
-    use crate::level::Level;
     use crate::level::data::Place;
+    use crate::level::{Level, Walker};
     use crate::map::grid::{Grid, Tile};
     use crate::map::species::{self, index_of};
     use crate::map::terrain::Edit;
@@ -177,7 +177,7 @@ mod tests {
     #[test]
     fn biffer_ignores_le_droit_de_passage() {
         let mut level = inked(level(OPEN), 2, "boue");
-        level.walkers.push((level.present[0], 2));
+        level.walkers.push(Walker { species: level.present[0], cell: 2 });
         assert_eq!(level.refusal(2, tool("biffer")), None);
     }
 

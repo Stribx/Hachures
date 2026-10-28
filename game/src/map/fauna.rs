@@ -6,7 +6,6 @@ use super::cells::Cell;
 use super::fields::mix;
 use super::grid::Grid;
 use super::growth::{Crop, sprigs};
-use super::look;
 use crate::level::Level;
 use crate::look::{Hachure, InkMaterial, ink};
 use crate::schedule::Screen;
@@ -29,7 +28,7 @@ pub fn butterfly_homes(grid: &Grid, alpine: bool) -> Vec<Vec3> {
         .into_iter()
         .map(|c| {
             let (x, z) = grid.coords(c);
-            Vec3::new(x as f32, look(grid.tiles[c]).0 + 0.25, z as f32)
+            Vec3::new(x as f32, super::look(grid.tiles[c]).height + 0.25, z as f32)
         })
         .collect()
 }

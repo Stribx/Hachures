@@ -23,8 +23,10 @@ pub enum Form {
         height: f32,
     },
     Sphere(f32),
-    /// Radius, height.
-    Cylinder(f32, f32),
+    Cylinder {
+        radius: f32,
+        height: f32,
+    },
     /// Full lengths.
     Cuboid(Vec3),
     Torus {
@@ -77,7 +79,7 @@ impl Form {
                 Form::Frustum { bottom: bottom * k, top: top * k, height: height * k }
             }
             Form::Sphere(r) => Form::Sphere(r * k),
-            Form::Cylinder(r, height) => Form::Cylinder(r * k, height * k),
+            Form::Cylinder { radius, height } => Form::Cylinder { radius: radius * k, height: height * k },
             Form::Cuboid(size) => Form::Cuboid(size * k),
             Form::Torus { minor, major } => Form::Torus { minor: minor * k, major: major * k },
         }
@@ -93,7 +95,7 @@ pub fn casts_shadow(form: &Form) -> bool {
     let longest = match *form {
         Form::Frustum { bottom, top, height } => (2.0 * bottom.max(top)).max(height),
         Form::Sphere(r) => 2.0 * r,
-        Form::Cylinder(r, height) => (2.0 * r).max(height),
+        Form::Cylinder { radius, height } => (2.0 * radius).max(height),
         Form::Cuboid(size) => size.max_element(),
         Form::Torus { minor, major } => 2.0 * (major + minor),
     };
@@ -149,7 +151,7 @@ impl Part {
         let half = match self.form {
             Form::Frustum { bottom, top, height } => Vec3::new(bottom.max(top), height / 2.0, bottom.max(top)),
             Form::Sphere(r) => Vec3::splat(r),
-            Form::Cylinder(r, height) => Vec3::new(r, height / 2.0, r),
+            Form::Cylinder { radius, height } => Vec3::new(radius, height / 2.0, radius),
             Form::Cuboid(size) => size / 2.0,
             Form::Torus { minor, major } => Vec3::new(major + minor, minor, major + minor),
         };
@@ -176,7 +178,7 @@ pub(super) fn body(shape: Shape) -> (Vec<Part>, Anchors) {
     match shape {
         Shape::Pied => (
             vec![
-                at(Form::Cylinder(0.14, 0.03), 0.0, 0.015, 0.0, Felt),
+                at(Form::Cylinder { radius: 0.14, height: 0.03 }, 0.0, 0.015, 0.0, Felt),
                 at(Form::Frustum { bottom: 0.10, top: 0.055, height: 0.26 }, 0.0, 0.16, 0.0, Coat),
                 at(Form::Sphere(0.065), 0.0, 0.35, 0.0, Wood),
             ],
@@ -184,9 +186,9 @@ pub(super) fn body(shape: Shape) -> (Vec<Part>, Anchors) {
         ),
         Shape::Echasses => (
             vec![
-                at(Form::Cylinder(0.14, 0.03), 0.0, 0.015, 0.0, Felt),
-                at(Form::Cylinder(0.018, 0.30), 0.0, 0.18, 0.05, Wood).leg(1.0),
-                at(Form::Cylinder(0.018, 0.30), 0.0, 0.18, -0.05, Wood).leg(-1.0),
+                at(Form::Cylinder { radius: 0.14, height: 0.03 }, 0.0, 0.015, 0.0, Felt),
+                at(Form::Cylinder { radius: 0.018, height: 0.30 }, 0.0, 0.18, 0.05, Wood).leg(1.0),
+                at(Form::Cylinder { radius: 0.018, height: 0.30 }, 0.0, 0.18, -0.05, Wood).leg(-1.0),
                 at(Form::Frustum { bottom: 0.08, top: 0.05, height: 0.16 }, 0.0, 0.41, 0.0, Coat),
                 at(Form::Sphere(0.06), 0.0, 0.55, 0.0, Wood),
             ],
@@ -200,7 +202,9 @@ pub(super) fn body(shape: Shape) -> (Vec<Part>, Anchors) {
             ];
             for (x, z) in [(0.15, 0.09), (0.15, -0.09), (-0.15, 0.09), (-0.15, -0.09)] {
                 // Diagonal pairs swing together, as in a trot.
-                parts.push(at(Form::Cylinder(0.025, 0.12), x, 0.08, z, Coat).leg(x.signum() * z.signum()));
+                parts.push(
+                    at(Form::Cylinder { radius: 0.025, height: 0.12 }, x, 0.08, z, Coat).leg(x.signum() * z.signum()),
+                );
             }
             (
                 parts,
@@ -223,7 +227,7 @@ fn chariot(lead: f32, height: f32) -> (Vec<Part>, Anchors) {
     let (middle, top) = (0.14 + height / 2.0, 0.14 + height);
     let mut parts = vec![at(Form::Cuboid(Vec3::new(0.5, height, 0.3)), lead, middle, 0.0, Paint::Coat)];
     for (x, z) in [(0.15, 0.17), (0.15, -0.17), (-0.15, 0.17), (-0.15, -0.17)] {
-        let wheel = at(Form::Cylinder(0.1, 0.04), lead + x, 0.1, z, Paint::Wood);
+        let wheel = at(Form::Cylinder { radius: 0.1, height: 0.04 }, lead + x, 0.1, z, Paint::Wood);
         parts.push(wheel.turned(Quat::from_rotation_x(FRAC_PI_2)).role(Role::Wheel));
     }
     // No head: the props sit on the box.
@@ -238,8 +242,13 @@ pub fn parts(shape: Shape, carries: &[Carry], hostile: bool) -> Vec<Part> {
     let (mut parts, anchors) = if boss { chariot(BOSS_LEAD, BOSS_BOX) } else { body(shape) };
     if hostile {
         // A disc of wax pressed on the front of the chest, its flat face looking forward.
-        let seal =
-            Part::at(Form::Cylinder(0.03, 0.015), anchors.chest.x + anchors.front, anchors.chest.y, 0.0, Paint::Seal);
+        let seal = Part::at(
+            Form::Cylinder { radius: 0.03, height: 0.015 },
+            anchors.chest.x + anchors.front,
+            anchors.chest.y,
+            0.0,
+            Paint::Seal,
+        );
         parts.push(seal.turned(Quat::from_rotation_z(-FRAC_PI_2)));
     }
     for &carry in carries {
@@ -351,8 +360,8 @@ mod tests {
 
     #[test]
     fn small_parts_cast_no_shadow() {
-        assert!(!casts_shadow(&Form::Cylinder(0.03, 0.015)), "a seal");
-        assert!(!casts_shadow(&Form::Cylinder(0.008, 0.05)), "a horn");
+        assert!(!casts_shadow(&Form::Cylinder { radius: 0.03, height: 0.015 }), "a seal");
+        assert!(!casts_shadow(&Form::Cylinder { radius: 0.008, height: 0.05 }), "a horn");
         assert!(casts_shadow(&Form::Frustum { bottom: 0.10, top: 0.055, height: 0.26 }), "a coat");
     }
 
@@ -417,7 +426,7 @@ mod tests {
     fn every_coat_reads_on_the_fields() {
         use crate::map::grid::Tile;
         use crate::theme::{MEADOW, PASTURE, WHEAT};
-        let fields = [PASTURE, MEADOW, WHEAT, crate::map::look(Tile::Glace).1];
+        let fields = [PASTURE, MEADOW, WHEAT, crate::map::look(Tile::Glace).color];
         for s in species::load() {
             let coat = Color::srgb(s.color.0, s.color.1, s.color.2);
             for field in fields {

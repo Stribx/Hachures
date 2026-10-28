@@ -13,8 +13,8 @@ use super::bar::Bar;
 use crate::combat::towers::{BASE_WOOD, TOWER_BASE, WEAPON_WOOD, weapon_model};
 use crate::ink::{Act, TOOLS, Tool};
 use crate::look::{Hachure, InkMaterial, ink, varnished};
+use crate::map;
 use crate::map::grid::Tile;
-use crate::map::look;
 use crate::map::props::prop;
 use crate::map::scraper::scraper;
 use crate::theme::SUNLIGHT;
@@ -111,8 +111,8 @@ fn spawn_ground(
     layer: &RenderLayers,
 ) {
     let ground = match tool.act {
-        Act::Lay(Tile::Boue) => varnished(look(Tile::Boue).1, 0.6),
-        _ => ink(look(Tile::Sol).1),
+        Act::Lay(Tile::Boue) => varnished(map::look(Tile::Boue).color, 0.6),
+        _ => ink(map::look(Tile::Sol).color),
     };
     commands.spawn((
         Mesh3d(meshes.add(Cuboid::new(1.0, 0.2, 1.0))),
@@ -155,10 +155,10 @@ fn spawn_piece(
             return;
         }
     };
-    for (mesh, color) in parts {
+    for part in parts {
         commands.spawn((
-            Mesh3d(meshes.add(mesh)),
-            MeshMaterial3d(materials.add(fine(color))),
+            Mesh3d(meshes.add(part.mesh)),
+            MeshMaterial3d(materials.add(fine(part.color))),
             Transform::from_translation(at),
             layer.clone(),
         ));

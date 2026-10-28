@@ -9,7 +9,7 @@ use serde::Deserialize;
 use super::boss::{Borne, Boss};
 use super::figure::{EnemyLook, Kind, leave};
 use super::shards::shatter;
-use super::{Enemy, Shots};
+use super::{Enemy, Shot, Shots};
 use crate::campaign::skills::Skill;
 use crate::ink::{TowerBiffed, TowerInked};
 use crate::level::story::Trigger;
@@ -64,8 +64,8 @@ pub struct TowerBase(pub usize);
 pub const TOWER_BASE: &str = "models/tower-round-bottom-a.glb";
 
 /// Carved for the plan-relief: a base of plain limewood, the weapon in walnut with its parts still told apart.
-pub const BASE_WOOD: Carved = Carved([214, 186, 140], false);
-pub const WEAPON_WOOD: Carved = Carved([196, 150, 110], true);
+pub const BASE_WOOD: Carved = Carved { rgb: [214, 186, 140], painted: false };
+pub const WEAPON_WOOD: Carved = Carved { rgb: [196, 150, 110], painted: true };
 
 /// The glTF asset path of the weapon's model.
 pub fn weapon_model(weapon: Weapon) -> &'static str {
@@ -224,7 +224,7 @@ pub(super) fn fire(
             }
         }
         tower.ready_in = stats.cooldown;
-        shots.0.push((pos, target_pos, 0.15));
+        shots.0.push(Shot { from: pos, to: target_pos, left: 0.15 });
         // Kenney weapons face +Z, look_at points -Z.
         tower_transform.look_at(Vec3::new(target_pos.x, pos.y, target_pos.z), Vec3::Y);
         tower_transform.rotate_local_y(PI);

@@ -44,25 +44,32 @@ pub fn cell_pos(grid: &Grid, i: usize) -> Vec3 {
     Vec3::new(x as f32, 0.45, z as f32)
 }
 
+/// The height and colour of a tile's block.
+#[derive(Clone, Copy, Debug)]
+pub struct Block {
+    pub height: f32,
+    pub color: Color,
+}
+
 /// Height and colour of a tile's block, washed in like a hand-coloured map: each tile keeps its own family, so the
 /// ground still reads at a glance (docs/direction-artistique.md, phase 6).
-pub fn look(tile: Tile) -> (f32, Color) {
+pub fn look(tile: Tile) -> Block {
     match tile {
-        Tile::Sol => (0.2, PASTURE),
-        Tile::SolBas => (0.15, MEADOW),
+        Tile::Sol => Block { height: 0.2, color: PASTURE },
+        Tile::SolBas => Block { height: 0.15, color: MEADOW },
         // Sunk below the ground: a trap, not a wall.
-        Tile::Boue => (0.14, Color::srgb(0.55, 0.4, 0.24)),
-        Tile::Ronces => (0.35, Color::srgb(0.36, 0.3, 0.2)),
-        Tile::Eau => (0.05, WATER),
-        Tile::Gue => (0.1, Color::srgb(0.62, 0.78, 0.82)),
-        Tile::Barricade => (0.6, WOOD),
+        Tile::Boue => Block { height: 0.14, color: Color::srgb(0.55, 0.4, 0.24) },
+        Tile::Ronces => Block { height: 0.35, color: Color::srgb(0.36, 0.3, 0.2) },
+        Tile::Eau => Block { height: 0.05, color: WATER },
+        Tile::Gue => Block { height: 0.1, color: Color::srgb(0.62, 0.78, 0.82) },
+        Tile::Barricade => Block { height: 0.6, color: WOOD },
         // Warm limestone, so the ridges stay stone among the greens.
-        Tile::Roc => (0.5, Color::srgb(0.72, 0.65, 0.52)),
-        Tile::Tour => (0.2, Color::srgb(0.8, 0.76, 0.66)),
-        Tile::Chaussee => (0.21, Color::srgb(0.95, 0.93, 0.86)),
-        Tile::Glace => (0.07, Color::srgb(0.88, 0.93, 0.95)),
-        Tile::Eboulis => (0.2, Color::srgb(0.6, 0.57, 0.52)),
-        Tile::Palissade => (0.2, Color::srgb(0.36, 0.26, 0.2)),
+        Tile::Roc => Block { height: 0.5, color: Color::srgb(0.72, 0.65, 0.52) },
+        Tile::Tour => Block { height: 0.2, color: Color::srgb(0.8, 0.76, 0.66) },
+        Tile::Chaussee => Block { height: 0.21, color: Color::srgb(0.95, 0.93, 0.86) },
+        Tile::Glace => Block { height: 0.07, color: Color::srgb(0.88, 0.93, 0.95) },
+        Tile::Eboulis => Block { height: 0.2, color: Color::srgb(0.6, 0.57, 0.52) },
+        Tile::Palissade => Block { height: 0.2, color: Color::srgb(0.36, 0.26, 0.2) },
     }
 }
 
@@ -76,6 +83,6 @@ pub fn cell_color(grid: &Grid, i: usize) -> Color {
     } else if grid.goals.values().any(|&g| g == i) {
         SEPIA
     } else {
-        look(grid.tiles[i]).1
+        look(grid.tiles[i]).color
     }
 }
