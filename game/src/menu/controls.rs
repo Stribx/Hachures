@@ -52,6 +52,9 @@ const KEYS: [(&str, &[(&str, &str)]); 3] = [
     ),
 ];
 
+/// The F12 capture is the desktop build's: the web build leaves its row out.
+const DESKTOP_ONLY: &str = n_("controls.key.f12");
+
 fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
     commands.spawn(page(Screen::Controls, VEIL)).with_children(|page| {
         page.spawn(sheet()).with_children(|p| {
@@ -68,8 +71,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                                         .spawn(text(&assets, t(heading), HEADING_SIZE))
                                         .insert(Node { margin: UiRect::top(px(8)), ..default() });
                                     for &(key, action) in keys {
-                                        // The F12 capture is the desktop build's.
-                                        if key == "F12" && cfg!(target_arch = "wasm32") {
+                                        if key == DESKTOP_ONLY && cfg!(target_arch = "wasm32") {
                                             continue;
                                         }
                                         column.spawn(Node { column_gap: px(16), ..default() }).with_children(|row| {
@@ -86,4 +88,16 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
             p.spawn(primary(BUTTON_WIDTH, label(&assets, t("common.back")))).observe(back);
         });
     });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// The row the web build leaves out is one of the sheet's rows: a typo would show it on the web.
+    #[test]
+    fn the_desktop_only_key_is_a_row() {
+        let rows: Vec<&str> = KEYS.iter().flat_map(|&(_, keys)| keys.iter().map(|&(key, _)| key)).collect();
+        assert!(rows.contains(&DESKTOP_ONLY), "{DESKTOP_ONLY} not in {rows:?}");
+    }
 }

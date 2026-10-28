@@ -13,12 +13,13 @@ mod parade;
 
 use bevy::prelude::*;
 use bevy::render::view::screenshot::{Screenshot, ScreenshotCaptured, save_to_disk};
+use std::path::Path;
 
 use crate::campaign::LoadLevel;
 use crate::campaign::skills::Skill;
 use crate::combat::enemies::send_wave;
 use crate::combat::towers::{Weapon, spawn_tower};
-use crate::ink::Selection;
+use crate::ink::{Selection, tool_index};
 use crate::level::Level;
 use crate::look::WorldCamera;
 use crate::map::grid::Tile;
@@ -204,7 +205,12 @@ fn act(
         let grid = level.terrain.grid();
         let open: Vec<usize> =
             (0..grid.tiles.len()).filter(|&i| grid.tiles[i] == Tile::Sol && grid.coords(i).1 == 3).collect();
-        for (tool, &i) in [0, 3].into_iter().zip(open.iter().step_by(4)) {
+        let tools = ["barricade", "arbalète"].map(|name| tool_index(name).expect("a tool of TOOLS"));
+        for (tool, &i) in tools.into_iter().zip(open.iter().step_by(4)) {
+            // As a click would: only where it isn't refused, or the sépia would run below zero.
+            if level.refusal(i, tool).is_some() {
+                continue;
+            }
             level.ink(i, tool);
             if let Some(weapon) = crate::ink::TOOLS[tool].act.weapon() {
                 spawn_tower(&mut commands, &assets, level.terrain.grid(), i, weapon);
@@ -222,7 +228,7 @@ fn timed(time: Res<Time>, mut taken: Local<usize>, mut commands: Commands) {
     }
     *taken += 1;
     let path = env(SHOT).expect("`timed` runs only with HACHURES_SHOT set");
-    let path = if times.len() > 1 { path.replace(".png", &format!("-{}.png", *taken)) } else { path };
+    let path = if times.len() > 1 { numbered(&path, *taken) } else { path };
     let mut shot = commands.spawn(Screenshot::primary_window());
     shot.observe(save_to_disk(path));
     if *taken == times.len() {
@@ -230,6 +236,17 @@ fn timed(time: Res<Time>, mut taken: Local<usize>, mut commands: Commands) {
             exit.write(AppExit::Success);
         });
     }
+}
+
+/// `path` with `-n` before its extension: `out.png` → `out-2.png`.
+fn numbered(path: &str, n: usize) -> String {
+    let path = Path::new(path);
+    let stem = path.file_stem().map_or_else(String::new, |s| s.to_string_lossy().into_owned());
+    let name = match path.extension() {
+        Some(extension) => format!("{stem}-{n}.{}", extension.to_string_lossy()),
+        None => format!("{stem}-{n}"),
+    };
+    path.with_file_name(name).to_string_lossy().into_owned()
 }
 
 #[cfg(test)]
@@ -243,5 +260,12 @@ mod tests {
         assert_eq!(waves_done("0", 5), 0);
         assert_eq!(waves_done("3", 5), 2);
         assert_eq!(waves_done("9", 5), 4, "the last wave at most");
+    }
+
+    #[test]
+    fn several_shots_are_numbered_before_the_extension() {
+        assert_eq!(numbered("shots/out.png", 2), "shots/out-2.png");
+        assert_eq!(numbered("out", 1), "out-1", "a name with no extension is numbered too");
+        assert_eq!(numbered("my.png.d/out.png", 3), "my.png.d/out-3.png", "only the file's own extension");
     }
 }
