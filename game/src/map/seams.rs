@@ -21,7 +21,8 @@ pub(super) fn seams(grid: &Grid) -> Vec<(Vec3, Vec3)> {
     for i in 0..grid.tiles.len() {
         let (x, z) = grid.coords(i);
         let (x, z) = (x as f32, z as f32);
-        for (j, (a, b)) in [(i + 1, ((0.5, -0.5), (0.5, 0.5))), (i + grid.width, ((-0.5, 0.5), (0.5, 0.5)))] {
+        let neighbours = [(i + 1, ((0.5, -0.5), (0.5, 0.5))), (i + grid.width, ((-0.5, 0.5), (0.5, 0.5)))];
+        for (j, (a, b)) in neighbours {
             let beside = if j == i + 1 { x as usize + 1 < grid.width } else { j < grid.tiles.len() };
             let tile = grid.tiles[i];
             if !beside || !matches!(tile, Tile::Sol | Tile::SolBas) || grid.tiles[j] != tile {

@@ -115,7 +115,7 @@ fn jump(
         crate::i18n::set(&code);
         settings.language = code;
     }
-    if let Some(n) = env("HACHURES_LEVEL").and_then(|n| n.parse().ok()) {
+    if let Some(n) = env("HACHURES_LEVEL").and_then(|n| n.parse::<usize>().ok()) {
         load.write(LoadLevel(n));
     }
 }
@@ -176,8 +176,8 @@ fn camera(mut camera: Single<&mut Transform, With<WorldCamera>>) {
 }
 
 /// `HACHURES_WALK=n@t` and `HACHURES_TRAVEL=n@t`: at `t` seconds, walk Nève to sheet `n`, or go and play it.
-/// `HACHURES_WALK=n@t` and `HACHURES_TRAVEL=n@t` (above); `HACHURES_INK=t`: at `t` seconds, ink a barricade and an
-/// arbalète on the third row, as a click would, to see them land.
+/// `HACHURES_INK=t`: at `t` seconds, ink a barricade and an arbalète on the third row, as a click would, to see
+/// them land.
 fn act(
     time: Res<Time>,
     mut done: Local<[bool; 3]>,

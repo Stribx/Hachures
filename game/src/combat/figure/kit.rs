@@ -7,10 +7,11 @@ use bevy::prelude::*;
 use super::props::props;
 use crate::map::species::{Carry, Shape};
 
-/// How far the Grande Chaîne's cart is pushed back so its oxen fit in front, and how far behind the root its back lies.
+/// How far the Grande Chaîne's cart is pushed back so its oxen fit in front.
 const BOSS_LEAD: f32 = -0.18;
 /// The Grande Chaîne's box is lower than a convoy's: at its size a tall one walls off the board.
 const BOSS_BOX: f32 = 0.14;
+/// How far behind the root the Grande Chaîne's back lies.
 pub const BOSS_REAR: f32 = 0.25 - BOSS_LEAD;
 
 /// A primitive of the kit, sized in figure units.
@@ -69,6 +70,7 @@ pub struct Part {
 }
 
 impl Form {
+    #[must_use]
     fn scaled(self, k: f32) -> Form {
         match self {
             Form::Frustum { bottom, top, height } => {
@@ -104,23 +106,27 @@ impl Part {
         Part { form, at: Transform::from_xyz(x, y, z), paint, role: Role::Body, side: 0.0 }
     }
 
+    #[must_use]
     pub(super) fn turned(mut self, rotation: Quat) -> Part {
         self.at.rotation = rotation;
         self
     }
 
     /// The part `k` times the size, from the figure's origin.
+    #[must_use]
     pub(super) fn scaled(mut self, k: f32) -> Part {
         self.form = self.form.scaled(k);
         self.at.translation *= k;
         self
     }
 
+    #[must_use]
     pub(super) fn shifted(mut self, by: Vec3) -> Part {
         self.at.translation += by;
         self
     }
 
+    #[must_use]
     pub(super) fn painted(mut self, paint: Paint) -> Part {
         self.paint = paint;
         self
@@ -290,11 +296,11 @@ mod tests {
         let hide: Vec<&Part> = parts.iter().filter(|p| p.paint == Paint::Hide).collect();
         assert_eq!(hide.iter().filter(|p| p.role == Role::Leg).count(), 8, "two oxen of four legs");
         assert_eq!(hide.iter().filter(|p| matches!(p.form, Form::Cuboid(_))).count(), 4, "a body and a head each");
-        assert!(hide.iter().all(ahead), "the oxen walk in front of the cart");
+        assert!(hide.iter().all(ahead), "the oxen walk in front of the cart: {hide:?}");
         assert_eq!(parts.iter().filter(|p| p.paint == Paint::Linen).count(), 4, "two horns each");
         let yoke = parts.iter().find(|p| p.paint == Paint::Wood && matches!(p.form, Form::Cuboid(c) if c.z > 0.2));
         let yoke = yoke.expect("a yoke across both necks");
-        assert!(ahead(&yoke) && yoke.at.translation.z == 0.0);
+        assert!(ahead(&yoke) && yoke.at.translation.z == 0.0, "{yoke:?}");
         let lamp = parts.iter().find(|p| p.paint == Paint::Lamp && matches!(p.form, Form::Sphere(_)));
         assert!(lamp.expect("a sighting lantern").at.translation.x > boxy.at.translation.x);
         let top = boxy.bounds().1.y;
@@ -340,7 +346,7 @@ mod tests {
         let stilts = of("echassier");
         let legs: Vec<&Part> = stilts.iter().filter(|p| p.role == Role::Leg).collect();
         assert_eq!(legs.iter().map(|p| p.side).sum::<f32>(), 0.0);
-        assert!(legs.iter().all(|p| p.side == p.at.translation.z.signum()));
+        assert!(legs.iter().all(|p| p.side == p.at.translation.z.signum()), "{legs:?}");
     }
 
     #[test]
@@ -365,10 +371,10 @@ mod tests {
         let all = species::load();
         let chaineur = all.iter().find(|s| s.name == "chaineur").unwrap();
         let parts = parts(chaineur.shape, &chaineur.carries, chaineur.hostile);
-        assert!(parts.iter().any(|p| p.paint == Paint::Iron && matches!(p.form, Form::Torus { .. })));
+        assert!(parts.iter().any(|p| p.paint == Paint::Iron && matches!(p.form, Form::Torus { .. })), "{parts:?}");
         let head = parts.iter().find(|p| matches!(p.form, Form::Sphere(_))).unwrap();
         let hat = parts.iter().find(|p| matches!(p.form, Form::Cuboid(_)) && p.paint == Paint::Wood).unwrap();
-        assert!(hat.bounds().0.y >= head.at.translation.y);
+        assert!(hat.bounds().0.y >= head.at.translation.y, "hat {hat:?} under head {head:?}");
     }
 
     /// (number of parts, bounding box rounded to 0.01) of a species' figurine.
@@ -447,7 +453,7 @@ mod tests {
         let heads = heads(&fuyard);
         assert_eq!(heads.len(), 2, "a head and a child's");
         let own = heads.iter().map(|h| h.at.translation.y).fold(f32::MIN, f32::max);
-        assert!(heads.iter().any(|h| h.at.translation.y < own));
+        assert!(heads.iter().any(|h| h.at.translation.y < own), "{heads:?}");
 
         let jalonneur = of("jalonneur");
         let top = |p: &Part| p.bounds().1.y;

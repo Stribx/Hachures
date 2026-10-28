@@ -134,7 +134,7 @@ fn grande_chaine_phases() {
     let level = app.world().resource::<Level>();
     assert_eq!(level.boss, None, "phase names come from spawn_enemies and boss_phases");
     assert!(level.terrain.base().tiles.contains(&Tile::Chaussee), "Le Levé lays Chaussée");
-    assert!(level.terrain.base().bornes.is_empty());
+    assert!(level.terrain.base().bornes.is_empty(), "{:?}", level.terrain.base().bornes);
 
     set_hp(&mut app, 500.0);
     run(&mut app, 16);

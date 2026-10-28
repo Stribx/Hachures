@@ -78,6 +78,10 @@ pub struct Grid {
 impl Grid {
     /// One char per tile. Markers stand on Sol: S spawn, F allies' start (Fuyards, a convoy), M the Cible
     /// (Moulin…), B Borne-Mère, R Refuge, X Sortie.
+    ///
+    /// # Panics
+    ///
+    /// If the map is empty, its rows differ in length, or it holds a character that is not a tile or a marker.
     pub fn parse(map: &str) -> Grid {
         let rows: Vec<&str> = map.lines().map(str::trim).filter(|l| !l.is_empty()).collect();
         let width = rows[0].len();

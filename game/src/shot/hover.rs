@@ -20,7 +20,7 @@ pub(super) fn hover(
     cards: Query<(Entity, &ToolButton)>,
     mut commands: Commands,
 ) {
-    if let Some(t) = env("HACHURES_TOOL").and_then(|n| n.parse().ok()) {
+    if let Some(t) = env("HACHURES_TOOL").and_then(|n| n.parse::<usize>().ok()) {
         selection.tool = t;
     }
     if let Some(t) = env("HACHURES_CARD").and_then(|n| n.parse::<usize>().ok()) {

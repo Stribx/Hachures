@@ -166,7 +166,7 @@ fn split_slot(text: &str) -> Option<(&str, Option<usize>, &str)> {
         if inside.is_empty() {
             return Some((&text[..open], None, &text[close + 1..]));
         }
-        if let Ok(k) = inside.parse() {
+        if let Ok(k) = inside.parse::<usize>() {
             return Some((&text[..open], Some(k), &text[close + 1..]));
         }
         from = open + 1;

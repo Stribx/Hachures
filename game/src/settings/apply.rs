@@ -101,7 +101,8 @@ fn apply_render(
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
-        use bevy::anti_alias::{fxaa::Fxaa, smaa::Smaa};
+        use bevy::anti_alias::fxaa::Fxaa;
+        use bevy::anti_alias::smaa::Smaa;
         use bevy::pbr::ScreenSpaceAmbientOcclusion;
         let mut camera = commands.entity(camera.0);
         match occlusion(s.occlusion) {
@@ -115,7 +116,7 @@ fn apply_render(
         };
     }
     // `camera::drive` focuses the lens again from the next frame.
-    match (*camera, s.depth_of_field()) {
+    match (*camera, s.depth_of_field_shown()) {
         ((camera, false), true) => {
             commands.entity(camera).insert(lens());
         }

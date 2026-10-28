@@ -58,7 +58,7 @@ mod tests {
     #[test]
     fn every_credited_asset_is_read() {
         let rows = rows(include_str!("../../assets/CREDITS.md"));
-        assert_eq!(rows.len(), 13);
+        assert_eq!(rows.len(), 13, "update when CREDITS.md gains a row");
         assert_eq!(rows[3], ("Lonelyhood", "yd", "CC0"));
         assert_eq!(rows[4].1, "dhallcomposer", "the ambient sounds follow the music");
         assert_eq!(rows[11], ("The travel clouds", "AI-generated for Hachures", "CC0"));

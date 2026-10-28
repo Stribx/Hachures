@@ -117,6 +117,7 @@ impl Terrain {
     }
 
     /// Whether the blocks must be rebuilt since the last call.
+    #[must_use]
     pub fn take_redraw(&mut self) -> bool {
         std::mem::take(&mut self.redraw)
     }

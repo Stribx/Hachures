@@ -84,7 +84,8 @@ pub struct Level {
     /// Names kept in the Rôle: Fuyards reaching the Refuge, and notes.
     pub names: i32,
     pub fuyard_hurt: bool,
-    /// (species, cell) of every enemy on the map and the cell it walks to.
+    /// (species, cell) pairs: one for the cell each enemy on the map stands on, and a second for the cell it
+    /// walks to next, when it has one.
     pub walkers: Vec<(usize, usize)>,
     /// Notes still to come, and the margin written so far.
     notes: Vec<Note>,
@@ -161,7 +162,7 @@ impl Level {
         self.finished = true;
         self.note(Trigger::Won);
         let challenge = self.challenge_met();
-        let record = save.record(self.index);
+        let record = save.record_mut(self.index);
         // A replay earns sceaux, but the story is written once, like the choice: the first win keeps its Names.
         if !record.won {
             record.names = self.names;

@@ -2,10 +2,11 @@
 //! rewritten whole on every change.
 
 #[cfg(not(target_arch = "wasm32"))]
-use std::{
-    fs, io,
-    path::{Path, PathBuf},
-};
+use std::fs;
+#[cfg(not(target_arch = "wasm32"))]
+use std::io;
+#[cfg(not(target_arch = "wasm32"))]
+use std::path::{Path, PathBuf};
 
 use bevy::prelude::*;
 use serde::Serialize;

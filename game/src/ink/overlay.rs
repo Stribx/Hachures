@@ -97,7 +97,7 @@ fn calque(gizmos: &mut Gizmos, level: &Level, selection: &Selection) {
     let field = &level.terrain.fields()[selection.shown];
     let at = |i| cell_pos(grid, i);
     for i in 0..grid.tiles.len() {
-        if let Some(n) = field.next(grid, i) {
+        if let Some(n) = field.next_step(grid, i) {
             gizmos.arrow(at(i), at(i).lerp(at(n), 0.6), SEPIA);
         }
     }

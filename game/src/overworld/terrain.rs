@@ -100,7 +100,7 @@ pub(super) fn land_mesh() -> Mesh {
         .collect();
     let colors: Vec<[f32; 4]> = corners.iter().map(|c| land_color(c.xz(), c.y).to_linear().to_f32_array()).collect();
     let width = columns as u32 + 1;
-    let indices = (0..rows as u32)
+    let indices: Vec<u32> = (0..rows as u32)
         .flat_map(|r| {
             (0..columns as u32).flat_map(move |c| {
                 let (a, d) = (r * width + c, (r + 1) * width + c);

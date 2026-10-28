@@ -75,7 +75,7 @@ S..^....
         sorted.sort_unstable();
         sorted.dedup();
         assert_eq!(sorted.len(), 5);
-        assert!(cells.iter().all(|&i| is_free(&grid, i)));
+        assert!(cells.iter().all(|&i| is_free(&grid, i)), "{cells:?}");
     }
 
     #[test]
@@ -89,7 +89,7 @@ S..^....
         let grid = Grid::parse(MAP);
         // Middle row is 2 (of 5) and has no run of 5; row 1 neither; row 3 has one from its third cell.
         let cells = parade_cells(&grid, 5);
-        assert!(cells.windows(2).all(|w| w[1] == w[0] + 1));
+        assert!(cells.windows(2).all(|w| w[1] == w[0] + 1), "{cells:?}");
         assert_eq!(grid.coords(cells[0]), (2, 3));
     }
 

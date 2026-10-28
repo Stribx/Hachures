@@ -136,7 +136,7 @@ impl Settings {
         self.volume(self.effects)
     }
 
-    pub fn depth_of_field(&self) -> bool {
+    pub fn depth_of_field_shown(&self) -> bool {
         self.depth_of_field && !self.reduced_motion
     }
 

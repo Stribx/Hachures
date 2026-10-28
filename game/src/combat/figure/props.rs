@@ -4,11 +4,8 @@ use std::f32::consts::FRAC_PI_2;
 
 use bevy::prelude::*;
 
-use super::kit::{
-    Anchors, Form,
-    Paint::{Coat, Felt, Hide, Iron, Lamp, Linen, Slate, Wood},
-    Part, Role, body,
-};
+use super::kit::Paint::{Coat, Felt, Hide, Iron, Lamp, Linen, Slate, Wood};
+use super::kit::{Anchors, Form, Part, Role, body};
 use crate::map::species::{Carry, Shape};
 
 /// How much smaller than the Harde an ox is.

@@ -61,6 +61,10 @@ pub struct LevelData {
 
 impl LevelData {
     /// Level `index` of `LEVELS`, read from its file.
+    ///
+    /// # Panics
+    ///
+    /// If `index` is not in `LEVELS`, or the file is not valid RON for a `LevelData`.
     pub fn of(index: usize) -> LevelData {
         ron::from_str(LEVELS[index]).expect("invalid level file")
     }

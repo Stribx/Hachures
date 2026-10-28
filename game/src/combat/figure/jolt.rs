@@ -40,7 +40,7 @@ mod tests {
         for i in 1..=25 {
             let now = angle(i as f32 * 0.01);
             assert!(now <= last + 1e-6, "the tilt grew at {i}");
-            assert!(jolt(i as f32 * 0.01).scale.y >= jolt(0.0).scale.y);
+            assert!(jolt(i as f32 * 0.01).scale.y >= jolt(0.0).scale.y, "the squash grew at {i}");
             last = now;
         }
     }

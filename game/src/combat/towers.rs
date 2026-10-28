@@ -67,7 +67,7 @@ pub const TOWER_BASE: &str = "models/tower-round-bottom-a.glb";
 pub const BASE_WOOD: Carved = Carved([214, 186, 140], false);
 pub const WEAPON_WOOD: Carved = Carved([196, 150, 110], true);
 
-/// The model of a weapon.
+/// The glTF asset path of the weapon's model.
 pub fn weapon_model(weapon: Weapon) -> &'static str {
     match weapon {
         Weapon::Arbalete => "models/weapon-ballista.glb",
@@ -99,7 +99,9 @@ pub(super) fn take_down(
     for &TowerBiffed { cell } in biffed.read() {
         let weapon = towers.iter().filter(|(_, t)| t.cell == cell).map(|(e, _)| e);
         let base = bases.iter().filter(|(_, b)| b.0 == cell).map(|(e, _)| e);
-        weapon.chain(base).for_each(|e| commands.entity(e).despawn());
+        for entity in weapon.chain(base) {
+            commands.entity(entity).despawn();
+        }
     }
 }
 

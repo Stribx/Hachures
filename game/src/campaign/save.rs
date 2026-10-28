@@ -69,6 +69,7 @@ impl Save {
     /// One holding only the settings starts with the prologue.
     /// One from before the language files has its scratched-out names in French: they become their keys.
     /// One from before the Lexique has met what its won levels showed.
+    #[must_use]
     pub fn upgrade(mut self) -> Save {
         if self.version == 0 && (self.reached > 0 || !self.levels.is_empty()) {
             self.reached += 1;
@@ -82,7 +83,8 @@ impl Save {
             }
         }
         if self.version < 3 {
-            for k in (0..self.levels.len().min(LEVELS.len())).filter(|&k| self.levels[k].won) {
+            let won = (0..self.levels.len().min(LEVELS.len())).filter(|&k| self.levels[k].won);
+            for k in won {
                 let level = Level::load(k, &self);
                 let tools = level.tools.iter().map(|&t| TOOLS[t].label);
                 let species = level.present.iter().map(|&s| level.species[s].label.as_str());
@@ -115,7 +117,7 @@ impl Save {
         self.levels.iter().map(|r| r.names).sum()
     }
 
-    pub fn record(&mut self, level: usize) -> &mut Record {
+    pub fn record_mut(&mut self, level: usize) -> &mut Record {
         if self.levels.len() <= level {
             self.levels.resize(level + 1, Record::default());
         }
@@ -143,7 +145,7 @@ mod tests {
         assert_eq!(storage::read::<Save>(&path), None, "no save yet");
 
         let mut save = Save { reached: 2, skills: vec![Skill::MineDePlomb], ..default() };
-        *save.record(1) = Record { won: true, challenge: true, names: 3, erased: vec!["place.pre_commun".into()] };
+        *save.record_mut(1) = Record { won: true, challenge: true, names: 3, erased: vec!["place.pre_commun".into()] };
         save.choices.insert("refuge".into(), "bois".into());
         save.seen.insert("tool.arbalete".into());
         storage::write(&path, &save).unwrap();
@@ -183,7 +185,7 @@ mod tests {
         let mut save = Save::default();
         save.discover("tool.barricade");
         assert!(save.is_new(), "the title still offers a new game");
-        save.record(0).won = true;
+        save.record_mut(0).won = true;
         assert!(!save.is_new());
     }
 

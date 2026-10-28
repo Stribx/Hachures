@@ -163,7 +163,7 @@ pub fn shore_image(min: Vec2, size: Vec2, per_unit: f32, wet: impl Fn(Vec2) -> b
         }
     }
     // Stored as a square root: finest by the bank, where the lines are closest.
-    let data = d.iter().map(|t| ((t / per_unit / SHORE_REACH).min(1.0).sqrt() * 255.0) as u8).collect();
+    let data = d.iter().map(|t| ((t / per_unit / SHORE_REACH).min(1.0).sqrt() * 255.0) as u8).collect::<Vec<u8>>();
     let mut image = Image::new(
         Extent3d { width: w as u32, height: h as u32, depth_or_array_layers: 1 },
         TextureDimension::D2,

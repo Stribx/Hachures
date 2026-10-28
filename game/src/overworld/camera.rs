@@ -54,6 +54,7 @@ impl CameraRig {
 }
 
 /// Unity's SmoothDamp: a critically damped spring, so a move starts and ends gently.
+#[must_use]
 fn smooth_damp(current: Vec3, goal: Vec3, velocity: &mut Vec3, smooth: f32, dt: f32) -> Vec3 {
     let omega = 2.0 / smooth;
     let x = omega * dt;

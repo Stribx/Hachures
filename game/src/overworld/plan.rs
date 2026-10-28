@@ -71,9 +71,13 @@ fn route(from: usize, to: usize) -> VecDeque<Vec3> {
         leg
     };
     if to > from {
-        (from..to).for_each(|k| points.extend(leg(k)));
+        for k in from..to {
+            points.extend(leg(k));
+        }
     } else {
-        (to..from).rev().for_each(|k| points.extend(leg(k).into_iter().rev()));
+        for k in (to..from).rev() {
+            points.extend(leg(k).into_iter().rev());
+        }
     }
     points.into_iter().map(ground).collect()
 }
@@ -150,7 +154,9 @@ fn seals(
     mut meshes: ResMut<Assets<Mesh>>,
     mut commands: Commands,
 ) {
-    old.iter().for_each(|e| commands.entity(e).despawn());
+    for entity in &old {
+        commands.entity(entity).despawn();
+    }
     let disc = meshes.add(Cylinder::new(0.6, 0.14));
     for i in 0..=save.reached.min(SHEETS.len() - 1) {
         let won = save.levels.get(i).is_some_and(|r| r.won);
@@ -229,5 +235,7 @@ fn walk(time: Res<Time>, mut pawn: ResMut<Pawn>, mut figure: Single<&mut Transfo
 /// Nève and the seals stand on the Grand Plan and under the title, not on the board in play.
 fn show_over_world(screen: Res<State<Screen>>, mut shown: Query<&mut Visibility, With<OverWorld>>) {
     let visibility = if over_world(screen) { Visibility::Inherited } else { Visibility::Hidden };
-    shown.iter_mut().for_each(|mut v| *v = visibility);
+    for mut slot in &mut shown {
+        *slot = visibility;
+    }
 }

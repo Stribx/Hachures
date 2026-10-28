@@ -108,7 +108,7 @@ mod tests {
         while parcel(Vec2::new(x, p.y)).0 == parcel(p).0 {
             x += 0.01;
         }
-        assert!(seam(Vec2::new(x, p.y)) < 0.05);
-        assert!(seam(p) >= 0.0);
+        assert!(seam(Vec2::new(x, p.y)) < 0.05, "at x {x}");
+        assert!(seam(p) >= 0.0, "at {p}");
     }
 }

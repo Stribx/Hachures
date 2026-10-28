@@ -19,7 +19,7 @@ impl Level {
     /// A bare level of world 1 on `base`: every tool, no waves, no event, no skills.
     pub fn new(base: Grid, species: Vec<Species>) -> Level {
         let tower_stats = towers::load_stats();
-        let present = (0..species.len()).collect();
+        let present: Vec<usize> = (0..species.len()).collect();
         Level {
             index: 0,
             world: 0,
@@ -60,6 +60,11 @@ impl Level {
     }
 
     /// Level `index` of the campaign, from its data file, shaped by the save's choices and skills.
+    ///
+    /// # Panics
+    ///
+    /// If `index` is not in `LEVELS`, or the level file names an unknown species or tool, a `shorter` cut longer
+    /// than its waves, or a world that does not exist.
     pub fn load(index: usize, save: &Save) -> Level {
         let data = LevelData::of(index);
         let mut species = species::load();
@@ -79,11 +84,17 @@ impl Level {
         if let Some((cond, by)) = &data.shorter
             && holds(&save.choices, cond)
         {
-            waves.truncate(waves.len() - by);
+            let kept = waves
+                .len()
+                .checked_sub(*by)
+                .unwrap_or_else(|| panic!("level {}: `shorter` cuts more waves than it has", data.name));
+            waves.truncate(kept);
         }
         let mut present: Vec<usize> = waves.iter().flatten().copied().collect();
         // A boss changes species with its phases.
-        if let Some(boss) = &WORLDS[data.world - 1].boss
+        let world = data.world.checked_sub(1).and_then(|w| WORLDS.get(w));
+        let world = world.unwrap_or_else(|| panic!("level {}: world {} does not exist", data.name, data.world));
+        if let Some(boss) = &world.boss
             && present.contains(&find(&boss.phases[0].species))
         {
             present.extend(boss.phases.iter().map(|p| find(&p.species)));
@@ -95,7 +106,8 @@ impl Level {
         let won = (0..LEVELS.len()).filter(|&k| save.levels.get(k).is_some_and(|r| r.won));
         let earned = won.flat_map(|k| LevelData::of(k).grants);
         let mut tools: Vec<usize> = Vec::new();
-        for name in data.tools.iter().cloned().chain(earned).chain([String::from("biffer")]) {
+        let names = data.tools.iter().cloned().chain(earned).chain([String::from("biffer")]);
+        for name in names {
             let t = tool_index(&name).unwrap_or_else(|| panic!("unknown tool {name:?}"));
             if !tools.contains(&t) {
                 tools.push(t);
@@ -142,7 +154,7 @@ mod tests {
         let later = (0..LEVELS.len()).find(|&k| LevelData::of(k).world == 2).unwrap();
         assert!(!Level::load(later, &Save::default()).tools.contains(&gratter), "not before");
         let mut save = Save::default();
-        *save.record(boss) = Record { won: true, ..Default::default() };
+        *save.record_mut(boss) = Record { won: true, ..Default::default() };
         assert!(Level::load(later, &save).tools.contains(&gratter), "once the boss is beaten");
     }
 

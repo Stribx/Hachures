@@ -25,7 +25,8 @@ pub fn spawn_figure(commands: &mut Commands, look: &EnemyLook, index: usize, at:
             // The kit's ground is y = 0, and the root floats `FLOAT` above the board.
             let ground = Transform::from_xyz(0.0, -FLOAT / scale, 0.0);
             root.spawn((Body { rest: ground }, ground, Visibility::default())).with_children(|body| {
-                for &(ref mesh, at, ref material, role, side, shadow) in look.figures.get(index).into_iter().flatten() {
+                let pieces = look.figures.get(index).into_iter().flatten();
+                for &(ref mesh, at, ref material, role, side, shadow) in pieces {
                     let mut part = body.spawn((Mesh3d(mesh.clone()), MeshMaterial3d(material.clone()), at));
                     if !shadow {
                         part.insert(NotShadowCaster);

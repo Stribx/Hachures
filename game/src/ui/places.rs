@@ -26,10 +26,10 @@ pub fn setup(mut commands: Commands, assets: Res<AssetServer>) {
     commands.spawn((Tooltip, widgets::tooltip(&assets)));
 }
 
-/// Writes the level's names over their cells (under the menus' paper), and strikes out the ones inked over.
 /// A place's label: its node, colour and visibility, and whether it is struck out.
 type Label<'a> = (Entity, &'a PlaceLabel, &'a mut Node, &'a mut TextColor, &'a mut Visibility, Has<Strikethrough>);
 
+/// Writes the level's names over their cells (under the menus' paper), and strikes out the ones inked over.
 pub fn label_places(
     mut commands: Commands,
     assets: Res<AssetServer>,

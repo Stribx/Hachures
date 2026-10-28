@@ -8,8 +8,9 @@ use crate::ink::{Act, TOOLS};
 use crate::map::species::{Goal, Reading, Species};
 
 /// A page of the Lexique.
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Default)]
 pub enum Tab {
+    #[default]
     Outils,
     Especes,
 }
@@ -193,9 +194,17 @@ mod tests {
         assert_eq!(find("lexique.damage").args, ["30"]);
         assert_eq!(find("lexique.range").args, ["3"]);
         assert_eq!(find("lexique.cooldown").args, ["0,8"]);
-        assert!(lines.iter().all(|l| l.key != "lexique.splash" && l.key != "lexique.range_equerre"));
+        assert!(
+            lines.iter().all(|l| l.key != "lexique.splash" && l.key != "lexique.range_equerre"),
+            "{:?}",
+            lines.iter().map(|l| l.key).collect::<Vec<_>>()
+        );
         let equerre = tool_lines(arbalete(), 45, &stats, &species, true);
-        assert!(equerre.iter().any(|l| l.key == "lexique.range_equerre" && l.args == ["3"]));
+        assert!(
+            equerre.iter().any(|l| l.key == "lexique.range_equerre" && l.args == ["3"]),
+            "{:?}",
+            equerre.iter().map(|l| (l.key, &l.args)).collect::<Vec<_>>()
+        );
         assert!(equerre.iter().all(|l| l.key != "lexique.range"));
     }
 
@@ -224,10 +233,18 @@ mod tests {
         let species = load();
         let tools = entries(Tab::Outils, &species);
         assert_eq!(tools.len(), TOOLS.len());
-        assert!((0..TOOLS.len()).all(|t| tools.iter().filter(|e| e.kind == EntryKind::Tool(t)).count() == 1));
+        assert!(
+            (0..TOOLS.len()).all(|t| tools.iter().filter(|e| e.kind == EntryKind::Tool(t)).count() == 1),
+            "{:?}",
+            tools.iter().map(|e| e.kind).collect::<Vec<_>>()
+        );
         let all = entries(Tab::Especes, &species);
         assert_eq!(all.len(), species.len());
-        assert!((0..species.len()).all(|s| all.iter().filter(|e| e.kind == EntryKind::Species(s)).count() == 1));
+        assert!(
+            (0..species.len()).all(|s| all.iter().filter(|e| e.kind == EntryKind::Species(s)).count() == 1),
+            "{:?}",
+            all.iter().map(|e| e.kind).collect::<Vec<_>>()
+        );
         assert_eq!(all[0].text(), format!("{}.text", species[0].label));
     }
 

@@ -157,6 +157,10 @@ impl Level {
 
     /// Inks `tool` at `i`, paid in sépia, and in a Name if a place's name is written there. Biffer goes through here
     /// too: free, it costs no Name and gives sépia back. The caller has checked `refusal`.
+    ///
+    /// # Panics
+    ///
+    /// If `refusal` would have refused: the sépia is a `u32`, and paying more than is left underflows.
     pub fn ink(&mut self, i: usize, tool: usize) {
         let act = TOOLS[tool].act;
         if act == Act::Biffer {
@@ -250,7 +254,7 @@ mod tests {
         assert_eq!(level.refusal(12, 0), Some("refusal.relief_closes"), "the bottom road will be the only one");
         level.start_wave();
         assert_eq!(level.terrain.base().tiles[2], Tile::Roc);
-        assert!(level.changes.is_empty());
+        assert!(level.changes.is_empty(), "{} changes left", level.changes.len());
     }
 
     /// Le Gel (world 2): the lake freezes for two waves, then thaws.

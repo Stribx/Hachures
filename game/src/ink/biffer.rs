@@ -127,7 +127,8 @@ mod tests {
         let mut level = inked(level(OPEN), 7, "mortier");
         level.ink(7, tool("biffer"));
         assert_eq!(level.terrain.base().tiles[7], Tile::Sol);
-        assert!(level.terrain.base().cover.iter().all(|&c| c == 0.0));
+        let cover = &level.terrain.base().cover;
+        assert!(cover.iter().all(|&c| c == 0.0), "{cover:?}");
     }
 
     /// Only what Nève inked herself: not the sheet's own barricade, the Ronces-mères' growth, a Palissade, a borne,

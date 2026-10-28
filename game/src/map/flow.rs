@@ -39,7 +39,7 @@ impl FlowField {
     }
 
     /// Next cell to step on from `i`; None at the goal or when cut off.
-    pub fn next(&self, grid: &Grid, i: usize) -> Option<usize> {
+    pub fn next_step(&self, grid: &Grid, i: usize) -> Option<usize> {
         grid.neighbours(i)
             .filter(|&n| self.dist[n] < self.dist[i])
             .min_by(|&a, &b| self.dist[a].total_cmp(&self.dist[b]))
@@ -49,7 +49,7 @@ impl FlowField {
     pub fn path(&self, grid: &Grid, from: usize) -> Vec<usize> {
         let mut path = vec![from];
         let mut at = from;
-        while let Some(n) = self.next(grid, at) {
+        while let Some(n) = self.next_step(grid, at) {
             path.push(n);
             at = n;
         }

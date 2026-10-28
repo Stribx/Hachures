@@ -50,16 +50,10 @@ fn key_l(
 }
 
 /// The tab shown and the entry picked in it.
-#[derive(Resource, PartialEq)]
+#[derive(Resource, PartialEq, Default)]
 struct LexiqueView {
     tab: Tab,
     entry: usize,
-}
-
-impl Default for LexiqueView {
-    fn default() -> Self {
-        LexiqueView { tab: crate::campaign::lexique::TABS[0].0, entry: 0 }
-    }
 }
 
 fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
@@ -170,7 +164,7 @@ mod tests {
         let names = rows(&mut app);
         assert_eq!(names.len(), TOOLS.len());
         assert_eq!(names[arbalete], t(TOOLS[arbalete].label));
-        assert!(names.iter().enumerate().all(|(i, n)| i == arbalete || n == t("lexique.locked")));
+        assert!(names.iter().enumerate().all(|(i, n)| i == arbalete || n == t("lexique.locked")), "{names:?}");
     }
 
     #[test]

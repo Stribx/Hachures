@@ -46,6 +46,10 @@ pub struct BossFile {
 
 impl Level {
     /// The boss of this level's world. Only asked for with a boss on the map, which comes from it.
+    ///
+    /// # Panics
+    ///
+    /// If this level's world has no boss.
     pub fn boss_file(&self) -> &'static BossFile {
         self.world().boss.as_ref().expect("a boss on the map comes from its world")
     }

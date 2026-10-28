@@ -183,7 +183,7 @@ mod tests {
         let (moulin, bois) = (lines("moulin"), lines("bois"));
         assert_ne!(moulin, bois);
         let said = |lines: &[String], words: &str| lines.iter().any(|l| crate::i18n::t(l).contains(words));
-        assert!(said(&moulin, "parlera") && said(&bois, "se tait"));
+        assert!(said(&moulin, "parlera") && said(&bois, "se tait"), "{moulin:?} / {bois:?}");
     }
 
     /// The Refuge choice moves the Refuge, and "Dans le Bois" costs a Name when Le Bornage begins.

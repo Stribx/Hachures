@@ -101,7 +101,12 @@ mod tests {
         let before = sprigs(&grid, 1.0, false);
         let cell = before[0].cell;
         grid.tiles[cell] = Tile::Barricade;
-        assert!(sprigs(&grid, 1.0, false).iter().all(|s| s.cell != cell));
+        let after = sprigs(&grid, 1.0, false);
+        assert!(
+            after.iter().all(|s| s.cell != cell),
+            "cell {cell} still grows {:?}",
+            after.iter().find(|s| s.cell == cell)
+        );
     }
 
     /// A modest machine grows less, but still some on every field.
@@ -116,7 +121,8 @@ mod tests {
     #[test]
     fn no_wheat_in_the_meadows() {
         let grid = Grid::parse(MAP);
-        assert!(sprigs(&grid, 1.0, false).iter().all(|s| s.crop != Crop::Wheat || grid.map[s.cell] != Tile::SolBas));
+        let wheat: Vec<_> = sprigs(&grid, 1.0, false).into_iter().filter(|s| s.crop == Crop::Wheat).collect();
+        assert!(wheat.iter().all(|s| grid.map[s.cell] != Tile::SolBas), "{wheat:?}");
     }
 
     /// Up in the Cols nothing is sown: the wheat fields are alpine meadows in flower.
@@ -125,8 +131,8 @@ mod tests {
         let grid = Grid::parse(MAP);
         let (bocage, alpine) = (sprigs(&grid, 1.0, false), sprigs(&grid, 1.0, true));
         assert!(bocage.iter().any(|s| s.crop == Crop::Wheat), "the bocage has wheat to replace");
-        assert!(alpine.iter().all(|s| s.crop != Crop::Wheat));
+        assert!(alpine.iter().all(|s| s.crop != Crop::Wheat), "{alpine:?}");
         let flowers = |sprigs: &[Sprig]| sprigs.iter().filter(|s| s.crop == Crop::Flowers).count();
-        assert!(flowers(&alpine) > flowers(&bocage));
+        assert!(flowers(&alpine) > flowers(&bocage), "{} against {}", flowers(&alpine), flowers(&bocage));
     }
 }

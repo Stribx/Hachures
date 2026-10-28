@@ -207,7 +207,7 @@ pub fn walk(
     for (entity, mut enemy, mut transform, mut boss) in &mut enemies {
         if enemy.next.is_none() {
             let field = &level.terrain.fields()[enemy.species];
-            enemy.next = field.next(level.terrain.grid(), enemy.cell);
+            enemy.next = field.next_step(level.terrain.grid(), enemy.cell);
             if enemy.next.is_none() && field.dist[enemy.cell] == 0.0 {
                 reach_goal(level, enemy.species, boss.is_some(), &mut trail);
                 let goal = level.species[enemy.species].goal;

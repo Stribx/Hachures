@@ -9,6 +9,7 @@ use crate::map::terrain::Edit;
 
 impl Level {
     /// Why `tool` can't be inked at `i`, if it can't.
+    #[must_use]
     pub fn refusal(&self, i: usize, tool: usize) -> Option<&'static str> {
         if TOOLS[tool].act == Act::Biffer {
             return self.biffer_refusal(i);

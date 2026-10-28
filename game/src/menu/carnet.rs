@@ -38,7 +38,8 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>, save: Res<Save>) {
             ..default()
         })
         .with_children(|pages| {
-            for (i, record) in save.levels.iter().enumerate().filter(|(_, r)| r.won) {
+            let won = save.levels.iter().enumerate().filter(|(_, r)| r.won);
+            for (i, record) in won {
                 let data = LevelData::of(i);
                 pages
                     .spawn(Node { width: px(420), flex_direction: FlexDirection::Column, row_gap: px(2), ..default() })

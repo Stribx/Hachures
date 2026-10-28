@@ -37,6 +37,10 @@ pub fn spawn_order(mut groups: Vec<(usize, u32)>) -> Vec<usize> {
 impl Level {
     /// Sends the next wave, and the world event with it if it is due. Returns whether the wave after it
     /// brings the event, for the rumble.
+    ///
+    /// # Panics
+    ///
+    /// If every wave has been sent already: the caller checks that one is left.
     pub fn start_wave(&mut self) -> bool {
         let sent = self.wave.number as usize;
         let number = self.wave.number + 1;
