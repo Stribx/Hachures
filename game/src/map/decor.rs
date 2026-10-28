@@ -25,7 +25,10 @@ pub(crate) fn rubble() -> Vec<(Mesh, Color)> {
             .translated_by(at);
         if light { &mut pale } else { &mut dark }.push(block);
     }
-    vec![(merge(pale).unwrap(), Color::srgb(0.62, 0.6, 0.55)), (merge(dark).unwrap(), Color::srgb(0.5, 0.48, 0.44))]
+    vec![
+        (merge(pale).expect("a prop has parts"), Color::srgb(0.62, 0.6, 0.55)),
+        (merge(dark).expect("a prop has parts"), Color::srgb(0.5, 0.48, 0.44)),
+    ]
 }
 
 /// 1 when a palissade stands north or south of cell `i` and none east or west, so the wall runs along z; else 0.
@@ -58,7 +61,8 @@ pub(crate) fn palisade(shape: u8) -> Vec<(Mesh, Color)> {
         let rail = Mesh::from(Cylinder { radius: 0.03, half_height: 0.5 }).rotated_by(Quat::from_rotation_z(FRAC_PI_2));
         wood.push(rail.translated_by(Vec3::new(0.0, y, 0.0)));
     }
-    let paint =
-        |parts: Vec<Mesh>, color| (merge(parts.into_iter().map(|m| m.rotated_by(turn)).collect()).unwrap(), color);
+    let paint = |parts: Vec<Mesh>, color| {
+        (merge(parts.into_iter().map(|m| m.rotated_by(turn)).collect()).expect("a prop has parts"), color)
+    };
     vec![paint(wood, Color::srgb(0.36, 0.26, 0.2)), paint(tips, Color::srgb(0.7, 0.2, 0.15))]
 }

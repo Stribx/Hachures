@@ -221,7 +221,7 @@ fn timed(time: Res<Time>, mut taken: Local<usize>, mut commands: Commands) {
         return;
     }
     *taken += 1;
-    let path = env(SHOT).unwrap();
+    let path = env(SHOT).expect("`timed` runs only with HACHURES_SHOT set");
     let path = if times.len() > 1 { path.replace(".png", &format!("-{}.png", *taken)) } else { path };
     let mut shot = commands.spawn(Screenshot::primary_window());
     shot.observe(save_to_disk(path));

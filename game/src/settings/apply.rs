@@ -81,9 +81,10 @@ fn apply_render(
     // logical size: picking and the place labels need no conversion.
     let scale = s.render_scale as f32 / 100.0;
     let wanted = (window.physical_size().as_vec2() * scale).as_uvec2().max(UVec2::ONE);
+    // `get_mut` marks the image changed, so only when it does.
     if images.get(&frame.0).is_some_and(|image| image.size() != wanted) {
         let size = Extent3d { width: wanted.x, height: wanted.y, depth_or_array_layers: 1 };
-        images.get_mut(&frame.0).unwrap().resize(size);
+        images.get_mut(&frame.0).expect("read just above").resize(size);
     }
     let target = ImageRenderTarget { handle: frame.0.clone(), scale_factor: window.scale_factor() * scale };
     commands.entity(camera.0).insert(RenderTarget::Image(target));

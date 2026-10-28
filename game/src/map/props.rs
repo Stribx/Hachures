@@ -75,7 +75,7 @@ fn stake() -> Mesh {
         tip.clone().translated_by(Vec3::Y * 0.35),
         tip.rotated_by(Quat::from_rotation_x(PI)).translated_by(Vec3::Y * -0.35),
     ])
-    .unwrap()
+    .expect("a stake has parts")
 }
 
 /// The parts of a barricade's beams, by what they are made of, and whether they carry fascines.
@@ -141,8 +141,8 @@ fn barricade(shape: u8) -> Vec<(Mesh, Color)> {
     }
     // Model-maker's stuff: whittled sticks of pale wood, cream string, the fascines in darker twigs.
     let mut parts = vec![
-        (merge(beams.wood).unwrap(), Color::srgb(0.6, 0.44, 0.27)),
-        (merge(beams.string).unwrap(), Color::srgb(0.88, 0.82, 0.68)),
+        (merge(beams.wood).expect("a prop has parts"), Color::srgb(0.6, 0.44, 0.27)),
+        (merge(beams.string).expect("a prop has parts"), Color::srgb(0.88, 0.82, 0.68)),
     ];
     if let Some(sticks) = merge(beams.sticks) {
         parts.push((sticks, Color::srgb(0.4, 0.28, 0.16)));
@@ -156,7 +156,7 @@ fn mud() -> Vec<(Mesh, Color)> {
         Mesh::from(Torus { minor_radius: 0.014, major_radius }).scaled_by(Vec3::new(1.0, 0.5, 1.0)).translated_by(at)
     };
     let parts = vec![ring(0.13, Vec3::new(0.08, 0.0, 0.05)), ring(0.26, Vec3::new(0.04, 0.0, 0.02))];
-    vec![(merge(parts).unwrap(), Color::srgb(0.7, 0.58, 0.4))]
+    vec![(merge(parts).expect("a prop has parts"), Color::srgb(0.7, 0.58, 0.4))]
 }
 
 /// Brambles: a low mound of moss, dark arches half sunk in it, thorns pointing out along their backs.
@@ -185,7 +185,7 @@ fn brambles() -> Vec<(Mesh, Color)> {
         }
     }
     // A felt mound and wire stems, painted the bramble's dull red.
-    vec![(mound, Color::srgb(0.5, 0.52, 0.36)), (merge(parts).unwrap(), Color::srgb(0.38, 0.2, 0.17))]
+    vec![(mound, Color::srgb(0.5, 0.52, 0.36)), (merge(parts).expect("a prop has parts"), Color::srgb(0.38, 0.2, 0.17))]
 }
 
 /// A tool's prop (`prop`), its meshes and fine-lined materials made once per tile and shape.

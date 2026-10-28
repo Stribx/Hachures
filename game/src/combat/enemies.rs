@@ -71,8 +71,8 @@ pub fn spawn_enemies(
         return;
     }
     let level = &mut *level;
+    let Some(species) = level.wave.queue.pop() else { return };
     level.wave.spawn_in = 1.0;
-    let species = level.wave.queue.pop().unwrap();
     let spawns = level.terrain.grid().spawns_for(&level.species[species]);
     let cell = spawns[level.wave.spawned % spawns.len()];
     level.wave.spawned += 1;

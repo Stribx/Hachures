@@ -120,8 +120,9 @@ fn lay_water_lines(
         images.insert(drawn.shore.id(), image).ok();
     }
     for (_, material) in drawn.made.values() {
+        // `get_mut` marks the material changed, so only when it does.
         if materials.get(material).is_some_and(|m| m.extension.shore.is_some() && m.extension.uniform.shore != rect) {
-            materials.get_mut(material).unwrap().extension.uniform.shore = rect;
+            materials.get_mut(material).expect("read just above").extension.uniform.shore = rect;
         }
     }
     rect

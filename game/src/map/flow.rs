@@ -48,8 +48,10 @@ impl FlowField {
     /// Cells walked from `from`, `from` included, until the goal or a dead end.
     pub fn path(&self, grid: &Grid, from: usize) -> Vec<usize> {
         let mut path = vec![from];
-        while let Some(n) = self.next(grid, *path.last().unwrap()) {
+        let mut at = from;
+        while let Some(n) = self.next(grid, at) {
             path.push(n);
+            at = n;
         }
         path
     }

@@ -59,7 +59,7 @@ pub const BRANCHES: [(&str, [Node; 3]); 3] = [
 
 impl Skill {
     pub fn cost(self) -> u32 {
-        BRANCHES.iter().flat_map(|b| &b.1).find(|n| n.skill == self).unwrap().cost
+        BRANCHES.iter().flat_map(|b| &b.1).find(|n| n.skill == self).expect("every skill has a node in BRANCHES").cost
     }
 }
 
