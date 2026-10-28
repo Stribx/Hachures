@@ -6,10 +6,11 @@ use std::f32::consts::PI;
 use bevy::prelude::*;
 use serde::Deserialize;
 
+use super::Enemy;
 use super::boss::{Borne, Boss};
+use super::draw::{Shot, Shots};
 use super::figure::{EnemyLook, ExitKind, leave};
 use super::shards::shatter;
-use super::{Enemy, Shot, Shots};
 use crate::campaign::skills::Skill;
 use crate::ink::{TowerBiffed, TowerInked};
 use crate::level::story::Trigger;

@@ -6,9 +6,10 @@ use bevy::picking::hover::Hovered;
 use bevy::prelude::*;
 use bevy::ui_widgets::{Activate, Button};
 
+use super::DuringPlay;
+use super::keys::{Fast, next_species};
 use super::studio::ToolIcons;
 use super::widgets::{Panel, SLIP_RADIUS, framed, primary, text};
-use super::{DuringPlay, Fast, next_species};
 use crate::combat::enemies::send_wave;
 use crate::i18n::{t, tf};
 use crate::ink::{Act, Selection, TOOLS};

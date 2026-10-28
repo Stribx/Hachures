@@ -23,7 +23,7 @@ use crate::ui::widgets::letter;
 pub fn plugin(app: &mut App) {
     app.add_message::<WalkTo>()
         // Under the Marches' root, once it exists.
-        .add_systems(Startup, spawn.after(super::spawn))
+        .add_systems(Startup, spawn.after(super::marches::spawn))
         .add_systems(OnEnter(Screen::Plan), (spawn_page, seals))
         .add_systems(Update, (walk_to, keys.run_if(in_state(Screen::Plan)), walk, unroll, draw_road, card).chain())
         .add_systems(Update, show_over_world.run_if(state_changed::<Screen>));
