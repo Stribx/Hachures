@@ -54,7 +54,7 @@ pass remain documented limitations for later milestones. See the
 Push a semantic version tag to publish desktop packages and a browser package:
 
 ```sh
-git tag v0.1.0
+git tag -a v0.1.0 -m "Hachures v0.1.0"
 git push origin v0.1.0
 ```
 
