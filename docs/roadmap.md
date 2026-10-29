@@ -3,7 +3,7 @@
 What is done, what comes next, and how far the whole game is. The design is `docs/bible.md`; this
 file only tracks it.
 
-**Total: ≈ 62%** (Worlds 5–6 campaign slice; update the commit hash when this lands).
+**Total: ≈ 73%** (recounted for the `v0.1.0` release candidate).
 
 ## Releases
 
@@ -18,16 +18,12 @@ the total is the weighted sum. Recount it rather than guess it.
 
 | Section | Weight | Done | Counts |
 |---|---|---|---|
-| Engine and systems | 30% | 25 / 41 (61%) | 18.3 |
-| Levels and bosses | 35% | 9 / 32 (28%) | 9.8 |
-| Powers and skill tree | 15% | 13 / 21 (62%) | 9.3 |
-| Endings and post-game | 10% | 1 / 13 (8%) | 0.8 |
-| Narration, sound, art | 10% | 9 / 40 (22%) | 2.2 |
-| **Total** | | | **≈ 40%** |
-
-The first estimate (before this file) said ≈ 30%, but its own table summed to ≈ 42%, with the
-engine guessed at 85%. Counted item by item, the engine is at 61%: worlds 4–6 still need most of
-their mechanics.
+| Engine and systems | 30% | 36 / 41 (88%) | 26.3 |
+| Levels and bosses | 35% | 26 / 33 (79%) | 27.6 |
+| Powers and skill tree | 15% | 17 / 21 (81%) | 12.1 |
+| Endings and post-game | 10% | 3 / 14 (21%) | 2.1 |
+| Narration, sound, art | 10% | 21 / 40 (53%) | 5.3 |
+| **Total** | | | **≈ 73%** |
 
 **Upkeep.** Tick an item with the commit that lands it, `[x] Item (abc1234)`. Update "Next up", the
 table and the total in the same change. When the bible adds work, add items; never drop an unticked
