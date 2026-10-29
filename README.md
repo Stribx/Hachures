@@ -34,9 +34,9 @@ The web build needs `rustup target add wasm32-unknown-unknown` and the `wasm-bin
 ## Project
 
 - `game/src/` — the game, one folder per feature; `game/assets/` — data, models, sounds, fonts, shaders, art.
-- `docs/` — the design: `bible.md` (the game design and story, in French), the art direction, the 3D asset rules
-  and the prompts for the 2D art.
-- `CLAUDE.md` — the full project map, the code rules (checked by CI) and the conventions.
+- `docs/` — the design: `bible.md` (the game design and story, in French), `roadmap.md` (what is done and what
+  comes next), the art direction, the 3D asset rules and the prompts for the 2D art.
+- `AGENTS.md` — the code rules (checked by CI) and the conventions; `docs/agents/map.md` — where everything lives.
 
 ## Licence
 

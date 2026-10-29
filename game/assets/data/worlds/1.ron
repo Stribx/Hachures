@@ -1,4 +1,5 @@
 // Monde 1 : Les Marches de Saule (docs, section 6). Levels 1-1 to 1-4.
+// Fields: `World` and `Event` in `level/world.rs`, the boss's `BossFile` and `Phase` in `combat/boss.rs`.
 (
     name: "world.1.name",
     defends: "world.1.defends",

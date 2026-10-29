@@ -1,4 +1,5 @@
 // Monde 2 : Les Cols de Verre (docs, section 6). Levels 2-1 to 2-4.
+// Fields: `World` and `Event` in `level/world.rs`, the boss's `BossFile` and `Phase` in `combat/boss.rs`.
 (
     name: "world.2.name",
     defends: "world.2.defends",

@@ -33,7 +33,7 @@ engraving, etching, woodcut, antique, vintage, aged paper, parchment, stains, or
 ---
 
 ## 1. Tool icons: made in the game
-No longer drawn: each tool's piece is filmed in a little studio off the board and the bar shows the picture (`game/src/ui/studio.rs`), so an icon is always its piece. See `docs/direction-artistique.md`, phase 3.
+No longer drawn: each tool's piece is filmed in a little studio off the board and the bar shows the picture (`game/src/ui/studio/`), so an icon is always its piece. See `docs/direction-artistique.md`, phase 3.
 
 ## 2. Counter icons: `game/assets/ui/icon-<name>.png`
 Done: drawn as vector pictograms (sources `icon-<name>.svg` in `../Hachures-asset-library/ui/`) and rasterised with `magick -background none -density 384 icon-<name>.svg -resize 60x60 -gravity center -extent 64x64 icon-<name>.png`. The prompt below stays for a generated set.
@@ -73,7 +73,7 @@ Contemporary flat illustration of a cloud, [SHAPE], cut from warm cream paper li
 | `cloud-4.png` | a long drifting wisp with tapered ends |
 
 ## Drawn in code: no image
-Buttons, the seal-red main button, panels and their corner marks (`game/src/menu/mod.rs`: `frame`, `primary`, `mark_corners`). They stay sharp at any resolution and follow the palette in code.
+Buttons, the seal-red main button and panels (`game/src/ui/widgets.rs`: `frame`, `primary`). They stay sharp at any resolution and follow the palette in code.
 
 ## Not used by the game yet: skip for now
 Nothing loads these yet. Make them once a screen uses them:

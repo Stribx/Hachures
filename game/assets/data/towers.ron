@@ -1,6 +1,6 @@
 // Tower combat stats. Not in the docs (only costs are): starting values, tune here.
 // `range` and `splash` in tiles, `cooldown` in seconds, `pin` = seconds the target is held in place,
-// `slow` = seconds it walks at half speed.
+// `slow` = seconds it walks at half speed, `underground` = it reaches what walks under the ground.
 // Damage is doubled against a species `weak_to` that weapon.
 {
     Arbalete: (damage: 30.0, range: 3.0, cooldown: 0.8, splash: 0.0, pin: 0.0),

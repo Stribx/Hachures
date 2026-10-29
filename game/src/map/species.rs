@@ -74,8 +74,8 @@ pub enum Carry {
 /// What a species walks towards.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug, Deserialize)]
 pub enum Goal {
-    /// What the hostiles attack and Nève defends (`M` on the map): the Moulin in world 1, the
-    /// Refuge Sarre in world 2.
+    /// What the hostiles attack and Nève defends (`M` on the map; `World.defends` names it): the
+    /// Moulin, the Refuge Sarre, the Puits d'Air…
     Cible,
     BorneMere,
     Refuge,
@@ -88,7 +88,7 @@ pub struct Species {
     /// Its key in `species.ron`, which the code and the level files use.
     #[serde(skip)]
     pub name: String,
-    /// What the player reads, in French.
+    /// What the player reads: a key of `assets/data/i18n/`.
     pub label: String,
     pub goal: Goal,
     #[serde(default)]

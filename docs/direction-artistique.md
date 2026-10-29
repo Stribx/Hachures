@@ -13,7 +13,7 @@ Ce qu'on retient de LittleBigPlanet et Sackboy : tout est **un vrai objet fait m
 |---|---|
 | Le plateau-maquette | **L'élément unique**, voir la feuille de route ci-dessous |
 | Décors en code (barricade, boue, ronces) | gardés ; leurs matières changent à la phase 3 |
-| Icônes d'outil | faites en jeu : filmées sur les pièces (`ui/studio.rs`). Les icônes de compteur restent à faire avec MOSS |
+| Icônes d'outil | faites en jeu : filmées sur les pièces (`ui/studio/`). Les icônes de compteur sont faites, en vectoriel |
 | Cadres d'interface à filet de 1 px et repères de coin | ✓ retirés : les boutons et les cartes d'outil sont des feuillets lavés d'encre aux coins à peine arrondis, les panneaux se posent sur la carte par leur ombre ; seul l'outil en main garde un cercle d'encre (un état, pas un décor) |
 | Nuages, Moulin, têtes de tour, socle (`3d-assets.md`) | en pause jusqu'à la fin de la feuille de route |
 | Espèces et boss | ✓ figurines en code, phase 7 |
@@ -51,7 +51,7 @@ On ne passe à la phase suivante que quand le critère « fini quand » tient su
   - L'arme est teintée noyer par-dessus sa texture, pour que ses pièces se distinguent encore.
 
   Ce sont toujours les modèles Kenney : de vraies figurines viendront par `docs/3d-assets.md`.
-- ✓ **Icônes filmées** (`ui/studio.rs`) :
+- ✓ **Icônes filmées** (`ui/studio/`) :
   - chaque outil est posé sur un carré de terrain, dans un studio hors du plateau, sur sa propre couche de rendu ;
   - une caméra le filme en 128 px vu de la caméra de jeu, et la barre affiche cette image. L'icône est donc toujours la pièce elle-même.
 
@@ -82,7 +82,7 @@ On ne passe à la phase suivante que quand le critère « fini quand » tient su
   - Le ciel se reflète dans la résine quand le regard rase la surface ; les hauts-fonds sont plus pâles que le large.
 - ✓ **Le vrai soleil :** le shader lit la direction et la couleur du soleil, et la couleur du ciel, depuis Bevy (`look::SUNLIGHT`, chaud ; l'ambiance, froide). Déplacer le soleil déplace les reflets.
 - ✓ **Ombre douce et froide :** dans l'ombre, l'encre bleuit et s'allège un peu. Une ombre est un lavis avec des traits, pas un trou noir.
-- ✓ **Les plis (bureau seulement) :** occlusion ambiante et ombres de contact (`look::creases`), avec SMAA puisque l'occlusion veut le MSAA éteint. Le shader change l'occlusion en traits : là où une pièce touche le sol, le graveur hachure. Le réglage *Ombres* les coupe avec les ombres. WebGL2 n'en a pas, le web garde le reste.
+- ✓ **Les plis (bureau seulement) :** occlusion ambiante et ombres de contact (`look/camera.rs`), avec SMAA puisque l'occlusion veut le MSAA éteint. Le shader change l'occlusion en traits : là où une pièce touche le sol, le graveur hachure. Le réglage *Ombres* les coupe avec les ombres. WebGL2 n'en a pas, le web garde le reste.
 - ✓ **Le papier :** une passe plein écran (`assets/shaders/paper.wesl`, `look::Paper`) pose un grain de papier fixe et assombrit les coins vers le sépia, comme une photo de maquette. L'interface est dessinée après, intacte.
   - Elle passe avant le flou de profondeur : laissées sans ordre, les deux passes lisaient l'image de l'autre à l'image précédente, et le grain s'empilait.
 - ✓ **Correctif :** `Tonemapping::None` désactivait en silence le tramage (`DebandDither`) que les commentaires promettaient. `Tonemapping::Linear` garde les couleurs et trame quand même.

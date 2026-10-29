@@ -1,6 +1,9 @@
 // Species profiles (docs, section 8: bestiaire). Colours must read on the paper board.
 // `label`: the species as the player reads it (route, Calque): a key of `assets/data/i18n/<code>.ron`.
-// `goal`: the Dijkstra source the species walks to (lecture de la Pente -> Moulin, lecture du But -> its own target).
+// `goal`: the Dijkstra source it walks to: Cible (`M`, what the world defends), BorneMere, Refuge or Sortie.
+// `hostile`: towers aim at it, and it costs Rôle at its goal; an ally keeps a Name there instead.
+// `loot`: sépia for felling it. `weak_to`: the weapon that deals it double damage, or None.
+// `color`: its coat, (r, g, b); it must read on the fields (`every_coat_reads_on_the_fields`).
 // `reading`: Pente (default) prices tiles with `costs`; Ombre prices every walkable cell 1 + the towers covering it.
 // `shape`: Pied (default), Echasses, Bete or Chariot, the silhouette it is drawn with.
 // `carries`: the props its figurine wears (Bicorne, Chaine, Jalon, Paille, Fichu, Ballot, Enfant, Capuche, Corde, Piolet, Bats, Bache, Meneur, Boeufs, Joug, Gast, Visee); none by default.
