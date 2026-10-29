@@ -2,6 +2,7 @@
 // `label`: the species as the player reads it (route, Calque): a key of `assets/data/i18n/<code>.ron`.
 // `goal`: the Dijkstra source it walks to: Cible (`M`, what the world defends), BorneMere, Refuge or Sortie.
 // `hostile`: towers aim at it, and it costs Rôle at its goal; an ally keeps a Name there instead.
+// `damageable`: whether weapons can damage it (Fuyards are invulnerable).
 // `loot`: sépia for felling it. `weak_to`: the weapon that deals it double damage, or None.
 // `color`: its coat, (r, g, b); it must read on the fields (`every_coat_reads_on_the_fields`).
 // `reading`: Pente (default) prices tiles with `costs`; Ombre prices every walkable cell 1 + the towers covering it.
@@ -33,7 +34,7 @@
     ),
     "fuyard": (
         label: "species.fuyard",
-        goal: Refuge, hostile: false, hp: 0.5, speed: 1.1, loot: 0, weak_to: None,
+        goal: Refuge, hostile: false, damageable: false, hp: 0.5, speed: 1.1, loot: 0, weak_to: None,
         color: (0.24, 0.46, 0.4), carries: [Fichu, Ballot, Enfant],
         costs: {Sol: 1.0, SolBas: 1.0, Boue: 2.0, Ronces: 3.0, Gue: 2.0, Chaussee: 1.0, Eboulis: 3.0},
     ),

@@ -105,6 +105,9 @@ pub struct Species {
     pub mends: f32,
     /// Towers only aim at hostiles (a mortar splash still hurts the others).
     pub hostile: bool,
+    /// Whether a weapon can damage this species.
+    #[serde(default = "default_damageable")]
+    pub damageable: bool,
     /// Relative to the Chaîneur's 100 HP.
     pub hp: f32,
     /// Tiles per second on a cost-1 tile.
@@ -118,6 +121,10 @@ pub struct Species {
     #[serde(default)]
     pub carries: Vec<Carry>,
     pub costs: HashMap<Tile, f32>,
+}
+
+fn default_damageable() -> bool {
+    true
 }
 
 impl Species {

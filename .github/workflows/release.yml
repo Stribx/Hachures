@@ -1,0 +1,114 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+
+jobs:
+  native:
+    name: Package ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux-x86_64
+          - os: macos-14
+            platform: macos-aarch64
+          - os: macos-15-intel
+            platform: macos-x86_64
+          - os: windows-latest
+            platform: windows-x86_64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ". -> target"
+      - run: cargo build --release -p game
+      - name: Assemble Unix package
+        if: runner.os != 'Windows'
+        run: |
+          set -euo pipefail
+          package="Hachures-${{ matrix.platform }}"
+          mkdir -p "$package/assets"
+          cp "target/release/Hachures" "$package/"
+          cp -R game/assets/. "$package/assets/"
+          tar -czf "${package}.tar.gz" "$package"
+      - name: Assemble Windows package
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $package = "Hachures-${{ matrix.platform }}"
+          New-Item -ItemType Directory -Force -Path "$package/assets" | Out-Null
+          Copy-Item "target/release/Hachures.exe" "$package/"
+          Copy-Item -Recurse -Force "game/assets/*" "$package/assets/"
+          Compress-Archive -Path "$package" -DestinationPath "$package.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-${{ matrix.platform }}
+          path: |
+            Hachures-*.tar.gz
+            Hachures-*.zip
+          if-no-files-found: error
+
+  web:
+    name: Package web build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ". -> target"
+      - name: Cache wasm-bindgen CLI
+        id: wasm-bindgen-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/wasm-bindgen
+          key: wasm-bindgen-cli-0.2.129-${{ runner.os }}-${{ runner.arch }}
+      - name: Install wasm-bindgen CLI
+        if: steps.wasm-bindgen-cache.outputs.cache-hit != 'true'
+        run: cargo install wasm-bindgen-cli --version 0.2.129 --locked
+      - run: ./scripts/build-web.sh
+      - run: tar -czf Hachures-web.tar.gz -C website/play .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web
+          path: Hachures-web.tar.gz
+          if-no-files-found: error
+
+  publish:
+    name: Publish GitHub release
+    runs-on: ubuntu-latest
+    needs: [native, web]
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: "*"
+          path: dist
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true

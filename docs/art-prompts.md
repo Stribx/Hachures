@@ -2,15 +2,20 @@
 
 Every image the game loads from `game/assets/ui/`, in the order the player sees them most. Until a file exists, the game draws a plain fallback, so add them in any order.
 
-## Art direction: editorial cartography
+## Art direction: illuminated editorial cartography
 
-Not an old engraving. Think of a modern Swiss topographic map, museum wayfinding signs, a risograph poster: the restraint of *Clair Obscur: Expedition 33* and the graphic language of *Marathon*. The 3D world already looks like this (flat pastel planes, procedural hachures in the shadows); the interface has to speak the same language.
+An illuminated engraving rather than a photorealistic old document: think of a modern Swiss topographic map
+combined with hand-applied watercolor washes, museum wayfinding signs, and a restrained risograph poster. The 3D
+world already looks like this (flat pastel planes, procedural hachures in the shadows); the interface has to
+speak the same language.
 
 - **Flat pictograms in two tones:** dark sepia ink on warm cream paper. One bold geometric silhouette, one even line weight.
 - **Hachures are a print pattern,** not shading: crisp parallel bands filling a shape, like a screenprint.
 - **One accent:** seal red, as a flat block, kept for the main action (the game draws it in code).
 - **Frames, buttons and panels are drawn in code:** thin rules and corner marks like the neatline of a survey sheet. No image needed for them.
-- **What to avoid:** aged paper, scrolls, filigree, bevels, metal, realistic rendering, the "fantasy RPG icon" look.
+- **What to avoid:** fake aged-paper texture, scrolls, filigree, bevels, metal, realistic rendering, and the
+  "fantasy RPG icon" look. Watercolor washes are allowed as restrained map-color accents, not as soft painterly
+  rendering.
 
 ## Workflow settings (once)
 
@@ -25,7 +30,7 @@ Not an old engraving. Think of a modern Swiss topographic map, museum wayfinding
 **Negative prompt** (the same for every image; paste it once into the second box):
 
 ```
-engraving, etching, woodcut, antique, vintage, aged paper, parchment, stains, ornate, filigree, scrollwork, flourish, bevel, emboss, metallic, chrome, glossy, 3d render, cgi, realistic, photograph, painterly, watercolor, smooth gradient, airbrush, fantasy rpg icon, skeuomorphic, colorful, rainbow, grey, text, letters, words, numbers, writing, signature, watermark, logo, frame, border, checkerboard, drop shadow, blurry, lowres, worst quality, jpeg artifact, nsfw
+aged paper, parchment, stains, ornate, filigree, scrollwork, flourish, bevel, emboss, metallic, chrome, glossy, 3d render, cgi, realistic, photograph, soft painterly, smooth gradient, airbrush, fantasy rpg icon, skeuomorphic, rainbow, grey, text, letters, words, numbers, writing, signature, watermark, logo, frame, border, checkerboard, drop shadow, blurry, lowres, worst quality, jpeg artifact, nsfw
 ```
 
 **Fitting.** MOSS can't output exact sizes, so each card has a `magick` command that trims, scales and centres the image to the size the game expects. Save the MOSS output as `raw.png`, then run the command from the repository root. Or drop the raw file anywhere and ask me to fit it.

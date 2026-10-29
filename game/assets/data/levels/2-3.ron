@@ -14,7 +14,6 @@
     // Le Gel lasts two waves: 5-6 and 9-10.
     events: [5, 9],
     shorter: Some(("deserteurs=livrer", 2)),
-    challenge: Some((text: "level.2-3.challenge", rule: NoFuyardHurt)),
     notes: [
         // Hesse's line is from the docs; the others are drafts.
         (on: Start, when: Some("deserteurs=escorter"), text: "note.2-3.hesse_passe_gens_passe"),
@@ -22,7 +21,6 @@
         (on: Start, when: Some("deserteurs=livrer"), names: -1, text: "note.2-3.hesse_m_regardee_compte"),
         (on: Wave(1), text: "note.2-3.deux_routes_se_croisent"),
         (on: Event, text: "note.2-3.gel_convoi_pourrait_couper"),
-        (on: FuyardHurt, text: "note.2-3.mortier_lit_passeports_hesse"),
         (on: FuyardSaved, text: "note.2-3.charrette_passe_col_hesse"),
         (on: Won, text: "note.2-3.convoi_passe_sous_glace"),
     ],

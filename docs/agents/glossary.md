@@ -24,6 +24,7 @@ The game's world keeps its French names in code, data and files (they are names 
 | la Tension de la feuille | hidden difficulty gauge, −2 to 2 | `Level.tension` |
 | Fuyards | non-hostile walkers heading for the Refuge; they bring Names | `Species.hostile == false` |
 | Chaîneur, Échassier, Jalonneur, Gens du Col… | the imperial species | `data/species.ron` |
+| Mandataire | world-6 elite who reads the Table de Nève | `docs/bible.md`, section 8 |
 | la Grande Chaîne | world 1's boss, in phases | `combat/boss.rs`, `World.boss` |
 | le Théodolite de Givre | world 2's boss, in phases: la Visée freezes the water in its axis, la Triangulation plants two masts (bornes) that seal the col if held, le Dégel forcé thaws all the ice | `combat/sighting.rs`, `World.boss` |
 | bornes, Borne-Mère | imperial markers the boss plants; the Jalonneurs' goal | `Grid.bornes`, `Goal::BorneMere` |

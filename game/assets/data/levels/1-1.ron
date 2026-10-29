@@ -14,7 +14,7 @@
     challenge: Some((text: "level.1-1.challenge", rule: Without("barricade"))),
     // Every text here is a key of `assets/data/i18n/<code>.ron` (`fr.ron` holds the French).
     // Notes: Nève's notebook in the margin (docs, section 9). Triggers: Start, Wave(n), Event (the world event starts), Boss(phase key),
-    // FuyardHurt, FuyardSaved, Won. `when: Some("id=option")` keeps a note to one choice; `names` changes the Rôle.
+    // FuyardSaved, Won. `when: Some("id=option")` keeps a note to one choice; `names` changes the Rôle.
     notes: [
         // Oudine's line is from the docs; the others are drafts.
         (on: Start, text: "note.1-1.oudine_gue_appelle_gue"),

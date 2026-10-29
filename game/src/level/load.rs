@@ -44,7 +44,6 @@ impl Level {
             loot_carry: 0.0,
             lives: START_LIVES,
             names: 0,
-            fuyard_hurt: false,
             walkers: Vec::new(),
             notes: Vec::new(),
             margin: Vec::new(),

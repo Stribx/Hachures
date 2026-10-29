@@ -18,7 +18,6 @@ pub enum Trigger {
     Event,
     /// A boss phase begins, by name.
     Boss(String),
-    FuyardHurt,
     FuyardSaved,
     Won,
 }
@@ -40,7 +39,6 @@ pub struct Note {
 enum Rule {
     /// Win without inking this tool.
     Without(String),
-    NoFuyardHurt,
     /// Win with at least this much Rôle left.
     KeepRole(u32),
     /// Win without scratching out a single name.
@@ -120,7 +118,6 @@ impl Level {
     pub fn challenge_met(&self) -> bool {
         self.challenge.as_ref().is_some_and(|c| match &c.rule {
             Rule::Without(tool) => !self.used.iter().any(|&t| TOOLS[t].name == tool),
-            Rule::NoFuyardHurt => !self.fuyard_hurt,
             Rule::KeepRole(role) => self.lives >= *role,
             Rule::KeepNames => self.erased.is_empty(),
         })

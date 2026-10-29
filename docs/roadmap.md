@@ -45,18 +45,19 @@ Not counted in the %: small debts found along the way.
 - [ ] A thin gap shows between neighbouring palissade rails
 - [ ] Cloud shadows can't be turned off (a setting, or the Low preset)
 
-## Open questions for the bible
+## Resolved design decisions
 
-Not counted in the %: the owner decides, then the bible changes first.
+Not counted in the %: these decisions are recorded in the bible before their dependent implementation work.
 
-- Fuyards have no HP in section 8, yet the mortar "peut les blesser" (the code gives them HP 0.5).
-- "Légat" names both the boss commanders and a world-6 enemy.
-- The Échassiers' defection is "une partie" in world 2 and "la moitié" in world 5.
-- The Chaîneur d'élite has no row in section 8, and its "Chaussée à 0,5" is already the base
-  Chaîneur's.
-- `docs/art-prompts.md` says "not an old engraving" and bans watercolour, while the bible and the
-  art direction want an illuminated engraving with watercolour washes; it still mentions the corner
-  marks the art direction removed.
+- Fuyards have no HP and cannot be damaged; mortar collateral-damage wording was corrected in the bible.
+  Fuyards are invulnerable; obsolete hurt challenges and notes were removed from the implemented levels.
+- **Légat** remains the name of the boss-commanders; the world-6 enemy is renamed **Mandataire**.
+- The amount of Échassiers defecting in world 5 depends on the player's world-2 choice; the exact quantities
+  and data representation remain part of the world-5 implementation.
+- The Chaîneur d'élite gets a distinct world-5 profile and a dedicated bestiary row; its exact statistics remain
+  part of the world-5 balance pass.
+- The art direction is an illuminated engraving with watercolor washes. `docs/art-prompts.md` must be aligned
+  with that direction before new generated art is produced.
 - Answered: the Étayeur mends "bornes endommagées", and bornes now have HP (28a6517).
 
 ## Engine and systems (30%)

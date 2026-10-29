@@ -1,0 +1,30 @@
+name: Bug report
+description: Report a reproducible problem in the game.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Give the exact level, actions, and expected versus actual result.
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
+      placeholder: Linux, macOS ARM64, macOS Intel, or Windows
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Include logs, screenshots, harness variables, or a save file description. Remove secrets.
+  - type: textarea
+    id: regression
+    attributes:
+      label: Regression test idea
+      description: Describe the smallest automated test that should prevent this from returning.
+

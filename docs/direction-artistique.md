@@ -159,7 +159,7 @@ Silhouette (ce qui se lit à 60 px), accessoires, allure, et ce qui la distingue
 | Caravanier rancunier (monde 4) | pion ocre, outres pendues, bâton de marche | Pas | Sablier : les outres |
 | Haleur (monde 5) | pion brique, **deux paniers** à une palanche sur les épaules | Pas ; Nage dans l'eau | Fuyard : les paniers en travers |
 | Greffier (monde 6) | pion ardoise, col crème, **grand registre** sous le bras, plume | Pas, lent hors du Cadastré | Chaîneur : le registre |
-| Légat (monde 6) | figurine plus haute (×1,3), manteau long, **bâton à matrice de sceau** ; deux sceaux | Pas, solennel | tous : la taille |
+| Mandataire (monde 6) | figurine plus haute (×1,3), manteau long, **bâton à matrice de sceau** ; deux sceaux | Pas, solennel | tous : la taille |
 
 | Boss | Assemblage | Points faibles (pièces à part) | Phases, à l'œil |
 |---|---|---|---|

@@ -61,7 +61,6 @@ pub struct Level {
     pub lives: u32,
     /// Names kept in the Rôle: Fuyards reaching the Refuge, and notes.
     pub names: i32,
-    pub fuyard_hurt: bool,
     /// One for the cell each enemy on the map stands on, and a second for the cell it walks to
     /// next, when it has one.
     pub walkers: Vec<Walker>,
