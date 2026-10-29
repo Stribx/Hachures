@@ -5,20 +5,11 @@ file only tracks it.
 
 **Total: ≈ 62%** (Worlds 5–6 campaign slice; update the commit hash when this lands).
 
-## Release scope: `v0.1.0`
+## Releases
 
-`v0.1.0` is the first technical playable milestone. Its goal is a reliable portfolio release, not completion
-of every post-game feature in the bible.
-
-Included: the current Worlds 1–6 campaign, save/progression, French and English localization, CI/CD, native
-Linux/macOS/Windows packages, and the browser package.
-
-Known limitations: bonus sheets are not yet integrated into the Grand Plan, Signer is only a preview
-foundation, Heroic mode and complete ending consequences are unfinished, Treuil and defection branches are
-incomplete, and the advanced audio/final art pass remains future work.
-
-The `v0.1.0` tag may be created when the included scope passes the local and GitHub CI gates and each known
-limitation is present in the release notes.
+Release-specific scope, acceptance criteria, limitations, and validation records live in
+[`docs/releases/`](releases/). The current planned milestone is
+[`v0.1.0`](releases/v0.1.0.md).
 
 ## How the % is counted
 

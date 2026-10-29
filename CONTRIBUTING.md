@@ -56,10 +56,10 @@ milestone is finished and reproducible; it is not used to hide unfinished work.
 
 ### Milestone `0.1.0`
 
-`0.1.0` is the first portfolio milestone, not merely the current `Cargo.toml` value. The milestone is
-ready only when its GitHub issue checklist is complete, the roadmap identifies the delivered scope, the
-local CI gate passes, the browser package and native packages are smoke-tested, and the known limitations
-are documented.
+`0.1.0` is the first portfolio milestone, not merely the current `Cargo.toml` value. Its scope and
+acceptance checklist are maintained in [`docs/releases/v0.1.0.md`](docs/releases/v0.1.0.md). The milestone
+is ready only when that checklist is complete, the local CI gate passes, the browser package and native
+packages are smoke-tested, and the known limitations are documented.
 
 The chosen scope is **option 1: a technical playable release**. It includes the current playable campaign
 through Worlds 1–6, the existing save/progression systems, localization, CI/CD, native packages for Linux,

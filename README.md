@@ -48,7 +48,8 @@ workflow, branch protections, PR rules, and the `0.1.0` milestone process.
 `0.1.0` is the first technical playable release: the current Worlds 1–6 campaign, save/progression,
 localization, CI/CD, native packages, and browser package. It is not the final game. Bonus sheets, the full
 Signer editor, Heroic mode, complete ending consequences, Treuil branches, advanced audio, and the final art
-pass remain documented limitations for later milestones.
+pass remain documented limitations for later milestones. See the
+[release document](docs/releases/v0.1.0.md) for its acceptance checklist and validation record.
 
 Push a semantic version tag to publish desktop packages and a browser package:
 
