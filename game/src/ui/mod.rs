@@ -1,6 +1,7 @@
 //! What the player reads and clicks: the label, Nève's margin, the bar of tools, the names on the
 //! sheet, and the page at the end of a level.
 
+mod actions;
 pub mod bar;
 mod counter_tip;
 mod enemy_card;
@@ -8,10 +9,12 @@ mod hud;
 mod keys;
 mod margin;
 mod notebook;
+mod perf;
 mod places;
 mod readout;
+pub(crate) mod scrollbar;
 mod stamp;
-mod studio;
+pub(crate) mod studio;
 mod tool_tip;
 pub(crate) mod widgets;
 
@@ -24,7 +27,7 @@ use margin::Margin;
 use widgets::Panel;
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins((studio::plugin, widgets::plugin));
+    app.add_plugins((perf::plugin, studio::plugin, widgets::plugin));
     app.init_resource::<keys::Fast>()
         .add_systems(Startup, (setup, places::setup, tool_tip::setup, enemy_card::setup))
         .add_systems(
@@ -32,7 +35,8 @@ pub fn plugin(app: &mut App) {
             (
                 keys::toggles.in_set(Step::Input).before(crate::overworld::onward::between_levels),
                 (
-                    hud::update_label,
+                    // Hidden behind the menus: its dozen strings a frame are built only in play.
+                    hud::update_label.run_if(in_state(Screen::Playing)),
                     counter_tip::counter_tip,
                     margin::update_margin,
                     margin::fresh_ink,
@@ -52,6 +56,7 @@ pub fn plugin(app: &mut App) {
                     .in_set(Step::Render)
                     .run_if(in_state(Screen::Playing)),
                 show_during_play.run_if(state_changed::<Screen>),
+                scrollbar::show_when_needed,
                 keys::speed,
             ),
         );

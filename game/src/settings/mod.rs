@@ -3,10 +3,12 @@
 //! puts them into effect.
 
 mod apply;
+mod dynamic;
 mod model;
 
 use bevy::prelude::*;
 
+pub use dynamic::DynamicScale;
 pub(crate) use model::PRESETS;
 pub use model::Settings;
 
@@ -14,7 +16,9 @@ pub fn plugin(app: &mut App) {
     let settings = Settings::load();
     // Before the first page is written.
     crate::i18n::set(&settings.language);
-    app.insert_resource(settings).add_systems(Startup, play_music).add_plugins(apply::plugin);
+    app.insert_resource(settings)
+        .add_systems(Startup, play_music)
+        .add_plugins((apply::plugin, dynamic::plugin));
 }
 
 /// The music playing, whose volume follows the settings.

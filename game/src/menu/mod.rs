@@ -1,6 +1,7 @@
 //! The screens around the game: splash, title, pause, settings, sceaux, lexique, carnet, controls
 //! and credits.
 
+mod backdrop;
 mod carnet;
 mod controls;
 mod credits;
@@ -10,6 +11,7 @@ mod sceaux;
 mod settings_page;
 mod splash;
 mod title;
+mod warmup;
 
 use bevy::input::keyboard::Key;
 use bevy::input_focus::{FocusCause, InputFocus};
@@ -28,6 +30,7 @@ use crate::ui::widgets::{Panel, Rise, framed, primary, text};
 
 pub fn plugin(app: &mut App) {
     app.add_plugins((
+        backdrop::plugin,
         splash::plugin,
         title::plugin,
         pause::plugin,
@@ -37,6 +40,7 @@ pub fn plugin(app: &mut App) {
         carnet::plugin,
         controls::plugin,
         credits::plugin,
+        warmup::plugin,
     ))
     .add_systems(OnEnter(Screen::Playing), reset_input)
     .add_systems(
@@ -72,8 +76,9 @@ fn label(assets: &AssetServer, label: impl Into<String>) -> impl Bundle {
     text(assets, label, SUBTITLE_SIZE)
 }
 
-/// How wide a page's buttons are, framed or primary.
-pub(crate) const BUTTON_WIDTH: f32 = 320.0;
+/// How wide a page's buttons are, framed or primary: all the same, and room for the longest label,
+/// a pause button asking "Sûr ? Recommencer le niveau", on one line.
+pub(crate) const BUTTON_WIDTH: f32 = 380.0;
 
 /// A framed button around `label`; attach its action with `.observe(|_: On<Activate>, ..| ..)`.
 fn button(label: impl Bundle) -> impl Bundle {

@@ -68,7 +68,11 @@ pub fn label_places(
     let width = level.terrain.base().width;
     let shown = if over_world(screen) { Visibility::Hidden } else { Visibility::Inherited };
     for (entity, &PlaceLabel(k), mut node, mut color, mut visibility, struck) in &mut labels {
-        *visibility = shown;
+        visibility.set_if_neq(shown);
+        // Hidden, a label needs no placing: a `Node` write lays the whole interface out again.
+        if shown == Visibility::Hidden {
+            continue;
+        }
         let Some(place) = level.places.get(k) else { continue };
         let center = place
             .at
@@ -77,10 +81,12 @@ pub fn label_places(
             .sum::<Vec3>()
             / place.at.len() as f32;
         if let Ok(p) = camera.world_to_viewport(at, center) {
-            node.left = px(p.x - WIDTH / 2.0);
             // Just under the cell centre, where the routes run: a route over a name must not read
             // as struck out.
-            node.top = px(p.y + 2.0);
+            let (left, top) = (px(p.x - WIDTH / 2.0), px(p.y + 2.0));
+            if (node.left, node.top) != (left, top) {
+                (node.left, node.top) = (left, top);
+            }
         }
         if level.erased.contains(&k) && !struck {
             commands.entity(entity).insert(Strikethrough);
@@ -101,7 +107,7 @@ pub fn price_tip(
     let (mut text, mut node, mut visibility) = tip.into_inner();
     let said = price(&level, &verdict, TOOLS[selection.tool].act);
     let (Some(said), Some(cursor)) = (said, window.cursor_position()) else {
-        *visibility = Visibility::Hidden;
+        visibility.set_if_neq(Visibility::Hidden);
         return;
     };
     text.set_if_neq(Text(said));

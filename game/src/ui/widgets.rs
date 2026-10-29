@@ -56,20 +56,24 @@ pub(crate) fn follow_cursor(node: &mut Node, cursor: Vec2) {
     node.top = px(cursor.y + 18.0);
 }
 
-/// A button at least `min_width` wide: a slip of washed paper, no ruled frame.
-pub(crate) fn framed(min_width: f32, label: impl Bundle) -> impl Bundle {
-    frame(min_width, label, SLIP)
+/// A button `width` wide, or as wide as its label at 0: a slip of washed paper, no ruled frame. A
+/// fixed width never changes with its words, so a page does not move when they do; words longer
+/// than it wrap.
+pub(crate) fn framed(width: f32, label: impl Bundle) -> impl Bundle {
+    frame(width, label, SLIP)
 }
 
 /// How round a button's or a card's corners are: a slip of paper, cut by hand.
 pub(crate) const SLIP_RADIUS: f32 = 4.0;
 
-fn frame(min_width: f32, label: impl Bundle, background: Color) -> impl Bundle {
+fn frame(width: f32, label: impl Bundle, background: Color) -> impl Bundle {
     (
         Button,
         Hovered::default(),
         Node {
-            min_width: px(min_width),
+            width: if width > 0.0 { px(width) } else { Val::Auto },
+            // Never squeezed: a row too tight for its buttons wraps them instead.
+            flex_shrink: 0.0,
             padding: UiRect::axes(px(16), px(6)),
             justify_content: JustifyContent::Center,
             border_radius: BorderRadius::all(px(SLIP_RADIUS)),
@@ -81,9 +85,9 @@ fn frame(min_width: f32, label: impl Bundle, background: Color) -> impl Bundle {
     )
 }
 
-/// The one action a page leads to, in the seal's red.
-pub(crate) fn primary(min_width: f32, label: impl Bundle) -> impl Bundle {
-    (frame(min_width, label, SEAL), Primary)
+/// The one action a page leads to, in the seal's red; `width` as for `framed`.
+pub(crate) fn primary(width: f32, label: impl Bundle) -> impl Bundle {
+    (frame(width, label, SEAL), Primary)
 }
 
 #[derive(Component)]
@@ -108,7 +112,11 @@ pub(crate) struct IconSlot;
 
 fn reveal_icons(mut slots: Query<(&mut Node, Has<ImageNode>), With<IconSlot>>) {
     for (mut node, drawn) in &mut slots {
-        node.display = if drawn { Display::Flex } else { Display::None };
+        let display = if drawn { Display::Flex } else { Display::None };
+        // Only on a change: any write to a `Node` lays the whole interface out again.
+        if node.display != display {
+            node.display = display;
+        }
     }
 }
 
@@ -208,14 +216,40 @@ fn button_look(
             (false, false, true) => LIT,
             (false, false, false) => SLIP,
         };
-        background.0 = tint;
+        background.set_if_neq(BackgroundColor(tint));
         let scale = if pressed && !still { 0.97 } else { 1.0 };
         let lift = if hovered.get() && !pressed && !still { -2.0 } else { 0.0 };
         let y = match transform.translation.y {
             Val::Px(y) => y,
             _ => 0.0,
         };
-        transform.scale = transform.scale.lerp(Vec2::splat(scale), ease);
-        transform.translation = Val2::px(0.0, y + (lift - y) * ease);
+        // Settled, the eased values stop moving: no write, no new layout.
+        transform.set_if_neq(UiTransform {
+            scale: transform.scale.lerp(Vec2::splat(scale), ease),
+            translation: Val2::px(0.0, y + (lift - y) * ease),
+            ..*transform
+        });
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// The node of a button made by `make`.
+    fn node_of(make: impl Bundle) -> Node {
+        let mut world = World::new();
+        let button = world.spawn(make).id();
+        world.get::<Node>(button).unwrap().clone()
+    }
+
+    #[test]
+    fn a_framed_width_is_exact_zero_fits_the_label_and_neither_shrinks() {
+        let fixed = node_of(framed(200.0, Text::new("a label longer than it should be")));
+        assert_eq!((fixed.width, fixed.min_width), (px(200), Val::Auto));
+        let fitted = node_of(primary(0.0, Text::new("Back")));
+        assert_eq!(fitted.width, Val::Auto);
+        // A tight row wraps its buttons, it does not squeeze their words onto two lines.
+        assert_eq!((fixed.flex_shrink, fitted.flex_shrink), (0.0, 0.0));
     }
 }

@@ -1,5 +1,5 @@
 //! Dev tool: F12 saves a screenshot to `screenshots/`. With `HACHURES_SHOT=out.png` the game jumps
-//! into play (`HACHURES_SCREEN=title|plan|paused|settings|lexique|controls|credits`,
+//! into play (`HACHURES_SCREEN=title|plan|paused|settings|lexique|sceaux|controls|credits`,
 //! `HACHURES_LANG=en`, `HACHURES_LEVEL=n`, `HACHURES_DEMO=1` for one tower of each kind and a few
 //! barricades, `HACHURES_PARADE=1` for one still figure of each species in a row,
 //! `HACHURES_FASCINES=1` with that skill, `HACHURES_WAVE=1` to send the first
@@ -35,10 +35,9 @@ const SHOT: &str = "HACHURES_SHOT";
 pub fn plugin(app: &mut App) {
     app.add_systems(Update, f12);
     if std::env::var("HACHURES_FPS").is_ok() {
-        app.add_systems(Last, frame_times).add_plugins((
-            bevy::render::diagnostic::RenderDiagnosticsPlugin,
-            bevy::diagnostic::LogDiagnosticsPlugin::default(),
-        ));
+        // The render passes' timings are on already, for the performance overlay (`ui::perf`).
+        app.add_systems(Last, frame_times)
+            .add_plugins(bevy::diagnostic::LogDiagnosticsPlugin::default());
     }
     if std::env::var(SHOT).is_ok() {
         app.add_systems(Startup, jump).add_systems(
@@ -99,6 +98,7 @@ fn jump(
         "paused" => Screen::Paused,
         "settings" => Screen::Settings,
         "lexique" => Screen::Lexique,
+        "sceaux" => Screen::Sceaux,
         "controls" => Screen::Controls,
         "credits" => Screen::Credits,
         _ => Screen::Playing,

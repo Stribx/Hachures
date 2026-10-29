@@ -11,7 +11,7 @@ use bevy::prelude::*;
 use bevy::render::render_resource::Extent3d;
 use bevy::window::{MonitorSelection, PresentMode, PrimaryWindow, WindowMode};
 
-use super::{Music, Settings};
+use super::{DynamicScale, Music, Settings};
 use crate::i18n;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::look::occlusion;
@@ -26,10 +26,13 @@ pub fn plugin(app: &mut App) {
     );
 }
 
-/// The settings, and when to read them again: they changed, or the window's focus or size did.
+/// The settings, and when to read them again: they changed, or the window's focus or size did, or
+/// the screen (the title draws a smaller world), or the dynamic resolution's share.
 #[derive(SystemParam)]
 struct Due<'w, 's> {
     settings: Res<'w, Settings>,
+    screen: Res<'w, State<Screen>>,
+    dynamic: Res<'w, DynamicScale>,
     seen: Local<'s, Option<(bool, Vec2, UVec2)>>,
 }
 
@@ -38,7 +41,9 @@ impl Due<'_, '_> {
         let now = (window.focused, window.size(), window.physical_size());
         // Every frame, so the window's last state is always the one seen.
         let moved = self.seen.replace(now) != Some(now);
-        (moved || self.settings.is_changed()).then(|| &*self.settings)
+        let due =
+            self.settings.is_changed() || self.screen.is_changed() || self.dynamic.is_changed();
+        (moved || due).then(|| &*self.settings)
     }
 }
 
@@ -71,6 +76,22 @@ fn apply_window(mut due: Due, mut window: Single<&mut Window, With<PrimaryWindow
     }
 }
 
+/// The world's picture on the title, at most, as a share of the window across: the lens blurs it
+/// there anyway. A render choice, not a rule: it takes a third off the title's GPU time, and the
+/// hatching still reads (at 0.5 it smeared into dashes).
+const TITLE_SCALE: f32 = 0.7;
+
+/// The world's picture, as a share of the window: no more than `TITLE_SCALE` on the screens the
+/// title's blurred Marches stand behind; elsewhere the player's render scale, times the dynamic
+/// resolution's share (`settings::dynamic`).
+fn world_scale(render_scale: u32, dynamic: DynamicScale, screen: Screen) -> f32 {
+    let asked = render_scale as f32 / 100.0;
+    match screen {
+        Screen::Splash | Screen::Title | Screen::ConfirmNew => asked.min(TITLE_SCALE),
+        _ => asked * dynamic.0 as f32 / 100.0,
+    }
+}
+
 /// The board's picture and what is drawn into it: the render scale, the shadows, the occlusion, the
 /// anti-aliasing and the lens.
 fn apply_render(
@@ -82,10 +103,11 @@ fn apply_render(
     mut images: ResMut<Assets<Image>>,
     mut commands: Commands,
 ) {
+    let (screen, dynamic) = (*due.screen.get(), *due.dynamic);
     let Some(settings) = due.check(&window) else { return };
     // The board's picture at the render scale. Its own scale factor shrinks with it, so it keeps
     // the window's logical size: picking and the place labels need no conversion.
-    let scale = settings.render_scale as f32 / 100.0;
+    let scale = world_scale(settings.render_scale, dynamic, screen);
     let wanted = (window.physical_size().as_vec2() * scale).as_uvec2().max(UVec2::ONE);
     // `get_mut` marks the image changed, so only when it does.
     if images.get(&frame.0).is_some_and(|image| image.size() != wanted) {
@@ -96,8 +118,8 @@ fn apply_render(
         ImageRenderTarget { handle: frame.0.clone(), scale_factor: window.scale_factor() * scale };
     commands.entity(camera.0).insert(RenderTarget::Image(target));
     // Stretched over the window, a smaller picture blurs: sharpened back, as a game's upscaler
-    // would.
-    if settings.render_scale < 100 {
+    // would. The title's too, so the splash compiles the sharpening, not a first drop in play.
+    if scale < 1.0 {
         commands.entity(camera.0).insert(ContrastAdaptiveSharpening::default());
     } else {
         commands.entity(camera.0).remove::<ContrastAdaptiveSharpening>();
@@ -188,6 +210,19 @@ fn pause_unfocused(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// The title's picture is smaller, never enlarged; the board's is the player's.
+    #[test]
+    fn the_title_draws_a_smaller_world() {
+        let all = DynamicScale(100);
+        assert_eq!(world_scale(100, all, Screen::Title), TITLE_SCALE);
+        assert_eq!(world_scale(40, all, Screen::Title), 0.4);
+        assert_eq!(world_scale(100, all, Screen::Playing), 1.0);
+        assert_eq!(world_scale(70, all, Screen::Settings), 0.7);
+        // The dynamic share shrinks the board's, never the title's.
+        assert_eq!(world_scale(100, DynamicScale(90), Screen::Playing), 0.9);
+        assert_eq!(world_scale(100, DynamicScale(90), Screen::Title), TITLE_SCALE);
+    }
 
     #[test]
     fn the_ui_shrinks_only_to_fit() {

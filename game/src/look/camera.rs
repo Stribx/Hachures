@@ -66,8 +66,14 @@ pub(super) fn setup(mut commands: Commands, mut images: ResMut<Assets<Image>>) {
     frame.sampler = ImageSampler::linear();
     let frame = images.add(frame);
     commands.insert_resource(Frame(frame.clone()));
-    // The window's camera: after the board's, it draws the picture, then the interface over it.
-    commands.spawn((Camera2d, Camera { order: 1, ..default() }));
+    // The window's camera: after the board's, it draws the picture, then the interface over it. The
+    // picture covers the window, so nothing to clear; the interface smooths its own edges, so no
+    // MSAA (4× at the window's size otherwise).
+    commands.spawn((
+        Camera2d,
+        Camera { order: 1, clear_color: ClearColorConfig::None, ..default() },
+        Msaa::Off,
+    ));
     commands.spawn((
         ImageNode::new(frame.clone()),
         Node {

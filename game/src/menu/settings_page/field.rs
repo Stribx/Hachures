@@ -26,6 +26,7 @@ pub(super) enum Field {
     Fullscreen,
     Vsync,
     RenderScale,
+    Performance,
     Preset,
     Shadows,
     Occlusion,
@@ -50,7 +51,10 @@ pub(super) const COLUMNS: [&[(&str, &[Field])]; 2] = [
         ),
     ],
     &[
-        (n_("settings.group.display"), &[Field::Fullscreen, Field::Vsync, Field::RenderScale]),
+        (
+            n_("settings.group.display"),
+            &[Field::Fullscreen, Field::Vsync, Field::RenderScale, Field::Performance],
+        ),
         (
             n_("settings.group.graphics"),
             &[Field::Preset, Field::Shadows, Field::Occlusion, Field::AntiAliasing, Field::Lens],
@@ -62,6 +66,8 @@ pub(super) const COLUMNS: [&[(&str, &[Field])]; 2] = [
 const OCCLUSION: [&str; 3] =
     [n_("common.off"), n_("settings.preset.low"), n_("settings.preset.high")];
 const ANTI_ALIASING: [&str; 3] = [n_("common.off"), n_("settings.aa.fxaa"), n_("settings.aa.smaa")];
+const PERFORMANCE: [&str; 3] =
+    [n_("common.off"), n_("settings.performance.fps"), n_("settings.performance.detailed")];
 
 impl Field {
     pub(super) fn name(self) -> &'static str {
@@ -76,6 +82,7 @@ impl Field {
             Field::Fullscreen => n_("settings.fullscreen"),
             Field::Vsync => n_("settings.vsync"),
             Field::RenderScale => n_("settings.render_scale"),
+            Field::Performance => n_("settings.performance"),
             Field::Preset => n_("settings.preset"),
             Field::Shadows => n_("settings.shadows"),
             Field::Occlusion => n_("settings.occlusion"),
@@ -120,6 +127,7 @@ impl Field {
         match self {
             Field::Occlusion => Some((&mut settings.occlusion, &OCCLUSION)),
             Field::AntiAliasing => Some((&mut settings.anti_aliasing, &ANTI_ALIASING)),
+            Field::Performance => Some((&mut settings.performance, &PERFORMANCE)),
             _ => None,
         }
     }
@@ -209,5 +217,18 @@ mod tests {
         assert_eq!(Field::AntiAliasing.value(&settings), t("common.off"));
         Field::Preset.step(&mut settings, -1);
         assert_eq!(settings.preset(), Some(1), "from Custom, a step starts from High");
+    }
+
+    #[test]
+    fn the_performance_overlay_goes_off_fps_detailed_and_round() {
+        let mut settings = Settings::default();
+        assert_eq!(Field::Performance.value(&settings), t("common.off"));
+        Field::Performance.advance(&mut settings);
+        assert_eq!(Field::Performance.value(&settings), t("settings.performance.fps"));
+        Field::Performance.advance(&mut settings);
+        assert_eq!(settings.performance, 2);
+        Field::Performance.advance(&mut settings);
+        assert_eq!(settings.performance, 0);
+        assert_eq!(settings.preset(), Some(2), "not a graphics setting: High stays High");
     }
 }

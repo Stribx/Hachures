@@ -29,7 +29,7 @@ pub fn counter_tip(
     let (mut text, mut node, mut visibility) = tip.into_inner();
     let hovered = pairs.iter().find(|(_, hovered)| hovered.get()).map(|(Tip(counter), _)| *counter);
     let (Some(counter), Some(cursor)) = (hovered, window.cursor_position()) else {
-        *visibility = Visibility::Hidden;
+        visibility.set_if_neq(Visibility::Hidden);
         return;
     };
     text.set_if_neq(Text(tip_text(counter, &level)));

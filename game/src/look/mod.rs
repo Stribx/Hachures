@@ -6,6 +6,8 @@ mod camera;
 mod material;
 mod models;
 mod paper;
+mod ready;
+mod timing;
 
 use bevy::core_pipeline::fullscreen_material::FullscreenMaterialPlugin;
 use bevy::prelude::*;
@@ -19,11 +21,14 @@ pub use material::{Hachure, InkMaterial, ink, shore_image, varnished, water};
 pub use models::{Carved, Swaying};
 use models::{Inked, ink_models};
 pub use paper::Paper;
+pub use ready::PipelinesReady;
+pub use timing::{frame_time, gpu_time};
 
 pub fn plugin(app: &mut App) {
     app.add_plugins((
         MaterialPlugin::<InkMaterial>::default(),
         FullscreenMaterialPlugin::<Paper>::default(),
+        ready::plugin,
     ))
     .insert_resource(ClearColor(SHEET))
     .insert_resource(GlobalAmbientLight { color: AMBIENT, brightness: 900.0, ..default() })

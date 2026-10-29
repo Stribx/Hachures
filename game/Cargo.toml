@@ -20,3 +20,5 @@ web-sys = { version = "0.3", features = ["Window", "Storage"] }
 [features]
 # Fast incremental builds while developing: `cargo run --features dev`
 dev = ["bevy/dynamic_linking"]
+# A span per system, render node and frame, for the Tracy profiler: `--release --features profile`
+profile = ["bevy/trace_tracy"]

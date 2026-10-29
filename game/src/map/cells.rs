@@ -64,9 +64,11 @@ pub(super) fn redraw_cells(
     mut images: ResMut<Assets<Image>>,
     mut drawn: Local<Drawn>,
 ) {
-    if !level.terrain.take_redraw() {
+    // Looking at the flag must not mark the level changed, or it would be every frame.
+    if !level.bypass_change_detection().terrain.take_redraw() {
         return;
     }
+    level.set_changed();
     for entity in &cells {
         commands.entity(entity).despawn();
     }
@@ -220,5 +222,34 @@ mod tests {
         // A bank, and water itself.
         assert!(!crossing(&grid, 1));
         assert!(!crossing(&grid, 5));
+    }
+
+    #[derive(Resource, Default)]
+    struct Changes(u32);
+
+    /// Only a redraw marks the level changed: a flag looked at every frame must not, or no system
+    /// could wait for the level to change.
+    #[test]
+    fn a_frame_without_redraw_leaves_the_level_unchanged() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .init_resource::<Assets<Mesh>>()
+            .init_resource::<Assets<InkMaterial>>()
+            .init_resource::<Assets<Image>>()
+            .init_resource::<Changes>()
+            .insert_resource(Level::new(Grid::parse("S.M"), crate::map::species::load()))
+            .add_systems(
+                Update,
+                (
+                    redraw_cells,
+                    (|mut n: ResMut<Changes>| n.0 += 1).run_if(resource_changed::<Level>),
+                )
+                    .chain(),
+            );
+        for _ in 0..3 {
+            app.update();
+        }
+        // The first frame only: the level was new, and drawn.
+        assert_eq!(app.world().resource::<Changes>().0, 1);
     }
 }

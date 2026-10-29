@@ -32,7 +32,7 @@ screenshots/, .taste-skill/, .impeccable/   local only, ignored by git
 | `ink/` | Nève's tools: the selection, the click that inks, le Droit de Passage (`passage.rs`), Biffer (`biffer.rs`), the overlay, the ghost |
 | `combat/` | towers, enemies and their figurines (`combat/figure/`), waves sent, shards, la Grande Chaîne |
 | `overworld/` | les Marches and the Grand Plan: terrain, sheets, road, Nève's walk, the camera rig, clouds, trips |
-| `ui/` | what the player reads during play: label, margin notes, tool bar, place names, the end-of-level page; `widgets` is the shared UI toolkit |
+| `ui/` | what the player reads during play: label, margin notes, tool bar, place names, the end-of-level page; `widgets` is the shared UI toolkit, `scrollbar` its ink scrollbar; `perf` the performance overlay (F3, every screen); `studio` films the tools' pieces and the species' figurines into the pictures the bar and the Lexique show |
 | `menu/` | the screens around play: splash, title, pause, settings page, sceaux tree, carnet, Lexique, controls, credits |
 | `look/`, `theme.rs`, `storage.rs`, `i18n.rs` | toolkit: ink material and camera, palette and fonts, saved files, words |
 | `shot/` | the dev harness (see `dev-tools.md`) |

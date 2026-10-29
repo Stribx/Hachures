@@ -14,6 +14,11 @@ use crate::settings::Settings;
 use crate::theme::{BODY_SIZE, HEADING_SIZE, TITLE_SIZE, VEIL};
 use field::{COLUMNS, Field};
 
+/// Width of a row's name-and-value button, and of its small arrows: the same for every row, so the
+/// arrows line up and no value moves the page. Two columns of rows fit `settings::apply`'s `FIT`.
+const ROW_WIDTH: f32 = 370.0;
+const ARROW: f32 = 40.0;
+
 /// A row's value, shown at its right.
 #[derive(Component)]
 struct Value(Field);
@@ -101,10 +106,10 @@ fn spawn_row(column: &mut ChildSpawnerCommands, assets: &AssetServer, field: Fie
             },
             children![small(t(field.name())), (small(""), Value(field))],
         );
-        row.spawn((framed(340.0, words), field))
+        row.spawn((framed(ROW_WIDTH, words), field))
             .observe(change(move |settings| field.advance(settings)));
         for (arrow, direction) in [("‹", -1), ("›", 1)] {
-            row.spawn((framed(0.0, small(arrow)), NoNav))
+            row.spawn((framed(ARROW, small(arrow)), NoNav))
                 .observe(change(move |settings| field.step(settings, direction)));
         }
     });

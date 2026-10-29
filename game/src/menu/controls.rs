@@ -50,6 +50,7 @@ const KEYS: [(&str, &[(&str, &str)]); 3] = [
             (n_("controls.key.esc"), n_("controls.action.pause_back")),
             (n_("controls.key.arrows_tab"), n_("controls.action.choose_button")),
             (n_("controls.key.enter"), n_("controls.action.press")),
+            (n_("controls.key.f3"), n_("controls.action.performance")),
             (n_("controls.key.f12"), n_("controls.action.screenshot")),
         ],
     ),

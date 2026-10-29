@@ -7,17 +7,14 @@ use bevy::prelude::*;
 use bevy::ui_widgets::{Activate, Button};
 
 use super::DuringPlay;
-use super::keys::{Fast, next_species};
+use super::actions::{RouteLabel, SpeedLabel, spawn_actions};
+use super::keys::Fast;
 use super::studio::ToolIcons;
-use super::widgets::{Panel, SLIP_RADIUS, framed, primary, text};
-use crate::combat::enemies::send_wave;
+use super::widgets::{Panel, SLIP_RADIUS, text};
 use crate::i18n::{t, tf};
 use crate::ink::{Act, Selection, TOOLS};
 use crate::level::{Level, LevelEntity};
-use crate::menu::{open_lexique, open_sceaux};
-use crate::schedule::Screen;
-use crate::settings::Settings;
-use crate::theme::{BODY_SIZE, INK, INK_SOFT, PAPER, SEAL, SLIP, SMALL_SIZE};
+use crate::theme::{INK, INK_SOFT, PAPER, SEAL, SLIP, SMALL_SIZE};
 
 #[derive(Component)]
 pub struct Bar;
@@ -33,14 +30,6 @@ pub struct ToolLabel(usize);
 /// The cost of `TOOLS[.0]`, in sépia.
 #[derive(Component)]
 pub struct ToolCost(usize);
-
-/// The label naming the species whose route is drawn.
-#[derive(Component)]
-pub struct RouteLabel;
-
-/// The label of the speed button.
-#[derive(Component)]
-pub struct SpeedLabel;
 
 type SpeedText = (With<SpeedLabel>, Without<ToolCost>, Without<RouteLabel>);
 
@@ -149,42 +138,6 @@ fn spawn_card(
             ));
             card.spawn((text(assets, t(tool.label), SMALL_SIZE), ToolLabel(index)));
             card.spawn((text(assets, "", SMALL_SIZE), ToolCost(index)));
-        });
-}
-
-/// What the turn asks: the next wave first, in the seal's red.
-fn spawn_actions(bar: &mut ChildSpawnerCommands, assets: &AssetServer) {
-    let small = |s: &str| text(assets, s.to_string(), SMALL_SIZE);
-    bar.spawn(Node { column_gap: px(8), align_items: AlignItems::Center, ..default() })
-        .with_children(|actions| {
-            actions.spawn(primary(0.0, text(assets, t("bar.send_wave"), BODY_SIZE))).observe(
-                |_: On<Activate>,
-                 mut level: ResMut<Level>,
-                 mut commands: Commands,
-                 assets: Res<AssetServer>,
-                 settings: Res<Settings>| {
-                    send_wave(&mut level, &mut commands, &assets, &settings)
-                },
-            );
-            actions
-                .spawn(framed(0.0, (small(""), SpeedLabel)))
-                .observe(|_: On<Activate>, mut fast: ResMut<Fast>| fast.0 = !fast.0);
-            actions.spawn(framed(0.0, small(t("bar.calque")))).observe(
-                |_: On<Activate>, mut selection: ResMut<Selection>| {
-                    selection.calque = !selection.calque
-                },
-            );
-            actions.spawn(framed(0.0, (small(""), RouteLabel))).observe(
-                |_: On<Activate>, level: Res<Level>, mut selection: ResMut<Selection>| {
-                    next_species(&mut selection, &level)
-                },
-            );
-            actions
-                .spawn(framed(0.0, small(t("bar.sceaux"))))
-                .observe(open_sceaux(Screen::Playing));
-            actions
-                .spawn(framed(0.0, small(t("bar.lexique"))))
-                .observe(open_lexique(Screen::Playing));
         });
 }
 

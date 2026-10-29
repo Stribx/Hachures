@@ -2,7 +2,7 @@
 //! across it.
 
 use bevy::asset::RenderAssetUsages;
-use bevy::mesh::{Indices, PrimitiveTopology};
+use bevy::mesh::{Indices, PrimitiveTopology, VertexAttributeValues};
 use bevy::prelude::*;
 
 use super::parcels::{WASHES, openness, parcel};
@@ -96,10 +96,70 @@ fn land_color(p: Vec2, h: f32) -> Color {
     color.mix(&stone, smoothstep(2.0, 4.0, h))
 }
 
+/// The land's squares, this wide, and how many of them a tile has a side: 40 units.
+const STEP: f32 = 0.5;
+const TILE: usize = 80;
+
+/// The land's squares across and down.
+fn land_size() -> (usize, usize) {
+    (((EAST - WEST) / STEP) as usize, ((SOUTH - NORTH) / STEP) as usize)
+}
+
+/// The two triangles of each square of a `columns` × `rows` grid of corners `width` across.
+fn squares(columns: u32, rows: u32, width: u32) -> Vec<u32> {
+    (0..rows)
+        .flat_map(|r| {
+            (0..columns).flat_map(move |c| {
+                let (a, d) = (r * width + c, (r + 1) * width + c);
+                [a, d, a + 1, a + 1, d, d + 1]
+            })
+        })
+        .collect()
+}
+
+/// The land in tiles, so the camera and the sun's shadow skip those out of view: as one mesh, it
+/// was drawn whole four times a frame. Cut from the whole land, its normals the same on both sides
+/// of a seam.
+pub(super) fn land_tiles() -> Vec<Mesh> {
+    let whole = land_mesh();
+    let attribute = |id| whole.attribute(id).cloned();
+    let (
+        Some(VertexAttributeValues::Float32x3(positions)),
+        Some(VertexAttributeValues::Float32x3(normals)),
+        Some(VertexAttributeValues::Float32x4(colors)),
+    ) = (
+        attribute(Mesh::ATTRIBUTE_POSITION),
+        attribute(Mesh::ATTRIBUTE_NORMAL),
+        attribute(Mesh::ATTRIBUTE_COLOR),
+    )
+    else {
+        return vec![whole];
+    };
+    let (columns, rows) = land_size();
+    let mut tiles = Vec::new();
+    for r0 in (0..rows).step_by(TILE) {
+        for c0 in (0..columns).step_by(TILE) {
+            let (r1, c1) = ((r0 + TILE).min(rows), (c0 + TILE).min(columns));
+            let at: Vec<usize> =
+                (r0..=r1).flat_map(|r| (c0..=c1).map(move |c| r * (columns + 1) + c)).collect();
+            let pick = |all: &[[f32; 3]]| at.iter().map(|&i| all[i]).collect::<Vec<_>>();
+            let tint = at.iter().map(|&i| colors[i]).collect::<Vec<_>>();
+            let (across, down) = ((c1 - c0) as u32, (r1 - r0) as u32);
+            tiles.push(
+                Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::default())
+                    .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, pick(&positions))
+                    .with_inserted_attribute(Mesh::ATTRIBUTE_NORMAL, pick(&normals))
+                    .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, tint)
+                    .with_inserted_indices(Indices::U32(squares(across, down, across + 1))),
+            );
+        }
+    }
+    tiles
+}
+
 /// The land as one smooth mesh, coloured at its corners so colours blend across it.
-pub(super) fn land_mesh() -> Mesh {
-    const STEP: f32 = 0.5;
-    let (columns, rows) = (((EAST - WEST) / STEP) as usize, ((SOUTH - NORTH) / STEP) as usize);
+fn land_mesh() -> Mesh {
+    let (columns, rows) = land_size();
     let corners: Vec<Vec3> = (0..=rows)
         .flat_map(|r| {
             (0..=columns).map(move |c| Vec2::new(WEST + c as f32 * STEP, NORTH + r as f32 * STEP))
@@ -108,15 +168,7 @@ pub(super) fn land_mesh() -> Mesh {
         .collect();
     let colors: Vec<[f32; 4]> =
         corners.iter().map(|c| land_color(c.xz(), c.y).to_linear().to_f32_array()).collect();
-    let width = columns as u32 + 1;
-    let indices: Vec<u32> = (0..rows as u32)
-        .flat_map(|r| {
-            (0..columns as u32).flat_map(move |c| {
-                let (a, d) = (r * width + c, (r + 1) * width + c);
-                [a, d, a + 1, a + 1, d, d + 1]
-            })
-        })
-        .collect();
+    let indices = squares(columns as u32, rows as u32, columns as u32 + 1);
     Mesh::new(PrimitiveTopology::TriangleList, RenderAssetUsages::default())
         .with_inserted_attribute(Mesh::ATTRIBUTE_POSITION, corners)
         .with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, colors)
@@ -155,6 +207,16 @@ pub(super) fn road_mesh() -> Mesh {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// The tiles hold every square of the land, once.
+    #[test]
+    fn the_tiles_cover_the_land() {
+        let (columns, rows) = land_size();
+        let tiles = land_tiles();
+        assert_eq!(tiles.len(), columns.div_ceil(TILE) * rows.div_ceil(TILE));
+        let triangles: usize = tiles.iter().map(|t| t.indices().map_or(0, |i| i.len())).sum();
+        assert_eq!(triangles, columns * rows * 6);
+    }
 
     /// The land's paint blends everywhere but at the parcels' seams: a cut would stay as big
     /// however close the points, a blend shrinks.

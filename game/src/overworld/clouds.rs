@@ -116,8 +116,12 @@ pub(super) fn place_clouds(
     mut clouds: Query<(&Cloud, &mut Node)>,
 ) {
     let t = trip.map_or(0.0, |trip| trip.cover);
-    **layer = if t > 0.0 { Visibility::Inherited } else { Visibility::Hidden };
-    fill.0 = SHEET.with_alpha(((t - 0.8) / 0.2).clamp(0.0, 1.0));
+    layer.set_if_neq(if t > 0.0 { Visibility::Inherited } else { Visibility::Hidden });
+    // Hidden, the clouds need no placing: writing their nodes would lay the interface out again.
+    if t <= 0.0 {
+        return;
+    }
+    fill.set_if_neq(BackgroundColor(SHEET.with_alpha(((t - 0.8) / 0.2).clamp(0.0, 1.0))));
     let size = cloud_size(window.width() / window.height().max(1.0));
     for (cloud, mut node) in &mut clouds {
         let at = cloud.open.lerp(cloud.closed, t) - size / 2.0;

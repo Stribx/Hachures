@@ -16,7 +16,7 @@ The game's world keeps its French names in code, data and files (they are names 
 | a Name / *le prix du nom* | inking a named place *rayes* its name from the Rôle (*rayer*, never *gratter*) | `Place`, `Level.erased` |
 | les sceaux | seals won per level (victory, challenge), spent in l'arbre des sceaux | `Save::sceaux`, `menu/sceaux.rs`, `campaign/skills.rs` |
 | le carnet | Nève's notebook: the margin notes in play, the campaign read back at the end | `ui` margin, `menu/carnet.rs` |
-| le Lexique | L: every tool and species met, with its real numbers; an entry unlocks the first time it shows on the sheet (`???` before). The tool tooltip and the enemy card show the same lines | `Save.seen`, `campaign/lexique.rs`, `menu/lexique/` |
+| le Lexique | L: every tool and species met, with its filmed piece or figurine and its real numbers; an entry unlocks the first time it shows on the sheet (`???` and a faded silhouette before). The tool tooltip and the enemy card show the same lines | `Save.seen`, `campaign/lexique.rs`, `menu/lexique/` |
 | le Calque | F1: the overlay of every species' route | `Selection.calque` |
 | le Droit de Passage | nothing may be inked that leaves a land species without a path, now or on a map to come | `ink/passage.rs` |
 | la Crue, le Gel | world 1 and 2 events, announced a wave ahead | `World.event`, `Level.event_on/next` |

@@ -21,6 +21,8 @@ pub struct Settings {
     pub vsync: bool,
     /// Percent of the window's pixels the board is drawn at, 50 to 100; the interface stays sharp.
     pub render_scale: u32,
+    /// The performance overlay (`ui::perf`): 0 off, 1 the FPS, 2 detailed. F3 goes round them.
+    pub performance: u8,
     /// The sun's shadow maps.
     pub shadows: bool,
     /// Ambient occlusion: 0 off, 1 low, 2 high (`look::occlusion`). Desktop only.
@@ -52,6 +54,7 @@ impl Default for Settings {
             fullscreen: false,
             vsync: true,
             render_scale: 100,
+            performance: 0,
             shadows: true,
             occlusion: 1,
             anti_aliasing: 2,
@@ -166,5 +169,12 @@ mod tests {
             odd.settings, None,
             "settings it cannot read are dropped, the save is still read"
         );
+    }
+
+    #[test]
+    fn a_settings_file_from_before_the_overlay_has_it_off() {
+        let old: Settings = ron::from_str("(music: 40)").unwrap();
+        assert_eq!((old.music, old.performance), (40, 0));
+        assert_eq!(Settings::default().performance, 0);
     }
 }

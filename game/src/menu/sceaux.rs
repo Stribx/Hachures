@@ -11,7 +11,7 @@ use crate::campaign::save::Save;
 use crate::campaign::skills::{BRANCHES, next_in};
 use crate::i18n::{t, tf, tp};
 use crate::level::Level;
-use crate::theme::{HEADING_SIZE, INK, SMALL_SIZE, SUBTITLE_SIZE, TITLE_SIZE, VEIL};
+use crate::theme::{Face, HEADING_SIZE, INK, SMALL_SIZE, SUBTITLE_SIZE, TITLE_SIZE, VEIL, font};
 use crate::ui::widgets::letter;
 
 pub fn plugin(app: &mut App) {
@@ -49,6 +49,14 @@ fn key_a(
 #[derive(Component, Clone, Copy)]
 struct NodeLabel(usize, usize);
 
+/// The ", acquis" after the words of node `.1` of branch `.0`: always there, so owning the node
+/// never wraps its words again, and seen only once owned. (The languages put it last.)
+#[derive(Component, Clone, Copy)]
+struct Owned(usize, usize);
+
+/// Width of a node, and of a branch's column.
+const NODE_WIDTH: f32 = 300.0;
+
 /// The line with the sceaux left to spend.
 #[derive(Component)]
 struct Purse;
@@ -57,21 +65,30 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
     commands.spawn(page(Screen::Sceaux, VEIL)).with_children(|p| {
         p.spawn(text(&assets, t("sceaux.title"), TITLE_SIZE));
         p.spawn((text(&assets, "", SUBTITLE_SIZE), Purse));
-        p.spawn(Node { column_gap: px(24), ..default() }).with_children(|row| {
-            for (b, branch) in BRANCHES.iter().enumerate() {
-                row.spawn(Node {
-                    flex_direction: FlexDirection::Column,
-                    row_gap: px(8),
-                    ..default()
-                })
-                .with_children(|column| {
-                    column.spawn(text(&assets, t(branch.name), HEADING_SIZE));
-                    for k in 0..branch.nodes.len() {
-                        column
-                            .spawn(framed(300.0, (text(&assets, "", SMALL_SIZE), NodeLabel(b, k))))
-                            .observe(buy(b, k));
-                    }
-                });
+        // A grid, filled row by row: the branches' names, then their first nodes, and so on. The
+        // nodes of a row share its height, so the tree lines up whatever each node says.
+        let grid = Node {
+            display: Display::Grid,
+            grid_template_columns: RepeatedGridTrack::px(BRANCHES.len() as u16, NODE_WIDTH),
+            column_gap: px(24),
+            row_gap: px(8),
+            ..default()
+        };
+        p.spawn(grid).with_children(|grid| {
+            for branch in &BRANCHES {
+                grid.spawn(text(&assets, t(branch.name), HEADING_SIZE));
+            }
+            for k in 0..BRANCHES[0].nodes.len() {
+                for b in 0..BRANCHES.len() {
+                    let mark = (
+                        TextSpan::new(t("sceaux.owned")),
+                        font(&assets, Face::Roman, SMALL_SIZE),
+                        TextColor(Color::NONE),
+                        Owned(b, k),
+                    );
+                    let words = (text(&assets, "", SMALL_SIZE), NodeLabel(b, k), children![mark]);
+                    grid.spawn(framed(NODE_WIDTH, words)).observe(buy(b, k));
+                }
             }
         });
         p.spawn(text(&assets, t("sceaux.note"), SMALL_SIZE));
@@ -105,17 +122,54 @@ fn show_nodes(
     save: Res<Save>,
     mut purse: Single<&mut Text, With<Purse>>,
     mut nodes: Query<(&NodeLabel, &mut Text, &mut TextColor), Without<Purse>>,
+    mut marks: Query<(&Owned, &mut TextColor), Without<NodeLabel>>,
 ) {
+    let owned = |b: usize, k: usize| save.skills.contains(&BRANCHES[b].nodes[k].skill);
+    for (&Owned(b, k), mut color) in &mut marks {
+        let ink = if owned(b, k) { INK } else { Color::NONE };
+        if color.0 != ink {
+            color.0 = ink;
+        }
+    }
     let n = save.sceaux();
     purse.set_if_neq(Text(tp("sceaux.purse", n, &[&n, &save.names()])));
     for (&NodeLabel(b, k), mut text, mut color) in &mut nodes {
         let node = &BRANCHES[b].nodes[k];
-        let owned = save.skills.contains(&node.skill);
         let next = next_in(b, &save.skills).is_some_and(|n| n.skill == node.skill)
             && save.sceaux() >= node.cost;
-        let owned_said = if owned { t("sceaux.owned") } else { "" };
-        let said = tf("sceaux.node", &[&t(node.name), &node.cost, &t(node.effect), &owned_said]);
+        // The last slot is the "owned" mark, a span of its own (`Owned`).
+        let said = tf("sceaux.node", &[&t(node.name), &node.cost, &t(node.effect), &""]);
         text.set_if_neq(Text(said));
-        color.0 = if owned || next { INK } else { INK.with_alpha(0.4) };
+        color.0 = if owned(b, k) || next { INK } else { INK.with_alpha(0.4) };
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// The words of node 0 of branch 0 and the colour of its "owned" mark, after a frame.
+    fn first_node(save: Save) -> (String, Color) {
+        let mut app = App::new();
+        app.insert_resource(save).add_systems(Update, show_nodes);
+        app.world_mut().spawn((Text::default(), Purse));
+        let node = app.world_mut().spawn((Text::default(), TextColor(INK), NodeLabel(0, 0))).id();
+        let mark = app
+            .world_mut()
+            .spawn((TextSpan::default(), TextColor(INK), Owned(0, 0), ChildOf(node)))
+            .id();
+        app.update();
+        let world = app.world();
+        (world.get::<Text>(node).unwrap().0.clone(), world.get::<TextColor>(mark).unwrap().0)
+    }
+
+    #[test]
+    fn owning_a_node_shows_its_mark_without_moving_its_words() {
+        let (words, mark) = first_node(Save::default());
+        assert_eq!(mark.alpha(), 0.0, "not owned: the mark keeps its room, unseen");
+        let owned = Save { skills: vec![BRANCHES[0].nodes[0].skill], ..default() };
+        let (owned_words, owned_mark) = first_node(owned);
+        assert_eq!(owned_words, words);
+        assert_eq!(owned_mark, INK);
     }
 }

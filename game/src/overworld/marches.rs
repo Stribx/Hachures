@@ -6,7 +6,7 @@ use bevy::prelude::*;
 
 use super::props::props;
 use super::sheets::{SHEETS, sheet_mesh};
-use super::terrain::{EAST, NORTH, SOUTH, WATER, WEST, height, land_mesh, road_mesh};
+use super::terrain::{EAST, NORTH, SOUTH, WATER, WEST, height, land_tiles, road_mesh};
 use super::{OverworldRoot, camera, pawn};
 use crate::campaign::save::Save;
 use crate::level::Level;
@@ -42,7 +42,9 @@ pub(super) fn spawn(
     let root = commands
         .spawn((OverworldRoot, Transform::default(), Visibility::default()))
         .with_children(|root| {
-            root.spawn((Mesh3d(meshes.add(land_mesh())), MeshMaterial3d(land.clone())));
+            for tile in land_tiles() {
+                root.spawn((Mesh3d(meshes.add(tile)), MeshMaterial3d(land.clone())));
+            }
             // Lying on the land, it would catch the land's own shadow as stripes.
             root.spawn((
                 Mesh3d(meshes.add(road_mesh())),
@@ -58,6 +60,8 @@ pub(super) fn spawn(
                 Mesh3d(meshes.add(Plane3d::new(Vec3::Y, size / 2.0))),
                 MeshMaterial3d(water),
                 Transform::from_xyz(middle.x, WATER, middle.y),
+                // Under the land, it would only shade what is already hidden.
+                NotShadowCaster,
             ));
         })
         .id();

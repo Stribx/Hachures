@@ -57,6 +57,10 @@ pub struct Tip(pub(super) Counter);
 #[derive(Component)]
 pub(super) struct CounterTip;
 
+/// The level's label: its name, counters and challenge, top-left during play.
+#[derive(Component)]
+pub(super) struct HudLabel;
+
 #[derive(Component)]
 pub enum Line {
     Name,
@@ -71,6 +75,7 @@ pub fn spawn(commands: &mut Commands, assets: &AssetServer) {
     commands.spawn((CounterTip, tooltip(assets)));
     commands
         .spawn((
+            HudLabel,
             DuringPlay,
             Visibility::Hidden,
             Panel,
@@ -117,6 +122,9 @@ pub fn spawn(commands: &mut Commands, assets: &AssetServer) {
 }
 
 /// The four counters, each an icon and its figure, in a row.
+/// The least width of a counter's figure: three figures at `SUBTITLE_SIZE`.
+const FIGURE_WIDTH: f32 = 48.0;
+
 fn spawn_counters(row: &mut ChildSpawnerCommands, assets: &AssetServer) {
     for counter in COUNTERS {
         row.spawn((
@@ -133,6 +141,8 @@ fn spawn_counters(row: &mut ChildSpawnerCommands, assets: &AssetServer) {
             .insert(Skin { image: assets.load(counter.icon()), slice: BorderRect::ZERO });
             pair.spawn((
                 Figure(counter),
+                // Room for three figures, so 70 → 100 does not push the next counter.
+                Node { min_width: px(FIGURE_WIDTH), ..default() },
                 Text::default(),
                 font(assets, Face::Roman, SUBTITLE_SIZE),
                 TextColor(INK),
