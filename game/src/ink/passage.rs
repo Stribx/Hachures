@@ -114,17 +114,8 @@ mod tests {
     use crate::ink::tool_index;
     use crate::level::Walker;
     use crate::level::data::{Change, Place};
-    use crate::map::grid::Grid;
-    use crate::map::species::{self, index_of};
 
-    /// A world-1 level where only the Chaîneur walks (it can't cross Eau), with six waves.
-    fn level(map: &str) -> Level {
-        let species = species::load();
-        let mut level = Level::new(Grid::parse(map), species);
-        level.present = vec![index_of(&level.species, "chaineur").unwrap()];
-        level.waves = vec![vec![]; 6];
-        level
-    }
+    use crate::map::species::index_of;
 
     /// Two ways: the top one on plain ground, the bottom one on low ground.
     const TWO_WAYS: &str = "
@@ -135,7 +126,7 @@ mod tests {
 
     #[test]
     fn a_flood_far_ahead_is_counted() {
-        let mut level = level(TWO_WAYS);
+        let mut level = Level::with_chaineur(TWO_WAYS);
         level.events = vec![3];
         let barricade = tool_index("barricade").unwrap();
         // Alone, the plain way is not enough once the low one drowns at wave 3.
@@ -146,7 +137,7 @@ mod tests {
 
     #[test]
     fn a_barricade_that_closes_nothing_is_accepted() {
-        let mut level = level(TWO_WAYS);
+        let mut level = Level::with_chaineur(TWO_WAYS);
         level.events = vec![3];
         // The dead-end middle of the low way: the plain way stays open dry or flooded.
         assert_eq!(level.refusal(12, tool_index("barricade").unwrap()), None);
@@ -156,7 +147,7 @@ mod tests {
     /// comes at wave 4.
     #[test]
     fn a_rockfall_then_the_flood_is_counted() {
-        let mut level = level(
+        let mut level = Level::with_chaineur(
             "
             S...M
             .^^^.
@@ -185,7 +176,7 @@ mod tests {
 
     #[test]
     fn gratter_scrapes_only_a_borne() {
-        let mut level = level("S...M");
+        let mut level = Level::with_chaineur("S...M");
         level.alter([(2, Edit::PlantBorne)]);
         let gratter = tool_index("gratter").unwrap();
         assert_eq!(level.refusal(1, gratter), Some("refusal.nothing_to_scrape"));
@@ -201,7 +192,7 @@ mod tests {
     /// stood on.
     #[test]
     fn gratter_preview_takes_the_borne_off() {
-        let mut level = level("S...B");
+        let mut level = Level::with_chaineur("S...B");
         let jalonneur = index_of(&level.species, "jalonneur").unwrap();
         level.alter([(1, Edit::Ink(Tile::Chaussee)), (1, Edit::PlantBorne)]);
         let gratter = tool_index("gratter").unwrap();
@@ -214,7 +205,7 @@ mod tests {
     /// Gratter on an Éboulis leaves plain Sol, in the tiles and in the map the world event reads.
     #[test]
     fn gratter_scrapes_an_eboulis() {
-        let mut level = level("S.e.M");
+        let mut level = Level::with_chaineur("S.e.M");
         let gratter = tool_index("gratter").unwrap();
         assert_eq!(level.refusal(2, gratter), None);
         let sepia = level.sepia;
@@ -231,7 +222,7 @@ mod tests {
     /// doesn't close the way.
     #[test]
     fn gratter_scrapes_a_palissade() {
-        let mut level = level("S.p.M\n.....");
+        let mut level = Level::with_chaineur("S.p.M\n.....");
         let gratter = tool_index("gratter").unwrap();
         assert_eq!(level.refusal(2, gratter), None);
         level.ink(2, gratter);
@@ -244,7 +235,7 @@ mod tests {
 
     #[test]
     fn a_palissade_is_not_buildable() {
-        let level = level("S.p.M\n.....");
+        let level = Level::with_chaineur("S.p.M\n.....");
         assert_eq!(level.refusal(2, tool_index("barricade").unwrap()), Some("refusal.firm_ground"));
     }
 
@@ -260,7 +251,7 @@ mod tests {
             Tile::Eau,
             Tile::Roc,
         ] {
-            let mut level = level("S...M");
+            let mut level = Level::with_chaineur("S...M");
             level.alter([(2, Edit::Ink(tile))]);
             assert_eq!(level.refusal(2, gratter), Some("refusal.nothing_to_scrape"), "{tile:?}");
         }
@@ -268,13 +259,13 @@ mod tests {
 
     #[test]
     fn an_eboulis_is_not_buildable() {
-        let level = level("S.e.M");
+        let level = Level::with_chaineur("S.e.M");
         assert_eq!(level.refusal(2, tool_index("barricade").unwrap()), Some("refusal.firm_ground"));
     }
 
     #[test]
     fn scraping_an_eboulis_keeps_its_name() {
-        let mut level = level("S.e.M");
+        let mut level = Level::with_chaineur("S.e.M");
         level.places = vec![Place { name: "place.pre_commun".into(), at: vec![(2, 0)] }];
         let gratter = tool_index("gratter").unwrap();
         let names = level.names;
@@ -289,7 +280,7 @@ mod tests {
     #[test]
     fn gratter_ignores_walkers_and_changes() {
         let gratter = tool_index("gratter").unwrap();
-        let mut level = level("S.e.M");
+        let mut level = Level::with_chaineur("S.e.M");
         level.walkers.push(Walker { species: level.present[0], cell: 2 });
         assert_eq!(level.refusal(2, gratter), None, "under a walker");
         level.walkers.clear();
@@ -305,7 +296,7 @@ mod tests {
 
     #[test]
     fn gratter_preview_takes_the_eboulis_off() {
-        let mut level = level("S.e.M");
+        let mut level = Level::with_chaineur("S.e.M");
         let k = level.present[0];
         let gratter = tool_index("gratter").unwrap();
         let (_, field) = level.what_if(2, gratter, k);
@@ -317,7 +308,7 @@ mod tests {
     /// there.
     #[test]
     fn la_crue_spares_a_scraped_eboulis() {
-        let mut level = level("S.,.M");
+        let mut level = Level::with_chaineur("S.,.M");
         level.alter([(2, Edit::Ink(Tile::Eboulis))]);
         level.ink(2, tool_index("gratter").unwrap());
         assert_eq!(

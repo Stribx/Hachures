@@ -237,7 +237,7 @@ mod tests {
             .init_resource::<Assets<InkMaterial>>()
             .init_resource::<Assets<Image>>()
             .init_resource::<Changes>()
-            .insert_resource(Level::new(Grid::parse("S.M"), crate::map::species::load()))
+            .insert_resource(Level::parse("S.M"))
             .add_systems(
                 Update,
                 (

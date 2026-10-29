@@ -4,9 +4,8 @@ use bevy::prelude::*;
 use bevy::ui_widgets::ScrollArea;
 
 use super::{LexiqueView, beside_its_bar, picture, tint};
-use crate::campaign::lexique::{EntryKind, entries, species_lines, tool_lines};
+use crate::campaign::lexique::{EntryKind, entries, known_tool_lines, species_lines};
 use crate::campaign::save::Save;
-use crate::campaign::skills::Skill;
 use crate::i18n::t;
 use crate::level::Level;
 use crate::theme::{BODY_SIZE, HEADING_SIZE, INK_SOFT, SMALL_SIZE};
@@ -67,18 +66,7 @@ fn words(view: &LexiqueView, save: &Save, level: &Level) -> [String; 3] {
         return [t("lexique.locked").into(), t("lexique.locked_text").into(), String::new()];
     }
     let lines = match entry.kind {
-        EntryKind::Tool(tool) => {
-            // The prices of a species not yet met would give it away.
-            let met: Vec<_> =
-                level.species.iter().filter(|s| save.seen.contains(&s.label)).cloned().collect();
-            tool_lines(
-                tool,
-                level.tool_cost(tool),
-                &level.tower_stats,
-                &met,
-                level.has(Skill::Equerre),
-            )
-        }
+        EntryKind::Tool(tool) => known_tool_lines(level, save, tool),
         EntryKind::Species(s) => species_lines(&level.species[s]),
     };
     let lines: Vec<String> = lines.iter().map(|l| l.shown()).collect();

@@ -89,12 +89,10 @@ pub(crate) fn hover(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::map::grid::Grid;
-    use crate::map::species;
 
     #[test]
     fn a_bare_level_starts_on_the_first_tool_and_species() {
-        let level = Level::new(Grid::parse("S...M"), species::load());
+        let level = Level::parse("S...M");
         assert_eq!(
             Selection::for_level(&level),
             Selection { tool: 0, shown: 0, calque: false, hovered: None }

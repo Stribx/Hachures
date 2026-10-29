@@ -6,7 +6,7 @@ use bevy::window::PrimaryWindow;
 use super::hud::capitalized;
 use super::places::PriceTip;
 use super::tool_tip::ToolTip;
-use super::widgets::{follow_cursor, tooltip};
+use super::widgets::{show_tip, tooltip};
 use crate::campaign::lexique::species_lines;
 use crate::combat::Enemy;
 use crate::combat::boss::Borne;
@@ -50,40 +50,34 @@ pub fn enemy_card(
             .filter(|&(_, d)| d <= NEAR)
             .min_by(|a, b| a.1.total_cmp(&b.1))
     });
-    let (Some((enemy, _)), Some(cursor), true) =
-        (nearest, window.cursor_position(), **tool_tip == Visibility::Hidden)
-    else {
-        *visibility = Visibility::Hidden;
-        return;
-    };
-    let species = &level.species[enemy.species()];
-    let (hp, max) = enemy.health();
-    let mut lines = vec![
-        capitalized(t(&species.label)),
-        tf("lexique.hp_now", &[&number(hp.max(0.0).ceil()), &number(max)]),
-    ];
-    lines.extend(species_lines(species).iter().map(|l| l.shown()));
-    let words = lines.join("\n");
-    if text.0 != words {
-        text.0 = words;
-    }
-    follow_cursor(&mut node, cursor);
-    *visibility = Visibility::Inherited;
+    let words = nearest.filter(|_| **tool_tip == Visibility::Hidden).map(|(enemy, _)| {
+        let species = &level.species[enemy.species()];
+        let (hp, max) = enemy.health();
+        let mut lines = vec![
+            capitalized(t(&species.label)),
+            tf("lexique.hp_now", &[&number(hp.max(0.0).ceil()), &number(max)]),
+        ];
+        lines.extend(species_lines(species).iter().map(|l| l.shown()));
+        lines.join("\n")
+    });
+    show_tip(words, window.cursor_position(), &mut text, &mut node, &mut visibility);
     // The cell's price would sit under the card, at the same spot.
-    for mut tip in &mut price {
-        *tip = Visibility::Hidden;
+    if *visibility == Visibility::Inherited {
+        for mut tip in &mut price {
+            *tip = Visibility::Hidden;
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::map::grid::Grid;
+
     use crate::map::species;
 
     fn board(hovered: Option<usize>) -> (App, Entity) {
         let mut app = App::new();
-        let level = Level::new(Grid::parse("S.M"), species::load());
+        let level = Level::parse("S.M");
         let chaineur = species::index_of(&level.species, "chaineur").unwrap();
         let at = map::cell_pos(level.terrain.grid(), 1);
         app.add_plugins(MinimalPlugins)

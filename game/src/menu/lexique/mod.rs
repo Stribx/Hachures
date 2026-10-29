@@ -85,8 +85,7 @@ mod tests {
     use crate::campaign::save::Save;
     use crate::ink::{TOOLS, tool_index};
     use crate::level::Level;
-    use crate::map::grid::Grid;
-    use crate::map::species;
+
     use crate::menu::BackTo;
     use crate::ui::studio::{SpeciesIcons, ToolIcons};
 
@@ -100,7 +99,7 @@ mod tests {
             .init_resource::<ButtonInput<Key>>()
             .init_resource::<Save>()
             .init_resource::<LexiqueView>()
-            .insert_resource(Level::new(Grid::parse("S.M"), species::load()))
+            .insert_resource(Level::parse("S.M"))
             .add_systems(Update, (super::super::escape, toggle_page("l", Screen::Lexique)));
         let species = app.world().resource::<Level>().species.len();
         let mut images = app.world_mut().resource_mut::<Assets<Image>>();

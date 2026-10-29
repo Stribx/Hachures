@@ -56,6 +56,23 @@ pub(crate) fn follow_cursor(node: &mut Node, cursor: Vec2) {
     node.top = px(cursor.y + 18.0);
 }
 
+/// Shows a tooltip at the cursor with `words`, or hides it when there are none or no cursor.
+pub(crate) fn show_tip(
+    words: Option<String>,
+    cursor: Option<Vec2>,
+    text: &mut Mut<Text>,
+    node: &mut Mut<Node>,
+    visibility: &mut Mut<Visibility>,
+) {
+    let (Some(words), Some(cursor)) = (words, cursor) else {
+        visibility.set_if_neq(Visibility::Hidden);
+        return;
+    };
+    text.set_if_neq(Text(words));
+    follow_cursor(node, cursor);
+    visibility.set_if_neq(Visibility::Inherited);
+}
+
 /// A button `width` wide, or as wide as its label at 0: a slip of washed paper, no ruled frame. A
 /// fixed width never changes with its words, so a page does not move when they do; words longer
 /// than it wrap.

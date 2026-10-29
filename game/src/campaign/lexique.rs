@@ -2,9 +2,12 @@
 
 use std::collections::HashMap;
 
+use crate::campaign::save::Save;
+use crate::campaign::skills::Skill;
 use crate::combat::towers::{TowerStats, Weapon};
 use crate::i18n::{n_, number, t, tf};
 use crate::ink::{Act, TOOLS};
+use crate::level::Level;
 use crate::map::species::{Goal, Reading, Species};
 
 /// A page of the Lexique.
@@ -129,6 +132,14 @@ pub fn tool_lines(
         Act::Scrape | Act::Rename | Act::Biffer => {}
     }
     lines
+}
+
+/// The lines of tool `tool` as the player may read them now: the prices of a species not yet met
+/// would give it away, so they are left out.
+pub fn known_tool_lines(level: &Level, save: &Save, tool: usize) -> Vec<Line> {
+    let met: Vec<_> =
+        level.species.iter().filter(|s| save.seen.contains(&s.label)).cloned().collect();
+    tool_lines(tool, level.tool_cost(tool), &level.tower_stats, &met, level.has(Skill::Equerre))
 }
 
 fn weapon_lines(

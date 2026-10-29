@@ -86,7 +86,7 @@ fn arbalete_spares_fuyards() {
 /// The Lanterne blinds the Gens du Col (double damage) and slows them.
 #[test]
 fn lanterne_slows() {
-    let level = Level::new(Grid::parse("S.....M"), species::load());
+    let level = Level::parse("S.....M");
     let gens = walker(&level, "gens_du_col", 100.0);
     let tower_at = map::cell_pos(level.terrain.grid(), 1);
     let mut app = app_with(level);
@@ -104,7 +104,7 @@ fn lanterne_slows() {
 /// The map owns the bornes: one taken off it (scraped) loses its piece, the other stays.
 #[test]
 fn a_borne_off_the_map_breaks() {
-    let mut level = Level::new(Grid::parse("S...M"), species::load());
+    let mut level = Level::parse("S...M");
     level.alter([(1, Edit::PlantBorne), (3, Edit::PlantBorne)]);
     let jalonneur = index_of(&level.species, "jalonneur").unwrap();
     let mut app = App::new();
@@ -345,7 +345,7 @@ fn with_animation(app: &mut App) {
 /// The step follows the ground walked, and a pinned walker does not step.
 #[test]
 fn a_stride_follows_the_ground_walked() {
-    let level = Level::new(Grid::parse("S.........M"), species::load());
+    let level = Level::parse("S.........M");
     let mut app = app_with(level);
     with_animation(&mut app);
     let id = striding(&mut app, "chaineur");
@@ -367,7 +367,7 @@ fn a_stride_follows_the_ground_walked() {
 /// A turn eases toward the heading and never passes it.
 #[test]
 fn turns_ease_without_overshoot() {
-    let level = Level::new(Grid::parse("S...\n...M\n...."), species::load());
+    let level = Level::parse("S...\n...M\n....");
     let mut app = app_with(level);
     with_animation(&mut app);
     let id = striding(&mut app, "chaineur");
@@ -411,7 +411,7 @@ fn ghosts_and_shards(app: &mut App) -> (Vec<ExitKind>, usize) {
 /// shards.
 #[test]
 fn a_defeated_enemy_leaves_a_ghost_then_shards() {
-    let mut level = Level::new(Grid::parse("S.....M\n...^..R"), species::load());
+    let mut level = Level::parse("S.....M\n...^..R");
     level.sepia = 0;
     let tower_cell = level.terrain.grid().width + 1;
     let tower_at = map::cell_pos(level.terrain.grid(), tower_cell);
@@ -435,7 +435,7 @@ fn a_defeated_enemy_leaves_a_ghost_then_shards() {
 /// An enemy at its goal is gone on that frame, as before; a ghost sinks into the board, then goes.
 #[test]
 fn an_arrival_sinks_into_the_board() {
-    let level = Level::new(Grid::parse("S.M"), species::load());
+    let level = Level::parse("S.M");
     let chaineur = walker(&level, "chaineur", 100.0);
     let mut app = app_with(level);
     app.add_systems(Update, exits);
@@ -455,7 +455,7 @@ fn an_arrival_sinks_into_the_board() {
 /// The first figure of a species is noted in the Lexique, once.
 #[test]
 fn a_new_species_is_noted_once() {
-    let level = Level::new(Grid::parse("S...M"), species::load());
+    let level = Level::parse("S...M");
     let (first, second) = (walker(&level, "chaineur", 100.0), walker(&level, "chaineur", 100.0));
     let mut app = app_with(level);
     app.insert_resource(Save::default()).add_systems(Update, super::noted::notice);
@@ -498,7 +498,7 @@ fn tower_beside(app: &mut App, weapon: Weapon) {
 
 /// The damage one shot of `weapon` deals to a `species` with 1000 HP.
 fn one_shot(species: &str, weapon: Weapon, underground: bool) -> f32 {
-    let mut level = Level::new(Grid::parse("S.....M"), species::load());
+    let mut level = Level::parse("S.....M");
     let k = index_of(&level.species, species).unwrap();
     level.species[k].underground = underground;
     let enemy = walker(&level, species, 1000.0);
@@ -528,7 +528,7 @@ fn only_the_sonde_reaches_underground() {
 /// The Taupier passes under a barricade that walls everyone else out.
 #[test]
 fn taupier_walks_under_a_barricade() {
-    let level = Level::new(Grid::parse("S.#.M"), species::load());
+    let level = Level::parse("S.#.M");
     let k = |name| index_of(&level.species, name).unwrap();
     let fields = level.terrain.fields();
     assert!(fields[k("taupier")].dist[0].is_finite());
@@ -538,7 +538,7 @@ fn taupier_walks_under_a_barricade() {
 /// An Étayeur beside a damaged borne mends it, never past whole; one too far off doesn't.
 #[test]
 fn etayeur_repairs_a_damaged_borne() {
-    let mut level = Level::new(Grid::parse("S.....M"), species::load());
+    let mut level = Level::parse("S.....M");
     level.alter([(1, Edit::PlantBorne)]);
     let etayeur = walker(&level, "etayeur", 100.0);
     let borne_at = map::cell_pos(level.terrain.grid(), 1);

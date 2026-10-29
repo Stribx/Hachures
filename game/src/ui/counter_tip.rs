@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
 use super::hud::{Counter, CounterTip, Tip, capitalized};
-use super::widgets::follow_cursor;
+use super::widgets::show_tip;
 use crate::i18n::{t, tf};
 use crate::level::Level;
 
@@ -28,26 +28,18 @@ pub fn counter_tip(
 ) {
     let (mut text, mut node, mut visibility) = tip.into_inner();
     let hovered = pairs.iter().find(|(_, hovered)| hovered.get()).map(|(Tip(counter), _)| *counter);
-    let (Some(counter), Some(cursor)) = (hovered, window.cursor_position()) else {
-        visibility.set_if_neq(Visibility::Hidden);
-        return;
-    };
-    text.set_if_neq(Text(tip_text(counter, &level)));
-    follow_cursor(&mut node, cursor);
-    *visibility = Visibility::Inherited;
+    let words = hovered.map(|counter| tip_text(counter, &level));
+    show_tip(words, window.cursor_position(), &mut text, &mut node, &mut visibility);
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::map::grid::Grid;
-    use crate::map::species;
 
     #[test]
     fn a_hovered_counter_is_named_at_the_cursor() {
         let mut app = App::new();
-        app.add_plugins(MinimalPlugins)
-            .insert_resource(Level::new(Grid::parse("S.M"), species::load()));
+        app.add_plugins(MinimalPlugins).insert_resource(Level::parse("S.M"));
         let mut window = Window::default();
         window.set_cursor_position(Some(Vec2::new(100.0, 50.0)));
         app.world_mut().spawn((window, PrimaryWindow));

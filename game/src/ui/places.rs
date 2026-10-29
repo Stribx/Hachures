@@ -4,7 +4,7 @@
 use bevy::prelude::*;
 use bevy::window::PrimaryWindow;
 
-use super::widgets::{self, follow_cursor};
+use super::widgets;
 use crate::i18n::{t, tf};
 use crate::ink::{Act, Selection, TOOLS, Verdict};
 use crate::level::{Level, LevelEntity};
@@ -106,13 +106,7 @@ pub fn price_tip(
 ) {
     let (mut text, mut node, mut visibility) = tip.into_inner();
     let said = price(&level, &verdict, TOOLS[selection.tool].act);
-    let (Some(said), Some(cursor)) = (said, window.cursor_position()) else {
-        visibility.set_if_neq(Visibility::Hidden);
-        return;
-    };
-    text.set_if_neq(Text(said));
-    follow_cursor(&mut node, cursor);
-    *visibility = Visibility::Inherited;
+    widgets::show_tip(said, window.cursor_position(), &mut text, &mut node, &mut visibility);
 }
 
 /// What the tooltip says for `act` at the verdict's cell, if anything.
@@ -134,12 +128,10 @@ mod tests {
     use super::*;
     use crate::ink::tool_index;
     use crate::level::data::Place;
-    use crate::map::grid::Grid;
-    use crate::map::species;
 
     /// A level with "le Pré commun" on cell 2 and a barricade Nève inked on cell 8.
     fn level() -> Level {
-        let mut level = Level::new(Grid::parse("S...M\n.....\n....."), species::load());
+        let mut level = Level::parse("S...M\n.....\n.....");
         level.places = vec![Place { name: "place.pre_commun".into(), at: vec![(2, 0)] }];
         level.ink(8, tool_index("barricade").unwrap());
         level

@@ -66,11 +66,11 @@ mod tests {
     use crate::combat::tests::{app_with, run, walker};
     use crate::combat::towers::Weapon;
     use crate::map;
-    use crate::map::species::{self, index_of};
+    use crate::map::species::index_of;
 
     /// A world-2 sheet, where the Théodolite is the boss.
     fn sheet(map: &str) -> Level {
-        let mut level = Level::new(Grid::parse(map), species::load());
+        let mut level = Level::parse(map);
         level.world = 1;
         level
     }

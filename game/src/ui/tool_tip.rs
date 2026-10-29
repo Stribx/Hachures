@@ -9,9 +9,8 @@ use bevy::window::PrimaryWindow;
 use super::bar::ToolButton;
 use super::hud::capitalized;
 use super::widgets::tooltip;
-use crate::campaign::lexique::tool_lines;
+use crate::campaign::lexique::known_tool_lines;
 use crate::campaign::save::Save;
-use crate::campaign::skills::Skill;
 use crate::i18n::t;
 use crate::ink::TOOLS;
 use crate::level::Level;
@@ -85,15 +84,7 @@ pub fn tool_tip(
 
 /// The name, what it is, and its numbers: the species not yet met are left out of them.
 fn words(level: &Level, save: &Save, tool: usize) -> String {
-    let met: Vec<_> =
-        level.species.iter().filter(|s| save.seen.contains(&s.label)).cloned().collect();
-    let lines = tool_lines(
-        tool,
-        level.tool_cost(tool),
-        &level.tower_stats,
-        &met,
-        level.has(Skill::Equerre),
-    );
+    let lines = known_tool_lines(level, save, tool);
     let label = TOOLS[tool].label;
     let mut all = vec![capitalized(t(label)), t(&format!("{label}.text")).to_string()];
     all.extend(lines.iter().map(|l| l.shown()));
@@ -104,13 +95,11 @@ fn words(level: &Level, save: &Save, tool: usize) -> String {
 mod tests {
     use super::*;
     use crate::ink::tool_index;
-    use crate::map::grid::Grid;
-    use crate::map::species;
 
     #[test]
     fn a_hovered_card_shows_its_numbers() {
         let mut app = App::new();
-        let mut level = Level::new(Grid::parse("S.M"), species::load());
+        let mut level = Level::parse("S.M");
         level.tools = vec![0, tool_index("arbalète").unwrap()];
         app.add_plugins(MinimalPlugins).insert_resource(level).init_resource::<Save>();
         app.init_resource::<ButtonInput<KeyCode>>();
@@ -140,7 +129,7 @@ mod tests {
     #[test]
     fn a_key_shows_the_tip_for_two_seconds() {
         let mut app = App::new();
-        let mut level = Level::new(Grid::parse("S.M"), species::load());
+        let mut level = Level::parse("S.M");
         let arbalete = tool_index("arbalète").unwrap();
         level.tools = vec![arbalete];
         app.add_plugins(MinimalPlugins).insert_resource(level).init_resource::<Save>();

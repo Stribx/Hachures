@@ -151,6 +151,24 @@ fn tools(data: &LevelData, save: &Save) -> Vec<usize> {
     tools
 }
 
+/// Levels built for tests.
+#[cfg(test)]
+impl Level {
+    /// A bare level of world 1 on the map `map`.
+    pub fn parse(map: &str) -> Level {
+        Level::new(Grid::parse(map), species::load())
+    }
+
+    /// A bare level of world 1 on `map` where only the Chaîneur walks (it can't cross Eau), with
+    /// six waves.
+    pub fn with_chaineur(map: &str) -> Level {
+        let mut level = Level::parse(map);
+        level.present = vec![species::index_of(&level.species, "chaineur").unwrap()];
+        level.waves = vec![vec![]; 6];
+        level
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

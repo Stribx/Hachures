@@ -37,10 +37,9 @@ pub(super) fn judge(level: Res<Level>, selection: Res<Selection>, mut verdict: R
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::map::species;
 
     fn hovering(i: usize) -> (Level, Selection) {
-        let level = Level::new(Grid::parse("S.....M\n......."), species::load());
+        let level = Level::parse("S.....M\n.......");
         let selection = Selection { hovered: Some(i), ..Selection::for_level(&level) };
         (level, selection)
     }

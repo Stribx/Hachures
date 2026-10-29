@@ -112,20 +112,17 @@ mod tests {
     use super::*;
     use crate::campaign::save::Save;
     use crate::ink::tool_index;
-    use crate::map::species::{self, index_of};
+    use crate::map::species::index_of;
 
     #[test]
     fn la_crue_is_checked_before_inking() {
         // Dry road on top, the other way around is low ground.
-        let mut level = Level::new(
-            Grid::parse(
-                "
+        let mut level = Level::parse(
+            "
                 S...M
                 ,^^^,
                 ,,,,,
                 ",
-            ),
-            species::load(),
         );
         let road = 2;
         assert_eq!(level.refusal(road, 0), None, "the low way around is open");
@@ -144,15 +141,12 @@ mod tests {
     #[test]
     fn avalanche_is_counted_before_it_falls() {
         // Two roads; the avalanche will close the top one at (2, 0).
-        let mut level = Level::new(
-            Grid::parse(
-                "
+        let mut level = Level::parse(
+            "
                 S...M
                 .^^^.
                 .....
                 ",
-            ),
-            species::load(),
         );
         level.waves = vec![vec![]];
         level.changes = vec![crate::level::data::Change {
@@ -176,13 +170,10 @@ mod tests {
     /// Le Gel (world 2): the lake freezes for two waves, then thaws.
     #[test]
     fn le_gel_freezes_the_lake() {
-        let mut level = Level::new(
-            Grid::parse(
-                "
+        let mut level = Level::parse(
+            "
                 S.~.M
                 ",
-            ),
-            species::load(),
         );
         level.world = 1;
         level.events = vec![2];
@@ -199,7 +190,7 @@ mod tests {
     /// are inked.
     #[test]
     fn inking_a_place_scratches_its_name() {
-        let mut level = Level::new(Grid::parse("S.....M"), species::load());
+        let mut level = Level::parse("S.....M");
         level.places = vec![crate::level::data::Place {
             name: "place.pre_commun".into(),
             at: vec![(2, 0), (3, 0)],
@@ -253,7 +244,7 @@ mod tests {
     #[test]
     fn biffing_a_tower_tells_combat() {
         let biffer = tool_index("biffer").unwrap();
-        let mut level = Level::new(Grid::parse("S...M\n.....\n....."), species::load());
+        let mut level = Level::parse("S...M\n.....\n.....");
         level.ink(7, tool_index("arbalète").unwrap());
         level.ink(2, tool_index("barricade").unwrap());
         let mut app = App::new();

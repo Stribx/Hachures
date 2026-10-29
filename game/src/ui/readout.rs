@@ -64,13 +64,12 @@ pub(super) fn readout(level: &Level, selection: &Selection, verdict: &Verdict) -
 mod tests {
     use super::*;
     use crate::level::data::Change;
-    use crate::map::grid::{Grid, Tile};
-    use crate::map::species;
+    use crate::map::grid::Tile;
 
     /// The wave before a collapse, the cartouche says so, once however many cells fall.
     #[test]
     fn a_collapse_is_announced() {
-        let mut level = Level::new(Grid::parse("S...M\n....."), species::load());
+        let mut level = Level::parse("S...M\n.....");
         let collapse = |x| Change {
             wave: 1,
             at: vec![(x, 1)],

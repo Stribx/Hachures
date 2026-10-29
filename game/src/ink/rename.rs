@@ -39,8 +39,8 @@ mod tests {
     use crate::ink::{Act, tool_index};
     use crate::level::data::Place;
     use crate::level::{Level, Walker};
-    use crate::map::grid::{Grid, Tile};
-    use crate::map::species::{self, index_of};
+    use crate::map::grid::Tile;
+    use crate::map::species::index_of;
     use crate::map::terrain::Edit;
 
     fn renommer() -> usize {
@@ -49,7 +49,7 @@ mod tests {
 
     /// A world-2 level where the Chaîneur and the Gens du Col walk, with six waves.
     fn sheet(map: &str) -> Level {
-        let mut level = Level::new(Grid::parse(map), species::load());
+        let mut level = Level::parse(map);
         level.world = 1;
         level.present = ["chaineur", "gens_du_col"]
             .iter()

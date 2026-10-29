@@ -6,8 +6,6 @@ use super::*;
 use crate::combat::figure;
 use crate::level::Level;
 use crate::look::{InkMaterial, PipelinesReady};
-use crate::map::grid::Grid;
-use crate::map::species;
 
 fn app() -> App {
     let mut app = App::new();
@@ -17,7 +15,7 @@ fn app() -> App {
         .init_asset::<InkMaterial>()
         .insert_state(Screen::Title)
         .init_resource::<PipelinesReady>()
-        .insert_resource(Level::new(Grid::parse("S.M"), species::load()))
+        .insert_resource(Level::parse("S.M"))
         .init_resource::<Filming>()
         .add_systems(Startup, figure::setup)
         .add_systems(PostStartup, super::species::setup)

@@ -44,18 +44,9 @@ mod tests {
     use crate::ink::tool_index;
     use crate::level::data::Place;
     use crate::level::{Level, Walker};
-    use crate::map::grid::{Grid, Tile};
-    use crate::map::species::{self, index_of};
-    use crate::map::terrain::Edit;
+    use crate::map::grid::Tile;
 
-    /// A world-1 level where only the Chaîneur walks, three rows wide so a stroke or two closes
-    /// nothing, six waves.
-    fn level(map: &str) -> Level {
-        let mut level = Level::new(Grid::parse(map), species::load());
-        level.present = vec![index_of(&level.species, "chaineur").unwrap()];
-        level.waves = vec![vec![]; 6];
-        level
-    }
+    use crate::map::terrain::Edit;
 
     fn tool(name: &str) -> usize {
         tool_index(name).unwrap()
@@ -72,7 +63,7 @@ mod tests {
 
     #[test]
     fn wet_ink_returns_all_it_cost_and_the_cell() {
-        let mut level = inked(level(OPEN), 2, "barricade");
+        let mut level = inked(Level::with_chaineur(OPEN), 2, "barricade");
         let sepia = level.sepia;
         assert_eq!(level.refund(2), Some(10));
         assert_eq!(level.refusal(2, tool("biffer")), None);
@@ -89,7 +80,7 @@ mod tests {
     /// What comes back is what was paid, skills included: a barricade with Fascines cost 7.
     #[test]
     fn the_refund_is_what_was_paid() {
-        let mut level = level(OPEN);
+        let mut level = Level::with_chaineur(OPEN);
         level.skills.push(Skill::Fascines);
         let level = inked(level, 2, "barricade");
         assert_eq!(level.refund(2), Some(7));
@@ -98,7 +89,7 @@ mod tests {
     /// Once a wave is sent, the ink is dry: half comes back, rounded down.
     #[test]
     fn dry_ink_returns_half() {
-        let mut level = level(OPEN);
+        let mut level = Level::with_chaineur(OPEN);
         level.skills.push(Skill::Fascines);
         let mut level = inked(inked(level, 2, "barricade"), 8, "arbalète");
         level.wave.number = 1;
@@ -109,7 +100,7 @@ mod tests {
     /// column.
     #[test]
     fn ink_laid_during_a_wave_is_dry() {
-        let mut level = level(OPEN);
+        let mut level = Level::with_chaineur(OPEN);
         level.wave.number = 1;
         level.wave.running = true;
         let mut level = inked(level, 7, "arbalète");
@@ -121,7 +112,7 @@ mod tests {
     /// Ink laid between waves stays wet until the next wave is sent.
     #[test]
     fn ink_stays_wet_until_the_next_wave() {
-        let mut level = level(OPEN);
+        let mut level = Level::with_chaineur(OPEN);
         level.wave.number = 2;
         let mut level = inked(level, 7, "arbalète");
         assert_eq!(level.refund(7), Some(50));
@@ -132,7 +123,7 @@ mod tests {
 
     #[test]
     fn a_tower_comes_down() {
-        let mut level = inked(level(OPEN), 7, "mortier");
+        let mut level = inked(Level::with_chaineur(OPEN), 7, "mortier");
         level.ink(7, tool("biffer"));
         assert_eq!(level.terrain.base().tiles[7], Tile::Sol);
         let cover = &level.terrain.base().cover;
@@ -143,7 +134,7 @@ mod tests {
     /// Palissade, a borne, or bare ground.
     #[test]
     fn biffer_takes_back_only_neves_strokes() {
-        let mut level = level("S.#.p.M\n.......");
+        let mut level = Level::with_chaineur("S.#.p.M\n.......");
         level.alter([(8, Edit::Ink(Tile::Ronces)), (9, Edit::PlantBorne)]);
         for i in [1, 2, 4, 8, 9] {
             assert_eq!(
@@ -159,7 +150,7 @@ mod tests {
     /// back.
     #[test]
     fn ink_covered_since_is_not_hers() {
-        let mut level = inked(level(OPEN), 2, "boue");
+        let mut level = inked(Level::with_chaineur(OPEN), 2, "boue");
         level.alter([(2, Edit::Ink(Tile::Chaussee))]);
         assert_eq!(level.refusal(2, tool("biffer")), Some("refusal.nothing_to_biffer"));
     }
@@ -167,7 +158,7 @@ mod tests {
     /// The cell is what it was: a barricade inked on the Chaussée gives back the Chaussée.
     #[test]
     fn the_cell_is_what_it_was() {
-        let mut level = level(OPEN);
+        let mut level = Level::with_chaineur(OPEN);
         level.alter([(2, Edit::Ink(Tile::Chaussee))]);
         let mut level = inked(level, 2, "barricade");
         level.ink(2, tool("biffer"));
@@ -177,7 +168,7 @@ mod tests {
     /// A scratched-out name never comes back (docs, section 2, rule 7).
     #[test]
     fn the_name_stays_scratched_out() {
-        let mut level = level(OPEN);
+        let mut level = Level::with_chaineur(OPEN);
         level.places = vec![Place { name: "place.pre_commun".into(), at: vec![(2, 0)] }];
         let names = level.names;
         let mut level = inked(level, 2, "barricade");
@@ -189,7 +180,7 @@ mod tests {
     /// Taking ink back never closes a way: a walker on the mud doesn't refuse it.
     #[test]
     fn biffer_ignores_le_droit_de_passage() {
-        let mut level = inked(level(OPEN), 2, "boue");
+        let mut level = inked(Level::with_chaineur(OPEN), 2, "boue");
         level.walkers.push(Walker { species: level.present[0], cell: 2 });
         assert_eq!(level.refusal(2, tool("biffer")), None);
     }
@@ -197,7 +188,7 @@ mod tests {
     /// The pencil line for Biffer is the route once the stroke is gone.
     #[test]
     fn biffer_preview_is_what_it_does() {
-        let mut level = inked(level(OPEN), 2, "barricade");
+        let mut level = inked(Level::with_chaineur(OPEN), 2, "barricade");
         let k = level.present[0];
         let (grid, field) = level.what_if(2, tool("biffer"), k);
         level.ink(2, tool("biffer"));
@@ -208,7 +199,7 @@ mod tests {
     /// Biffer is free, and using it doesn't count as using a tool for a challenge.
     #[test]
     fn biffer_is_free() {
-        let mut level = inked(level(OPEN), 2, "barricade");
+        let mut level = inked(Level::with_chaineur(OPEN), 2, "barricade");
         level.sepia = 0;
         assert_eq!(level.refusal(2, tool("biffer")), None);
         level.ink(2, tool("biffer"));

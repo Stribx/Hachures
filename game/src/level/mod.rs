@@ -38,8 +38,7 @@ mod tests {
     use crate::campaign::save::Save;
     use crate::level::data::LEVELS;
     use crate::map::flow::FlowField;
-    use crate::map::grid::Grid;
-    use crate::map::species;
+
     use crate::schedule::Screen;
 
     /// Once the Rôle is lost, the simulation stands still, even during play.
@@ -51,7 +50,7 @@ mod tests {
         app.add_plugins((MinimalPlugins, StatesPlugin, crate::schedule::plugin, plugin))
             .init_resource::<Ticks>()
             .insert_resource(Save::default())
-            .insert_resource(Level::new(Grid::parse("S.M"), species::load()))
+            .insert_resource(Level::parse("S.M"))
             .add_systems(Update, (|mut ticks: ResMut<Ticks>| ticks.0 += 1).in_set(Step::Simulate));
         app.world_mut().resource_mut::<NextState<Screen>>().set(Screen::Playing);
         app.update();

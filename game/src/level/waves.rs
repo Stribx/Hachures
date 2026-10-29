@@ -163,8 +163,7 @@ mod tests {
     /// Gouffre falls for good.
     #[test]
     fn a_collapse_rumbles_then_falls() {
-        let mut level =
-            Level::new(crate::map::grid::Grid::parse("S...M\n....."), crate::map::species::load());
+        let mut level = Level::parse("S...M\n.....");
         level.waves = vec![vec![]; 3];
         level.changes = vec![crate::level::data::Change {
             wave: 2,
