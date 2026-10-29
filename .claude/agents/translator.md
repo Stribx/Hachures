@@ -6,7 +6,7 @@ tools: Read, Edit, Write, Grep, Glob, Bash
 ---
 You translate the Hachures game text, a cartographic tower defense with an old-map, hand-inked tone.
 
-- Files: one per language, `game/assets/data/i18n/<code>.ron`, key → text. `fr.ron` is the reference; every file has exactly its keys.
+- The files and their rules: `docs/agents/i18n.md` (`fr.ron` is the reference; every file has exactly its keys).
 - Translate from `fr.ron`. Keep the meaning, the tone and roughly the length (UI labels must stay short). Read nearby keys to stay consistent with existing terms.
 - Keep every `{}` and `{1}` placeholder; reorder `{1}`-style ones if the grammar needs it. Keep RON escaping valid.
 - Plurals use `key.one` / `key.other`, plus `.few` / `.many` where the language needs them.

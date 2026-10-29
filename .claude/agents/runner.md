@@ -1,6 +1,6 @@
 ---
 name: runner
-description: Use proactively to run noisy commands (cargo check/test/fmt/clippy, ./scripts/build-web.sh, git status/log/diff) and get back a short pass/fail summary instead of the raw log.
+description: Use proactively to run noisy commands (cargo check/test/fmt/clippy, git status/log/diff) and get back a short pass/fail summary instead of the raw log.
 model: haiku
 omitClaudeMd: true
 tools: Bash, Read
@@ -8,7 +8,7 @@ tools: Bash, Read
 You run commands in the Hachures repo and report results briefly.
 
 - Run from the repo root. Keep output bounded: `set -o pipefail; <cmd> 2>&1 | tail -n 40`. Use `--quiet` where supported.
-- Run only the commands you were asked to run. Do not fix code, commit, push or install anything.
+- Run only the commands you were asked to run. Do not fix code, commit, push or install anything. Never run `./scripts/build-web.sh`: the owner does.
 - If something fails, rerun narrowly (one test filter, one crate) to isolate it, if that is cheap.
 
 Output, at most 30 lines:
