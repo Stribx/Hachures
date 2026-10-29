@@ -43,6 +43,13 @@ or `chore/*` branches and merged by pull request. A `release/vX.Y.Z` branch free
 validation, then merges into `main` and is tagged. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the complete
 workflow, branch protections, PR rules, and the `0.1.0` milestone process.
 
+### Version `0.1.0`
+
+`0.1.0` is the first technical playable release: the current Worlds 1–6 campaign, save/progression,
+localization, CI/CD, native packages, and browser package. It is not the final game. Bonus sheets, the full
+Signer editor, Heroic mode, complete ending consequences, Treuil branches, advanced audio, and the final art
+pass remain documented limitations for later milestones.
+
 Push a semantic version tag to publish desktop packages and a browser package:
 
 ```sh

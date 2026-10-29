@@ -83,7 +83,16 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>, save: Res<Save>, leve
                 },
             );
         });
+        page.spawn(version_label(&assets));
     });
+}
+
+fn version_label(assets: &AssetServer) -> impl Bundle {
+    (
+        text(assets, concat!("v", env!("CARGO_PKG_VERSION")), SMALL_SIZE),
+        TextColor(INK_SOFT),
+        Node { position_type: PositionType::Absolute, right: px(16), bottom: px(12), ..default() },
+    )
 }
 
 fn spawn_confirm(mut commands: Commands, assets: Res<AssetServer>) {

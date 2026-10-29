@@ -61,6 +61,31 @@ ready only when its GitHub issue checklist is complete, the roadmap identifies t
 local CI gate passes, the browser package and native packages are smoke-tested, and the known limitations
 are documented.
 
+The chosen scope is **option 1: a technical playable release**. It includes the current playable campaign
+through Worlds 1–6, the existing save/progression systems, localization, CI/CD, native packages for Linux,
+macOS, and Windows, and the browser package. It does not claim that every design-bible post-game feature
+is complete.
+
+The following are explicitly known limitations of `0.1.0`: bonus sheets are data foundations rather than
+fully integrated post-game content; Signer is only a safe preview foundation; Heroic mode and the complete
+four-ending consequences are not finished; Treuil and defection branches remain incomplete; and the final
+audio and art pass remains future work. These limitations must appear in the GitHub release notes and
+portfolio documentation.
+
+### `0.1.0` acceptance checklist
+
+- The campaign included in the release starts, can be played through World 6, and persists progress.
+- French and English localization validation passes.
+- Native release packages build for Linux x86_64, macOS Apple Silicon, macOS Intel, and Windows x86_64.
+- The browser package builds and passes its HTTP/package smoke test.
+- Formatting, Clippy, unit/integration tests, balance regression, and WASM compilation pass.
+- The README, roadmap, release notes, and known limitations agree with the tagged build.
+- No generated output, secret, or unreviewed asset is included in the release.
+
+The milestone is rejected if a listed platform package cannot start, if the core campaign is blocked, if a
+save migration is missing, or if CI is red. A missing post-game feature is not a release blocker when it is
+one of the documented limitations above.
+
 The normal sequence is:
 
 1. Create or update the milestone issue, for example `Milestone 0.1.0`, with acceptance criteria and links
