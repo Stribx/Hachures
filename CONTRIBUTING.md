@@ -44,6 +44,8 @@ For focused work, use the smallest relevant command first:
 cargo test -p game name_of_test
 cargo test -p game balance -- --ignored --nocapture
 cargo run --release -p game
+./scripts/build-web.sh
+python3 scripts/check-web-package.py website/play
 ```
 
 For visual or performance changes, use the harness described in `docs/agents/dev-tools.md`. Do not judge a
@@ -82,4 +84,3 @@ Docker is optional and not the primary development path. It can provide a reprod
 cannot replace native macOS and Windows builds or graphics testing. The supported source of truth remains the
 local script plus GitHub's OS matrix. Do not add a Docker dependency to every contributor's workflow unless
 native setup becomes unreliable.
-

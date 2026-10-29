@@ -25,6 +25,7 @@ cargo run -p game --features dev     # desktop, fast incremental builds
 cargo build --release -p game        # desktop release binary
 cargo test -p game                   # tests, including the level and Droit de Passage checks
 ./scripts/build-web.sh               # browser build into website/play/
+python3 scripts/check-web-package.py website/play  # package and HTTP smoke test
 python3 -m http.server -d website    # then open http://localhost:8000/play/
 ```
 

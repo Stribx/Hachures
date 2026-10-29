@@ -53,6 +53,7 @@ jobs:
           cp "target/release/Hachures" "$package/"
           cp -R game/assets/. "$package/assets/"
           tar -czf "${package}.tar.gz" "$package"
+          python3 scripts/check-native-package.py "${package}.tar.gz"
       - name: Assemble Windows package
         if: runner.os == 'Windows'
         shell: pwsh
@@ -62,6 +63,7 @@ jobs:
           Copy-Item "target/release/Hachures.exe" "$package/"
           Copy-Item -Recurse -Force "game/assets/*" "$package/assets/"
           Compress-Archive -Path "$package" -DestinationPath "$package.zip"
+          python scripts/check-native-package.py "$package.zip"
       - uses: actions/upload-artifact@v4
         with:
           name: native-${{ matrix.platform }}
@@ -91,6 +93,7 @@ jobs:
         if: steps.wasm-bindgen-cache.outputs.cache-hit != 'true'
         run: cargo install wasm-bindgen-cli --version 0.2.129 --locked
       - run: ./scripts/build-web.sh
+      - run: python3 scripts/check-web-package.py website/play
       - run: tar -czf Hachures-web.tar.gz -C website/play .
       - uses: actions/upload-artifact@v4
         with:

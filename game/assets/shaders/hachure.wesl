@@ -29,6 +29,8 @@ struct Hachure {
     flow: f32,
     // How far it leans in the wind (`wind.wesl`); unused here.
     wind: f32,
+    // How strongly drifting cloud shadows darken the surface; 0 disables them.
+    cloud_shadows: f32,
 }
 
 @group(constants::MATERIAL_BIND_GROUP) @binding(100)
@@ -120,8 +122,11 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
     // Bevy's occlusion is faint (0.85 at a contact): squared, it reads.
     let occlusion = pow(luminance(pbr_input.diffuse_occlusion), 2.0);
     let pos = in.world_position.xyz;
-    let shade =
-        clamp(luminance(lit.rgb) / max(luminance(albedo), 0.02) / hachure.params.z, 0.0, 1.0) * occlusion * cloud(pos.xz);
+    let shade = clamp(
+        luminance(lit.rgb) / max(luminance(albedo), 0.02) / hachure.params.z,
+        0.0,
+        1.0,
+    ) * occlusion * mix(1.0, cloud(pos.xz), hachure.cloud_shadows);
 
     // Flat colour faded toward the paper, a little darker in the shade so faces still read apart.
     // Plaster grain, faded out where its specks get finer than a pixel (it would shimmer as the camera moves).

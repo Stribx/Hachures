@@ -69,7 +69,8 @@ pub(crate) fn palisade(shape: u8) -> Vec<PropPart> {
     }
     // The rails run edge to edge, so a line of palissades is one fence.
     for y in [0.15, 0.4] {
-        let rail = Mesh::from(Cylinder { radius: 0.03, half_height: 0.5 })
+        // Slight overlap hides raster gaps where neighbouring cells meet.
+        let rail = Mesh::from(Cylinder { radius: 0.03, half_height: 0.52 })
             .rotated_by(Quat::from_rotation_z(FRAC_PI_2));
         wood.push(rail.translated_by(Vec3::new(0.0, y, 0.0)));
     }

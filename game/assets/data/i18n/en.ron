@@ -34,6 +34,7 @@
     "choice.refuge.prompt": "Where should the Refuge go?",
     // common
     "common.back": "Back",
+    "common.unreachable": "—",
     "common.off": "off",
     "common.on": "on",
     // controls

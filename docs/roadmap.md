@@ -41,9 +41,9 @@ one without a word in the commit. Items done before this file are marked `(befor
 Not counted in the %: small debts found along the way.
 
 - [ ] Run the web build in a browser: the wind shaders, the sound after the first click, the figures
-- [ ] The Calque prints a raw "inf" for a cost or a distance (`ui/readout.rs`)
-- [ ] A thin gap shows between neighbouring palissade rails
-- [ ] Cloud shadows can't be turned off (a setting, or the Low preset)
+- [x] The Calque prints a raw "inf" for a cost or a distance (`ui/readout.rs`)
+- [x] A thin gap shows between neighbouring palissade rails
+- [x] Cloud shadows can't be turned off (a setting, or the Low preset)
 
 ## Resolved design decisions
 

@@ -46,7 +46,17 @@ jobs:
       # The balance bot's table, kept in game/tests/balance.txt.
       - run: cargo test -p game balance -- --ignored
       # The browser build: the save goes through localStorage there.
-      - run: cargo check --target wasm32-unknown-unknown -p game
+      - name: Cache wasm-bindgen CLI
+        id: wasm-bindgen-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/wasm-bindgen
+          key: wasm-bindgen-cli-0.2.129-${{ runner.os }}-${{ runner.arch }}
+      - name: Install wasm-bindgen CLI
+        if: steps.wasm-bindgen-cache.outputs.cache-hit != 'true'
+        run: cargo install wasm-bindgen-cli --version 0.2.129 --locked
+      - run: ./scripts/build-web.sh
+      - run: python3 scripts/check-web-package.py website/play
 
   native:
     name: Native build (${{ matrix.platform }})

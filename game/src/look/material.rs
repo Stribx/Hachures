@@ -44,6 +44,8 @@ pub struct HachureUniform {
     /// at the tip for a mesh whose vertex colours' alpha weighs each vertex's sway (the
     /// grass). 0 for what never moves.
     pub wind: f32,
+    /// How strongly the shader applies drifting cloud shadows: 0 disables them.
+    pub cloud_shadows: f32,
 }
 
 impl Default for Hachure {
@@ -57,6 +59,7 @@ impl Default for Hachure {
                 gloss: 0.0,
                 flow: 0.0,
                 wind: 0.0,
+                cloud_shadows: 1.0,
             },
             shore: None,
         }

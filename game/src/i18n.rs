@@ -94,6 +94,9 @@ pub fn tf(key: &str, args: &[&dyn Display]) -> String {
 /// `x` as a number to read: one decimal at most, none when whole, the decimal mark of the language
 /// shown.
 pub fn number(x: f32) -> String {
+    if !x.is_finite() {
+        return t("common.unreachable").to_string();
+    }
     let text = format!("{x:.1}");
     text.strip_suffix(".0").map_or_else(|| text.replace('.', t("language.decimal")), String::from)
 }
@@ -302,6 +305,7 @@ mod tests {
         assert_eq!(number(0.8), "0,8");
         assert_eq!(number(3.0), "3");
         assert_eq!(number(1.25), "1,2");
+        assert_eq!(number(f32::INFINITY), "—");
     }
 
     #[test]
@@ -309,7 +313,11 @@ mod tests {
         let (mut used, mut counted) = (BTreeSet::new(), BTreeSet::new());
         code_keys(&Path::new(env!("CARGO_MANIFEST_DIR")).join("src"), &mut used, &mut counted);
         data_keys(&mut used);
-        used.extend(["language.name".into(), "language.decimal".into()]);
+        used.extend([
+            "language.name".into(),
+            "language.decimal".into(),
+            "common.unreachable".into(),
+        ]);
         let french = &TABLES[0];
         let missing: Vec<&String> = used.iter().filter(|k| !french.contains_key(*k)).collect();
         let forms: Vec<String> =
