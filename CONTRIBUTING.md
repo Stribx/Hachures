@@ -149,7 +149,7 @@ harness run by its frame rate: use the logged GPU pass times and the in-game F3 
 
 ## Pull requests
 
-Open a pull request against `main` only after the local gate passes. The PR description must state:
+Open a pull request against `develop` (only `release/*` and `hotfix/*` target `main`) once the local gate passes. The PR description must state:
 
 - the issue or design decision;
 - the current project state and the intended change;
