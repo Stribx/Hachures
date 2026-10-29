@@ -50,3 +50,4 @@ Break one and CI fails; change the code, never silence the check. Full text: `do
 | Screenshots, the harness env vars, the balance bot | `docs/agents/dev-tools.md` |
 | Text the player reads, a new language | `docs/agents/i18n.md` |
 | Issues, specs, triage, ADRs | `docs/agents/issue-tracker.md`, `triage-labels.md`, `domain.md` |
+| What's done, what's next, the game's % (tick items as work lands) | `docs/roadmap.md` |
