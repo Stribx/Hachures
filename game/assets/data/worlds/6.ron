@@ -1,0 +1,42 @@
+// Monde 6 : Le Plan-Relief.
+(
+    name: "world.6.name",
+    defends: "world.6.defends",
+    event: Some((
+        cells: [Eau],
+        becomes: Glace,
+        lasts: 1,
+        announce: "world.6.announce",
+        during: "world.6.during",
+        refuse_next: "world.6.refuse_next",
+        refuse_after: "world.6.refuse_after",
+        color: (0.55, 0.7, 0.85),
+    )),
+    boss: Some((
+        name: "boss.dernier_cadastre.name",
+        breach: 8,
+        borne_hp: 2.4,
+        phases: [
+            (
+                name: "boss.dernier_cadastre.lecture",
+                until: 0.66,
+                species: "dernier_cadastre",
+                cadastre: true,
+            ),
+            (
+                name: "boss.dernier_cadastre.registre",
+                until: 0.33,
+                species: "dernier_registre",
+                change_every: 1,
+                change: Some(Cadastre),
+                cadastre: true,
+            ),
+            (
+                name: "boss.dernier_cadastre.case_blanche",
+                until: 0.0,
+                species: "dernier_case_blanche",
+                cadastre: true,
+            ),
+        ],
+    )),
+)

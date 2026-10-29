@@ -27,7 +27,7 @@ pub(crate) fn inking(
     if let Some(&tool) = level.tools.iter().find(|&&t| keys.just_pressed(TOOLS[t].key)) {
         selection.tool = tool;
     }
-    if TOOLS[selection.tool].act == Act::Date {
+    if matches!(TOOLS[selection.tool].act, Act::Date | Act::Hoist | Act::Sign) {
         if keys.just_pressed(KeyCode::KeyP) || mouse.just_pressed(MouseButton::Left) {
             level.ink(0, selection.tool);
         }
@@ -81,6 +81,13 @@ impl Level {
             self.used.push(tool);
             return self.date();
         }
+        if matches!(act, Act::Hoist | Act::Sign) {
+            self.sepia -= self.tool_cost(tool);
+            if !self.used.contains(&tool) {
+                self.used.push(tool);
+            }
+            return;
+        }
         let paid = self.tool_cost(tool);
         self.sepia -= paid;
         if !self.used.contains(&tool) {
@@ -125,7 +132,7 @@ impl Level {
             Act::Biffer => Edit::Unink(
                 self.stroke(cell).map_or(self.terrain.base().tiles[cell], |s| self.inked[s].under),
             ),
-            Act::Date => Edit::Ink(self.terrain.base().tiles[cell]),
+            Act::Date | Act::Hoist | Act::Sign => Edit::Ink(self.terrain.base().tiles[cell]),
         }
     }
 

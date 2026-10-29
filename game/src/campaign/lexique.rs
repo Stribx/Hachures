@@ -129,7 +129,7 @@ pub fn tool_lines(
                 .collect();
             lines.push(Line::new(n_("lexique.step"), &[prices.join(", ")]));
         }
-        Act::Scrape | Act::Rename | Act::Biffer | Act::Date => {}
+        Act::Scrape | Act::Rename | Act::Biffer | Act::Date | Act::Hoist | Act::Sign => {}
     }
     lines
 }

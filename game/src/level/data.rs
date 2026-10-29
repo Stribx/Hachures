@@ -7,7 +7,7 @@ use crate::map::grid::Tile;
 use crate::map::terrain::Edit;
 
 /// The campaign, in order.
-pub const LEVELS: [&str; 17] = [
+pub const LEVELS: [&str; 25] = [
     include_str!("../../assets/data/levels/0-0.ron"),
     include_str!("../../assets/data/levels/1-1.ron"),
     include_str!("../../assets/data/levels/1-2.ron"),
@@ -25,6 +25,14 @@ pub const LEVELS: [&str; 17] = [
     include_str!("../../assets/data/levels/4-2.ron"),
     include_str!("../../assets/data/levels/4-3.ron"),
     include_str!("../../assets/data/levels/4-4.ron"),
+    include_str!("../../assets/data/levels/5-1.ron"),
+    include_str!("../../assets/data/levels/5-2.ron"),
+    include_str!("../../assets/data/levels/5-3.ron"),
+    include_str!("../../assets/data/levels/5-4.ron"),
+    include_str!("../../assets/data/levels/6-1.ron"),
+    include_str!("../../assets/data/levels/6-2.ron"),
+    include_str!("../../assets/data/levels/6-3.ron"),
+    include_str!("../../assets/data/levels/6-4.ron"),
 ];
 
 /// Enemies reaching the Cible or the Borne-Mère before the Rôle is lost (not in the docs; set with
@@ -54,6 +62,9 @@ pub struct LevelData {
     /// Wave at which world 4's wind reverses.
     #[serde(default)]
     pub wind_turn: Option<u32>,
+    /// Wave and state of each lock gate: `true` means open water.
+    #[serde(default)]
+    pub vanne_schedule: Vec<(u32, bool)>,
     pub map: Vec<String>,
     pub waves: Vec<Vec<(String, u32)>>,
     #[serde(default)]

@@ -38,6 +38,8 @@ pub enum Tile {
     Saline,
     /// The Meridian's cadastral cut: dunes stop at it.
     Cadastre,
+    /// A lock gate, open as water or closed as ground according to the timetable.
+    Vanne,
 }
 
 impl Tile {
@@ -61,6 +63,7 @@ impl Tile {
             Tile::Dune => n_("tile.dune"),
             Tile::Saline => n_("tile.saline"),
             Tile::Cadastre => n_("tile.cadastre"),
+            Tile::Vanne => n_("tile.vanne"),
         }
     }
 
@@ -130,6 +133,7 @@ impl Grid {
                 'd' => Tile::Dune,
                 's' => Tile::Saline,
                 'c' => Tile::Cadastre,
+                'v' => Tile::Vanne,
                 'S' => {
                     grid.spawns.push(i);
                     Tile::Sol

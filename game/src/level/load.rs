@@ -26,6 +26,7 @@ impl Level {
             name: String::new(),
             terrain: Terrain::new(base, Reach::new(&tower_stats, &[]), &species),
             events: Vec::new(),
+            vanne_schedule: Vec::new(),
             event_on: false,
             event_next: false,
             dated: false,
@@ -34,6 +35,8 @@ impl Level {
             darkness: None,
             wind_turn: None,
             dune_direction: 1,
+            vanne_open: false,
+            uniform_profile: false,
             species,
             present,
             waves: Vec::new(),
@@ -124,6 +127,9 @@ impl Level {
         level.darkness = data.darkness;
         level.wind_turn = data.wind_turn;
         level.dune_direction = 1;
+        level.vanne_open = data.vanne_schedule.first().is_some_and(|(_, open)| *open);
+        level.terrain.set_vanne(level.vanne_open, &level.species);
+        level.vanne_schedule = data.vanne_schedule;
         level.event_next = level.event_at(1);
         level.waves = waves;
         level.present = present;

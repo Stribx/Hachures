@@ -83,6 +83,7 @@ pub fn look(tile: Tile) -> Block {
         Tile::Dune => Block { height: 0.28, color: Color::srgb(0.82, 0.68, 0.38) },
         Tile::Saline => Block { height: 0.08, color: Color::srgb(0.92, 0.9, 0.8) },
         Tile::Cadastre => Block { height: 0.22, color: Color::srgb(0.36, 0.27, 0.2) },
+        Tile::Vanne => Block { height: 0.12, color: WATER },
     }
 }
 

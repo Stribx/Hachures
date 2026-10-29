@@ -25,7 +25,7 @@ impl Biome {
             1 => Biome::Cols,
             2 => Biome::Karst,
             3 => Biome::Desert,
-            _ => panic!("world {world} has no biome"),
+            _ => Biome::Desert,
         }
     }
 }

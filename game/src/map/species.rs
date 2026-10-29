@@ -133,6 +133,9 @@ fn default_damageable() -> bool {
 impl Species {
     /// Cost of walking off `tile`; tiles missing from the profile are impassable.
     pub fn cost(&self, tile: Tile) -> f32 {
+        if matches!(tile, Tile::Vanne | Tile::Cadastre) && !self.costs.contains_key(&tile) {
+            return self.cost(Tile::Sol).min(self.cost(Tile::Eau));
+        }
         self.costs.get(&tile).copied().unwrap_or(f32::INFINITY)
     }
 

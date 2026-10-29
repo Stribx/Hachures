@@ -50,8 +50,13 @@ impl Level {
             self.mix(&mut queue);
         }
         self.wave = Wave { number, running: true, queue, ..default() };
+        self.uniform_profile = self.world == 5;
+        self.terrain.set_uniform_profile(self.uniform_profile, &self.species);
         if self.wind_turn == Some(number) {
             self.dune_direction *= -1;
+        }
+        if let Some((_, open)) = self.vanne_schedule.iter().find(|(wave, _)| *wave == number) {
+            self.set_vanne(*open);
         }
         self.lives_at_wave_start = self.lives;
         // Scripted changes due now fall on the empty map.
@@ -82,6 +87,10 @@ impl Level {
         if self.event_on {
             self.event_on = false;
             self.follow_event();
+        }
+        if self.uniform_profile {
+            self.uniform_profile = false;
+            self.terrain.set_uniform_profile(false, &self.species);
         }
         let lost = self.lives_at_wave_start.saturating_sub(self.lives) as i32;
         self.tension = (self.tension + if lost == 0 { 1 } else { -lost.min(2) }).clamp(-2, 2);

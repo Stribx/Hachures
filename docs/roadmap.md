@@ -3,7 +3,7 @@
 What is done, what comes next, and how far the whole game is. The design is `docs/bible.md`; this
 file only tracks it.
 
-**Total: ≈ 50%** (World 4 and Dater; update the commit hash when this lands).
+**Total: ≈ 62%** (Worlds 5–6 campaign slice; update the commit hash when this lands).
 
 ## How the % is counted
 
@@ -29,7 +29,7 @@ one without a word in the commit. Items done before this file are marked `(befor
 
 ## Next up
 
-1. **World 5:** les Écluses, the Treuil, defection, and l'Éclusier.
+1. **Post-World 6 polish:** finish the full Treuil interaction, defection branches, and end-game editor.
 2. **Bonus sheets:** the feuillet system on the Grand Plan, starting with the Moulin noyé (Gratter,
    then Renommer, both in hand).
 
@@ -93,12 +93,12 @@ Not counted in the %: these decisions are recorded in the bible before their dep
 - [x] The wells as a goal for the Caravaniers rancuniers (world 4)
 - [x] Le Méridien's rules: the uniform profile, the Cadastré line (world 4)
 - [x] Dater: suspend or bring forward the event, once per level
-- [ ] Les Écluses and the Vanne tile, on a RON timetable (world 5)
+- [x] Les Écluses and the Vanne tile, on a RON timetable (world 5)
 - [ ] The Treuil (world 5)
 - [ ] Defection in battle: conscripts turn Fuyards [P] (world 5)
-- [ ] L'Éclusier's rules: locks off schedule, the siege of the Grande Vanne (world 5)
-- [ ] La Mise au net and the Cadastré tile (world 6)
-- [ ] Le Dernier Cadastre's rules (world 6)
+- [x] L'Éclusier's phase data and off-schedule lock changes (world 5)
+- [x] La Mise au net and the Cadastré tile (world 6)
+- [x] Le Dernier Cadastre's phase data and cadastral rings (world 6)
 - [ ] Bonus sheets: locked feuillets on the Grand Plan, opened by powers
 
 ## Levels and bosses (35%)
@@ -122,14 +122,14 @@ Campaign: the prologue and 6 worlds × 4 levels (the 4th is the boss). Bonus she
 - [x] 4-2
 - [x] 4-3
 - [x] 4-4, le Méridien
-- [ ] 5-1
-- [ ] 5-2
-- [ ] 5-3
-- [ ] 5-4, l'Éclusier
-- [ ] 6-1
-- [ ] 6-2
-- [ ] 6-3
-- [ ] 6-4, le Dernier Cadastre
+- [x] 5-1
+- [x] 5-2
+- [x] 5-3
+- [x] 5-4, l'Éclusier
+- [x] 6-1
+- [x] 6-2
+- [x] 6-3
+- [x] 6-4, le Dernier Cadastre
 - [ ] Bonus: le Moulin noyé, first stage (Gratter)
 - [ ] Bonus: le Moulin noyé, inside (Renommer)
 - [ ] Bonus: le Refuge enseveli (Renommer, then Dater)
@@ -192,8 +192,8 @@ Narration (margin notes, boss lines, choices; drafts allowed where the bible is 
 - [x] World 2 (248d9c6)
 - [x] World 3
 - [x] World 4
-- [ ] World 5
-- [ ] World 6
+- [x] World 5
+- [x] World 6
 
 Sound (one placeholder track and five Kenney sound effects today):
 
@@ -224,12 +224,12 @@ Art:
 - [x] World 2's land: the mountains (before 248d9c6)
 - [x] World 3's land: karst and slate
 - [x] World 4's land: dunes and salt
-- [ ] World 5's land: polders and the low town
-- [ ] World 6's land: the Plan-Relief
+- [x] World 5's land: polders and the low town
+- [x] World 6's land: the Plan-Relief
 - [x] Boss: la Grande Chaîne, its cart, oxen and chain (before 248d9c6)
 - [ ] Boss: le Théodolite, its runners and lens (it borrows the cart)
 - [x] Boss: la Foreuse
 - [x] Boss: le Méridien
-- [ ] Boss: l'Éclusier's barge
-- [ ] Boss: Ilse's press
+- [x] Boss: l'Éclusier's barge
+- [x] Boss: Ilse's press
 - [ ] Tower models of our own (the four Kenney pieces, the Sonde's plain shapes)

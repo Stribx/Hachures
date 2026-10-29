@@ -68,6 +68,8 @@ pub struct Terrain {
     event: Option<&'static Event>,
     /// Terrain blocks must be rebuilt from `grid`.
     redraw: bool,
+    vanne_open: bool,
+    uniform_profile: bool,
 }
 
 impl Terrain {
@@ -80,6 +82,8 @@ impl Terrain {
             reach,
             event: None,
             redraw: true,
+            vanne_open: false,
+            uniform_profile: false,
         };
         terrain.settle(species);
         terrain
@@ -110,7 +114,18 @@ impl Terrain {
         if self.event.map(std::ptr::from_ref) != event.map(std::ptr::from_ref) {
             self.base.thawed.clear();
         }
+
         self.event = event;
+        self.settle(species);
+    }
+
+    pub fn set_vanne(&mut self, open: bool, species: &[Species]) {
+        self.vanne_open = open;
+        self.settle(species);
+    }
+
+    pub fn set_uniform_profile(&mut self, uniform: bool, species: &[Species]) {
+        self.uniform_profile = uniform;
         self.settle(species);
     }
 
@@ -153,12 +168,31 @@ impl Terrain {
     fn settle(&mut self, species: &[Species]) {
         self.grid = self.walked(self.base.clone(), &self.towers);
         self.base.cover.clone_from(&self.grid.cover);
-        self.fields = flow::fields(&self.grid, species);
+        if self.uniform_profile {
+            let Some(template) = species.iter().find(|s| s.name == "chaineur") else {
+                self.fields = flow::fields(&self.grid, species);
+                self.redraw = true;
+                return;
+            };
+            let mut profiles = species.to_vec();
+            for profile in &mut profiles {
+                profile.reading = template.reading;
+                profile.costs = template.costs.clone();
+            }
+            self.fields = flow::fields(&self.grid, &profiles);
+        } else {
+            self.fields = flow::fields(&self.grid, species);
+        }
         self.redraw = true;
     }
 
     /// `base` with the towers' shadow, under the world event while it lasts.
     fn walked(&self, mut base: Grid, towers: &[(usize, Weapon)]) -> Grid {
+        for tile in &mut base.tiles {
+            if *tile == Tile::Vanne {
+                *tile = if self.vanne_open { Tile::Eau } else { Tile::Sol };
+            }
+        }
         base.cover = (0..base.tiles.len())
             .map(|i| {
                 let covering = towers.iter().filter(|&&(t, weapon)| {

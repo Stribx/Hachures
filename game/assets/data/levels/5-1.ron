@@ -1,0 +1,32 @@
+(
+    world: 5,
+    at: (320.0, -36.0),
+    name: "level.5-1.name",
+    sepia: 190,
+    tools: ["barricade", "boue", "arbalète", "mortier", "harpon", "lanterne"],
+    events: [],
+    vanne_schedule: [(1, false), (3, true), (5, false)],
+    notes: [
+        (on: Start, text: "note.5-1.quay"),
+        (on: Wave(3), text: "note.5-1.bell"),
+    ],
+    places: [(name: "place.quai_haleurs", at: [(2, 1)])],
+    map: [
+        "^^^^^^^^^^^^^^^^",
+        "S...v...,,,,....",
+        "^......B.......^",
+        "^....vv........^",
+        "^..............^",
+        "^.............M^",
+        "^..............^",
+        "^^^^^^^^^^^^^^^^",
+    ],
+    waves: [
+        [("chaineur", 4)],
+        [("haleur", 4), ("chaineur", 2)],
+        [("echassier_rancunier", 4), ("haleur", 3)],
+        [("jalonneur", 3), ("chaineur_elite", 2)],
+        [("harde", 4), ("haleur", 4)],
+        [("chaineur_elite", 4), ("echassier_rancunier", 4)],
+    ],
+)

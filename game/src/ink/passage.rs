@@ -23,6 +23,9 @@ impl Level {
                     None
                 };
             }
+            Act::Hoist | Act::Sign => {
+                return (self.sepia < self.tool_cost(tool)).then_some(n_("refusal.sepia"));
+            }
             _ => {}
         }
         let Some(tile) = TOOLS[tool].act.lays() else {

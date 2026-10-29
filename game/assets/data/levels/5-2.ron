@@ -1,0 +1,33 @@
+(
+    world: 5,
+    at: (340.0, -36.0),
+    name: "level.5-2.name",
+    sepia: 210,
+    tools: ["barricade", "boue", "ronces", "arbalète", "mortier", "harpon", "lanterne"],
+    events: [4],
+    vanne_schedule: [(1, false), (2, true), (4, false), (6, true)],
+    notes: [
+        (on: Start, text: "note.5-2.flood"),
+        (on: Event, text: "note.5-2.return"),
+    ],
+    places: [(name: "place.polders_bas", at: [(3, 2), (4, 2)])],
+    map: [
+        "^^^^^^^^^^^^^^^^",
+        "S..,,,,v........",
+        "^..,,,,........^",
+        "^......B.......^",
+        "^..~~~~........^",
+        "^.............M^",
+        "^..............^",
+        "^^^^^^^^^^^^^^^^",
+    ],
+    waves: [
+        [("chaineur", 4)],
+        [("haleur", 4), ("echassier_rancunier", 3)],
+        [("harde", 4), ("haleur", 4)],
+        [("echassier_rancunier", 5), ("jalonneur", 2)],
+        [("chaineur_elite", 5), ("haleur", 5)],
+        [("harde", 6), ("echassier_rancunier", 5)],
+        [("haleur", 6), ("chaineur_elite", 5)],
+    ],
+)

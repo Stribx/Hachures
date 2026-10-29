@@ -30,6 +30,8 @@ pub struct Level {
     pub terrain: Terrain,
     /// Waves the world event starts at; it lasts `event.lasts` waves.
     pub events: Vec<u32>,
+    /// Wave and state of each lock gate: `true` means open water.
+    pub vanne_schedule: Vec<(u32, bool)>,
     /// The world event is under way.
     pub event_on: bool,
     /// The next wave brings the event: its map is checked too before inking.
@@ -44,6 +46,9 @@ pub struct Level {
     pub darkness: Option<(u32, u32)>,
     pub wind_turn: Option<u32>,
     pub dune_direction: i32,
+    pub vanne_open: bool,
+    /// World 6's Mise au net: all species temporarily read the imperial profile.
+    pub uniform_profile: bool,
     pub species: Vec<Species>,
     /// The species this level sends (the boss's phases included), sorted: le Droit de Passage and
     /// Tab only consider these.
@@ -162,6 +167,13 @@ impl Level {
             }
         }
         self.alter(edits);
+    }
+
+    pub fn set_vanne(&mut self, open: bool) {
+        if self.vanne_open != open {
+            self.vanne_open = open;
+            self.terrain.set_vanne(open, &self.species);
+        }
     }
 
     /// `base` once every scripted change still to come has fallen.

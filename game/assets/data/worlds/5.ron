@@ -1,0 +1,42 @@
+// Monde 5 : Vannes-sur-Lieue.
+(
+    name: "world.5.name",
+    defends: "world.5.defends",
+    event: Some((
+        cells: [SolBas],
+        becomes: Eau,
+        lasts: 1,
+        announce: "world.5.announce",
+        during: "world.5.during",
+        refuse_next: "world.5.refuse_next",
+        refuse_after: "world.5.refuse_after",
+        color: (0.15, 0.45, 0.42),
+    )),
+    boss: Some((
+        name: "boss.eclusier.name",
+        breach: 6,
+        borne_hp: 2.0,
+        phases: [
+            (
+                name: "boss.eclusier.vannes",
+                until: 0.66,
+                species: "eclusier",
+                change_every: 2,
+                change: Some(Eau),
+            ),
+            (
+                name: "boss.eclusier.siege",
+                until: 0.33,
+                species: "eclusier_siege",
+                change_every: 1,
+                change: Some(Eau),
+            ),
+            (
+                name: "boss.eclusier.doute",
+                until: 0.0,
+                species: "eclusier_doute",
+                pinnable: true,
+            ),
+        ],
+    )),
+)
