@@ -25,7 +25,7 @@ pub fn ambience(world: usize, event_on: bool, wet: bool) -> [f32; 5] {
         on(bocage && !event_on, 0.6),
         on(bocage && event_on, 0.8),
         on(wet, 0.45),
-        on(cols, if event_on { 0.9 } else { 0.5 }),
+        on(cols || biome == Biome::Karst, if event_on { 0.9 } else { 0.5 }),
     ]
 }
 

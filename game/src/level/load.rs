@@ -26,8 +26,17 @@ impl Level {
             name: String::new(),
             terrain: Terrain::new(base, Reach::new(&tower_stats, &[]), &species),
             events: Vec::new(),
+            vanne_schedule: Vec::new(),
             event_on: false,
             event_next: false,
+            dated: false,
+            event_suppressed: false,
+            rename_free: false,
+            darkness: None,
+            wind_turn: None,
+            dune_direction: 1,
+            vanne_open: false,
+            uniform_profile: false,
             species,
             present,
             waves: Vec::new(),
@@ -44,7 +53,6 @@ impl Level {
             loot_carry: 0.0,
             lives: START_LIVES,
             names: 0,
-            fuyard_hurt: false,
             walkers: Vec::new(),
             notes: Vec::new(),
             margin: Vec::new(),
@@ -116,6 +124,12 @@ impl Level {
         level.sepia = data.sepia;
         level.tools = tools;
         level.events = data.events;
+        level.darkness = data.darkness;
+        level.wind_turn = data.wind_turn;
+        level.dune_direction = 1;
+        level.vanne_open = data.vanne_schedule.first().is_some_and(|(_, open)| *open);
+        level.terrain.set_vanne(level.vanne_open, &level.species);
+        level.vanne_schedule = data.vanne_schedule;
         level.event_next = level.event_at(1);
         level.waves = waves;
         level.present = present;

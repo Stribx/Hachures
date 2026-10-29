@@ -1,4 +1,4 @@
-//! The two biomes the worlds lie in: the bocage and the Cols.
+//! The biomes the worlds lie in: the bocage, the Cols and the Combes.
 
 /// The kind of biome a world lies in.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -7,6 +7,10 @@ pub enum Biome {
     Bocage,
     /// World 2: alpine meadows, cold with le Gel.
     Cols,
+    /// World 3: karst plateaus and galleries.
+    Karst,
+    /// World 4: erg and salt pans.
+    Desert,
 }
 
 impl Biome {
@@ -19,7 +23,9 @@ impl Biome {
         match world {
             0 => Biome::Bocage,
             1 => Biome::Cols,
-            _ => panic!("world {world} has no biome"),
+            2 => Biome::Karst,
+            3 => Biome::Desert,
+            _ => Biome::Desert,
         }
     }
 }

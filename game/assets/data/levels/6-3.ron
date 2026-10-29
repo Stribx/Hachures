@@ -1,0 +1,33 @@
+(
+    world: 6,
+    at: (460.0, -48.0),
+    name: "level.6-3.name",
+    sepia: 250,
+    tools: ["barricade", "boue", "ronces", "arbalète", "mortier", "harpon", "lanterne"],
+    events: [5],
+    vanne_schedule: [(2, true), (6, false)],
+    choice: Some((
+        id: "alliance",
+        prompt: "choice.6-3.prompt",
+        options: [("corentin", "choice.6-3.corentin"), ("hesse", "choice.6-3.hesse")],
+    )),
+    notes: [(on: Start, text: "note.6-3.allies")],
+    map: [
+        "^^^^^^^^^^^^^^^^",
+        "S....c..........",
+        "^....c.B.......^",
+        "^..............^",
+        "^..............^",
+        "^.............M^",
+        "^..............^",
+        "^^^^^^^^^^^^^^^^",
+    ],
+    waves: [
+        [("chaineur", 4), ("greffier", 3)],
+        [("harde", 5), ("mandataire", 2)],
+        [("haleur", 5), ("gens_du_col", 4)],
+        [("echassier_rancunier", 6), ("greffier", 5)],
+        [("mandataire", 4), ("chaineur_elite", 5)],
+        [("harde", 7), ("greffier", 6)],
+    ],
+)

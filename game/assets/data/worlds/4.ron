@@ -1,0 +1,39 @@
+// Monde 4 : Le Partage des Sables.
+(
+    name: "world.4.name",
+    defends: "world.4.defends",
+    event: Some((
+        cells: [Dune],
+        becomes: Dune,
+        lasts: 1,
+        announce: "world.4.announce",
+        during: "world.4.during",
+        refuse_next: "world.4.refuse_next",
+        refuse_after: "world.4.refuse_after",
+        color: (0.9, 0.65, 0.2),
+    )),
+    boss: Some((
+        name: "boss.meridien.name",
+        breach: 6,
+        borne_hp: 1.8,
+        phases: [
+            (
+                name: "boss.meridien.ligne",
+                until: 0.66,
+                species: "meridien",
+            ),
+            (
+                name: "boss.meridien.midi",
+                until: 0.33,
+                species: "meridien_midi",
+            ),
+            (
+                name: "boss.meridien.trace",
+                until: 0.0,
+                species: "meridien_trace",
+                change_every: 1,
+                cadastre: true,
+            ),
+        ],
+    )),
+)

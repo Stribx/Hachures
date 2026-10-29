@@ -9,6 +9,7 @@ pub mod ambience;
 pub(crate) mod barricade;
 pub mod biome;
 mod cells;
+mod darkness;
 pub mod daylight;
 mod decor;
 pub mod fauna;
@@ -35,7 +36,8 @@ pub fn plugin(app: &mut App) {
         .add_systems(Startup, ambience::start)
         .add_systems(
             Update,
-            (daylight::follow_the_waves, weather::fall, ambience::fade).in_set(Step::Render),
+            (daylight::follow_the_waves, weather::fall, ambience::fade, darkness::apply)
+                .in_set(Step::Render),
         )
         .add_systems(
             Update,
@@ -78,6 +80,10 @@ pub fn look(tile: Tile) -> Block {
         Tile::Palissade => Block { height: 0.2, color: Color::srgb(0.36, 0.26, 0.2) },
         // A pit: sunk to the walnut base and slate-black.
         Tile::Gouffre => Block { height: 0.02, color: Color::srgb(0.13, 0.12, 0.13) },
+        Tile::Dune => Block { height: 0.28, color: Color::srgb(0.82, 0.68, 0.38) },
+        Tile::Saline => Block { height: 0.08, color: Color::srgb(0.92, 0.9, 0.8) },
+        Tile::Cadastre => Block { height: 0.22, color: Color::srgb(0.36, 0.27, 0.2) },
+        Tile::Vanne => Block { height: 0.12, color: WATER },
     }
 }
 

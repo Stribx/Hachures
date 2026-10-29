@@ -14,7 +14,6 @@
     notes: [
         (on: Start, text: "note.1-3.oudine_ce_champ_appelle"),
         (on: Wave(9), text: "note.1-3.echassier_fredonne_connais_cet"),
-        (on: FuyardHurt, text: "note.1-3.eux_sous_mes_tours"),
         (on: Won, text: "note.1-3.role_grave_reste_savoir"),
     ],
     choice: Some((

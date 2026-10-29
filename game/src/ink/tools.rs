@@ -1,4 +1,4 @@
-//! The eleven tools Nève holds: their keys, names, prices and what each does to a cell.
+//! The tools Nève holds: their keys, names, prices and what each does to a cell.
 
 use bevy::prelude::*;
 
@@ -20,6 +20,12 @@ pub enum Act {
     Rename,
     /// Takes back one of Nève's own strokes (Biffer): the cell is what it was before.
     Biffer,
+    /// Dates the world's event once in the level.
+    Date,
+    /// Pulls a walker one cell toward the hoist.
+    Hoist,
+    /// Unlocks the level editor after the final campaign.
+    Sign,
 }
 
 impl Act {
@@ -28,7 +34,7 @@ impl Act {
         match self {
             Act::Lay(tile) => Some(tile),
             Act::Raise(_) => Some(Tile::Tour),
-            Act::Scrape | Act::Rename | Act::Biffer => None,
+            Act::Scrape | Act::Rename | Act::Biffer | Act::Date | Act::Hoist | Act::Sign => None,
         }
     }
 
@@ -60,6 +66,7 @@ impl Tool {
     pub fn digit(&self) -> String {
         match self.key {
             KeyCode::Backspace => t(n_("controls.key.backspace")).to_string(),
+            KeyCode::KeyP => "P".to_string(),
             key => format!("{key:?}").trim_start_matches("Digit").to_string(),
         }
     }
@@ -69,7 +76,7 @@ const fn tool(key: KeyCode, name: &'static str, label: &'static str, cost: u32, 
     Tool { key, name, label, cost, act }
 }
 
-pub const TOOLS: [Tool; 11] = [
+pub const TOOLS: [Tool; 14] = [
     tool(KeyCode::Digit1, "barricade", n_("tool.barricade"), 10, Act::Lay(Tile::Barricade)),
     tool(KeyCode::Digit2, "boue", n_("tool.boue"), 15, Act::Lay(Tile::Boue)),
     tool(KeyCode::Digit3, "ronces", n_("tool.ronces"), 20, Act::Lay(Tile::Ronces)),
@@ -87,6 +94,9 @@ pub const TOOLS: [Tool; 11] = [
     // Free: what it gives back is the price (docs, section 7). Last, so the balance bot's indices
     // hold; on Backspace, like taking back a stroke.
     tool(KeyCode::Backspace, "biffer", n_("tool.biffer"), 0, Act::Biffer),
+    tool(KeyCode::KeyP, "dater", n_("tool.dater"), 35, Act::Date),
+    tool(KeyCode::KeyT, "treuil", n_("tool.treuil"), 45, Act::Hoist),
+    tool(KeyCode::KeyS, "signer", n_("tool.signer"), 0, Act::Sign),
 ];
 
 /// Index in `TOOLS` of the tool called `name`.

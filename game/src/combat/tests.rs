@@ -83,6 +83,26 @@ fn arbalete_spares_fuyards() {
     assert_eq!(level.names, 1, "the Fuyard reached the Refuge");
 }
 
+/// Mortar splash must not damage an invulnerable Fuyard standing beside a hostile target.
+#[test]
+fn mortar_spares_fuyards_in_splash() {
+    let level = Level::parse("S.....M");
+    let tower_at = map::cell_pos(level.terrain.grid(), 1);
+    let (chaineur, fuyard) = (walker(&level, "chaineur", 100.0), walker(&level, "fuyard", 100.0));
+    let mut app = app_with(level);
+    app.world_mut().spawn((
+        Tower { cell: 1, weapon: Weapon::Mortier, ready_in: 0.0 },
+        Transform::from_translation(tower_at),
+    ));
+    let chaineur = app.world_mut().spawn(chaineur).id();
+    let fuyard = app.world_mut().spawn(fuyard).id();
+
+    app.update();
+
+    assert!(app.world().get::<Enemy>(chaineur).unwrap().hp < 100.0);
+    assert_eq!(app.world().get::<Enemy>(fuyard).unwrap().hp, 100.0);
+}
+
 /// The Lanterne blinds the Gens du Col (double damage) and slows them.
 #[test]
 fn lanterne_slows() {

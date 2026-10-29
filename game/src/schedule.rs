@@ -30,6 +30,8 @@ pub enum Screen {
     Lexique,
     /// Le carnet de Nève, once the campaign is over.
     Carnet,
+    /// The post-game RON editor.
+    Editor,
     /// The keys, read-only.
     Controls,
     Credits,

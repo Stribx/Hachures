@@ -69,6 +69,8 @@ pub enum Carry {
     Gast,
     /// The sighting lantern on a post at the front of the box.
     Visee,
+    /// The Foreuse's toothed drill head.
+    Foreuse,
 }
 
 /// What a species walks towards.
@@ -81,6 +83,7 @@ pub enum Goal {
     Refuge,
     /// Where an escorted convoy leaves the map (`X`).
     Sortie,
+    Puits,
 }
 
 #[derive(Clone, Deserialize)]
@@ -105,6 +108,9 @@ pub struct Species {
     pub mends: f32,
     /// Towers only aim at hostiles (a mortar splash still hurts the others).
     pub hostile: bool,
+    /// Whether a weapon can damage this species.
+    #[serde(default = "default_damageable")]
+    pub damageable: bool,
     /// Relative to the Chaîneur's 100 HP.
     pub hp: f32,
     /// Tiles per second on a cost-1 tile.
@@ -120,9 +126,16 @@ pub struct Species {
     pub costs: HashMap<Tile, f32>,
 }
 
+fn default_damageable() -> bool {
+    true
+}
+
 impl Species {
     /// Cost of walking off `tile`; tiles missing from the profile are impassable.
     pub fn cost(&self, tile: Tile) -> f32 {
+        if matches!(tile, Tile::Vanne | Tile::Cadastre) && !self.costs.contains_key(&tile) {
+            return self.cost(Tile::Sol).min(self.cost(Tile::Eau));
+        }
         self.costs.get(&tile).copied().unwrap_or(f32::INFINITY)
     }
 
@@ -140,7 +153,11 @@ impl Species {
 pub fn load() -> Vec<Species> {
     let map: BTreeMap<String, Species> =
         ron::from_str(include_str!("../../assets/data/species.ron")).expect("invalid species.ron");
-    map.into_iter().map(|(name, s)| Species { name, ..s }).collect()
+    let mut species: Vec<_> = map.into_iter().map(|(name, s)| Species { name, ..s }).collect();
+    if let Some(chainman) = species.iter().position(|s| s.name == "chaineur") {
+        species.swap(0, chainman);
+    }
+    species
 }
 
 /// Index of the species called `name`.

@@ -1,0 +1,32 @@
+(
+    world: 5,
+    at: (360.0, -36.0),
+    name: "level.5-3.name",
+    sepia: 230,
+    tools: ["barricade", "boue", "ronces", "arbalète", "mortier", "harpon", "lanterne"],
+    events: [],
+    vanne_schedule: [(1, true), (3, false), (5, true)],
+    changes: [
+        (wave: 5, at: [(7, 3)], becomes: Eau, announce: Some("world.5.out_of_schedule"),
+         color: Some((0.2, 0.6, 0.55))),
+    ],
+    notes: [(on: Start, text: "note.5-3.barge")],
+    map: [
+        "^^^^^^^^^^^^^^^^",
+        "S....v..........",
+        "^....v.........^",
+        "^......B.......^",
+        "^..............^",
+        "^.............M^",
+        "^..............^",
+        "^^^^^^^^^^^^^^^^",
+    ],
+    waves: [
+        [("chaineur", 4)],
+        [("haleur", 5), ("chaineur", 2)],
+        [("echassier_rancunier", 5), ("haleur", 4)],
+        [("harde", 5), ("jalonneur", 2)],
+        [("chaineur_elite", 6), ("haleur", 5)],
+        [("echassier_rancunier", 6), ("harde", 5)],
+    ],
+)

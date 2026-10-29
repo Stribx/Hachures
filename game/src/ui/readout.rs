@@ -1,7 +1,7 @@
 //! The cartouche's lines of news: what the world is about to do, and what the cursor reads.
 
 use crate::campaign::skills::Skill;
-use crate::i18n::{t, tf};
+use crate::i18n::{number, t, tf};
 use crate::ink::{Selection, Verdict};
 use crate::level::Level;
 
@@ -37,8 +37,10 @@ pub(super) fn readout(level: &Level, selection: &Selection, verdict: &Verdict) -
         && let Some((what_if, field)) = &verdict.pencil
         && let Some(&spawn) = what_if.spawns_for(&level.species[selection.shown]).first()
     {
-        let (before, after) =
-            (level.terrain.fields()[selection.shown].dist[spawn], field.dist[spawn]);
+        let (before, after) = (
+            number(level.terrain.fields()[selection.shown].dist[spawn]),
+            number(field.dist[spawn]),
+        );
         lines.push(tf("hud.line_cost", &[&before, &after]));
     }
     if selection.calque {
@@ -49,8 +51,8 @@ pub(super) fn readout(level: &Level, selection: &Selection, verdict: &Verdict) -
             .map(|&k| {
                 let (name, cost, goal) = (
                     t(&level.species[k].label),
-                    level.species[k].cost(tile),
-                    level.terrain.fields()[k].dist[i],
+                    number(level.species[k].cost(tile)),
+                    number(level.terrain.fields()[k].dist[i]),
                 );
                 tf("hud.calque_species", &[&name, &cost, &goal])
             })

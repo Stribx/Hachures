@@ -1,0 +1,28 @@
+(
+    world: 6,
+    at: (420.0, -48.0),
+    name: "level.6-1.name",
+    sepia: 220,
+    tools: ["barricade", "boue", "ronces", "arbalète", "mortier", "harpon", "lanterne"],
+    events: [4],
+    vanne_schedule: [(2, true), (6, false)],
+    notes: [(on: Start, text: "note.6-1.archives")],
+    map: [
+        "^^^^^^^^^^^^^^^^",
+        "S..cc....,,,....",
+        "^..cc..B.......^",
+        "^..............^",
+        "^.....~~~~.....^",
+        "^.............M^",
+        "^..............^",
+        "^^^^^^^^^^^^^^^^",
+    ],
+    waves: [
+        [("chaineur", 4), ("greffier", 2)],
+        [("harde", 4), ("greffier", 4)],
+        [("gens_du_col", 4), ("mandataire", 2)],
+        [("haleur", 4), ("greffier", 5)],
+        [("echassier_rancunier", 5), ("mandataire", 3)],
+        [("chaineur_elite", 5), ("greffier", 6)],
+    ],
+)

@@ -9,13 +9,11 @@
     sepia: 120,
     tools: ["barricade", "boue", "ronces", "arbalète", "mortier"],
     events: [7, 11],
-    challenge: Some((text: "level.1-2.challenge", rule: NoFuyardHurt)),
     // Notes: see 1-1.ron. Drafts, except the wave 4 Fuyards, which are in the docs.
     notes: [
         (on: Start, text: "note.1-2.jalonneurs_regardent_pente_regardent"),
         (on: Wave(4), text: "note.1-2.gens_bocage_leurs_vaches"),
         (on: FuyardSaved, text: "note.1-2.nom_plus_dans_role"),
-        (on: FuyardHurt, text: "note.1-2.mortier_fait_difference_entre"),
         (on: Event, text: "note.1-2.crue_encore_echassiers_rient"),
     ],
     // Named places: inking any of their cells scratches the name out of the Rôle (docs, section 2). Drafts.

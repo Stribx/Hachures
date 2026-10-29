@@ -24,6 +24,10 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>, save: Res<Save>) {
     commands.spawn(page(Screen::Carnet, VEIL)).with_children(|p| {
         p.spawn(text(&assets, t("carnet.title"), TITLE_SIZE));
         p.spawn(text(&assets, tf("carnet.roll", &[&save.names()]), SUBTITLE_SIZE));
+        if let Some(ending) = save.ending() {
+            p.spawn(text(&assets, ending.label(), SUBTITLE_SIZE));
+            p.spawn(text(&assets, ending.postgame(), SMALL_SIZE));
+        }
         p.spawn(Node {
             max_width: percent(94),
             flex_wrap: FlexWrap::Wrap,

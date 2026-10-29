@@ -9,6 +9,7 @@ use crate::Step;
 use crate::campaign::{LoadLevel, load_level};
 use crate::level::Level;
 use crate::look::WorldCamera;
+use crate::map::species::Goal;
 use crate::schedule::Screen;
 
 pub fn plugin(app: &mut App) {
@@ -37,7 +38,13 @@ impl Selection {
     pub fn for_level(level: &Level) -> Selection {
         Selection {
             tool: level.tools[0],
-            shown: level.present.first().copied().unwrap_or(0),
+            shown: level
+                .present
+                .iter()
+                .copied()
+                .find(|&s| level.species[s].goal == Goal::Cible)
+                .or_else(|| level.present.first().copied())
+                .unwrap_or(0),
             calque: false,
             hovered: None,
         }

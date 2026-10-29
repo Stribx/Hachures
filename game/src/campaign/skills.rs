@@ -1,5 +1,4 @@
 //! L'arbre des sceaux (docs, section 7): three branches, each bought node by node.
-//! Only tiers 1 to 3 are in: world 1 gives 8 sceaux, and tiers 4 and 5 need powers not in yet.
 
 use serde::{Deserialize, Serialize};
 
@@ -16,6 +15,12 @@ pub enum Skill {
     LectureFine,
     SceauxBrises,
     OmbrePortee,
+    DoubleTrait,
+    GrattoirFin,
+    Leurre,
+    EncreFixe,
+    ReliefVivant,
+    NomGarde,
 }
 
 pub struct Node {
@@ -32,7 +37,7 @@ const fn node(skill: Skill, name: &'static str, cost: u32, effect: &'static str)
 /// A branch of the tree: its name (an i18n key) and its nodes in buying order.
 pub struct Branch {
     pub name: &'static str,
-    pub nodes: [Node; 3],
+    pub nodes: [Node; 5],
 }
 
 pub const BRANCHES: [Branch; 3] = [
@@ -52,6 +57,13 @@ pub const BRANCHES: [Branch; 3] = [
                 3,
                 n_("skill.contre_visee.effect"),
             ),
+            node(
+                Skill::DoubleTrait,
+                n_("skill.double_trait.name"),
+                4,
+                n_("skill.double_trait.effect"),
+            ),
+            node(Skill::EncreFixe, n_("skill.encre_fixe.name"), 6, n_("skill.encre_fixe.effect")),
         ],
     },
     Branch {
@@ -70,6 +82,18 @@ pub const BRANCHES: [Branch; 3] = [
                 n_("skill.ronces_meres.effect"),
             ),
             node(Skill::Fascines, n_("skill.fascines.name"), 3, n_("skill.fascines.effect")),
+            node(
+                Skill::GrattoirFin,
+                n_("skill.grattoir_fin.name"),
+                4,
+                n_("skill.grattoir_fin.effect"),
+            ),
+            node(
+                Skill::ReliefVivant,
+                n_("skill.relief_vivant.name"),
+                6,
+                n_("skill.relief_vivant.effect"),
+            ),
         ],
     },
     Branch {
@@ -93,6 +117,8 @@ pub const BRANCHES: [Branch; 3] = [
                 3,
                 n_("skill.ombre_portee.effect"),
             ),
+            node(Skill::Leurre, n_("skill.leurre.name"), 4, n_("skill.leurre.effect")),
+            node(Skill::NomGarde, n_("skill.nom_garde.name"), 6, n_("skill.nom_garde.effect")),
         ],
     },
 ];

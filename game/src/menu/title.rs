@@ -20,7 +20,6 @@ pub fn plugin(app: &mut App) {
 
 fn spawn(mut commands: Commands, assets: Res<AssetServer>, save: Res<Save>, level: Res<Level>) {
     let new = save.is_new();
-    // The Marches drift behind; the menu is a sheet laid on the left.
     let mut page = commands.spawn(page(Screen::Title, Color::NONE));
     page.entry::<Node>().and_modify(|mut node| {
         node.align_items = AlignItems::FlexStart;
@@ -50,7 +49,6 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>, save: Res<Save>, leve
             ))
             .observe(go(if new { Screen::Playing } else { Screen::Plan }));
             if !new {
-                // Where the campaign stands, under the button that goes back to it.
                 let n = save.sceaux();
                 let progress = tp("title.progress", n, &[&t(&level.name), &n]);
                 p.spawn(text(&assets, progress, SMALL_SIZE)).insert(TextColor(INK_SOFT));
@@ -61,6 +59,10 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>, save: Res<Save>, leve
                 if written(&save) {
                     p.spawn(button(label(&assets, t("title.carnet"))))
                         .observe(open(Screen::Carnet, Screen::Title));
+                    if save.ending().is_some() {
+                        p.spawn(button(label(&assets, t("title.editor"))))
+                            .observe(open(Screen::Editor, Screen::Title));
+                    }
                 }
             }
             p.spawn(button(label(&assets, t("menu.controls"))))
@@ -81,16 +83,6 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>, save: Res<Save>, leve
                 },
             );
         });
-        // The build, small in the corner, for bug reports.
-        page.spawn(text(&assets, concat!("v", env!("CARGO_PKG_VERSION")), SMALL_SIZE)).insert((
-            TextColor(INK_SOFT),
-            Node {
-                position_type: PositionType::Absolute,
-                right: px(16),
-                bottom: px(12),
-                ..default()
-            },
-        ));
     });
 }
 

@@ -14,7 +14,6 @@ use super::shards::shatter;
 use super::stand::Tower;
 use crate::campaign::skills::Skill;
 use crate::level::Level;
-use crate::level::story::Trigger;
 use crate::map::species::Species;
 use crate::map::terrain::Edit;
 
@@ -165,7 +164,6 @@ pub(super) fn fire(
     mut commands: Commands,
 ) {
     let level = &mut *level;
-    let mut fuyard_hurt = false;
     for (mut tower, mut tower_transform) in &mut towers {
         tower.ready_in -= time.delta_secs();
         if tower.ready_in > 0.0 {
@@ -177,7 +175,7 @@ pub(super) fn fire(
         // Aim at the hostile in range that is closest to its goal.
         let Some((target, target_pos)) = aim(level, &enemies, stats, pos, range) else { continue };
 
-        // A mortar shell hits everyone in the splash, Fuyards included.
+        // A mortar shell hits every damageable species in the splash.
         for (entity, mut enemy, t, mut boss, _) in &mut enemies {
             let hit = if stats.splash > 0.0 {
                 t.translation.distance(target_pos) <= stats.splash
@@ -185,8 +183,7 @@ pub(super) fn fire(
             } else {
                 entity == target
             };
-            if hit {
-                fuyard_hurt |= !level.species[enemy.species].hostile;
+            if hit && level.species[enemy.species].damageable {
                 strike(level, tower.weapon, stats, &mut enemy, boss.as_deref_mut());
             }
         }
@@ -198,10 +195,6 @@ pub(super) fn fire(
     }
 
     defeat(level, &enemies, &look, &mut commands);
-    if fuyard_hurt {
-        level.fuyard_hurt = true;
-        level.note(Trigger::FuyardHurt);
-    }
 }
 
 #[cfg(test)]

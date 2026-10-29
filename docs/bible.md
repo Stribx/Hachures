@@ -211,7 +211,8 @@ Choix de valeur : la progression des règles simultanées est 1, 1, 2, 2, 3, 3.
    - **Objectif :** tenir le Moulin des Noms le temps qu'Oudine grave le Rôle.
    - **Rebondissement :** la Grande Chaîne suit exactement le levé que Nève avait fait dix ans plus tôt, et elle reconnaît son écriture sur les bornes.
    - **Choix (fin du 1-3) :** où placer le Refuge ?
-     - *Au Moulin* : les Fuyards traversent la zone de tir. Le mortier peut les blesser, mais chacun qui arrive garde un Nom. Le Rôle s'enrichit et Oudine parlera plus tard.
+     - *Au Moulin* : les Fuyards traversent la zone de tir. Les éclats de mortier ne peuvent pas les blesser,
+       mais chacun qui arrive garde un Nom. Le Rôle s'enrichit et Oudine parlera plus tard.
      - *Dans le Bois* : chemin sûr, mais le Moulin est à découvert. Au boss, l'Empire grave sa propre borne sur la meule : un Nom est perdu et Oudine se tait jusqu'au monde 6.
    - Répliques :
      - Oudine : « Le gué ne s'appelle pas "gué". Il s'appelle comme celles qui l'ont passé avec un enfant sur la hanche. »
@@ -252,7 +253,9 @@ Choix de valeur : la progression des règles simultanées est 1, 1, 2, 2, 3, 3.
    - **Objectif :** faire passer le convoi de Hesse.
    - **Rebondissement :** le convoi transporte des déserteurs échassiers, ceux-là mêmes qui marchaient contre le Moulin au monde 1. Les légions sont faites de voisins.
    - **Choix :**
-     - *Escorter les déserteurs* : le niveau 2-3 devient plus dur (escorte et vagues pleines). Au monde 5, une partie des Échassiers fait défection en pleine bataille : leur profil passe en Fuyards [P].
+     - *Escorter les déserteurs* : le niveau 2-3 devient plus dur (escorte et vagues pleines). Au monde 5,
+       une quantité déterminée par ce choix d'Échassiers fait défection en pleine bataille : leur profil passe
+       en Fuyards [P].
      - *Les livrer à Corentin*, qui détourne en échange une légion : le 2-3 compte deux vagues de moins. Au monde 5, les Échassiers deviennent **Rancuniers** (profil plus agressif, ronces à coût 3 au lieu de 5) et Hesse refuse de reparaître.
    - Répliques :
      - Hesse : « Tu veux savoir qui est l'ennemi ? Regarde qui a froid aux pieds dans les deux colonnes. »
@@ -349,7 +352,8 @@ Choix de valeur : la progression des règles simultanées est 1, 1, 2, 2, 3, 3.
 4. **Monstres.**
    - **Haleur** : lit la Pente et nage (Eau à 1, Vanne à 1). Faible contre le Treuil, qui le tire hors de l'eau. 3 sépia.
    - **Échassiers** : Fuyards ou Rancuniers, selon le choix du monde 2.
-   - **Chaîneur d'élite** : plus de PV, Chaussée à 0,5.
+   - **Chaîneur d'élite** : profil distinct du Chaîneur ordinaire, défini par les règles du monde 5 et sa
+     ligne de bestiaire.
    - **Jalonneur** : vise la Grande Vanne.
 5. **Mécanique unique : les Écluses.** Un carillon sonne une vague à l'avance. Les Vannes s'ouvrent (Eau) ou se ferment (Sol) [T], selon un horaire donné en RON.
 6. **Événements scriptés.**
@@ -358,7 +362,9 @@ Choix de valeur : la progression des règles simultanées est 1, 1, 2, 2, 3, 3.
 7. **Boss : l'Éclusier** (Corentin, sur la barge-porte de la Grande Vanne).
    - **Phase 1 :** il ouvre et ferme les vannes hors horaire [T], avec une annonce raccourcie mais toujours présente.
    - **Phase 2 :** toutes les légions prennent la Grande Vanne comme destination [S] ; c'est un siège.
-   - **Phase 3, le Doute :** si les déserteurs ont été escortés au monde 2, la moitié des Échassiers passent en profil Fuyards [P] et Corentin hésite à voix haute. Point faible : le rouage maître de la barge. Le Treuil l'expose.
+   - **Phase 3, le Doute :** si les déserteurs ont été escortés au monde 2, la quantité prévue par ce choix
+     d'Échassiers passe en profil Fuyards [P] et Corentin hésite à voix haute. Point faible : le rouage maître
+     de la barge. Le Treuil l'expose.
 8. **Progression.** Tour Treuil (tire une unité d'une case, ce qui change son chemin). Clé de la Chancellerie.
 9. **Narration.**
    - **Objectif :** garder la Grande Vanne.
@@ -386,7 +392,7 @@ Choix de valeur : la progression des règles simultanées est 1, 1, 2, 2, 3, 3.
    - Faction : les greffiers, et les alliés réunis selon les choix.
 4. **Monstres.**
    - **Greffier** : lit la Pente et ne marche bien que sur le Cadastré. 2 sépia.
-   - **Légat** : élite, lit le But (la Table de Nève). 6 sépia.
+   - **Mandataire** : élite du monde 6, lit le But (la Table de Nève). 6 sépia.
    - Toutes les espèces précédentes reviennent, en mélange.
 5. **Mécanique unique : la Mise au net.** Le grincement d'une presse l'annonce. Pendant une vague, toutes les espèces prennent le profil impérial [P] : la « lecture unique ». C'est la thèse de l'Empire rendue jouable : quand tout le monde lit pareil, les détours de Nève ne servent plus à rien. Les Écluses et le Gel restent actifs : trois règles simultanées.
 6. **Événements scriptés.**
@@ -448,7 +454,7 @@ Pour les lecteurs de la Pente, le chemin dépend du terrain. Pour les lecteurs d
 | Jalonneur | But (borne ou cible) | 1 | 3 | 4 | ∞ | ∞ | ∞ | comme le Chaîneur | 0,7 | 2 | Harpon |
 | Échassier conscrit | Pente | 1 | 1 | 5 | 2 | ∞ | ∞ | Gué 1 · Glace 4 · Éboulis 3 · Dune 3 | 1,2 | 3 | Ronces, mortier |
 | Échassier rancunier (monde 5) | Pente | 1 | 1 | 3 | 2 | ∞ | ∞ | Gué 1 · Vanne 1 | 1,4 | 3 | Mortier |
-| Fuyard (non hostile) | But (Refuge) | 1 | 2 | 3 | ∞ | ∞ | ∞ | Gué 2 · Éboulis 3 | — | des Noms | — |
+| Fuyard (non hostile) | But (Refuge) | 1 | 2 | 3 | ∞ | ∞ | ∞ | Gué 2 · Éboulis 3 | — | des Noms | aucun dégât |
 | Harde | Ombre | 1 + tours | 1 + tours | 1 + tours | ∞ | ∞ | ∞ | Glace : 1 + tours · Éboulis : 1 + tours | 2,0 | 4 | Placement des tours |
 | Gens du Col | Pente | 1 | 2 | 3 | ∞ | ∞ | 3 | Glace 1 · Éboulis 2 | 1,3 | 3 | Lanterne |
 | Convoi de Hesse (allié) | But (sortie) | 1 | 2 | 3 | ∞ | ∞ | ∞ | Glace 2 · Éboulis 4 | — | — | — |
@@ -458,7 +464,7 @@ Pour les lecteurs de la Pente, le chemin dépend du terrain. Pour les lecteurs d
 | Caravanier rancunier | But (puits) | 2 | 4 | 3 | ∞ | ∞ | ∞ | Dune 1 | 1,0 | 3 | Harpon |
 | Haleur | Pente | 1 | 2 | 4 | 1 | ∞ | ∞ | Vanne 1 | 1,4 | 3 | Treuil |
 | Greffier | Pente | 3 | 4 | 6 | ∞ | ∞ | ∞ | Cadastré 0,5 | 1,0 | 2 | Tout, sauf sur le Cadastré |
-| Légat | But (Table de Nève) | 1 | 2 | 3 | ∞ | ∞ | ∞ | Cadastré 0,5 | 3,0 | 6 | Harpon puis mortier |
+| Mandataire | But (Table de Nève) | 1 | 2 | 3 | ∞ | ∞ | ∞ | Cadastré 0,5 | 3,0 | 6 | Harpon puis mortier |
 
 **Courbe de PV** (formule conservée : monde *n* = PV du monde 1 × 1,5^(n−1), puis ×1,12^(k−1) à la vague *k*). Choix de valeur : 100 PV pour le Chaîneur au monde 1.
 

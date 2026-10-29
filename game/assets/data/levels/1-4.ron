@@ -12,7 +12,6 @@
     grants: ["gratter"],
     events: [4],
     alt_refuge: Some("refuge=bois"),
-    challenge: Some((text: "level.1-4.challenge", rule: NoFuyardHurt)),
     // Notes: see 1-1.ron. Gast's line, the twist, Nève's borne line, the Bois consequence
     // and the closing transition are from the docs; the others are drafts.
     notes: [
@@ -26,7 +25,6 @@
             names: -1,
         ),
         (on: Boss("boss.grande_chaine.chaine_rompue"), text: "note.1-4.boeufs_paniquent_fuit_tours"),
-        (on: FuyardHurt, text: "note.1-4.traversent_zone_tir_savais"),
         (on: Won, text: "note.1-4.grande_chaine_effondre_dans"),
         (on: Won, text: "note.1-4.garde_ma_facon_faire"),
         (on: Won, when: Some("refuge=moulin"), text: "note.1-4.oudine_vu_passer_chacun"),

@@ -7,7 +7,7 @@ use crate::map::grid::Tile;
 use crate::map::terrain::Edit;
 
 /// The campaign, in order.
-pub const LEVELS: [&str; 9] = [
+pub const LEVELS: [&str; 25] = [
     include_str!("../../assets/data/levels/0-0.ron"),
     include_str!("../../assets/data/levels/1-1.ron"),
     include_str!("../../assets/data/levels/1-2.ron"),
@@ -17,7 +17,38 @@ pub const LEVELS: [&str; 9] = [
     include_str!("../../assets/data/levels/2-2.ron"),
     include_str!("../../assets/data/levels/2-3.ron"),
     include_str!("../../assets/data/levels/2-4.ron"),
+    include_str!("../../assets/data/levels/3-1.ron"),
+    include_str!("../../assets/data/levels/3-2.ron"),
+    include_str!("../../assets/data/levels/3-3.ron"),
+    include_str!("../../assets/data/levels/3-4.ron"),
+    include_str!("../../assets/data/levels/4-1.ron"),
+    include_str!("../../assets/data/levels/4-2.ron"),
+    include_str!("../../assets/data/levels/4-3.ron"),
+    include_str!("../../assets/data/levels/4-4.ron"),
+    include_str!("../../assets/data/levels/5-1.ron"),
+    include_str!("../../assets/data/levels/5-2.ron"),
+    include_str!("../../assets/data/levels/5-3.ron"),
+    include_str!("../../assets/data/levels/5-4.ron"),
+    include_str!("../../assets/data/levels/6-1.ron"),
+    include_str!("../../assets/data/levels/6-2.ron"),
+    include_str!("../../assets/data/levels/6-3.ron"),
+    include_str!("../../assets/data/levels/6-4.ron"),
 ];
+
+/// Post-game sheets unlocked by the corresponding power.
+pub const BONUS_LEVELS: [&str; 7] = [
+    include_str!("../../assets/data/bonus/1-moulin.ron"),
+    include_str!("../../assets/data/bonus/1-moulin-inside.ron"),
+    include_str!("../../assets/data/bonus/2-refuge.ron"),
+    include_str!("../../assets/data/bonus/3-premiers-plans.ron"),
+    include_str!("../../assets/data/bonus/4-saline.ron"),
+    include_str!("../../assets/data/bonus/5-ville-basse.ron"),
+    include_str!("../../assets/data/bonus/6-salle-vaux.ron"),
+];
+
+pub fn bonus(index: usize) -> LevelData {
+    ron::from_str(BONUS_LEVELS[index]).expect("invalid bonus level file")
+}
 
 /// Enemies reaching the Cible or the Borne-Mère before the Rôle is lost (not in the docs; set with
 /// the balance bot).
@@ -40,6 +71,15 @@ pub struct LevelData {
     pub grants: Vec<String>,
     /// Waves the world event starts at.
     pub events: Vec<u32>,
+    /// Waves during which the board is dimmed; the Calque remains readable.
+    #[serde(default)]
+    pub darkness: Option<(u32, u32)>,
+    /// Wave at which world 4's wind reverses.
+    #[serde(default)]
+    pub wind_turn: Option<u32>,
+    /// Wave and state of each lock gate: `true` means open water.
+    #[serde(default)]
+    pub vanne_schedule: Vec<(u32, bool)>,
     pub map: Vec<String>,
     pub waves: Vec<Vec<(String, u32)>>,
     #[serde(default)]
@@ -144,5 +184,14 @@ mod tests {
         data.map = vec!["R.W".into()];
         assert_eq!(data.map_text(Refuge::Usual), "R..");
         assert_eq!(data.map_text(Refuge::Moved), "..R");
+    }
+
+    #[test]
+    fn bonus_sheets_are_valid_level_documents() {
+        for index in 0..BONUS_LEVELS.len() {
+            let level = bonus(index);
+            assert!(level.name.starts_with("bonus."));
+            assert_eq!(level.map.len(), 1);
+        }
     }
 }

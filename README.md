@@ -14,7 +14,7 @@ A 3D low-poly tower defense built on path diversion, one Dijkstra flow field per
 ## Play
 
 - In the browser: build the web version (below) and serve `website/`.
-- On the desktop: `cargo run --release -p game`.
+- On the desktop: `cargo run --release -p game`. Asset paths are detected automatically for local runs and release archives.
 
 Mouse only; keys are listed in the game's *Controls* page. The game is in French and English (settings).
 
@@ -25,11 +25,45 @@ cargo run -p game --features dev     # desktop, fast incremental builds
 cargo build --release -p game        # desktop release binary
 cargo test -p game                   # tests, including the level and Droit de Passage checks
 ./scripts/build-web.sh               # browser build into website/play/
+python3 scripts/check-web-package.py website/play  # package and HTTP smoke test
 python3 -m http.server -d website    # then open http://localhost:8000/play/
 ```
 
 The web build needs `rustup target add wasm32-unknown-unknown` and the `wasm-bindgen-cli` version that matches
 `Cargo.lock`.
+
+## Continuous delivery
+
+Pull requests and code/assets changes to `main` run formatting, clippy, tests, the balance table, a WebAssembly
+check, and parallel release builds on Linux, macOS, and Windows. Documentation-only changes are filtered out. Runs
+cancel when a newer commit supersedes them, and Cargo dependencies and build outputs are cached.
+
+Push a semantic version tag to publish desktop packages and a browser package:
+
+```sh
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The release assets are `Hachures-linux-x86_64.tar.gz`, `Hachures-macos-aarch64.tar.gz`,
+`Hachures-macos-x86_64.tar.gz`, `Hachures-windows-x86_64.zip`, and `Hachures-web.tar.gz`.
+
+## Contributing
+
+Read [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a change. The local CI gate is:
+
+```sh
+./scripts/ci-local.sh
+```
+
+It runs the same formatting, lint, test, balance-regression, and WebAssembly checks as Linux CI. Pull requests
+must describe the current state, intended change, regression coverage, and any platform or performance impact.
+
+## Project overview
+
+For the full explanation of the project's goal, development process, Rust/Bevy, graphics and shader work,
+CI/CD, testing, AI-agent rules, hard skills, and soft skills, read
+[`docs/project-overview.md`](docs/project-overview.md).
 
 ## Project
 

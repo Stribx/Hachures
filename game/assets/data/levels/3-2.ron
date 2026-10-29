@@ -1,0 +1,48 @@
+// Monde 3, niveau 3-2: the gallery blackout lasts for waves 4 and 5.
+(
+    world: 3,
+    at: (238.0, -8.0),
+    name: "level.3-2.name",
+    sepia: 240,
+    tools: ["barricade", "arbalète", "mortier", "harpon", "sonde"],
+    events: [],
+    darkness: Some((4, 5)),
+    changes: [
+        (wave: 8, at: [(10, 1), (10, 2)], becomes: Gouffre, announce: Some("world.3.announce"), color: Some((0.8, 0.1, 0.1))),
+    ],
+    challenge: Some((text: "level.3-2.challenge", rule: KeepRole(16))),
+    notes: [
+        (on: Start, text: "note.3-2.pellan_lumiere_tombe"),
+        (on: Wave(3), text: "note.3-2.calque_seul"),
+        (on: Event, text: "note.3-2.galerie_respire"),
+        (on: Won, text: "note.3-2.ombre_ne_cache_pas_tout"),
+    ],
+    places: [
+        (name: "place.galerie_basse", at: [(3, 5), (4, 5)]),
+        (name: "place.puits_second", at: [(15, 2), (16, 2)]),
+    ],
+    map: [
+        "^^^^^^^^^^^^^^^^^^",
+        "S....e...^.......M",
+        "^....e...^.......^",
+        "^....e...........^",
+        "^....###.........^",
+        "^........e.......^",
+        "^................^",
+        "^^^^^^^^^^^^^^^^^^",
+    ],
+    waves: [
+        [("chaineur", 4)],
+        [("taupier", 3), ("jalonneur_galeries", 2)],
+        [("etayeur", 2), ("taupier", 4)],
+        [("taupier", 5), ("etayeur", 2)],
+        [("jalonneur_galeries", 3), ("taupier", 5)],
+        [("etayeur", 3), ("taupier", 5)],
+        [("taupier", 6), ("etayeur", 3)],
+        [("jalonneur_galeries", 4), ("etayeur", 4)],
+        [("taupier", 7), ("etayeur", 4)],
+        [("jalonneur_galeries", 4), ("taupier", 6)],
+        [("etayeur", 5), ("taupier", 7)],
+        [("jalonneur_galeries", 5), ("etayeur", 4), ("taupier", 6)],
+    ],
+)

@@ -50,6 +50,14 @@ impl Level {
             self.mix(&mut queue);
         }
         self.wave = Wave { number, running: true, queue, ..default() };
+        self.uniform_profile = self.world == 5;
+        self.terrain.set_uniform_profile(self.uniform_profile, &self.species);
+        if self.wind_turn == Some(number) {
+            self.dune_direction *= -1;
+        }
+        if let Some((_, open)) = self.vanne_schedule.iter().find(|(wave, _)| *wave == number) {
+            self.set_vanne(*open);
+        }
         self.lives_at_wave_start = self.lives;
         // Scripted changes due now fall on the empty map.
         let (due, rest): (Vec<_>, _) =
@@ -61,6 +69,7 @@ impl Level {
         self.event_on = self.event_at(number);
         self.event_next = self.event_at(number + 1);
         self.follow_event();
+        self.migrate_dunes();
         if self.has(Skill::RoncesMeres) {
             self.grow_ronces();
         }
@@ -78,6 +87,10 @@ impl Level {
         if self.event_on {
             self.event_on = false;
             self.follow_event();
+        }
+        if self.uniform_profile {
+            self.uniform_profile = false;
+            self.terrain.set_uniform_profile(false, &self.species);
         }
         let lost = self.lives_at_wave_start.saturating_sub(self.lives) as i32;
         self.tension = (self.tension + if lost == 0 { 1 } else { -lost.min(2) }).clamp(-2, 2);
@@ -180,5 +193,32 @@ mod tests {
             (level.terrain.grid().tiles[2], level.terrain.grid().map[2]),
             (Tile::Gouffre, Tile::Gouffre)
         );
+    }
+
+    #[test]
+    fn migrating_dunes_move_one_cell_with_the_wind() {
+        let mut level = Level::parse("S.dM");
+        level.world = 3;
+        level.wave.number = 2;
+        level.dune_direction = 1;
+        level.migrate_dunes();
+        assert_eq!(level.terrain.base().tiles, vec![Tile::Sol, Tile::Sol, Tile::Sol, Tile::Dune,]);
+    }
+
+    #[test]
+    fn dater_brings_the_announced_event_forward_once() {
+        let index = crate::level::data::LEVELS
+            .iter()
+            .position(|ron| ron.contains("level.4-2.name"))
+            .unwrap();
+        let mut level = Level::load(index, &Save::default());
+        level.wave.number = 4;
+        level.event_next = level.event_at(5);
+        assert!(level.event_next);
+        level.date();
+        assert!(level.dated);
+        assert!(level.event_at(5));
+        level.date();
+        assert_eq!(level.events, vec![5]);
     }
 }

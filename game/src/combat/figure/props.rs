@@ -151,6 +151,7 @@ pub(super) fn props(carry: Carry, a: &Anchors) -> Vec<Part> {
         | Carry::Joug
         | Carry::Gast
         | Carry::Visee
+        | Carry::Foreuse
         | Carry::Meneur => carried(carry, a),
     }
 }
@@ -195,6 +196,12 @@ fn carried(carry: Carry, a: &Anchors) -> Vec<Part> {
         }
         // A small figurine standing on the ground beside the front of the cart.
         Carry::Boeufs | Carry::Joug | Carry::Gast | Carry::Visee => assembly(carry, a),
+        Carry::Foreuse => vec![
+            at(Form::Cylinder { radius: 0.045, height: 0.16 }, cx + 0.22, 0.2, 0.0, Iron)
+                .turned(Quat::from_rotation_z(FRAC_PI_2)),
+            at(Form::Cylinder { radius: 0.07, height: 0.14 }, cx + 0.22, 0.2, 0.0, Iron)
+                .turned(Quat::from_rotation_z(FRAC_PI_2)),
+        ],
         Carry::Meneur => vec![
             at(Form::Frustum { bottom: 0.07, top: 0.04, height: 0.18 }, cx + 0.2, 0.09, 0.26, Coat),
             at(Form::Sphere(0.045), cx + 0.2, 0.215, 0.26, Wood),

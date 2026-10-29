@@ -2,6 +2,7 @@
 // `label`: the species as the player reads it (route, Calque): a key of `assets/data/i18n/<code>.ron`.
 // `goal`: the Dijkstra source it walks to: Cible (`M`, what the world defends), BorneMere, Refuge or Sortie.
 // `hostile`: towers aim at it, and it costs Rôle at its goal; an ally keeps a Name there instead.
+// `damageable`: whether weapons can damage it (Fuyards are invulnerable).
 // `loot`: sépia for felling it. `weak_to`: the weapon that deals it double damage, or None.
 // `color`: its coat, (r, g, b); it must read on the fields (`every_coat_reads_on_the_fields`).
 // `reading`: Pente (default) prices tiles with `costs`; Ombre prices every walkable cell 1 + the towers covering it.
@@ -33,7 +34,7 @@
     ),
     "fuyard": (
         label: "species.fuyard",
-        goal: Refuge, hostile: false, hp: 0.5, speed: 1.1, loot: 0, weak_to: None,
+        goal: Refuge, hostile: false, damageable: false, hp: 0.5, speed: 1.1, loot: 0, weak_to: None,
         color: (0.24, 0.46, 0.4), carries: [Fichu, Ballot, Enfant],
         costs: {Sol: 1.0, SolBas: 1.0, Boue: 2.0, Ronces: 3.0, Gue: 2.0, Chaussee: 1.0, Eboulis: 3.0},
     ),
@@ -96,6 +97,125 @@
         goal: Cible, hostile: true, hp: 0.7, speed: 1.3, loot: 2, weak_to: Some(Harpon),
         color: (0.2, 0.2, 0.26), carries: [Bicorne, Jalon],
         costs: {Sol: 1.0, SolBas: 1.0, Boue: 3.0, Ronces: 4.0, Gue: 2.0, Chaussee: 0.5, Glace: 2.0, Eboulis: 3.0},
+    ),
+    "foreuse": (
+        label: "species.foreuse",
+        goal: Cible, hostile: true, underground: true, hp: 16.0, speed: 0.45, loot: 40, weak_to: Some(Sonde),
+        color: (0.25, 0.27, 0.29), shape: Chariot, carries: [Foreuse],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 2.0, Ronces: 3.0, Roc: 1.0, Chaussee: 1.0, Eboulis: 1.0},
+    ),
+    "foreuse_effondrement": (
+        label: "species.foreuse_effondrement",
+        goal: Cible, hostile: true, underground: true, hp: 16.0, speed: 0.55, loot: 40, weak_to: Some(Sonde),
+        color: (0.25, 0.27, 0.29), shape: Chariot, carries: [Foreuse, Corde],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 2.0, Ronces: 3.0, Roc: 1.0, Chaussee: 1.0, Eboulis: 1.0},
+    ),
+    "foreuse_surface": (
+        label: "species.foreuse_surface",
+        goal: Cible, hostile: true, hp: 16.0, speed: 0.7, loot: 40, weak_to: Some(Sonde),
+        color: (0.25, 0.27, 0.29), shape: Chariot, carries: [Foreuse, Piolet],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 2.0, Ronces: 3.0, Roc: 1.0, Chaussee: 1.0, Eboulis: 1.0},
+    ),
+    // Monde 4. The sand clans: dunes are firm under them, salt pans slow.
+    "sablier": (
+        label: "species.sablier",
+        goal: Cible, hostile: true, hp: 1.1, speed: 1.0, loot: 3, weak_to: Some(Lanterne),
+        color: (0.32, 0.18, 0.08), carries: [Capuche],
+        costs: {Sol: 1.0, SolBas: 2.0, Boue: 4.0, Ronces: 5.0, Chaussee: 1.0, Dune: 1.0, Saline: 1.0},
+    ),
+    "caravanier": (
+        label: "species.caravanier",
+        goal: Puits, hostile: true, hp: 1.3, speed: 0.9, loot: 3, weak_to: Some(Harpon),
+        color: (0.22, 0.46, 0.52), shape: Chariot, carries: [Bache, Meneur],
+        costs: {Sol: 1.0, SolBas: 2.0, Boue: 4.0, Ronces: 5.0, Chaussee: 1.0, Dune: 1.5, Saline: 2.0},
+    ),
+    "meridien": (
+        label: "species.meridien",
+        goal: Cible, hostile: true, hp: 18.0, speed: 0.5, loot: 40, weak_to: Some(Harpon),
+        color: (0.3, 0.22, 0.16), shape: Chariot, carries: [Jalon, Visee],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 1.0, Ronces: 1.0, Chaussee: 1.0, Dune: 1.0, Saline: 1.0},
+    ),
+    "meridien_midi": (
+        label: "species.meridien_midi",
+        goal: Cible, hostile: true, hp: 18.0, speed: 0.55, loot: 40, weak_to: Some(Harpon), reading: Ombre,
+        color: (0.3, 0.22, 0.16), shape: Chariot, carries: [Jalon, Visee, Paille],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 1.0, Ronces: 1.0, Chaussee: 1.0, Dune: 1.0, Saline: 1.0},
+    ),
+    "meridien_trace": (
+        label: "species.meridien_trace",
+        goal: Cible, hostile: true, hp: 18.0, speed: 0.65, loot: 40, weak_to: Some(Harpon),
+        color: (0.3, 0.22, 0.16), shape: Chariot, carries: [Jalon, Visee, Corde],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 1.0, Ronces: 1.0, Chaussee: 1.0, Dune: 1.0, Saline: 1.0, Cadastre: 1.0},
+    ),
+    // Monde 5. Canal workers and the imperial profiles of the lock siege.
+    "haleur": (
+        label: "species.haleur",
+        goal: Cible, hostile: true, hp: 1.4, speed: 1.0, loot: 3, weak_to: Some(Sonde),
+        color: (0.18, 0.38, 0.42), shape: Chariot, carries: [Bache, Corde],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 2.0, Eau: 1.0, Gue: 1.0, Vanne: 1.0, Chaussee: 1.0},
+    ),
+    "echassier_rancunier": (
+        label: "species.echassier_rancunier",
+        goal: Cible, hostile: true, hp: 1.2, speed: 1.0, loot: 3, weak_to: Some(Mortier),
+        color: (0.15, 0.35, 0.05), shape: Echasses, carries: [Paille],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 1.0, Ronces: 3.0, Eau: 2.0, Gue: 1.0, Vanne: 1.0, Chaussee: 1.0},
+    ),
+    "chaineur_elite": (
+        label: "species.chaineur_elite",
+        goal: Cible, hostile: true, hp: 1.6, speed: 0.9, loot: 4, weak_to: Some(Harpon),
+        color: (0.2, 0.24, 0.3), carries: [Bicorne, Chaine],
+        armor: 0.2,
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 2.0, Ronces: 3.0, Eau: 2.0, Gue: 1.0, Vanne: 1.0, Chaussee: 0.5},
+    ),
+    "eclusier": (
+        label: "species.eclusier",
+        goal: Cible, hostile: true, hp: 20.0, speed: 0.45, loot: 40, weak_to: Some(Harpon),
+        color: (0.16, 0.24, 0.25), shape: Chariot, carries: [Bache, Meneur, Corde],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 2.0, Ronces: 3.0, Eau: 1.0, Gue: 1.0, Vanne: 1.0, Chaussee: 0.5},
+    ),
+    "eclusier_siege": (
+        label: "species.eclusier_siege",
+        goal: Cible, hostile: true, hp: 20.0, speed: 0.55, loot: 40, weak_to: Some(Harpon),
+        color: (0.16, 0.24, 0.25), shape: Chariot, carries: [Bache, Meneur, Jalon],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 2.0, Ronces: 3.0, Eau: 1.0, Gue: 1.0, Vanne: 1.0, Chaussee: 0.5},
+    ),
+    "eclusier_doute": (
+        label: "species.eclusier_doute",
+        goal: Cible, hostile: true, hp: 20.0, speed: 0.65, loot: 40, weak_to: Some(Harpon),
+        color: (0.16, 0.24, 0.25), shape: Chariot, carries: [Bache, Meneur, Corde],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 2.0, Ronces: 3.0, Eau: 1.0, Gue: 1.0, Vanne: 1.0, Chaussee: 0.5},
+    ),
+    // Monde 6. The imperial profiles used by the Mise au net and the final press.
+    "greffier": (
+        label: "species.greffier",
+        goal: Cible, hostile: true, hp: 1.0, speed: 0.9, loot: 2, weak_to: Some(Lanterne),
+        color: (0.25, 0.27, 0.34), carries: [Bicorne],
+        costs: {Sol: 2.0, SolBas: 2.0, Boue: 3.0, Ronces: 4.0, Eau: 3.0, Gue: 2.0, Vanne: 2.0, Chaussee: 0.5, Cadastre: 0.5},
+    ),
+    "mandataire": (
+        label: "species.mandataire",
+        goal: BorneMere, hostile: true, hp: 2.2, speed: 0.75, loot: 6, weak_to: Some(Harpon),
+        color: (0.24, 0.2, 0.3), carries: [Bicorne, Jalon, Visee],
+        reading: Ombre,
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 2.0, Ronces: 3.0, Eau: 2.0, Gue: 1.0, Vanne: 1.0, Chaussee: 0.5, Cadastre: 0.5},
+    ),
+    "dernier_cadastre": (
+        label: "species.dernier_cadastre",
+        goal: Cible, hostile: true, hp: 24.0, speed: 0.4, loot: 50, weak_to: Some(Harpon),
+        color: (0.18, 0.2, 0.25), shape: Chariot, carries: [Bicorne, Visee],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 1.0, Ronces: 1.0, Eau: 1.0, Gue: 1.0, Vanne: 1.0, Chaussee: 0.5, Cadastre: 0.5},
+    ),
+    "dernier_registre": (
+        label: "species.dernier_registre",
+        goal: Cible, hostile: true, hp: 24.0, speed: 0.5, loot: 50, weak_to: Some(Harpon),
+        color: (0.18, 0.2, 0.25), shape: Chariot, carries: [Bicorne, Jalon],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 1.0, Ronces: 1.0, Eau: 1.0, Gue: 1.0, Vanne: 1.0, Chaussee: 0.5, Cadastre: 0.5},
+    ),
+    "dernier_case_blanche": (
+        label: "species.dernier_case_blanche",
+        goal: Cible, hostile: true, hp: 24.0, speed: 0.6, loot: 50, weak_to: Some(Harpon),
+        color: (0.18, 0.2, 0.25), shape: Chariot, carries: [Bicorne, Jalon, Corde],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 1.0, Ronces: 1.0, Eau: 1.0, Gue: 1.0, Vanne: 1.0, Chaussee: 0.5, Cadastre: 0.5},
     ),
     // Le Théodolite de Givre, the boss of monde 2 (phases in worlds/2.ron): a tower on runners,
     // quick on ice. It goes wherever a Chaîneur can, so it never makes le Droit de Passage stricter.

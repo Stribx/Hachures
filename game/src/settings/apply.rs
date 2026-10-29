@@ -15,14 +15,22 @@ use super::{DynamicScale, Music, Settings};
 use crate::i18n;
 #[cfg(not(target_arch = "wasm32"))]
 use crate::look::occlusion;
-use crate::look::{Frame, Sun, WorldCamera, lens};
+use crate::look::{Frame, InkMaterial, Sun, WorldCamera, lens};
 use crate::schedule::Screen;
 use crate::theme::{FELL, READABLE};
 
 pub fn plugin(app: &mut App) {
     app.add_systems(
         Update,
-        (apply_audio, apply_window, apply_render, apply_ui_scale, swap_fonts, pause_unfocused),
+        (
+            apply_audio,
+            apply_window,
+            apply_render,
+            apply_cloud_shadows,
+            apply_ui_scale,
+            swap_fonts,
+            pause_unfocused,
+        ),
     );
 }
 
@@ -114,6 +122,7 @@ fn apply_render(
         let size = Extent3d { width: wanted.x, height: wanted.y, depth_or_array_layers: 1 };
         images.get_mut(&frame.0).expect("read just above").resize(size);
     }
+
     let target =
         ImageRenderTarget { handle: frame.0.clone(), scale_factor: window.scale_factor() * scale };
     commands.entity(camera.0).insert(RenderTarget::Image(target));
@@ -154,6 +163,17 @@ fn apply_render(
             commands.entity(camera).remove::<DepthOfField>();
         }
         _ => {}
+    }
+}
+
+/// Keeps procedural cloud shading aligned with the graphics setting, including materials created
+/// after the setting changed.
+fn apply_cloud_shadows(settings: Res<Settings>, mut materials: ResMut<Assets<InkMaterial>>) {
+    let cloud_shadows = if settings.shadows { 1.0 } else { 0.0 };
+    for (_, material) in materials.iter_mut() {
+        if material.extension.uniform.cloud_shadows != cloud_shadows {
+            material.extension.uniform.cloud_shadows = cloud_shadows;
+        }
     }
 }
 

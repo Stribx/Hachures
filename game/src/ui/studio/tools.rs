@@ -62,7 +62,7 @@ fn spawn_piece(
         Act::Lay(tile) => prop(tile, 0),
         // ponytail: Renommer and Biffer borrow Gratter's scraper; their own pieces (a quill
         // rewriting, one striking out) when the art is drawn.
-        Act::Scrape | Act::Rename | Act::Biffer => scraper(),
+        Act::Scrape | Act::Rename | Act::Biffer | Act::Date | Act::Hoist | Act::Sign => scraper(),
         Act::Raise(Weapon::Sonde) => sonde(),
         Act::Raise(weapon) => {
             // Every other weapon has its model; the Sonde was built just above.

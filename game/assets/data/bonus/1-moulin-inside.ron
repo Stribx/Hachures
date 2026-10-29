@@ -1,0 +1,4 @@
+(
+    world: 1, name: "bonus.moulin_inside", sepia: 100, tools: ["barricade"], grants: [],
+    events: [], map: ["S..M"], waves: [[("harde", 1)]],
+)

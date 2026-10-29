@@ -1,0 +1,4 @@
+(
+    world: 3, name: "bonus.premiers_plans", sepia: 140, tools: ["barricade"], grants: [],
+    events: [], map: ["S..M"], waves: [[("harde", 1)]],
+)

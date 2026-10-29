@@ -1,0 +1,4 @@
+(
+    world: 4, name: "bonus.saline", sepia: 160, tools: ["barricade"], grants: [],
+    events: [], map: ["S..M"], waves: [[("harde", 1)]],
+)

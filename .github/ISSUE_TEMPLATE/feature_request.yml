@@ -1,0 +1,32 @@
+name: Feature or design change
+description: Propose a feature, rule, level, or content change.
+title: "[Feature] "
+labels: ["feature"]
+body:
+  - type: textarea
+    id: rule
+    attributes:
+      label: Rule or player outcome
+      description: State what the player should experience and cite the relevant bible section.
+    validations:
+      required: true
+  - type: textarea
+    id: state
+    attributes:
+      label: Current project state
+      description: Explain what exists today and what is missing.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance and regression cases
+      description: List the cases that must pass, including save, localization, and platform concerns.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and dependencies
+      description: Note affected modules, data, assets, roadmap items, and open design decisions.
+

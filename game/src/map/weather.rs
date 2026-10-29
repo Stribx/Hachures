@@ -19,6 +19,7 @@ pub enum Weather {
     Rain,
     /// Snow, `.0` of it: 1 in a storm, less when it only drifts.
     Snow(f32),
+    Dust,
 }
 
 /// The weather in world `world` (an index of `WORLDS`), with its event under way or not.
@@ -27,6 +28,7 @@ pub fn weather(world: usize, event_on: bool) -> Weather {
         (Biome::Bocage, true) => Weather::Rain,
         (Biome::Cols, true) => Weather::Snow(1.0),
         (Biome::Cols, false) => Weather::Snow(0.3),
+        (Biome::Karst | Biome::Desert, _) => Weather::Dust,
         (Biome::Bocage, false) => Weather::Clear,
     }
 }
@@ -77,6 +79,13 @@ pub(super) fn fall(
                 let flake = Vec3::new(at.x + drift.x, 3.0 - fall * 2.8, at.y + drift.y);
                 gizmos.line(flake - Vec3::X * 0.035, flake + Vec3::X * 0.035, SNOW);
                 gizmos.line(flake - Vec3::Z * 0.035, flake + Vec3::Z * 0.035, SNOW);
+            }
+        }
+        Weather::Dust => {
+            for (at, phase) in (0..(FLAKES * 0.4 * calm) as usize).map(spot) {
+                let fall = (t * 0.12 + phase).fract();
+                let dust = Vec3::new(at.x, 2.4 - fall * 1.8, at.y);
+                gizmos.line(dust - Vec3::X * 0.025, dust + Vec3::X * 0.025, RAIN.with_alpha(0.25));
             }
         }
         Weather::Clear => {}

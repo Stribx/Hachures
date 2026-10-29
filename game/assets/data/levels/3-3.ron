@@ -1,0 +1,52 @@
+// Monde 3, niveau 3-3: the signed gallery and its choice.
+(
+    world: 3,
+    at: (258.0, -20.0),
+    name: "level.3-3.name",
+    sepia: 240,
+    tools: ["barricade", "arbalète", "mortier", "harpon", "sonde"],
+    events: [],
+    challenge: Some((text: "level.3-3.challenge", rule: KeepNames)),
+    notes: [
+        (on: Start, text: "note.3-3.pellan_carte_sue"),
+        (on: Wave(4), text: "note.3-3.neve_plume"),
+        (on: Won, when: Some("plan=garder"), text: "note.3-3.plan_garde"),
+        (on: Won, when: Some("plan=bruler"), names: -1, text: "note.3-3.plan_brule"),
+    ],
+    choice: Some((
+        id: "plan",
+        prompt: "choice.plan.prompt",
+        options: [
+            ("garder", "choice.plan.garder"),
+            ("bruler", "choice.plan.bruler"),
+        ],
+    )),
+    places: [
+        (name: "place.galerie_signee", at: [(8, 3), (9, 3), (10, 3)]),
+        (name: "place.ardoise_ancienne", at: [(13, 5), (14, 5)]),
+    ],
+    map: [
+        "^^^^^^^^^^^^^^^^^^",
+        "S.......e........M",
+        "^.......e........^",
+        "^..........e.....^",
+        "^....###.........^",
+        "^........e.......^",
+        "^................^",
+        "^^^^^^^^^^^^^^^^^^",
+    ],
+    waves: [
+        [("taupier", 4)],
+        [("jalonneur_galeries", 2), ("taupier", 4)],
+        [("etayeur", 2), ("taupier", 5)],
+        [("taupier", 6), ("etayeur", 3)],
+        [("jalonneur_galeries", 3), ("taupier", 5)],
+        [("etayeur", 3), ("taupier", 6)],
+        [("taupier", 7), ("etayeur", 4)],
+        [("jalonneur_galeries", 4), ("etayeur", 4)],
+        [("taupier", 8), ("etayeur", 4)],
+        [("jalonneur_galeries", 5), ("taupier", 7)],
+        [("etayeur", 5), ("taupier", 8)],
+        [("jalonneur_galeries", 5), ("etayeur", 5), ("taupier", 7)],
+    ],
+)

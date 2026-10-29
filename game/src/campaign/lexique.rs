@@ -129,7 +129,7 @@ pub fn tool_lines(
                 .collect();
             lines.push(Line::new(n_("lexique.step"), &[prices.join(", ")]));
         }
-        Act::Scrape | Act::Rename | Act::Biffer => {}
+        Act::Scrape | Act::Rename | Act::Biffer | Act::Date | Act::Hoist | Act::Sign => {}
     }
     lines
 }
@@ -183,6 +183,7 @@ pub fn species_lines(s: &Species) -> Vec<Line> {
         Goal::BorneMere => n_("lexique.goal.borne_mere"),
         Goal::Refuge => n_("lexique.goal.refuge"),
         Goal::Sortie => n_("lexique.goal.sortie"),
+        Goal::Puits => n_("lexique.goal.puits"),
     };
     let reading = match s.reading {
         Reading::Pente => n_("lexique.reading.pente"),
