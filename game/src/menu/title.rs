@@ -3,12 +3,8 @@
 use bevy::prelude::*;
 use bevy::ui_widgets::Activate;
 
-use super::carnet::{open_carnet, written};
-use super::controls::open_controls;
-use super::credits::open_credits;
-use super::lexique::open_lexique;
-use super::sceaux::open_sceaux;
-use super::settings_page::open_settings;
+use super::carnet::written;
+use super::open;
 use super::{Screen, button, go, label, page, primary, text};
 use crate::campaign::LoadLevel;
 use crate::campaign::save::Save;
@@ -59,19 +55,20 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>, save: Res<Save>, leve
                 let progress = tp("title.progress", n, &[&t(&level.name), &n]);
                 p.spawn(text(&assets, progress, SMALL_SIZE)).insert(TextColor(INK_SOFT));
                 p.spawn(button(label(&assets, t("sceaux.title"))))
-                    .observe(open_sceaux(Screen::Title));
+                    .observe(open(Screen::Sceaux, Screen::Title));
                 p.spawn(button(label(&assets, t("menu.lexique"))))
-                    .observe(open_lexique(Screen::Title));
+                    .observe(open(Screen::Lexique, Screen::Title));
                 if written(&save) {
                     p.spawn(button(label(&assets, t("title.carnet"))))
-                        .observe(open_carnet(Screen::Title));
+                        .observe(open(Screen::Carnet, Screen::Title));
                 }
             }
             p.spawn(button(label(&assets, t("menu.controls"))))
-                .observe(open_controls(Screen::Title));
+                .observe(open(Screen::Controls, Screen::Title));
             p.spawn(button(label(&assets, t("menu.settings"))))
-                .observe(open_settings(Screen::Title));
-            p.spawn(button(label(&assets, t("menu.credits")))).observe(open_credits(Screen::Title));
+                .observe(open(Screen::Settings, Screen::Title));
+            p.spawn(button(label(&assets, t("menu.credits"))))
+                .observe(open(Screen::Credits, Screen::Title));
             if !new {
                 p.spawn(button(label(&assets, t("title.new_game"))))
                     .observe(go(Screen::ConfirmNew));

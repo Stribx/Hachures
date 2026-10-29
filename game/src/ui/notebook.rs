@@ -12,7 +12,7 @@ use crate::campaign::save::Save;
 use crate::i18n::{t, tf};
 use crate::level::data::LEVELS;
 use crate::level::{Level, LevelEntity};
-use crate::menu::{open_carnet, open_sceaux};
+use crate::menu::open;
 use crate::overworld::plan::WalkTo;
 use crate::overworld::travel::Travel;
 use crate::schedule::Screen;
@@ -187,12 +187,12 @@ fn spawn_actions(p: &mut ChildSpawnerCommands, assets: &AssetServer, level: &Lev
                 // The last level: the campaign so far, read back.
                 actions
                     .spawn(framed(0.0, line(assets, t("notebook.read_carnet"), BODY_SIZE, 1.0)))
-                    .observe(open_carnet(Screen::Playing));
+                    .observe(open(Screen::Carnet, Screen::Playing));
             }
             let sceaux = tf("notebook.sceaux", &[&sceaux]);
             actions
                 .spawn(framed(0.0, line(assets, sceaux, BODY_SIZE, 1.0)))
-                .observe(open_sceaux(Screen::Playing));
+                .observe(open(Screen::Sceaux, Screen::Playing));
         },
     );
 }

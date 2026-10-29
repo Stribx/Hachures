@@ -13,20 +13,17 @@ mod splash;
 mod title;
 mod warmup;
 
+use bevy::ecs::system::SystemParam;
 use bevy::input::keyboard::Key;
 use bevy::input_focus::{FocusCause, InputFocus};
 use bevy::prelude::*;
 use bevy::ui::UiGlobalTransform;
 use bevy::ui_widgets::{Activate, Button};
 
-pub use carnet::open_carnet;
-pub use lexique::open_lexique;
-pub use sceaux::open_sceaux;
-
 // The pages build with the shared widgets; `super::{text, ..}` reaches them from here.
 use crate::schedule::Screen;
 use crate::theme::{PAPER, SUBTITLE_SIZE};
-use crate::ui::widgets::{Panel, Rise, framed, primary, text};
+use crate::ui::widgets::{Panel, Rise, framed, letter, primary, text};
 
 pub fn plugin(app: &mut App) {
     app.add_plugins((
@@ -100,10 +97,43 @@ fn go(screen: Screen) -> impl Fn(On<Activate>, ResMut<NextState<Screen>>) {
 pub struct BackTo(pub Screen);
 
 /// Button action: open `page`, coming back to `from`.
-fn open(page: Screen, from: Screen) -> impl Fn(On<Activate>, Commands, ResMut<NextState<Screen>>) {
+pub fn open(
+    page: Screen,
+    from: Screen,
+) -> impl Fn(On<Activate>, Commands, ResMut<NextState<Screen>>) {
     move |_, mut commands, mut next| {
         commands.insert_resource(BackTo(from));
         next.set(page);
+    }
+}
+
+/// What `toggle_page` reads and sets.
+#[derive(SystemParam)]
+struct PageKeys<'w, 's> {
+    keys: Res<'w, ButtonInput<Key>>,
+    screen: Res<'w, State<Screen>>,
+    from: Option<Res<'w, BackTo>>,
+    commands: Commands<'w, 's>,
+    next: ResMut<'w, NextState<Screen>>,
+}
+
+/// System: the key `key` during play opens `page`; pressed again there, it closes it.
+fn toggle_page(key: &'static str, page: Screen) -> impl Fn(PageKeys) {
+    move |mut p| {
+        if !letter(&p.keys, key) {
+            return;
+        }
+        match p.screen.get() {
+            Screen::Playing => {
+                p.commands.insert_resource(BackTo(Screen::Playing));
+                p.next.set(page);
+            }
+            shown if *shown == page => {
+                let back = p.from.as_ref().map_or(Screen::Title, |f| f.0);
+                p.next.set(back);
+            }
+            _ => {}
+        }
     }
 }
 

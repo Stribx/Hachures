@@ -3,9 +3,7 @@
 use bevy::prelude::*;
 use bevy::ui_widgets::Activate;
 
-use super::controls::open_controls;
-use super::lexique::open_lexique;
-use super::settings_page::open_settings;
+use super::open;
 use super::{Screen, button, go, label, page, text};
 use crate::i18n::{n_, t, tf};
 use crate::level::Level;
@@ -60,9 +58,12 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>, level: Res<Level>) {
         );
         // The level stays on its sheet: tracing it again from the Plan picks it up where it was.
         p.spawn(button(label(&assets, t("plan.title")))).observe(go(Screen::Plan));
-        p.spawn(button(label(&assets, t("menu.lexique")))).observe(open_lexique(Screen::Paused));
-        p.spawn(button(label(&assets, t("menu.controls")))).observe(open_controls(Screen::Paused));
-        p.spawn(button(label(&assets, t("menu.settings")))).observe(open_settings(Screen::Paused));
+        p.spawn(button(label(&assets, t("menu.lexique"))))
+            .observe(open(Screen::Lexique, Screen::Paused));
+        p.spawn(button(label(&assets, t("menu.controls"))))
+            .observe(open(Screen::Controls, Screen::Paused));
+        p.spawn(button(label(&assets, t("menu.settings"))))
+            .observe(open(Screen::Settings, Screen::Paused));
         // The level stays as it is: Continuer picks it up again.
         p.spawn(button(label(&assets, t("pause.main_menu")))).observe(go(Screen::Title));
         // A browser tab is closed, not quit.

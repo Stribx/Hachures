@@ -1,48 +1,22 @@
 //! L'arbre des sceaux (docs, section 7): three branches, bought node by node with the sceaux the
 //! levels gave. Open from the title, from the page at the end of a level, or with A during play.
 
-use bevy::input::keyboard::Key;
 use bevy::prelude::*;
 use bevy::ui_widgets::Activate;
 
-use super::{BackTo, Screen, back, button, framed, label, open, page, text};
+use super::{Screen, back, button, framed, label, page, text, toggle_page};
 use crate::campaign::LoadLevel;
 use crate::campaign::save::Save;
 use crate::campaign::skills::{BRANCHES, next_in};
 use crate::i18n::{t, tf, tp};
 use crate::level::Level;
 use crate::theme::{Face, HEADING_SIZE, INK, SMALL_SIZE, SUBTITLE_SIZE, TITLE_SIZE, VEIL, font};
-use crate::ui::widgets::letter;
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(OnEnter(Screen::Sceaux), spawn)
-        .add_systems(Update, (show_nodes.run_if(in_state(Screen::Sceaux)), key_a));
-}
-
-/// Button action: open the tree, coming back to `from`.
-pub fn open_sceaux(from: Screen) -> impl Fn(On<Activate>, Commands, ResMut<NextState<Screen>>) {
-    open(Screen::Sceaux, from)
-}
-
-/// A during play opens the tree; A again closes it.
-fn key_a(
-    keys: Res<ButtonInput<Key>>,
-    screen: Res<State<Screen>>,
-    from: Option<Res<BackTo>>,
-    mut commands: Commands,
-    mut next: ResMut<NextState<Screen>>,
-) {
-    if !letter(&keys, "a") {
-        return;
-    }
-    match screen.get() {
-        Screen::Playing => {
-            commands.insert_resource(BackTo(Screen::Playing));
-            next.set(Screen::Sceaux);
-        }
-        Screen::Sceaux => next.set(from.map_or(Screen::Title, |f| f.0)),
-        _ => {}
-    }
+    app.add_systems(OnEnter(Screen::Sceaux), spawn).add_systems(
+        Update,
+        (show_nodes.run_if(in_state(Screen::Sceaux)), toggle_page("a", Screen::Sceaux)),
+    );
 }
 
 /// The label of node `.1` of branch `.0`.

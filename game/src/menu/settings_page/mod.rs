@@ -7,7 +7,7 @@ use bevy::input_focus::InputFocus;
 use bevy::prelude::*;
 use bevy::ui_widgets::Activate;
 
-use super::{NoNav, Screen, back, button, framed, label, open, page, primary, sheet, text};
+use super::{NoNav, Screen, back, button, framed, label, page, primary, sheet, text};
 use crate::i18n::t;
 use crate::menu::BUTTON_WIDTH;
 use crate::settings::Settings;
@@ -28,11 +28,6 @@ pub fn plugin(app: &mut App) {
         Update,
         (adjust, show_values, preview, relabel).run_if(in_state(Screen::Settings)),
     );
-}
-
-/// Button action: open the settings page, coming back to `from`.
-pub fn open_settings(from: Screen) -> impl Fn(On<Activate>, Commands, ResMut<NextState<Screen>>) {
-    open(Screen::Settings, from)
 }
 
 /// Button action: change the settings with `edit`, then save them.

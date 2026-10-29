@@ -3,9 +3,8 @@
 //! closed.
 
 use bevy::prelude::*;
-use bevy::ui_widgets::Activate;
 
-use super::{Screen, back, button, label, open, page, text};
+use super::{Screen, back, button, label, page, text};
 use crate::campaign::save::Save;
 use crate::i18n::{t, tf};
 use crate::level::data::{LEVELS, LevelData};
@@ -14,11 +13,6 @@ use crate::theme::{INK, SMALL_SIZE, SUBTITLE_SIZE, TITLE_SIZE, VEIL};
 
 pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Carnet), spawn);
-}
-
-/// Button action: open the carnet, coming back to `from`.
-pub fn open_carnet(from: Screen) -> impl Fn(On<Activate>, Commands, ResMut<NextState<Screen>>) {
-    open(Screen::Carnet, from)
 }
 
 /// Whether the campaign's last level is won: the carnet can be read.

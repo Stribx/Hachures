@@ -2,20 +2,14 @@
 //! page.
 
 use bevy::prelude::*;
-use bevy::ui_widgets::Activate;
 
-use super::{Screen, back, label, open, page, primary, sheet, text};
+use super::{Screen, back, label, page, primary, sheet, text};
 use crate::i18n::{n_, t};
 use crate::menu::BUTTON_WIDTH;
 use crate::theme::{BODY_SIZE, HEADING_SIZE, INK_SOFT, TITLE_SIZE, VEIL};
 
 pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Controls), spawn);
-}
-
-/// Button action: open the controls, coming back to `from`.
-pub fn open_controls(from: Screen) -> impl Fn(On<Activate>, Commands, ResMut<NextState<Screen>>) {
-    open(Screen::Controls, from)
 }
 
 /// (key, what it does), by where it is used. Arrows are named, not drawn: IM Fell has no arrow

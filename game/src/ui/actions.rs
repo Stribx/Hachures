@@ -10,7 +10,7 @@ use crate::combat::enemies::send_wave;
 use crate::i18n::t;
 use crate::ink::Selection;
 use crate::level::Level;
-use crate::menu::{open_lexique, open_sceaux};
+use crate::menu::open;
 use crate::schedule::Screen;
 use crate::settings::Settings;
 use crate::theme::{BODY_SIZE, SMALL_SIZE};
@@ -63,7 +63,11 @@ pub(super) fn spawn_actions(bar: &mut ChildSpawnerCommands, assets: &AssetServer
                 next_species(&mut selection, &level)
             },
         );
-        actions.spawn(framed(0.0, small(t("bar.sceaux")))).observe(open_sceaux(Screen::Playing));
-        actions.spawn(framed(0.0, small(t("bar.lexique")))).observe(open_lexique(Screen::Playing));
+        actions
+            .spawn(framed(0.0, small(t("bar.sceaux"))))
+            .observe(open(Screen::Sceaux, Screen::Playing));
+        actions
+            .spawn(framed(0.0, small(t("bar.lexique"))))
+            .observe(open(Screen::Lexique, Screen::Playing));
     });
 }

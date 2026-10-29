@@ -2,20 +2,14 @@
 //! so the list has one source.
 
 use bevy::prelude::*;
-use bevy::ui_widgets::Activate;
 
-use super::{Screen, back, label, open, page, primary, sheet, text};
+use super::{Screen, back, label, page, primary, sheet, text};
 use crate::i18n::t;
 use crate::menu::BUTTON_WIDTH;
 use crate::theme::{BODY_SIZE, INK_SOFT, SMALL_SIZE, SUBTITLE_SIZE, TITLE_SIZE, VEIL};
 
 pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Credits), spawn);
-}
-
-/// Button action: open the credits, coming back to `from`.
-pub fn open_credits(from: Screen) -> impl Fn(On<Activate>, Commands, ResMut<NextState<Screen>>) {
-    open(Screen::Credits, from)
 }
 
 /// (asset, author, licence) of each row of the table in `CREDITS.md`.

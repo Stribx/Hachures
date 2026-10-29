@@ -4,18 +4,15 @@
 mod detail;
 mod list;
 
-use bevy::input::keyboard::Key;
 use bevy::prelude::*;
-use bevy::ui_widgets::Activate;
 
-use super::{BackTo, Screen, back, open, page, primary, sheet, text};
+use super::{Screen, back, page, primary, sheet, text, toggle_page};
 use crate::campaign::lexique::{EntryKind, Tab};
 use crate::i18n::t;
 use crate::menu::BUTTON_WIDTH;
 use crate::theme::{BODY_SIZE, TITLE_SIZE, VEIL};
 use crate::ui::scrollbar::scrollbar;
 use crate::ui::studio::{SpeciesIcons, ToolIcons};
-use crate::ui::widgets::letter;
 
 pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Lexique), spawn).add_systems(
@@ -24,33 +21,7 @@ pub fn plugin(app: &mut App) {
             .chain()
             .run_if(in_state(Screen::Lexique)),
     );
-    app.add_systems(Update, key_l);
-}
-
-/// Button action: open the Lexique, coming back to `from`.
-pub fn open_lexique(from: Screen) -> impl Fn(On<Activate>, Commands, ResMut<NextState<Screen>>) {
-    open(Screen::Lexique, from)
-}
-
-/// L during play opens the Lexique; L again closes it.
-fn key_l(
-    keys: Res<ButtonInput<Key>>,
-    screen: Res<State<Screen>>,
-    from: Option<Res<BackTo>>,
-    mut commands: Commands,
-    mut next: ResMut<NextState<Screen>>,
-) {
-    if !letter(&keys, "l") {
-        return;
-    }
-    match screen.get() {
-        Screen::Playing => {
-            commands.insert_resource(BackTo(Screen::Playing));
-            next.set(Screen::Lexique);
-        }
-        Screen::Lexique => next.set(from.map_or(Screen::Title, |f| f.0)),
-        _ => {}
-    }
+    app.add_systems(Update, toggle_page("l", Screen::Lexique));
 }
 
 /// The tab shown and the entry picked in it.
@@ -107,6 +78,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
 
 #[cfg(test)]
 mod tests {
+    use bevy::input::keyboard::Key;
     use bevy::state::app::StatesPlugin;
 
     use super::*;
@@ -115,6 +87,7 @@ mod tests {
     use crate::level::Level;
     use crate::map::grid::Grid;
     use crate::map::species;
+    use crate::menu::BackTo;
     use crate::ui::studio::{SpeciesIcons, ToolIcons};
 
     fn app() -> App {
@@ -128,7 +101,7 @@ mod tests {
             .init_resource::<Save>()
             .init_resource::<LexiqueView>()
             .insert_resource(Level::new(Grid::parse("S.M"), species::load()))
-            .add_systems(Update, (super::super::escape, key_l));
+            .add_systems(Update, (super::super::escape, toggle_page("l", Screen::Lexique)));
         let species = app.world().resource::<Level>().species.len();
         let mut images = app.world_mut().resource_mut::<Assets<Image>>();
         let mut blank = |n: usize| (0..n).map(|_| images.add(Image::default())).collect();
