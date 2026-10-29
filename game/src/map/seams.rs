@@ -82,7 +82,7 @@ mod tests {
         for (a, b) in seams {
             let mid = (a + b) / 2.0;
             let (dx, dz) = if a.x == b.x { (0.5, 0.0) } else { (0.0, 0.5) };
-            let cell = |x: f32, z: f32| z.round() as usize * grid.width + x.round() as usize;
+            let cell = |x: f32, z: f32| grid.cell_at(x, z).expect("a stitch is on the board");
             let (i, j) = (cell(mid.x - dx, mid.z - dz), cell(mid.x + dx, mid.z + dz));
             assert!(
                 fields[i].is_some() && fields[j].is_some() && fields[i] != fields[j],

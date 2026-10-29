@@ -32,6 +32,12 @@ pub enum Weapon {
     Sonde,
 }
 
+impl Weapon {
+    /// Every weapon, in the order the bar offers them.
+    pub const ALL: [Weapon; 5] =
+        [Weapon::Arbalete, Weapon::Mortier, Weapon::Harpon, Weapon::Lanterne, Weapon::Sonde];
+}
+
 /// A tower's combat stats (`assets/data/towers.ron`).
 #[derive(Deserialize)]
 pub struct TowerStats {
@@ -195,5 +201,18 @@ pub(super) fn fire(
     if fuyard_hurt {
         level.fuyard_hurt = true;
         level.note(Trigger::FuyardHurt);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// `Weapon::ALL` lists every weapon the stats table knows: a new weapon forgotten there fails here.
+    #[test]
+    fn all_lists_every_weapon_with_stats() {
+        let stats = load_stats();
+        assert_eq!(Weapon::ALL.len(), stats.len());
+        assert!(Weapon::ALL.iter().all(|w| stats.contains_key(w)));
     }
 }

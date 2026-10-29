@@ -30,13 +30,12 @@ pub(super) fn hover(
             commands.entity(entity).insert(Hovered(card.0 == t));
         }
     }
-    let width = level.terrain.grid().width;
     let cell = match env("HACHURES_HOVER").as_deref() {
         Some("tower") => towers.iter().next().map(|t| t.cell),
-        Some("enemy") => enemies
-            .iter()
-            .next()
-            .map(|p| p.translation.z.round() as usize * width + p.translation.x.round() as usize),
+        Some("enemy") => {
+            let grid = level.terrain.grid();
+            enemies.iter().next().and_then(|p| grid.cell_at(p.translation.x, p.translation.z))
+        }
         Some(n) => n.parse().ok(),
         None => return,
     };

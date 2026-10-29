@@ -15,13 +15,13 @@ use crate::schedule::Screen;
 use crate::theme::PANEL_SHADOW;
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(Update, (spawn, gizmos).run_if(in_state(Screen::Splash)))
-        .add_systems(OnExit(Screen::Splash), clear);
+    app.add_systems(Update, (spawn, gizmos).run_if(in_state(Screen::Splash)));
 }
 
-/// A piece drawn only for the warm-up.
-#[derive(Component)]
-struct Warmup;
+/// A piece drawn only for the warm-up, gone as the splash is.
+fn warmup() -> DespawnOnExit<Screen> {
+    DespawnOnExit(Screen::Splash)
+}
 
 /// Once the level and its figures are ready, every piece at the board's middle, where the
 /// camera already looks behind the splash.
@@ -39,21 +39,18 @@ fn spawn(
     let grid = level.terrain.grid();
     let at = map::cell_pos(grid, grid.tiles.len() / 2);
     commands.spawn((
-        Warmup,
+        warmup(),
         scene(&assets, TOWER_BASE),
         BASE_WOOD,
         Transform::from_translation(at),
     ));
-    let models = [Weapon::Arbalete, Weapon::Mortier, Weapon::Harpon, Weapon::Lanterne]
-        .into_iter()
-        .filter_map(weapon_model);
-    for path in models {
+    for path in Weapon::ALL.into_iter().filter_map(weapon_model) {
         let top = Transform::from_translation(at + Vec3::Y * 0.6);
-        commands.spawn((Warmup, scene(&assets, path), WEAPON_WOOD, top));
+        commands.spawn((warmup(), scene(&assets, path), WEAPON_WOOD, top));
     }
     for index in 0..look.figures.len() {
         let figure = spawn_figure(&mut commands, &look, index, at, 1.0);
-        commands.entity(figure).insert(Warmup);
+        commands.entity(figure).insert(warmup());
     }
     // The ghost's piece, its colours on its vertices.
     let pale = ghost_ink();
@@ -61,14 +58,14 @@ fn spawn(
     let n = cube.count_vertices();
     let cube = cube.with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, vec![[1.0; 4]; n]);
     commands.spawn((
-        Warmup,
+        warmup(),
         Mesh3d(meshes.add(cube)),
         MeshMaterial3d(materials.add(pale)),
         Transform::from_translation(at),
     ));
     // A panel's shadow, as the title's menu casts it: under the splash's card, unseen.
     commands.spawn((
-        Warmup,
+        warmup(),
         Node { width: px(1), height: px(1), ..default() },
         BoxShadow::new(PANEL_SHADOW, px(0), px(3), px(0), px(12)),
         GlobalZIndex(i32::MIN + 1),
@@ -84,10 +81,4 @@ fn gizmos(level: Res<Level>, mut gizmos: Gizmos) {
         0.5,
         Color::BLACK,
     );
-}
-
-fn clear(pieces: Query<Entity, With<Warmup>>, mut commands: Commands) {
-    for piece in &pieces {
-        commands.entity(piece).despawn();
-    }
 }

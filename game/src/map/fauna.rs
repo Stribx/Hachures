@@ -227,7 +227,7 @@ mod tests {
         let homes = butterfly_homes(&grid, Biome::Bocage);
         assert!(!homes.is_empty() && homes.len() <= BUTTERFLIES, "{homes:?}");
         for home in homes {
-            let cell = home.z.round() as usize * grid.width + home.x.round() as usize;
+            let cell = grid.cell_at(home.x, home.z).expect("a home is on the board");
             assert!(flowers.contains(&cell), "cell {cell}");
         }
         assert_eq!(butterfly_homes(&grid, Biome::Bocage), butterfly_homes(&grid, Biome::Bocage));

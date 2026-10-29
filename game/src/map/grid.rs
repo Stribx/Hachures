@@ -188,6 +188,14 @@ impl Grid {
         if species.hostile { &self.spawns } else { &self.fuyard_spawns }
     }
 
+    /// The cell under the world position (`x`, `z`), the inverse of `map::cell_pos`, if it lies on
+    /// the board.
+    pub fn cell_at(&self, x: f32, z: f32) -> Option<usize> {
+        let (x, z) = (x.round(), z.round());
+        (x >= 0.0 && z >= 0.0 && (x as usize) < self.width && (z as usize) < self.height)
+            .then(|| z as usize * self.width + x as usize)
+    }
+
     pub fn coords(&self, i: usize) -> (usize, usize) {
         (i % self.width, i / self.width)
     }
@@ -217,6 +225,20 @@ mod tests {
     use super::*;
 
     /// A Gouffre is drawn `o`, and no walker crosses it: no species prices it.
+    /// The cell under a world position is the cell `map::cell_pos` put it at; off the board, none.
+    #[test]
+    fn cell_at_inverts_cell_pos_and_stops_at_the_edge() {
+        let grid = Grid::parse("S...\n...M");
+        for i in 0..grid.tiles.len() {
+            let at = crate::map::cell_pos(&grid, i);
+            assert_eq!(grid.cell_at(at.x, at.z), Some(i));
+        }
+        assert_eq!(grid.cell_at(3.4, 1.0), Some(7), "within half a cell of the last column");
+        for (x, z) in [(-0.6, 0.0), (0.0, -0.6), (3.6, 0.0), (0.0, 1.6)] {
+            assert_eq!(grid.cell_at(x, z), None, "({x}, {z})");
+        }
+    }
+
     #[test]
     fn a_gouffre_stops_every_walker() {
         let grid = Grid::parse("S.o.M");

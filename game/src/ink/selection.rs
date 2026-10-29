@@ -80,11 +80,7 @@ pub(crate) fn hover(
         .cursor_position()
         .and_then(|cursor| camera.viewport_to_world(camera_transform, cursor).ok())
         .and_then(|ray| ray.plane_intersection_point(Vec3::Y * 0.2, InfinitePlane3d::new(Vec3::Y)));
-    let hovered = hit.and_then(|p| {
-        let (x, z) = (p.x.round(), p.z.round());
-        (x >= 0.0 && z >= 0.0 && (x as usize) < grid.width && (z as usize) < grid.height)
-            .then(|| z as usize * grid.width + x as usize)
-    });
+    let hovered = hit.and_then(|p| grid.cell_at(p.x, p.z));
     if selection.hovered != hovered {
         selection.hovered = hovered;
     }
