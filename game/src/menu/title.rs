@@ -83,14 +83,13 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>, save: Res<Save>, leve
                 },
             );
         });
-        page.spawn(version_label(&assets));
+        page.spawn(version_label(&assets)).insert(TextColor(INK_SOFT));
     });
 }
 
 fn version_label(assets: &AssetServer) -> impl Bundle {
     (
         text(assets, concat!("v", env!("CARGO_PKG_VERSION")), SMALL_SIZE),
-        TextColor(INK_SOFT),
         Node { position_type: PositionType::Absolute, right: px(16), bottom: px(12), ..default() },
     )
 }
@@ -113,4 +112,18 @@ fn new_game(
     save.store();
     load.write(LoadLevel(0));
     next.set(Screen::Playing);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// `text` already carries a `TextColor`: a second one in the bundle panics on spawn.
+    #[test]
+    fn the_version_label_spawns() {
+        let mut app = App::new();
+        app.add_plugins((MinimalPlugins, AssetPlugin::default())).init_asset::<Font>();
+        let assets = app.world().resource::<AssetServer>().clone();
+        app.world_mut().spawn(version_label(&assets));
+    }
 }
