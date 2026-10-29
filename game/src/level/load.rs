@@ -28,7 +28,12 @@ impl Level {
             events: Vec::new(),
             event_on: false,
             event_next: false,
+            dated: false,
+            event_suppressed: false,
+            rename_free: false,
             darkness: None,
+            wind_turn: None,
+            dune_direction: 1,
             species,
             present,
             waves: Vec::new(),
@@ -117,6 +122,8 @@ impl Level {
         level.tools = tools;
         level.events = data.events;
         level.darkness = data.darkness;
+        level.wind_turn = data.wind_turn;
+        level.dune_direction = 1;
         level.event_next = level.event_at(1);
         level.waves = waves;
         level.present = present;

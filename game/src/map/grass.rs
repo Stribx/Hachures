@@ -104,6 +104,7 @@ fn sprig_parts(sprig: &Sprig, wash: Color, biome: Biome) -> Vec<Mesh> {
                 Biome::Cols => &ALPINE_BLOOMS,
                 Biome::Karst => &KARST_BLOOMS,
                 Biome::Bocage => &BLOOMS,
+                Biome::Desert => &KARST_BLOOMS,
             };
             let bloom = blooms[(roll >> 24) as usize % blooms.len()];
             vec![stalk(h, 0.014, 0.1, grass), part(Vec3::splat(0.042), h, turn, 0.1, bloom)]

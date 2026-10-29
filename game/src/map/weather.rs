@@ -28,7 +28,7 @@ pub fn weather(world: usize, event_on: bool) -> Weather {
         (Biome::Bocage, true) => Weather::Rain,
         (Biome::Cols, true) => Weather::Snow(1.0),
         (Biome::Cols, false) => Weather::Snow(0.3),
-        (Biome::Karst, _) => Weather::Dust,
+        (Biome::Karst | Biome::Desert, _) => Weather::Dust,
         (Biome::Bocage, false) => Weather::Clear,
     }
 }

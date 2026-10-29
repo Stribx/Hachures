@@ -34,8 +34,16 @@ pub struct Level {
     pub event_on: bool,
     /// The next wave brings the event: its map is checked too before inking.
     pub event_next: bool,
+    /// Dater has been used in this level.
+    pub dated: bool,
+    /// Dater cancels the current event instead of moving it.
+    pub event_suppressed: bool,
+    /// Nom gardé is consumed by the first Rename that would erase a place.
+    pub rename_free: bool,
     /// The two-wave darkness interval of World 3 level 3-2, if any.
     pub darkness: Option<(u32, u32)>,
+    pub wind_turn: Option<u32>,
+    pub dune_direction: i32,
     pub species: Vec<Species>,
     /// The species this level sends (the boss's phases included), sorted: le Droit de Passage and
     /// Tab only consider these.
@@ -120,11 +128,40 @@ impl Level {
     /// Whether the world event is under way during wave `wave`.
     pub fn event_at(&self, wave: u32) -> bool {
         let Some(event) = &self.world().event else { return false };
+        if self.event_suppressed {
+            return false;
+        }
         self.events.iter().any(|&start| (start..start + event.lasts).contains(&wave))
     }
 
     pub fn darkness_on(&self) -> bool {
         self.darkness.is_some_and(|(from, to)| (from..=to).contains(&self.wave.number))
+    }
+
+    pub fn migrate_dunes(&mut self) {
+        if self.world != 3 || self.wave.number == 0 || !self.wave.number.is_multiple_of(2) {
+            return;
+        }
+        let width = self.terrain.base().width;
+        let mut edits = Vec::new();
+        for y in 0..self.terrain.base().height {
+            let dunes: Vec<_> = (0..width)
+                .map(|x| y * width + x)
+                .filter(|&i| self.terrain.base().tiles[i] == Tile::Dune)
+                .collect();
+            for i in dunes {
+                let x = i % width;
+                let next_x = x as i32 + self.dune_direction;
+                if (0..width as i32).contains(&next_x) {
+                    let next = y * width + next_x as usize;
+                    if self.terrain.base().tiles[next] == Tile::Sol {
+                        edits.push((i, Edit::Land(Tile::Sol)));
+                        edits.push((next, Edit::Land(Tile::Dune)));
+                    }
+                }
+            }
+        }
+        self.alter(edits);
     }
 
     /// `base` once every scripted change still to come has fallen.
@@ -142,6 +179,26 @@ impl Level {
 
     pub fn has(&self, skill: Skill) -> bool {
         self.skills.contains(&skill)
+    }
+
+    /// Dater: cancel an event already under way, or bring the announced event to this wave.
+    pub fn date(&mut self) {
+        if self.dated || self.world().event.is_none() || self.wave.running {
+            return;
+        }
+        self.dated = true;
+        if self.event_on {
+            self.event_suppressed = true;
+            self.event_on = false;
+        } else if self.event_next {
+            let wave = self.wave.number + 1;
+            self.events = vec![wave];
+            self.event_on = true;
+        } else {
+            return;
+        }
+        self.event_next = self.event_at(self.wave.number + 1);
+        self.follow_event();
     }
 
     /// Every wave sent and beaten.

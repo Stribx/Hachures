@@ -32,7 +32,7 @@ impl ExitKind {
     pub fn arriving(goal: Goal) -> ExitKind {
         match goal {
             Goal::Refuge | Goal::Sortie => ExitKind::Hop,
-            Goal::Cible | Goal::BorneMere => ExitKind::Sink,
+            Goal::Cible | Goal::BorneMere | Goal::Puits => ExitKind::Sink,
         }
     }
 }

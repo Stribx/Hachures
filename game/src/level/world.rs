@@ -14,6 +14,7 @@ pub static WORLDS: LazyLock<Vec<World>> = LazyLock::new(|| {
         include_str!("../../assets/data/worlds/1.ron"),
         include_str!("../../assets/data/worlds/2.ron"),
         include_str!("../../assets/data/worlds/3.ron"),
+        include_str!("../../assets/data/worlds/4.ron"),
     ]
     .iter()
     .map(|ron| ron::from_str(ron).expect("invalid world file"))

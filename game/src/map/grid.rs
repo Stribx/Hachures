@@ -32,6 +32,12 @@ pub enum Tile {
     Palissade,
     /// A collapse (les Effondrements, world 3): a pit no walker crosses, for the rest of the level.
     Gouffre,
+    /// Wind-blown sand that migrates every two waves in world 4.
+    Dune,
+    /// White salt pan, crossed only by species that know the desert.
+    Saline,
+    /// The Meridian's cadastral cut: dunes stop at it.
+    Cadastre,
 }
 
 impl Tile {
@@ -52,6 +58,9 @@ impl Tile {
             Tile::Eboulis => n_("tile.eboulis"),
             Tile::Palissade => n_("tile.palissade"),
             Tile::Gouffre => n_("tile.gouffre"),
+            Tile::Dune => n_("tile.dune"),
+            Tile::Saline => n_("tile.saline"),
+            Tile::Cadastre => n_("tile.cadastre"),
         }
     }
 
@@ -118,6 +127,9 @@ impl Grid {
                 'e' => Tile::Eboulis,
                 'p' => Tile::Palissade,
                 'o' => Tile::Gouffre,
+                'd' => Tile::Dune,
+                's' => Tile::Saline,
+                'c' => Tile::Cadastre,
                 'S' => {
                     grid.spawns.push(i);
                     Tile::Sol
@@ -126,12 +138,13 @@ impl Grid {
                     grid.fuyard_spawns.push(i);
                     Tile::Sol
                 }
-                'M' | 'B' | 'R' | 'X' => {
+                'M' | 'B' | 'R' | 'X' | 'P' => {
                     let goal = match c {
                         'M' => Goal::Cible,
                         'B' => Goal::BorneMere,
                         'R' => Goal::Refuge,
-                        _ => Goal::Sortie,
+                        'X' => Goal::Sortie,
+                        _ => Goal::Puits,
                     };
                     grid.goals.insert(goal, i);
                     Tile::Sol

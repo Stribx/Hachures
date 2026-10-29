@@ -9,6 +9,7 @@ use super::trail::{Trail, lay};
 use crate::level::story::Trigger;
 use crate::level::{Level, LevelEntity, Walker};
 use crate::map;
+use crate::map::grid::Tile;
 use crate::map::species::Goal;
 use crate::settings::Settings;
 
@@ -107,7 +108,9 @@ fn reach_goal(level: &mut Level, species: usize, is_boss: bool, trail: &mut Trai
             level.names += 1;
             trail.saved = true;
         }
-        Goal::Cible | Goal::BorneMere => level.lives = level.lives.saturating_sub(loss),
+        Goal::Cible | Goal::BorneMere | Goal::Puits => {
+            level.lives = level.lives.saturating_sub(loss)
+        }
     }
     if is_boss {
         level.boss = None;
@@ -153,6 +156,9 @@ fn step(
                     && let Some(tile) = phase.change
                 {
                     trail.relief.push((left, tile));
+                }
+                if phase.cadastre {
+                    trail.relief.push((left, Tile::Cadastre));
                 }
                 if boss.planted < phase.bornes && boss.cells % 2 == 0 {
                     boss.planted += 1;

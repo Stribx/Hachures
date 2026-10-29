@@ -52,6 +52,9 @@ pub struct Phase {
     pub change_every: u32,
     #[serde(default)]
     pub change: Option<Tile>,
+    /// Leaves a cadastral cut behind the boss.
+    #[serde(default)]
+    pub cadastre: bool,
 }
 
 #[derive(Deserialize)]

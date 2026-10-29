@@ -14,6 +14,15 @@ impl Level {
         match TOOLS[tool].act {
             Act::Biffer => return self.biffer_refusal(cell),
             Act::Rename => return self.rename_refusal(cell, tool),
+            Act::Date => {
+                return if self.dated || self.world().event.is_none() || self.wave.running {
+                    Some(n_("refusal.date"))
+                } else if self.sepia < self.tool_cost(tool) {
+                    Some(n_("refusal.sepia"))
+                } else {
+                    None
+                };
+            }
             _ => {}
         }
         let Some(tile) = TOOLS[tool].act.lays() else {

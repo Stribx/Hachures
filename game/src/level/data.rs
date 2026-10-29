@@ -7,7 +7,7 @@ use crate::map::grid::Tile;
 use crate::map::terrain::Edit;
 
 /// The campaign, in order.
-pub const LEVELS: [&str; 13] = [
+pub const LEVELS: [&str; 17] = [
     include_str!("../../assets/data/levels/0-0.ron"),
     include_str!("../../assets/data/levels/1-1.ron"),
     include_str!("../../assets/data/levels/1-2.ron"),
@@ -21,6 +21,10 @@ pub const LEVELS: [&str; 13] = [
     include_str!("../../assets/data/levels/3-2.ron"),
     include_str!("../../assets/data/levels/3-3.ron"),
     include_str!("../../assets/data/levels/3-4.ron"),
+    include_str!("../../assets/data/levels/4-1.ron"),
+    include_str!("../../assets/data/levels/4-2.ron"),
+    include_str!("../../assets/data/levels/4-3.ron"),
+    include_str!("../../assets/data/levels/4-4.ron"),
 ];
 
 /// Enemies reaching the Cible or the Borne-Mère before the Rôle is lost (not in the docs; set with
@@ -47,6 +51,9 @@ pub struct LevelData {
     /// Waves during which the board is dimmed; the Calque remains readable.
     #[serde(default)]
     pub darkness: Option<(u32, u32)>,
+    /// Wave at which world 4's wind reverses.
+    #[serde(default)]
+    pub wind_turn: Option<u32>,
     pub map: Vec<String>,
     pub waves: Vec<Vec<(String, u32)>>,
     #[serde(default)]

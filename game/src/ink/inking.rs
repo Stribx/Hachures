@@ -27,6 +27,12 @@ pub(crate) fn inking(
     if let Some(&tool) = level.tools.iter().find(|&&t| keys.just_pressed(TOOLS[t].key)) {
         selection.tool = tool;
     }
+    if TOOLS[selection.tool].act == Act::Date {
+        if keys.just_pressed(KeyCode::KeyP) || mouse.just_pressed(MouseButton::Left) {
+            level.ink(0, selection.tool);
+        }
+        return;
+    }
     let Some(i) = selection.hovered else { return };
     if !mouse.just_pressed(MouseButton::Left) || level.refusal(i, selection.tool).is_some() {
         return;
@@ -49,6 +55,8 @@ impl Level {
             0.9
         } else if spec.act == Act::Lay(Tile::Barricade) && self.has(Skill::Fascines) {
             0.7
+        } else if spec.act == Act::Scrape && self.has(Skill::GrattoirFin) {
+            0.5
         } else {
             1.0
         };
@@ -68,6 +76,11 @@ impl Level {
         if act == Act::Biffer {
             return self.biffer(cell);
         }
+        if act == Act::Date {
+            self.sepia -= self.tool_cost(tool);
+            self.used.push(tool);
+            return self.date();
+        }
         let paid = self.tool_cost(tool);
         self.sepia -= paid;
         if !self.used.contains(&tool) {
@@ -75,7 +88,12 @@ impl Level {
         }
         if let (true, Some(p)) = (act.names(), self.place_at(cell)) {
             self.erased.push(p);
-            self.names -= 1;
+            let free_name = act == Act::Rename && self.has(Skill::NomGarde) && !self.rename_free;
+            if free_name {
+                self.rename_free = true;
+            } else {
+                self.names -= 1;
+            }
             let line = n_("note.erased").to_string();
             self.margin.push(MarginNote { line, name: Some(self.places[p].name.clone()) });
         }
@@ -86,6 +104,15 @@ impl Level {
         }
         let edit = self.edit(cell, tool);
         self.alter([(cell, edit)]);
+        let next = if self.has(Skill::DoubleTrait) && matches!(act, Act::Lay(_)) {
+            let base = self.terrain.base();
+            base.neighbours(cell).find(|&i| base.tiles[i].buildable() && !base.spawns.contains(&i))
+        } else {
+            None
+        };
+        if let Some(next) = next {
+            self.alter([(next, edit)]);
+        }
     }
 
     /// What inking `tool` at `cell` does to the cell.
@@ -98,6 +125,7 @@ impl Level {
             Act::Biffer => Edit::Unink(
                 self.stroke(cell).map_or(self.terrain.base().tiles[cell], |s| self.inked[s].under),
             ),
+            Act::Date => Edit::Ink(self.terrain.base().tiles[cell]),
         }
     }
 

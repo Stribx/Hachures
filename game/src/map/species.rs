@@ -83,6 +83,7 @@ pub enum Goal {
     Refuge,
     /// Where an escorted convoy leaves the map (`X`).
     Sortie,
+    Puits,
 }
 
 #[derive(Clone, Deserialize)]
@@ -149,7 +150,11 @@ impl Species {
 pub fn load() -> Vec<Species> {
     let map: BTreeMap<String, Species> =
         ron::from_str(include_str!("../../assets/data/species.ron")).expect("invalid species.ron");
-    map.into_iter().map(|(name, s)| Species { name, ..s }).collect()
+    let mut species: Vec<_> = map.into_iter().map(|(name, s)| Species { name, ..s }).collect();
+    if let Some(chainman) = species.iter().position(|s| s.name == "chaineur") {
+        species.swap(0, chainman);
+    }
+    species
 }
 
 /// Index of the species called `name`.

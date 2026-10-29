@@ -9,6 +9,8 @@ pub enum Biome {
     Cols,
     /// World 3: karst plateaus and galleries.
     Karst,
+    /// World 4: erg and salt pans.
+    Desert,
 }
 
 impl Biome {
@@ -22,6 +24,7 @@ impl Biome {
             0 => Biome::Bocage,
             1 => Biome::Cols,
             2 => Biome::Karst,
+            3 => Biome::Desert,
             _ => panic!("world {world} has no biome"),
         }
     }

@@ -3,7 +3,7 @@
 What is done, what comes next, and how far the whole game is. The design is `docs/bible.md`; this
 file only tracks it.
 
-**Total: ≈ 48%** (World 3 vertical slice; update the commit hash when this lands).
+**Total: ≈ 50%** (World 4 and Dater; update the commit hash when this lands).
 
 ## How the % is counted
 
@@ -29,7 +29,7 @@ one without a word in the commit. Items done before this file are marked `(befor
 
 ## Next up
 
-1. **World 4:** les Dunes migrantes, the Héliographe, the wells, le Méridien, then Dater.
+1. **World 5:** les Écluses, the Treuil, defection, and l'Éclusier.
 2. **Bonus sheets:** the feuillet system on the Grand Plan, starting with the Moulin noyé (Gratter,
    then Renommer, both in hand).
 
@@ -88,11 +88,11 @@ Not counted in the %: these decisions are recorded in the bible before their dep
 - [x] The karst region of the Grand Plan and world 3's biome
 - [x] La Foreuse's rules: underground, chain collapses, Taupiers skirting the gouffres
 - [ ] A choice that adds a spawn source later (keeping the plan, 3-3 → world 4)
-- [ ] Les Dunes migrantes, the Dune and Saline tiles (world 4)
+- [x] Les Dunes migrantes, the Dune and Saline tiles (world 4)
 - [ ] The Héliographe (world 4)
-- [ ] The wells as a goal for the Caravaniers rancuniers (world 4)
-- [ ] Le Méridien's rules: the uniform profile, the Cadastré line (world 4)
-- [ ] Dater: suspend or bring forward the event, once per level
+- [x] The wells as a goal for the Caravaniers rancuniers (world 4)
+- [x] Le Méridien's rules: the uniform profile, the Cadastré line (world 4)
+- [x] Dater: suspend or bring forward the event, once per level
 - [ ] Les Écluses and the Vanne tile, on a RON timetable (world 5)
 - [ ] The Treuil (world 5)
 - [ ] Defection in battle: conscripts turn Fuyards [P] (world 5)
@@ -118,10 +118,10 @@ Campaign: the prologue and 6 worlds × 4 levels (the 4th is the boss). Bonus she
 - [x] 3-2, the darkness
 - [x] 3-3, la Galerie Signée
 - [x] 3-4, la Foreuse
-- [ ] 4-1
-- [ ] 4-2
-- [ ] 4-3
-- [ ] 4-4, le Méridien
+- [x] 4-1
+- [x] 4-2
+- [x] 4-3
+- [x] 4-4, le Méridien
 - [ ] 5-1
 - [ ] 5-2
 - [ ] 5-3
@@ -146,7 +146,7 @@ Powers (docs, section 7):
 - [x] Biffer (before 248d9c6)
 - [x] Gratter (before 248d9c6)
 - [x] Renommer (248d9c6)
-- [ ] Dater
+- [x] Dater
 - [ ] Signer
 
 Skill nodes, 3 branches × 5:
@@ -154,18 +154,18 @@ Skill nodes, 3 branches × 5:
 - [x] Mine de plomb (before 248d9c6)
 - [x] Équerre (before 248d9c6)
 - [x] Contre-visée (before 248d9c6)
-- [ ] Double trait
+- [x] Double trait
 - [ ] Encre fixe
 - [x] Boue profonde (before 248d9c6)
 - [x] Ronces-mères (before 248d9c6)
 - [x] Fascines (before 248d9c6)
-- [ ] Grattoir fin
+- [x] Grattoir fin
 - [ ] Relief vivant
 - [x] Lecture fine (before 248d9c6)
 - [x] Sceaux brisés (before 248d9c6)
 - [x] Ombre portée (before 248d9c6)
 - [ ] Leurre
-- [ ] Nom gardé
+- [x] Nom gardé
 
 ## Endings and post-game (10%)
 
@@ -191,7 +191,7 @@ Narration (margin notes, boss lines, choices; drafts allowed where the bible is 
 - [x] World 1 (before 248d9c6)
 - [x] World 2 (248d9c6)
 - [x] World 3
-- [ ] World 4
+- [x] World 4
 - [ ] World 5
 - [ ] World 6
 
@@ -223,13 +223,13 @@ Art:
 - [x] World 1's land: the bocage (before 248d9c6)
 - [x] World 2's land: the mountains (before 248d9c6)
 - [x] World 3's land: karst and slate
-- [ ] World 4's land: dunes and salt
+- [x] World 4's land: dunes and salt
 - [ ] World 5's land: polders and the low town
 - [ ] World 6's land: the Plan-Relief
 - [x] Boss: la Grande Chaîne, its cart, oxen and chain (before 248d9c6)
 - [ ] Boss: le Théodolite, its runners and lens (it borrows the cart)
 - [x] Boss: la Foreuse
-- [ ] Boss: le Méridien
+- [x] Boss: le Méridien
 - [ ] Boss: l'Éclusier's barge
 - [ ] Boss: Ilse's press
 - [ ] Tower models of our own (the four Kenney pieces, the Sonde's plain shapes)

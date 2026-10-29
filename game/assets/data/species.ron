@@ -116,6 +116,37 @@
         color: (0.25, 0.27, 0.29), shape: Chariot, carries: [Foreuse, Piolet],
         costs: {Sol: 1.0, SolBas: 1.0, Boue: 2.0, Ronces: 3.0, Roc: 1.0, Chaussee: 1.0, Eboulis: 1.0},
     ),
+    // Monde 4. The sand clans: dunes are firm under them, salt pans slow.
+    "sablier": (
+        label: "species.sablier",
+        goal: Cible, hostile: true, hp: 1.1, speed: 1.0, loot: 3, weak_to: Some(Lanterne),
+        color: (0.32, 0.18, 0.08), carries: [Capuche],
+        costs: {Sol: 1.0, SolBas: 2.0, Boue: 4.0, Ronces: 5.0, Chaussee: 1.0, Dune: 1.0, Saline: 1.0},
+    ),
+    "caravanier": (
+        label: "species.caravanier",
+        goal: Puits, hostile: true, hp: 1.3, speed: 0.9, loot: 3, weak_to: Some(Harpon),
+        color: (0.22, 0.46, 0.52), shape: Chariot, carries: [Bache, Meneur],
+        costs: {Sol: 1.0, SolBas: 2.0, Boue: 4.0, Ronces: 5.0, Chaussee: 1.0, Dune: 1.5, Saline: 2.0},
+    ),
+    "meridien": (
+        label: "species.meridien",
+        goal: Cible, hostile: true, hp: 18.0, speed: 0.5, loot: 40, weak_to: Some(Harpon),
+        color: (0.3, 0.22, 0.16), shape: Chariot, carries: [Jalon, Visee],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 1.0, Ronces: 1.0, Chaussee: 1.0, Dune: 1.0, Saline: 1.0},
+    ),
+    "meridien_midi": (
+        label: "species.meridien_midi",
+        goal: Cible, hostile: true, hp: 18.0, speed: 0.55, loot: 40, weak_to: Some(Harpon), reading: Ombre,
+        color: (0.3, 0.22, 0.16), shape: Chariot, carries: [Jalon, Visee, Paille],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 1.0, Ronces: 1.0, Chaussee: 1.0, Dune: 1.0, Saline: 1.0},
+    ),
+    "meridien_trace": (
+        label: "species.meridien_trace",
+        goal: Cible, hostile: true, hp: 18.0, speed: 0.65, loot: 40, weak_to: Some(Harpon),
+        color: (0.3, 0.22, 0.16), shape: Chariot, carries: [Jalon, Visee, Corde],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 1.0, Ronces: 1.0, Chaussee: 1.0, Dune: 1.0, Saline: 1.0, Cadastre: 1.0},
+    ),
     // Le Théodolite de Givre, the boss of monde 2 (phases in worlds/2.ron): a tower on runners,
     // quick on ice. It goes wherever a Chaîneur can, so it never makes le Droit de Passage stricter.
     "theodolite": (
