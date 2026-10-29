@@ -88,8 +88,8 @@ On ne passe à la phase suivante que quand le critère « fini quand » tient su
 - ✓ **Correctif :** `Tonemapping::None` désactivait en silence le tramage (`DebandDither`) que les commentaires promettaient. `Tonemapping::Linear` garde les couleurs et trame quand même.
 - **Fini quand :** l'eau se lit comme une carte gravée et l'œil sent d'où vient la lumière. ✓ Atteint sur le plateau et le Grand Plan. Les plis restent discrets sur les pièces Kenney.
 
-### Phase 6 : la maquette vivante (faite, sauf le son)
-La maquette reste une gravure, mais **enluminée** : des lavis d'aquarelle sous les hachures, comme une carte de Cassini coloriée à la main. Le plateau devient un **bocage en patchwork** : de petits champs en feutre et en tissu, verts, blonds et ocre, cousus entre eux, bordés de haies, et qui bougent avec le vent. Spécification et tickets : `.scratch/maquette-vivante/`.
+### Phase 6 : la maquette vivante (faite)
+La maquette reste une gravure, mais **enluminée** : des lavis d'aquarelle sous les hachures, comme une carte de Cassini coloriée à la main. Le plateau devient un **bocage en patchwork** : de petits champs en feutre et en tissu, verts, blonds et ocre, cousus entre eux, bordés de haies, et qui bougent avec le vent.
 
 - **Couleur.** La fonte vers le papier se règle par matière : légère sur la terre, gardée sur les traits d'encre. La palette gagne les couleurs du bocage (pâture, pré, blé, jachère, lin, haie, ciel), et le brouillard et le vignettage se réchauffent.
   - **Fini quand :** on dit « une carte coloriée à la main », pas « une maquette beige ».
@@ -105,7 +105,7 @@ La maquette reste une gravure, mais **enluminée** : des lavis d'aquarelle sous 
   - **Mesuré** (`HACHURES_FPS=1`, 1-1, build de debug, fenêtre 1568 × 1689, total des passes GPU) : Bas 6,8 ms avant, 6,3 à 6,7 après ; Haut 8,9 avant, 10,6 à 10,7 après (+1,8 ms) ; Ultra 10,5 avant, 12,4 à 12,6 après (+2 ms). Le surcoût vient surtout de la passe opaque (l'herbe, les haies) et des ombres. Le web compile ; il reste à le lancer dans un navigateur.
 
 ### Phase 7 : le bestiaire (faite)
-Les espèces sont la dernière chose du plateau qui ne soit pas « de la maquette » : deux à quatre primitives grises, une seule couleur, qui glissent sans bouger et disparaissent. Elles deviennent des **figurines de plan-relief en bois peint**, poussées case à case par une main invisible. Spécification et tickets : `.scratch/bestiaire/`.
+Les espèces sont la dernière chose du plateau qui ne soit pas « de la maquette » : deux à quatre primitives grises, une seule couleur, qui glissent sans bouger et disparaissent. Elles deviennent des **figurines de plan-relief en bois peint**, poussées case à case par une main invisible.
 
 Décisions du propriétaire : figurines faites **en code** (pas de modèle généré), mouvement **procédural** (ni squelette ni clip glTF), boss **assemblés en code** à partir du même jeu de pièces (bible §9), fiches pour tout le bestiaire de la bible.
 

@@ -36,6 +36,29 @@ one without a word in the commit. Items done before this file are marked `(befor
 4. **Bonus sheets:** the feuillet system on the Grand Plan, starting with the Moulin noyé (Gratter,
    then Renommer, both in hand).
 
+## Bugs and polish
+
+Not counted in the %: small debts found along the way.
+
+- [ ] Run the web build in a browser: the wind shaders, the sound after the first click, the figures
+- [ ] The Calque prints a raw "inf" for a cost or a distance (`ui/readout.rs`)
+- [ ] A thin gap shows between neighbouring palissade rails
+- [ ] Cloud shadows can't be turned off (a setting, or the Low preset)
+
+## Open questions for the bible
+
+Not counted in the %: the owner decides, then the bible changes first.
+
+- Fuyards have no HP in section 8, yet the mortar "peut les blesser" (the code gives them HP 0.5).
+- "Légat" names both the boss commanders and a world-6 enemy.
+- The Échassiers' defection is "une partie" in world 2 and "la moitié" in world 5.
+- The Chaîneur d'élite has no row in section 8, and its "Chaussée à 0,5" is already the base
+  Chaîneur's.
+- `docs/art-prompts.md` says "not an old engraving" and bans watercolour, while the bible and the
+  art direction want an illuminated engraving with watercolour washes; it still mentions the corner
+  marks the art direction removed.
+- Answered: the Étayeur mends "bornes endommagées", and bornes now have HP (28a6517).
+
 ## Engine and systems (30%)
 
 - [x] Grid, tiles and per-species cost profiles in RON (before 248d9c6)
