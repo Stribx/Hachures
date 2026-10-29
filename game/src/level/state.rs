@@ -34,6 +34,8 @@ pub struct Level {
     pub event_on: bool,
     /// The next wave brings the event: its map is checked too before inking.
     pub event_next: bool,
+    /// The two-wave darkness interval of World 3 level 3-2, if any.
+    pub darkness: Option<(u32, u32)>,
     pub species: Vec<Species>,
     /// The species this level sends (the boss's phases included), sorted: le Droit de Passage and
     /// Tab only consider these.
@@ -119,6 +121,10 @@ impl Level {
     pub fn event_at(&self, wave: u32) -> bool {
         let Some(event) = &self.world().event else { return false };
         self.events.iter().any(|&start| (start..start + event.lasts).contains(&wave))
+    }
+
+    pub fn darkness_on(&self) -> bool {
+        self.darkness.is_some_and(|(from, to)| (from..=to).contains(&self.wave.number))
     }
 
     /// `base` once every scripted change still to come has fallen.

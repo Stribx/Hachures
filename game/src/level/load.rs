@@ -28,6 +28,7 @@ impl Level {
             events: Vec::new(),
             event_on: false,
             event_next: false,
+            darkness: None,
             species,
             present,
             waves: Vec::new(),
@@ -115,6 +116,7 @@ impl Level {
         level.sepia = data.sepia;
         level.tools = tools;
         level.events = data.events;
+        level.darkness = data.darkness;
         level.event_next = level.event_at(1);
         level.waves = waves;
         level.present = present;

@@ -21,6 +21,8 @@ pub(super) struct Trail {
     pub(super) bornes: Vec<(usize, usize)>,
     /// (cell left, cell reached) where the boss sights the water ahead.
     pub(super) sights: Vec<(usize, usize)>,
+    /// Relief changes made by a drilling boss.
+    pub(super) relief: Vec<(usize, Tile)>,
     pub(super) saved: bool,
 }
 
@@ -38,6 +40,9 @@ pub(super) fn lay(level: &mut Level, look: &EnemyLook, commands: &mut Commands, 
         batch.extend(
             sight_line(level.terrain.base(), from, to).map(|i| (i, Edit::Ink(Tile::Glace))),
         );
+    }
+    for &(cell, tile) in &trail.relief {
+        batch.push((cell, Edit::Land(tile)));
     }
     // [S] Le Bornage: every borne is one more target for the Jalonneurs.
     for &(cell, species) in &trail.bornes {

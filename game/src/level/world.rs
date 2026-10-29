@@ -10,10 +10,14 @@ use crate::map::grid::Tile;
 
 /// Every world, in order; a level file names its world by number (1 is `WORLDS[0]`).
 pub static WORLDS: LazyLock<Vec<World>> = LazyLock::new(|| {
-    [include_str!("../../assets/data/worlds/1.ron"), include_str!("../../assets/data/worlds/2.ron")]
-        .iter()
-        .map(|ron| ron::from_str(ron).expect("invalid world file"))
-        .collect()
+    [
+        include_str!("../../assets/data/worlds/1.ron"),
+        include_str!("../../assets/data/worlds/2.ron"),
+        include_str!("../../assets/data/worlds/3.ron"),
+    ]
+    .iter()
+    .map(|ron| ron::from_str(ron).expect("invalid world file"))
+    .collect()
 });
 
 #[derive(Deserialize)]

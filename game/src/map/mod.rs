@@ -9,6 +9,7 @@ pub mod ambience;
 pub(crate) mod barricade;
 pub mod biome;
 mod cells;
+mod darkness;
 pub mod daylight;
 mod decor;
 pub mod fauna;
@@ -35,7 +36,8 @@ pub fn plugin(app: &mut App) {
         .add_systems(Startup, ambience::start)
         .add_systems(
             Update,
-            (daylight::follow_the_waves, weather::fall, ambience::fade).in_set(Step::Render),
+            (daylight::follow_the_waves, weather::fall, ambience::fade, darkness::apply)
+                .in_set(Step::Render),
         )
         .add_systems(
             Update,

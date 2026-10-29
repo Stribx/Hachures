@@ -98,6 +98,24 @@
         color: (0.2, 0.2, 0.26), carries: [Bicorne, Jalon],
         costs: {Sol: 1.0, SolBas: 1.0, Boue: 3.0, Ronces: 4.0, Gue: 2.0, Chaussee: 0.5, Glace: 2.0, Eboulis: 3.0},
     ),
+    "foreuse": (
+        label: "species.foreuse",
+        goal: Cible, hostile: true, underground: true, hp: 16.0, speed: 0.45, loot: 40, weak_to: Some(Sonde),
+        color: (0.25, 0.27, 0.29), shape: Chariot, carries: [Foreuse],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 2.0, Ronces: 3.0, Roc: 1.0, Chaussee: 1.0, Eboulis: 1.0},
+    ),
+    "foreuse_effondrement": (
+        label: "species.foreuse_effondrement",
+        goal: Cible, hostile: true, underground: true, hp: 16.0, speed: 0.55, loot: 40, weak_to: Some(Sonde),
+        color: (0.25, 0.27, 0.29), shape: Chariot, carries: [Foreuse, Corde],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 2.0, Ronces: 3.0, Roc: 1.0, Chaussee: 1.0, Eboulis: 1.0},
+    ),
+    "foreuse_surface": (
+        label: "species.foreuse_surface",
+        goal: Cible, hostile: true, hp: 16.0, speed: 0.7, loot: 40, weak_to: Some(Sonde),
+        color: (0.25, 0.27, 0.29), shape: Chariot, carries: [Foreuse, Piolet],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 2.0, Ronces: 3.0, Roc: 1.0, Chaussee: 1.0, Eboulis: 1.0},
+    ),
     // Le Théodolite de Givre, the boss of monde 2 (phases in worlds/2.ron): a tower on runners,
     // quick on ice. It goes wherever a Chaîneur can, so it never makes le Droit de Passage stricter.
     "theodolite": (

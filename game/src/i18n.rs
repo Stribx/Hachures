@@ -273,6 +273,7 @@ mod tests {
             let data: LevelData = ron::from_str(level).unwrap();
             keys.insert(data.name);
             keys.extend(data.notes.iter().map(|n| n.text().to_string()));
+            keys.extend(data.changes.iter().filter_map(|c| c.announce.clone()));
             keys.extend(data.challenge.map(|c| c.text));
             if let Some(choice) = data.choice {
                 keys.insert(choice.prompt);

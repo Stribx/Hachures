@@ -148,6 +148,12 @@ fn step(
                 if phase.freeze_every > 0 && boss.cells % phase.freeze_every == 0 {
                     trail.sights.push((left, next));
                 }
+                if phase.change_every > 0
+                    && boss.cells % phase.change_every == 0
+                    && let Some(tile) = phase.change
+                {
+                    trail.relief.push((left, tile));
+                }
                 if boss.planted < phase.bornes && boss.cells % 2 == 0 {
                     boss.planted += 1;
                     trail.bornes.push((left, enemy.species));

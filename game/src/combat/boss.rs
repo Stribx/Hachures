@@ -8,6 +8,7 @@ use super::figure::EnemyLook;
 use super::shards::shatter;
 use crate::level::Level;
 use crate::level::story::Trigger;
+use crate::map::grid::Tile;
 use crate::map::species::index_of;
 
 /// One phase of the boss.
@@ -46,6 +47,11 @@ pub struct Phase {
     /// While the Lanterne lights it, every tower hits it twice as hard.
     #[serde(default)]
     pub cracked: bool,
+    /// Changes the relief behind the boss every `change_every` cells.
+    #[serde(default)]
+    pub change_every: u32,
+    #[serde(default)]
+    pub change: Option<Tile>,
 }
 
 #[derive(Deserialize)]

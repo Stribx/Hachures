@@ -1,0 +1,32 @@
+// Monde 3 : Les Combes Creuses (docs, section 6).
+(
+    name: "world.3.name",
+    defends: "world.3.defends",
+    boss: Some((
+        name: "boss.foreuse.name",
+        breach: 6,
+        borne_hp: 2.0,
+        phases: [
+            (
+                name: "boss.foreuse.sous_terre",
+                until: 0.66,
+                species: "foreuse",
+                change_every: 3,
+                change: Some(Eboulis),
+            ),
+            (
+                name: "boss.foreuse.effondrements",
+                until: 0.33,
+                species: "foreuse_effondrement",
+                change_every: 2,
+                change: Some(Gouffre),
+            ),
+            (
+                name: "boss.foreuse.a_l_air",
+                until: 0.0,
+                species: "foreuse_surface",
+                pinnable: true,
+            ),
+        ],
+    )),
+)

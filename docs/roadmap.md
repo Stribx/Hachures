@@ -3,7 +3,7 @@
 What is done, what comes next, and how far the whole game is. The design is `docs/bible.md`; this
 file only tracks it.
 
-**Total: ≈ 40%** (last updated 2026-10-29, after 28a6517).
+**Total: ≈ 48%** (World 3 vertical slice; update the commit hash when this lands).
 
 ## How the % is counted
 
@@ -29,11 +29,8 @@ one without a word in the commit. Items done before this file are marked `(befor
 
 ## Next up
 
-1. **World 3, milestone 2:** `worlds/3.ron`, the karst region of the Grand Plan (`EAST`, a karst
-   ramp, `Biome::Karst`), levels 3-1, 3-2 (the darkness) and 3-3 (the Galerie Signée choice).
-2. **World 3, milestone 3:** la Foreuse and level 3-4.
-3. **World 4:** les Dunes migrantes, the Héliographe, the wells, le Méridien, then Dater.
-4. **Bonus sheets:** the feuillet system on the Grand Plan, starting with the Moulin noyé (Gratter,
+1. **World 4:** les Dunes migrantes, the Héliographe, the wells, le Méridien, then Dater.
+2. **Bonus sheets:** the feuillet system on the Grand Plan, starting with the Moulin noyé (Gratter,
    then Renommer, both in hand).
 
 ## Bugs and polish
@@ -87,9 +84,9 @@ Not counted in the %: these decisions are recorded in the bible before their dep
 - [x] The Gouffre and les Effondrements, announced in red (28a6517)
 - [x] The Sonde and what walks underground (28a6517)
 - [x] Armour, mending bornes, passing under barricades (28a6517)
-- [ ] The darkness of 3-2: only the Calque shows the columns
-- [ ] The karst region of the Grand Plan and world 3's biome
-- [ ] La Foreuse's rules: underground, chain collapses, Taupiers skirting the gouffres
+- [x] The darkness of 3-2: only the Calque shows the columns
+- [x] The karst region of the Grand Plan and world 3's biome
+- [x] La Foreuse's rules: underground, chain collapses, Taupiers skirting the gouffres
 - [ ] A choice that adds a spawn source later (keeping the plan, 3-3 → world 4)
 - [ ] Les Dunes migrantes, the Dune and Saline tiles (world 4)
 - [ ] The Héliographe (world 4)
@@ -117,10 +114,10 @@ Campaign: the prologue and 6 worlds × 4 levels (the 4th is the boss). Bonus she
 - [x] 2-2 (before 248d9c6)
 - [x] 2-3, the escort (before 248d9c6)
 - [x] 2-4, le Théodolite de Givre (248d9c6)
-- [ ] 3-1
-- [ ] 3-2, the darkness
-- [ ] 3-3, la Galerie Signée
-- [ ] 3-4, la Foreuse
+- [x] 3-1
+- [x] 3-2, the darkness
+- [x] 3-3, la Galerie Signée
+- [x] 3-4, la Foreuse
 - [ ] 4-1
 - [ ] 4-2
 - [ ] 4-3
@@ -193,7 +190,7 @@ Narration (margin notes, boss lines, choices; drafts allowed where the bible is 
 - [x] Prologue (before 248d9c6)
 - [x] World 1 (before 248d9c6)
 - [x] World 2 (248d9c6)
-- [ ] World 3
+- [x] World 3
 - [ ] World 4
 - [ ] World 5
 - [ ] World 6
@@ -225,13 +222,13 @@ Art:
 - [x] The figurine kit: one body, silhouettes and props per people (before 248d9c6)
 - [x] World 1's land: the bocage (before 248d9c6)
 - [x] World 2's land: the mountains (before 248d9c6)
-- [ ] World 3's land: karst and slate
+- [x] World 3's land: karst and slate
 - [ ] World 4's land: dunes and salt
 - [ ] World 5's land: polders and the low town
 - [ ] World 6's land: the Plan-Relief
 - [x] Boss: la Grande Chaîne, its cart, oxen and chain (before 248d9c6)
 - [ ] Boss: le Théodolite, its runners and lens (it borrows the cart)
-- [ ] Boss: la Foreuse
+- [x] Boss: la Foreuse
 - [ ] Boss: le Méridien
 - [ ] Boss: l'Éclusier's barge
 - [ ] Boss: Ilse's press

@@ -28,6 +28,12 @@ const ALPINE_BLOOMS: [Color; 4] = [
     Color::srgb(0.86, 0.42, 0.56),
     Color::srgb(0.96, 0.7, 0.22),
 ];
+const KARST_BLOOMS: [Color; 4] = [
+    Color::srgb(0.52, 0.58, 0.48),
+    Color::srgb(0.78, 0.72, 0.52),
+    Color::srgb(0.42, 0.48, 0.52),
+    Color::srgb(0.7, 0.64, 0.58),
+];
 /// The wildflowers' colours: poppy, cornflower, ox-eye daisy, buttercup.
 const BLOOMS: [Color; 4] = [
     Color::srgb(0.82, 0.26, 0.2),
@@ -96,6 +102,7 @@ fn sprig_parts(sprig: &Sprig, wash: Color, biome: Biome) -> Vec<Mesh> {
             let h = 0.07 + (roll >> 3 & 7) as f32 * 0.006;
             let blooms = match biome {
                 Biome::Cols => &ALPINE_BLOOMS,
+                Biome::Karst => &KARST_BLOOMS,
                 Biome::Bocage => &BLOOMS,
             };
             let bloom = blooms[(roll >> 24) as usize % blooms.len()];

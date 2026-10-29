@@ -69,6 +69,8 @@ pub enum Carry {
     Gast,
     /// The sighting lantern on a post at the front of the box.
     Visee,
+    /// The Foreuse's toothed drill head.
+    Foreuse,
 }
 
 /// What a species walks towards.
