@@ -38,6 +38,11 @@ Pull requests and code/assets changes to `main` run formatting, clippy, tests, t
 check, and parallel release builds on Linux, macOS, and Windows. Documentation-only changes are filtered out. Runs
 cancel when a newer commit supersedes them, and Cargo dependencies and build outputs are cached.
 
+Development uses `develop` as the integration branch. Work is done on short `feature/*`, `fix/*`, `docs/*`,
+or `chore/*` branches and merged by pull request. A `release/vX.Y.Z` branch freezes a milestone for final
+validation, then merges into `main` and is tagged. See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the complete
+workflow, branch protections, PR rules, and the `0.1.0` milestone process.
+
 Push a semantic version tag to publish desktop packages and a browser package:
 
 ```sh

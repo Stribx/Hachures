@@ -38,6 +38,77 @@ git switch -c feat/short-description
 The script runs the same fast checks as CI: formatting, clippy, unit/integration tests, the ignored balance
 regression test, and the WebAssembly check. It installs no dependencies and does not modify tracked files.
 
+## Git workflow and agile milestones
+
+Hachures uses a lightweight Git Flow adapted to a student project. A Git tag is created only when the
+milestone is finished and reproducible; it is not used to hide unfinished work.
+
+| Branch | Purpose | Allowed source | Merge target |
+|---|---|---|---|
+| `main` | Stable, releasable history only | `release/*`, `hotfix/*` | — |
+| `develop` | Integration branch for the current milestone | `feature/*`, `fix/*`, `docs/*`, `chore/*` | — |
+| `feature/<issue>-<name>` | One feature or vertical slice | `develop` | `develop` |
+| `fix/<issue>-<name>` | One bug or regression fix | `develop` | `develop` |
+| `docs/<issue>-<name>` | Documentation-only work | `develop` | `develop` |
+| `chore/<issue>-<name>` | Tooling, CI, or maintenance | `develop` | `develop` |
+| `release/v<major>.<minor>.<patch>` | Stabilization and release preparation | `develop` | `main` and back to `develop` |
+| `hotfix/v<major>.<minor>.<patch>` | Urgent production correction | `main` | `main` and back to `develop` |
+
+### Milestone `0.1.0`
+
+`0.1.0` is the first portfolio milestone, not merely the current `Cargo.toml` value. The milestone is
+ready only when its GitHub issue checklist is complete, the roadmap identifies the delivered scope, the
+local CI gate passes, the browser package and native packages are smoke-tested, and the known limitations
+are documented.
+
+The normal sequence is:
+
+1. Create or update the milestone issue, for example `Milestone 0.1.0`, with acceptance criteria and links
+   to the relevant roadmap items.
+2. Create `develop` from the current `main` once, then do all milestone work through short branches:
+   `git switch -c feature/123-world-3 develop`.
+3. Open pull requests into `develop`. Each PR must represent one coherent change and pass CI plus review.
+4. When the milestone scope is code-complete, freeze feature work and create:
+   `git switch -c release/v0.1.0 develop`.
+5. On `release/v0.1.0`, allow only release blockers, documentation, version metadata, packaging, and
+   manual validation fixes. Do not add new features.
+6. Merge the release branch into `main` with a merge commit, tag the exact merge commit, and push both:
+
+   ```sh
+   git switch main
+   git merge --no-ff release/v0.1.0 -m "Release v0.1.0"
+   git tag -a v0.1.0 -m "Hachures v0.1.0"
+   git push origin main v0.1.0
+   ```
+
+7. Merge the same release branch back into `develop`, then delete the release branch after the GitHub
+   release is published. The tag must never move; a correction gets a new patch version.
+
+### Pull-request rules
+
+- Never commit directly to `main` or `develop`; protect both branches on GitHub.
+- A PR targets `develop` by default. Only `release/*` and `hotfix/*` target `main`.
+- Keep one issue, one branch, and one PR whenever practical. Link the issue with `Fixes #123` only when
+  the PR truly completes it.
+- The PR title follows `type(scope): short description`; examples:
+  `feat(world-3): add karst boss slice` and `fix(save): migrate version 4`.
+- Squash feature/fix PRs when the branch contains exploratory commits. Preserve release and hotfix merge
+  commits so the release history remains visible.
+- A failed CI check, unresolved review, missing test, missing localization, or undocumented limitation
+  blocks merge.
+
+### Versioning rules
+
+Use Semantic Versioning:
+
+- `0.1.0`: first coherent playable milestone;
+- `0.1.x`: fixes, packaging corrections, and safe documentation corrections;
+- `0.2.0`: new gameplay scope or a deliberately incompatible save/data change;
+- `1.0.0`: the project is feature-complete for its declared public scope.
+
+Update `game/Cargo.toml`, release notes, and the roadmap in the release PR. Save-format changes require a
+migration and a test before the version tag is created.
+
 For focused work, use the smallest relevant command first:
 
 ```sh
