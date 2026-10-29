@@ -76,6 +76,8 @@ pub fn look(tile: Tile) -> Block {
         Tile::Glace => Block { height: 0.07, color: Color::srgb(0.88, 0.93, 0.95) },
         Tile::Eboulis => Block { height: 0.2, color: Color::srgb(0.6, 0.57, 0.52) },
         Tile::Palissade => Block { height: 0.2, color: Color::srgb(0.36, 0.26, 0.2) },
+        // A pit: sunk to the walnut base and slate-black.
+        Tile::Gouffre => Block { height: 0.02, color: Color::srgb(0.13, 0.12, 0.13) },
     }
 }
 

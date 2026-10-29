@@ -113,6 +113,12 @@ pub struct Change {
     pub wave: u32,
     pub at: Vec<(usize, usize)>,
     pub becomes: Tile,
+    /// What the HUD says the wave before (les Effondrements: `world.3.announce`), if anything.
+    #[serde(default)]
+    pub announce: Option<String>,
+    /// The shiver's colour the wave before: white unless given (red cracks for a collapse).
+    #[serde(default)]
+    pub color: Option<(f32, f32, f32)>,
 }
 
 impl Change {

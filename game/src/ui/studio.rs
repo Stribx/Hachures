@@ -10,7 +10,9 @@ use bevy::render::render_resource::TextureFormat;
 use bevy::world_serialization::WorldInstanceReady;
 
 use super::bar::Bar;
+use crate::combat::drill::sonde;
 use crate::combat::stand::{BASE_WOOD, TOWER_BASE, WEAPON_WOOD, weapon_model};
+use crate::combat::towers::Weapon;
 use crate::ink::{Act, TOOLS, Tool};
 use crate::look::{Hachure, InkMaterial, ink, varnished};
 use crate::map;
@@ -152,7 +154,10 @@ fn spawn_piece(
         // ponytail: Renommer and Biffer borrow Gratter's scraper; their own pieces (a quill
         // rewriting, one striking out) when the art is drawn.
         Act::Scrape | Act::Rename | Act::Biffer => scraper(),
+        Act::Raise(Weapon::Sonde) => sonde(),
         Act::Raise(weapon) => {
+            // Every other weapon has its model; the Sonde was built just above.
+            let Some(path) = weapon_model(weapon) else { return };
             let scene = |path: &'static str| {
                 WorldAssetRoot(assets.load(GltfAssetLabel::Scene(0).from_asset(path)))
             };
@@ -165,7 +170,7 @@ fn spawn_piece(
             ));
             commands.spawn((
                 StudioModel,
-                scene(weapon_model(weapon)),
+                scene(path),
                 WEAPON_WOOD,
                 // Turned a little, so its shape shows rather than its front.
                 Transform::from_translation(at + Vec3::Y * 0.6)

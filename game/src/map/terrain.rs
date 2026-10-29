@@ -245,7 +245,7 @@ mod tests {
         let species = species::load();
         let mut terrain = Terrain::new(Grid::parse("S,,,M"), reach(), &species);
         terrain.alter([(1, Edit::Land(Tile::Roc)), (2, Edit::Ink(Tile::Boue))], &species);
-        terrain.set_event(Some(&WORLDS[0].event), &species);
+        terrain.set_event(Some(WORLDS[0].event.as_ref().unwrap()), &species);
         assert_eq!(&terrain.grid().tiles[1..4], [Tile::Roc, Tile::Eau, Tile::Eau]);
         terrain.set_event(None, &species);
         assert_eq!(&terrain.grid().tiles[1..4], [Tile::Roc, Tile::Boue, Tile::SolBas]);
@@ -281,7 +281,10 @@ mod tests {
         let species = species::load();
         let mut terrain = Terrain::new(Grid::parse("S.,.M\n....."), reach(), &species);
         terrain.alter([(2, Edit::Ink(Tile::Palissade))], &species);
-        assert_eq!(terrain.base().under(&WORLDS[0].event).tiles[2], Tile::Palissade);
+        assert_eq!(
+            terrain.base().under(WORLDS[0].event.as_ref().unwrap()).tiles[2],
+            Tile::Palissade
+        );
     }
 
     /// Biffer: the tower comes off with its shadow, the barricade gives the road back; the cell is
@@ -348,7 +351,7 @@ mod tests {
         ];
         for (i, edit) in [4, 2, 1, 3, 5].into_iter().zip(edits) {
             let mut terrain = Terrain::new(Grid::parse(map), reach(), &species);
-            terrain.set_event(Some(&WORLDS[0].event), &species);
+            terrain.set_event(Some(WORLDS[0].event.as_ref().unwrap()), &species);
             let previews: Vec<_> = species.iter().map(|s| terrain.preview(i, edit, s)).collect();
             terrain.alter([(i, edit)], &species);
             for (k, (grid, field)) in previews.iter().enumerate() {

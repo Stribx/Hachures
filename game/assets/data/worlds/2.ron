@@ -3,7 +3,7 @@
     name: "world.2.name",
     defends: "world.2.defends",
     // Le Gel [T]: for two waves, water turns to ice. A road for the Gens du Col, a shortcut for the others.
-    event: (
+    event: Some((
         cells: [Eau],
         becomes: Glace,
         lasts: 2,
@@ -12,7 +12,7 @@
         refuse_next: "world.2.refuse_next",
         refuse_after: "world.2.refuse_after",
         color: (0.75, 0.9, 1.0),
-    ),
+    )),
     // Le Théodolite de Givre, commanded by Ombeline Sarre: a tower on runners with a great lens.
     // Phases as for La Grande Chaîne (worlds/1.ron); HP, speed and loot are in species.ron.
     boss: Some((

@@ -3,7 +3,7 @@
     name: "world.1.name",
     defends: "world.1.defends",
     // La Crue [T]: during a wave, low ground (Sol bas, Gué) turns to water, except under barricades, palissades and towers.
-    event: (
+    event: Some((
         cells: [SolBas, Gue],
         becomes: Eau,
         spares: [Barricade, Tour, Palissade],
@@ -13,7 +13,7 @@
         refuse_next: "world.1.refuse_next",
         refuse_after: "world.1.refuse_after",
         color: (0.2, 0.4, 0.9),
-    ),
+    )),
     // La Grande Chaîne, commanded by Gast. It spawns when a wave sends the first phase's species;
     // each phase lasts until its HP fraction drops to `until`. HP, speed and loot are in species.ron.
     boss: Some((

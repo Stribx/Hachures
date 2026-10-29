@@ -37,7 +37,7 @@ pub fn spawn_order(mut groups: Vec<(usize, u32)>) -> Vec<usize> {
 
 impl Level {
     /// Sends the next wave, and the world event with it if it is due. Returns whether the wave
-    /// after it brings the event, for the rumble.
+    /// after it brings the event or a change of the relief (a collapse…), for the rumble.
     ///
     /// # Panics
     ///
@@ -68,7 +68,7 @@ impl Level {
         if started {
             self.note(Trigger::Event);
         }
-        self.event_next
+        self.event_next || self.changes.iter().any(|c| c.wave == number + 1)
     }
 
     /// The wave's last enemy is gone: the world event withdraws until the next wave, and the sheet
@@ -120,6 +120,7 @@ impl Level {
 mod tests {
     use super::*;
     use crate::campaign::save::Save;
+    use crate::map::grid::Tile;
     use crate::map::species::index_of;
 
     #[test]
@@ -156,5 +157,29 @@ mod tests {
         level.sepia = 0;
         level.loot(10);
         assert_eq!(level.sepia, 11, "a buckled sheet gives back 10 % more ink");
+    }
+
+    /// A collapse is a change of the relief: announced (the rumble) the wave before, then the
+    /// Gouffre falls for good.
+    #[test]
+    fn a_collapse_rumbles_then_falls() {
+        let mut level =
+            Level::new(crate::map::grid::Grid::parse("S...M\n....."), crate::map::species::load());
+        level.waves = vec![vec![]; 3];
+        level.changes = vec![crate::level::data::Change {
+            wave: 2,
+            at: vec![(2, 0)],
+            becomes: Tile::Gouffre,
+            announce: Some("world.2.announce".into()),
+            color: Some((0.8, 0.1, 0.1)),
+        }];
+        assert!(level.start_wave(), "the rumble, a wave ahead");
+        assert_eq!(level.terrain.grid().tiles[2], Tile::Sol);
+        level.end_wave();
+        level.start_wave();
+        assert_eq!(
+            (level.terrain.grid().tiles[2], level.terrain.grid().map[2]),
+            (Tile::Gouffre, Tile::Gouffre)
+        );
     }
 }

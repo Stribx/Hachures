@@ -6,15 +6,25 @@ use crate::ink::{Selection, Verdict};
 use crate::level::Level;
 
 pub(super) fn notice(level: &Level) -> String {
-    let event = &level.world().event;
     let mut lines = Vec::new();
     if let Some(phase) = &level.boss {
         lines.push(tf("hud.boss_phase", &[&t(&level.boss_file().name), &t(phase)]));
     }
-    if level.event_on {
-        lines.push(t(&event.during).to_string());
-    } else if level.event_next {
-        lines.push(t(&event.announce).to_string());
+    if let Some(event) = &level.world().event {
+        if level.event_on {
+            lines.push(t(&event.during).to_string());
+        } else if level.event_next {
+            lines.push(t(&event.announce).to_string());
+        }
+    }
+    let next = level.wave.number + 1;
+    let announced =
+        level.changes.iter().filter(|c| c.wave == next).filter_map(|c| c.announce.as_ref());
+    for announce in announced {
+        let line = t(announce).to_string();
+        if !lines.contains(&line) {
+            lines.push(line);
+        }
     }
     lines.join("\n")
 }
@@ -48,4 +58,30 @@ pub(super) fn readout(level: &Level, selection: &Selection, verdict: &Verdict) -
         lines.push(tf("hud.calque", &[&t(tile.name()), &costs.join(", ")]));
     }
     lines.join("\n")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::level::data::Change;
+    use crate::map::grid::{Grid, Tile};
+    use crate::map::species;
+
+    /// The wave before a collapse, the cartouche says so, once however many cells fall.
+    #[test]
+    fn a_collapse_is_announced() {
+        let mut level = Level::new(Grid::parse("S...M\n....."), species::load());
+        let collapse = |x| Change {
+            wave: 1,
+            at: vec![(x, 1)],
+            becomes: Tile::Gouffre,
+            announce: Some("world.2.announce".into()),
+            color: None,
+        };
+        level.changes = vec![collapse(1), collapse(3)];
+        assert_eq!(notice(&level), t("world.2.announce"));
+        level.changes[0].wave = 2;
+        level.changes[1].wave = 2;
+        assert_eq!(notice(&level), "", "not two waves ahead");
+    }
 }

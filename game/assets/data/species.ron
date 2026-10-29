@@ -4,6 +4,9 @@
 // `reading`: Pente (default) prices tiles with `costs`; Ombre prices every walkable cell 1 + the towers covering it.
 // `shape`: Pied (default), Echasses, Bete or Chariot, the silhouette it is drawn with.
 // `carries`: the props its figurine wears (Bicorne, Chaine, Jalon, Paille, Fichu, Ballot, Enfant, Capuche, Corde, Piolet, Bats, Bache, Meneur, Boeufs, Joug, Gast, Visee); none by default.
+// `armor`: share of every hit shrugged off, except from the weapon it is weak to (default 0).
+// `underground`: walks under the ground, only the Sonde reaches it (default false).
+// `mends`: share of a damaged borne's HP it gives back each second, standing beside it (default 0).
 // `hp` is relative to the Chaîneur's 100 HP; `speed` in tiles per second on a cost-1 tile (not in the docs: tune here).
 // A tile left out of `costs` is impassable for that species; `costs` also set walking speed.
 {
@@ -67,6 +70,29 @@
         goal: Cible, hostile: true, hp: 20.0, speed: 0.7, loot: 40, weak_to: None, reading: Ombre,
         color: (0.36, 0.24, 0.14), shape: Chariot, carries: [Boeufs, Joug, Gast, Visee],
         costs: {Sol: 1.0, SolBas: 1.0, Boue: 2.0, Ronces: 3.0, Gue: 1.5, Chaussee: 1.0, Eboulis: 2.0},
+    ),
+    // Monde 3. Diggers: rock and fallen stone are easy going, open ground slow, and they pass under a
+    // barricade. Only the Sonde finds them where they dig.
+    "taupier": (
+        label: "species.taupier",
+        goal: Cible, hostile: true, hp: 1.5, speed: 0.8, loot: 4, weak_to: Some(Sonde),
+        color: (0.3, 0.24, 0.2), carries: [Capuche, Piolet],
+        costs: {Sol: 2.0, SolBas: 2.0, Boue: 2.0, Ronces: 1.0, Roc: 2.0, Barricade: 3.0, Chaussee: 2.0, Eboulis: 1.0},
+    ),
+    // Imperial shorers: armoured, they read l'Ombre and mend the bornes the towers have damaged.
+    "etayeur": (
+        label: "species.etayeur",
+        goal: Cible, hostile: true, hp: 1.8, speed: 0.8, loot: 4, weak_to: Some(Mortier), reading: Ombre,
+        armor: 0.5, mends: 0.1,
+        color: (0.4, 0.3, 0.24), carries: [Bicorne, Corde, Ballot],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 1.0, Ronces: 1.0, Chaussee: 1.0, Eboulis: 1.0},
+    ),
+    // The galleries' Jalonneur: it reads le But, and the goal down here is the Puits d'Air itself.
+    "jalonneur_galeries": (
+        label: "species.jalonneur_galeries",
+        goal: Cible, hostile: true, hp: 0.7, speed: 1.3, loot: 2, weak_to: Some(Harpon),
+        color: (0.2, 0.2, 0.26), carries: [Bicorne, Jalon],
+        costs: {Sol: 1.0, SolBas: 1.0, Boue: 3.0, Ronces: 4.0, Gue: 2.0, Chaussee: 0.5, Glace: 2.0, Eboulis: 3.0},
     ),
     // Le Théodolite de Givre, the boss of monde 2 (phases in worlds/2.ron): a tower on runners,
     // quick on ice. It goes wherever a Chaîneur can, so it never makes le Droit de Passage stricter.

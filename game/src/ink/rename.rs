@@ -63,8 +63,8 @@ mod tests {
     /// Le Gel under way, as `start_wave` sets it.
     fn freeze(level: &mut Level) {
         level.event_on = true;
-        let event = &level.world().event;
-        level.terrain.set_event(Some(event), &level.species);
+        let event = level.world().event.as_ref();
+        level.terrain.set_event(event, &level.species);
     }
 
     fn land(level: &Level, i: usize) -> (Tile, Tile) {

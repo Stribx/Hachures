@@ -93,6 +93,16 @@ pub struct Species {
     pub goal: Goal,
     #[serde(default)]
     pub reading: Reading,
+    /// Share of every hit it shrugs off, except from the weapon it is weak to (the Étayeur's
+    /// armour).
+    #[serde(default)]
+    pub armor: f32,
+    /// Walks under the ground: only a weapon that strikes there (the Sonde) reaches it.
+    #[serde(default)]
+    pub underground: bool,
+    /// Share of a damaged borne's HP it gives back each second, beside it (the Étayeur).
+    #[serde(default)]
+    pub mends: f32,
     /// Towers only aim at hostiles (a mortar splash still hurts the others).
     pub hostile: bool,
     /// Relative to the Chaîneur's 100 HP.

@@ -134,7 +134,7 @@ mod tests {
         assert_eq!(level.refusal(road, 0), Some("world.1.refuse_next"));
 
         level.alter([(5, Edit::Raise(Weapon::Arbalete)), (11, Edit::Ink(Tile::Boue))]);
-        let flooded = level.terrain.base().under(&level.world().event);
+        let flooded = level.terrain.base().under(level.world().event.as_ref().unwrap());
         assert_eq!(flooded.tiles[5], Tile::Tour, "towers stand through the flood");
         assert_eq!(flooded.tiles[11], Tile::Eau, "mud inked on low ground still drowns");
         assert_eq!(flooded.tiles[10], Tile::Eau);
@@ -155,8 +155,13 @@ mod tests {
             species::load(),
         );
         level.waves = vec![vec![]];
-        level.changes =
-            vec![crate::level::data::Change { wave: 1, at: vec![(2, 0)], becomes: Tile::Roc }];
+        level.changes = vec![crate::level::data::Change {
+            wave: 1,
+            at: vec![(2, 0)],
+            becomes: Tile::Roc,
+            announce: None,
+            color: None,
+        }];
         assert_eq!(level.refusal(2, 0), Some(n_("refusal.relief_changes")));
         assert_eq!(
             level.refusal(12, 0),
@@ -181,7 +186,7 @@ mod tests {
         );
         level.world = 1;
         level.events = vec![2];
-        let ice = level.terrain.base().under(&level.world().event);
+        let ice = level.terrain.base().under(level.world().event.as_ref().unwrap());
         assert_eq!(ice.tiles[2], Tile::Glace);
         assert_eq!(
             (1..=4).map(|w| level.event_at(w)).collect::<Vec<_>>(),

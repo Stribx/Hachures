@@ -154,16 +154,16 @@ mod tests {
     fn degel_turns_all_glace_to_water() {
         let mut level = sheet("S.........M\n~~~~~~~~~~~\n...^^~^^^^.");
         level.event_on = true;
-        let event = &level.world().event;
-        level.terrain.set_event(Some(event), &level.species);
+        let event = level.world().event.as_ref();
+        level.terrain.set_event(event, &level.species);
         level.alter([(16, Edit::Ink(Tile::Glace))]);
         level.thaw_all();
         let tiles = &level.terrain.grid().tiles;
         assert!((11..22).all(|i| tiles[i] == Tile::Eau), "{:?}", &tiles[11..22]);
         let mut level = sheet("S..~..M");
         level.event_on = true;
-        let event = &level.world().event;
-        level.terrain.set_event(Some(event), &level.species);
+        let event = level.world().event.as_ref();
+        level.terrain.set_event(event, &level.species);
         level.thaw_all();
         assert_eq!(level.terrain.grid().tiles[3], Tile::Glace, "the only way stays frozen");
     }

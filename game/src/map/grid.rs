@@ -30,6 +30,8 @@ pub enum Tile {
     Eboulis,
     /// An imperial barricade the level data lays: impassable; Gratter scrapes it back to Sol.
     Palissade,
+    /// A collapse (les Effondrements, world 3): a pit no walker crosses, for the rest of the level.
+    Gouffre,
 }
 
 impl Tile {
@@ -49,6 +51,7 @@ impl Tile {
             Tile::Glace => n_("tile.glace"),
             Tile::Eboulis => n_("tile.eboulis"),
             Tile::Palissade => n_("tile.palissade"),
+            Tile::Gouffre => n_("tile.gouffre"),
         }
     }
 
@@ -114,6 +117,7 @@ impl Grid {
                 '^' => Tile::Roc,
                 'e' => Tile::Eboulis,
                 'p' => Tile::Palissade,
+                'o' => Tile::Gouffre,
                 'S' => {
                     grid.spawns.push(i);
                     Tile::Sol
@@ -211,6 +215,16 @@ impl Grid {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// A Gouffre is drawn `o`, and no walker crosses it: no species prices it.
+    #[test]
+    fn a_gouffre_stops_every_walker() {
+        let grid = Grid::parse("S.o.M");
+        assert_eq!((grid.tiles[2], grid.map[2]), (Tile::Gouffre, Tile::Gouffre));
+        for species in super::super::species::load() {
+            assert!(!species.cost(Tile::Gouffre).is_finite(), "{} crosses a Gouffre", species.name);
+        }
+    }
 
     #[test]
     fn an_eboulis_is_parsed_as_drawn() {

@@ -8,4 +8,6 @@
     Harpon: (damage: 35.0, range: 3.0, cooldown: 2.0, splash: 0.0, pin: 1.5),
     // World 2: blinds the Gens du Col (weak to it) and slows whoever it lights.
     Lanterne: (damage: 15.0, range: 3.0, cooldown: 1.0, splash: 0.0, pin: 0.0, slow: 1.5),
+    // World 3: strikes under the ground, the only weapon that reaches what digs (`underground`).
+    Sonde: (damage: 40.0, range: 2.5, cooldown: 1.6, splash: 0.0, pin: 0.0, underground: true),
 }

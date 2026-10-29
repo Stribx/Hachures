@@ -2,6 +2,7 @@
 
 pub mod boss;
 mod draw;
+pub(crate) mod drill;
 pub mod enemies;
 mod enemy;
 pub mod figure;
@@ -27,12 +28,14 @@ pub fn plugin(app: &mut App) {
         (
             enemies::start_waves.in_set(Step::Input),
             (stand::raise_towers, stand::take_down).in_set(Step::Input).after(crate::ink::inking),
+            drill::dress_sondes.in_set(Step::Simulate),
             boss::drop_bornes.in_set(Step::Input).after(crate::ink::inking),
             (
                 enemies::spawn_enemies,
                 noted::notice,
                 enemies::walk,
                 towers::fire,
+                boss::mend_bornes,
                 boss::boss_phases,
                 sighting::seal_col,
                 shards::shards,

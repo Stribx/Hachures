@@ -488,3 +488,76 @@ fn a_biffed_tower_comes_down() {
     let bases: Vec<usize> = world.query::<&TowerBase>().iter(world).map(|b| b.0).collect();
     assert_eq!((towers, bases), (vec![4], vec![4]));
 }
+
+/// A tower of `weapon` beside the first spawn, ready to fire.
+fn tower_beside(app: &mut App, weapon: Weapon) {
+    let at = map::cell_pos(app.world().resource::<Level>().terrain.grid(), 1);
+    app.world_mut()
+        .spawn((Tower { cell: 1, weapon, ready_in: 0.0 }, Transform::from_translation(at)));
+}
+
+/// The damage one shot of `weapon` deals to a `species` with 1000 HP.
+fn one_shot(species: &str, weapon: Weapon, underground: bool) -> f32 {
+    let mut level = Level::new(Grid::parse("S.....M"), species::load());
+    let k = index_of(&level.species, species).unwrap();
+    level.species[k].underground = underground;
+    let enemy = walker(&level, species, 1000.0);
+    let mut app = app_with(level);
+    tower_beside(&mut app, weapon);
+    let enemy = app.world_mut().spawn(enemy).id();
+    app.update();
+    1000.0 - app.world().get::<Enemy>(enemy).unwrap().hp
+}
+
+/// The Étayeur's armour halves every hit but the mortar's, which it is weak to.
+#[test]
+fn armour_halves_but_not_the_weakness() {
+    assert_eq!(one_shot("etayeur", Weapon::Arbalete, false), 15.0);
+    assert_eq!(one_shot("etayeur", Weapon::Mortier, false), 90.0);
+}
+
+/// What digs under the ground only the Sonde reaches; the Taupier is weak to it.
+#[test]
+fn only_the_sonde_reaches_underground() {
+    assert_eq!(one_shot("chaineur", Weapon::Arbalete, true), 0.0);
+    assert_eq!(one_shot("chaineur", Weapon::Mortier, true), 0.0, "nor its splash");
+    assert_eq!(one_shot("chaineur", Weapon::Sonde, true), 40.0);
+    assert_eq!(one_shot("taupier", Weapon::Sonde, false), 80.0);
+}
+
+/// The Taupier passes under a barricade that walls everyone else out.
+#[test]
+fn taupier_walks_under_a_barricade() {
+    let level = Level::new(Grid::parse("S.#.M"), species::load());
+    let k = |name| index_of(&level.species, name).unwrap();
+    let fields = level.terrain.fields();
+    assert!(fields[k("taupier")].dist[0].is_finite());
+    assert!(!fields[k("chaineur")].dist[0].is_finite());
+}
+
+/// An Étayeur beside a damaged borne mends it, never past whole; one too far off doesn't.
+#[test]
+fn etayeur_repairs_a_damaged_borne() {
+    let mut level = Level::new(Grid::parse("S.....M"), species::load());
+    level.alter([(1, Edit::PlantBorne)]);
+    let etayeur = walker(&level, "etayeur", 100.0);
+    let borne_at = map::cell_pos(level.terrain.grid(), 1);
+    let mut app = App::new();
+    app.add_plugins(MinimalPlugins)
+        .insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(50)))
+        .insert_resource(level)
+        .add_systems(Update, super::boss::mend_bornes);
+    let mut borne = Enemy::new(0, 100.0, 1);
+    borne.hp = 50.0;
+    let borne = app.world_mut().spawn((Borne, borne, Transform::from_translation(borne_at))).id();
+    let etayeur = app.world_mut().spawn(etayeur).id();
+    run(&mut app, 2);
+    let hp = app.world().get::<Enemy>(borne).unwrap().hp;
+    assert!(hp > 55.0 && hp < 100.0, "{hp}");
+    run(&mut app, 10);
+    assert_eq!(app.world().get::<Enemy>(borne).unwrap().hp, 100.0, "whole, not more");
+    app.world_mut().get_mut::<Enemy>(borne).unwrap().hp = 50.0;
+    app.world_mut().get_mut::<Transform>(etayeur).unwrap().translation.x += 4.0;
+    run(&mut app, 2);
+    assert_eq!(app.world().get::<Enemy>(borne).unwrap().hp, 50.0, "too far to mend");
+}

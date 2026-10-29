@@ -15,6 +15,7 @@ use super::stand::Tower;
 use crate::campaign::skills::Skill;
 use crate::level::Level;
 use crate::level::story::Trigger;
+use crate::map::species::Species;
 use crate::map::terrain::Edit;
 
 /// Damage multiplier against a species weak to the weapon.
@@ -27,6 +28,8 @@ pub enum Weapon {
     Harpon,
     /// Blinds and slows (world 2).
     Lanterne,
+    /// Strikes under the ground (world 3): the only weapon that reaches what digs.
+    Sonde,
 }
 
 /// A tower's combat stats (`assets/data/towers.ron`).
@@ -41,6 +44,16 @@ pub struct TowerStats {
     /// Seconds the target walks slowed.
     #[serde(default)]
     pub slow: f32,
+    /// Whether it reaches a species walking under the ground.
+    #[serde(default)]
+    pub underground: bool,
+}
+
+impl TowerStats {
+    /// Whether it can hit `species` at all: what walks under the ground only the Sonde reaches.
+    fn reaches(&self, species: &Species) -> bool {
+        self.underground || !species.underground
+    }
 }
 
 pub fn load_stats() -> HashMap<Weapon, TowerStats> {
@@ -55,11 +68,20 @@ type Targets<'w, 's> = Query<
 >;
 
 /// The hostile in `range` of `pos` that is closest to its goal, and where it stands.
-fn aim(level: &Level, enemies: &Targets, pos: Vec3, range: f32) -> Option<(Entity, Vec3)> {
+fn aim(
+    level: &Level,
+    enemies: &Targets,
+    stats: &TowerStats,
+    pos: Vec3,
+    range: f32,
+) -> Option<(Entity, Vec3)> {
     enemies
         .iter()
         .filter(|(_, e, t, _, _)| {
-            level.species[e.species].hostile && t.translation.xz().distance(pos.xz()) <= range
+            let species = &level.species[e.species];
+            species.hostile
+                && stats.reaches(species)
+                && t.translation.xz().distance(pos.xz()) <= range
         })
         .min_by(|(_, a, ..), (_, b, ..)| {
             level.terrain.fields()[a.species].dist[a.cell]
@@ -78,7 +100,8 @@ fn strike(
     mut boss: Option<&mut Boss>,
 ) {
     let species = &level.species[enemy.species];
-    let weak = if species.weak_to == Some(weapon) { WEAKNESS } else { 1.0 };
+    // Armour holds against everything but the weapon the species is weak to.
+    let weak = if species.weak_to == Some(weapon) { WEAKNESS } else { 1.0 - species.armor };
     let counter_sight =
         boss.is_some() && weapon == Weapon::Mortier && level.has(Skill::ContreVisee);
     let phase = boss.as_ref().map(|b| &level.boss_file().phases[b.phase]);
@@ -146,12 +169,13 @@ pub(super) fn fire(
         let range = level.terrain.reach(tower.cell, tower.weapon);
         let pos = tower_transform.translation;
         // Aim at the hostile in range that is closest to its goal.
-        let Some((target, target_pos)) = aim(level, &enemies, pos, range) else { continue };
+        let Some((target, target_pos)) = aim(level, &enemies, stats, pos, range) else { continue };
 
         // A mortar shell hits everyone in the splash, Fuyards included.
         for (entity, mut enemy, t, mut boss, _) in &mut enemies {
             let hit = if stats.splash > 0.0 {
                 t.translation.distance(target_pos) <= stats.splash
+                    && stats.reaches(&level.species[enemy.species])
             } else {
                 entity == target
             };

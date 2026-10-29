@@ -158,6 +158,9 @@ fn weapon_lines(
     } else {
         Line::new(n_("lexique.strong"), &[strong.join(", ")])
     });
+    if stats.underground {
+        lines.push(Line::new(n_("lexique.underground"), &[]));
+    }
     lines.push(Line::new(n_("lexique.aims"), &[]));
     lines
 }
@@ -183,6 +186,12 @@ pub fn species_lines(s: &Species) -> Vec<Line> {
     ];
     if s.hostile {
         lines.push(Line::new(n_("lexique.loot"), &[s.loot.to_string()]));
+    }
+    if s.armor > 0.0 {
+        lines.push(Line::new(n_("lexique.armor"), &[number(s.armor * 100.0)]));
+    }
+    if s.underground {
+        lines.push(Line::new(n_("lexique.digs"), &[]));
     }
     lines.push(match s.weak_to.and_then(|w| TOOLS.iter().find(|tool| tool.act == Act::Raise(w))) {
         Some(tool) => Line::new(n_("lexique.weak"), &[t(tool.label).to_string()]),
@@ -246,8 +255,13 @@ mod tests {
     fn a_barricade_lists_what_cannot_cross_it() {
         let (species, stats) = (load(), load_stats());
         let barricade = tool_index("barricade").unwrap();
-        let line = &tool_lines(barricade, 10, &stats, &species, false)[1];
+        let walled: Vec<_> = species.iter().filter(|s| s.name != "taupier").cloned().collect();
+        let line = &tool_lines(barricade, 10, &stats, &walled, false)[1];
         assert_eq!(line.key, "lexique.impassable_all");
+        // The Taupier passes under it (world 3): then every species' step is listed.
+        let line = &tool_lines(barricade, 10, &stats, &species, false)[1];
+        assert_eq!(line.key, "lexique.step");
+        assert!(line.args[0].contains("Taupier 3"), "{}", line.args[0]);
         let boue = tool_index("boue").unwrap();
         let line = &tool_lines(boue, 15, &stats, &species, false)[1];
         let blocked = line.args[0].matches("infranchissable").count();

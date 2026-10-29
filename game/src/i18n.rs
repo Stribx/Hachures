@@ -278,16 +278,12 @@ mod tests {
             keys.extend(data.places.into_iter().map(|p| p.name));
         }
         for world in WORLDS.iter() {
-            let event = &world.event;
-            let said = [
-                &world.name,
-                &world.defends,
-                &event.announce,
-                &event.during,
-                &event.refuse_next,
-                &event.refuse_after,
-            ];
-            keys.extend(said.map(String::clone));
+            keys.extend([world.name.clone(), world.defends.clone()]);
+            if let Some(event) = &world.event {
+                let said =
+                    [&event.announce, &event.during, &event.refuse_next, &event.refuse_after];
+                keys.extend(said.map(String::clone));
+            }
             if let Some(boss) = &world.boss {
                 keys.insert(boss.name.clone());
                 keys.extend(boss.phases.iter().map(|p| p.name.clone()));

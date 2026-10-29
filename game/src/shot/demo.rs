@@ -49,7 +49,8 @@ pub(super) fn demo(
     let grid = level.terrain.grid();
     let open =
         (0..grid.tiles.len()).filter(|&i| grid.tiles[i] == Tile::Sol && grid.coords(i).1 == 2);
-    let weapons = [Weapon::Arbalete, Weapon::Mortier, Weapon::Harpon, Weapon::Lanterne];
+    let weapons =
+        [Weapon::Arbalete, Weapon::Mortier, Weapon::Harpon, Weapon::Lanterne, Weapon::Sonde];
     for (i, weapon) in open.step_by(3).zip(weapons) {
         spawn_tower(&mut commands, &assets, grid, i, weapon);
     }

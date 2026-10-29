@@ -28,13 +28,15 @@ pub const TOWER_BASE: &str = "models/tower-round-bottom-a.glb";
 pub const BASE_WOOD: Carved = Carved { rgb: [214, 186, 140], painted: false };
 pub const WEAPON_WOOD: Carved = Carved { rgb: [196, 150, 110], painted: true };
 
-/// The glTF asset path of the weapon's model.
-pub fn weapon_model(weapon: Weapon) -> &'static str {
+/// The glTF asset path of the weapon's model; the Sonde has none yet, its piece is built from plain
+/// shapes (`combat/drill.rs`).
+pub fn weapon_model(weapon: Weapon) -> Option<&'static str> {
     match weapon {
-        Weapon::Arbalete => "models/weapon-ballista.glb",
-        Weapon::Mortier => "models/weapon-cannon.glb",
-        Weapon::Harpon => "models/weapon-catapult.glb",
-        Weapon::Lanterne => "models/weapon-turret.glb",
+        Weapon::Arbalete => Some("models/weapon-ballista.glb"),
+        Weapon::Mortier => Some("models/weapon-cannon.glb"),
+        Weapon::Harpon => Some("models/weapon-catapult.glb"),
+        Weapon::Lanterne => Some("models/weapon-turret.glb"),
+        Weapon::Sonde => None,
     }
 }
 
@@ -91,12 +93,14 @@ pub fn spawn_tower(
         base,
         Land::new(base, Some("audio/sfx/impact/impactPlank_medium_000.ogg")),
     ));
-    commands.spawn((
+    let mut tower = commands.spawn((
         LevelEntity,
         Tower { cell, weapon, ready_in: 0.0 },
-        scene(weapon_model(weapon)),
         WEAPON_WOOD,
         top,
         Land::new(top, None),
     ));
+    if let Some(path) = weapon_model(weapon) {
+        tower.insert(scene(path));
+    }
 }

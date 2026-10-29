@@ -25,6 +25,7 @@ const KEYS: [(&str, &[(&str, &str)]); 3] = [
         n_("controls.group.sheet"),
         &[
             (n_("controls.key.digits"), n_("controls.action.pick_tool")),
+            (n_("controls.key.backspace"), n_("controls.action.biffer")),
             (n_("controls.key.click"), n_("controls.action.ink")),
             (n_("controls.key.space"), n_("controls.action.send_wave")),
             (n_("controls.key.f"), n_("controls.action.speed")),

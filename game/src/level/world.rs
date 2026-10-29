@@ -22,7 +22,8 @@ pub struct World {
     pub name: String,
     /// The Cible, as the HUD names it mid-sentence: "le Moulin" (`world.1.defends`).
     pub defends: String,
-    pub event: Event,
+    /// None in a world whose relief changes for good instead (les Effondrements: level `changes`).
+    pub event: Option<Event>,
     #[serde(default)]
     pub boss: Option<BossFile>,
 }

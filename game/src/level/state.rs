@@ -118,8 +118,8 @@ impl Level {
 
     /// Whether the world event is under way during wave `wave`.
     pub fn event_at(&self, wave: u32) -> bool {
-        let lasts = self.world().event.lasts;
-        self.events.iter().any(|&start| (start..start + lasts).contains(&wave))
+        let Some(event) = &self.world().event else { return false };
+        self.events.iter().any(|&start| (start..start + event.lasts).contains(&wave))
     }
 
     /// `base` once every scripted change still to come has fallen.
@@ -178,8 +178,8 @@ impl Level {
 
     /// The map follows `event_on`: under the world event while it lasts.
     pub(super) fn follow_event(&mut self) {
-        let world = self.world();
-        self.terrain.set_event(self.event_on.then_some(&world.event), &self.species);
+        let event = self.world().event.as_ref().filter(|_| self.event_on);
+        self.terrain.set_event(event, &self.species);
     }
 }
 

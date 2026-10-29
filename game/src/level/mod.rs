@@ -87,10 +87,13 @@ mod tests {
                         level.name,
                         species.name
                     );
-                    let event = &level.world().event;
                     let later = level.after_changes();
                     let base = level.terrain.base();
-                    for map in [base.under(event), later.under(event), base.clone(), later] {
+                    let mut maps = vec![base.clone(), later.clone()];
+                    if let Some(event) = &level.world().event {
+                        maps.extend([base.under(event), later.under(event)]);
+                    }
+                    for map in maps {
                         let field = FlowField::new(&map, species);
                         assert!(
                             spawns.iter().all(|&s| field.dist[s].is_finite()),

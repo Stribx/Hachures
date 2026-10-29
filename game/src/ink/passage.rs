@@ -41,7 +41,7 @@ impl Level {
     /// Le Droit de Passage: why `tile` at `cell` would close the map, now or around the world
     /// event.
     pub(super) fn closes(&self, cell: usize, tile: Tile) -> Option<&'static str> {
-        let event = &self.world().event;
+        let event = self.world().event.as_ref();
         if self.changes.iter().any(|c| c.cells(self.terrain.base().width).any(|n| n == cell)) {
             Some(n_("refusal.relief_changes"))
         } else if !can_place(
@@ -53,13 +53,15 @@ impl Level {
             &self.walkers,
         ) {
             Some(n_("refusal.closed"))
-        } else if self
-            .maps_ahead()
-            .iter()
-            .any(|map| !can_place(map, &self.species, &self.present, cell, tile, &[]))
+        } else if let Some(event) = event
+            && self
+                .maps_ahead()
+                .iter()
+                .any(|map| !can_place(map, &self.species, &self.present, cell, tile, &[]))
         {
             Some(&event.refuse_next)
-        } else if self.event_on
+        } else if let Some(event) = event
+            && self.event_on
             && !can_place(self.terrain.base(), &self.species, &self.present, cell, tile, &[])
         {
             Some(&event.refuse_after)
@@ -75,7 +77,7 @@ impl Level {
     /// The maps of the waves still to come that the world event floods, each with the changes
     /// fallen by then.
     fn maps_ahead(&self) -> Vec<Grid> {
-        let event = &self.world().event;
+        let Some(event) = &self.world().event else { return Vec::new() };
         let width = self.terrain.base().width;
         let mut seen = Vec::new();
         let mut maps = Vec::new();
@@ -163,7 +165,13 @@ mod tests {
             .....
             ",
         );
-        level.changes = vec![Change { wave: 2, at: vec![(2, 0)], becomes: Tile::Roc }];
+        level.changes = vec![Change {
+            wave: 2,
+            at: vec![(2, 0)],
+            becomes: Tile::Roc,
+            announce: None,
+            color: None,
+        }];
         level.events = vec![4];
         let c = 22;
         assert_eq!(level.refusal(c, tool_index("barricade").unwrap()), Some("world.1.refuse_next"));
@@ -285,7 +293,13 @@ mod tests {
         level.walkers.push(Walker { species: level.present[0], cell: 2 });
         assert_eq!(level.refusal(2, gratter), None, "under a walker");
         level.walkers.clear();
-        level.changes = vec![Change { wave: 2, at: vec![(2, 0)], becomes: Tile::Roc }];
+        level.changes = vec![Change {
+            wave: 2,
+            at: vec![(2, 0)],
+            becomes: Tile::Roc,
+            announce: None,
+            color: None,
+        }];
         assert_eq!(level.refusal(2, gratter), None, "on a cell a change will hit");
     }
 
@@ -306,6 +320,9 @@ mod tests {
         let mut level = level("S.,.M");
         level.alter([(2, Edit::Ink(Tile::Eboulis))]);
         level.ink(2, tool_index("gratter").unwrap());
-        assert_eq!(level.terrain.base().under(&level.world().event).tiles[2], Tile::Sol);
+        assert_eq!(
+            level.terrain.base().under(level.world().event.as_ref().unwrap()).tiles[2],
+            Tile::Sol
+        );
     }
 }

@@ -77,16 +77,19 @@ fn relief(gizmos: &mut Gizmos, level: &Level) {
 fn shiver(gizmos: &mut Gizmos, level: &Level, elapsed: f32) {
     let grid = level.terrain.grid();
     let shiver = Vec3::X * (elapsed * 25.0).sin() * 0.03;
-    let event = &level.world().event;
-    if level.event_next && !level.event_on {
+    if let Some(event) = &level.world().event
+        && level.event_next
+        && !level.event_on
+    {
         let (r, g, b) = event.color;
         for i in (0..grid.tiles.len()).filter(|&i| grid.hit_by(event, i)) {
             hachures(gizmos, level, i, Color::srgb(r, g, b), shiver);
         }
     }
     for change in level.changes.iter().filter(|c| c.wave == level.wave.number + 1) {
+        let color = change.color.map_or(Color::WHITE, |(r, g, b)| Color::srgb(r, g, b));
         for i in change.cells(grid.width) {
-            hachures(gizmos, level, i, Color::WHITE, shiver);
+            hachures(gizmos, level, i, color, shiver);
         }
     }
 }

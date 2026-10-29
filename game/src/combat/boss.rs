@@ -104,6 +104,27 @@ pub(super) fn drop_bornes(
     }
 }
 
+/// How near an Étayeur stands to mend a borne, in tiles.
+const MEND_REACH: f32 = 1.5;
+
+/// The Étayeurs mend the bornes beside them, never past whole. A scraped borne is off the map and
+/// gone (`drop_bornes`): past mending.
+pub(super) fn mend_bornes(
+    time: Res<Time>,
+    level: Res<Level>,
+    walkers: Query<(&Enemy, &Transform), Without<Borne>>,
+    mut bornes: Query<(&mut Enemy, &Transform), With<Borne>>,
+) {
+    for (mut borne, at) in &mut bornes {
+        let mends: f32 = walkers
+            .iter()
+            .filter(|(_, t)| t.translation.xz().distance(at.translation.xz()) <= MEND_REACH)
+            .map(|(e, _)| level.species[e.species].mends)
+            .sum();
+        borne.hp = (borne.hp + borne.max_hp * mends * time.delta_secs()).min(borne.max_hp);
+    }
+}
+
 /// The boss moves on to its next phase as its HP drops; [P] a new phase can mean a new species
 /// profile.
 pub fn boss_phases(mut level: ResMut<Level>, mut bosses: Query<(&mut Enemy, &mut Boss)>) {
