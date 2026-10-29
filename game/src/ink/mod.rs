@@ -16,6 +16,7 @@ use crate::Step;
 use crate::campaign::load_level;
 use crate::combat::towers::Weapon;
 use crate::map::land::fibres;
+pub(crate) use ghost::ghost_ink;
 pub(crate) use inking::inking;
 pub use selection::Selection;
 pub use tools::{Act, TOOLS, Tool, tool_index};

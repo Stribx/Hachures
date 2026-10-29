@@ -45,6 +45,11 @@ pub const PASTURE: Color = Color::srgb(0.65, 0.74, 0.48);
 pub const MEADOW: Color = Color::srgb(0.53, 0.68, 0.53);
 /// Ripe wheat and straw.
 pub const WHEAT: Color = Color::srgb(0.84, 0.77, 0.52);
+
+/// A wheat ear: the wheat gone a little more ochre.
+pub fn wheat_ear() -> Color {
+    WHEAT.mix(&Color::srgb(0.7, 0.55, 0.28), 0.4)
+}
 /// Hedgerows and the woods' floor, the deepest green.
 pub const HEDGE: Color = Color::srgb(0.36, 0.5, 0.32);
 /// The shadow a panel casts on the map, lifting the sheet off it.

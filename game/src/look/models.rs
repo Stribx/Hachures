@@ -2,12 +2,19 @@
 
 use std::collections::HashMap;
 
+use bevy::asset::AssetPath;
 use bevy::ecs::system::SystemParam;
 use bevy::pbr::ExtendedMaterial;
 use bevy::prelude::*;
 use bevy::world_serialization::WorldInstanceReady;
 
 use super::{Hachure, InkMaterial};
+
+/// The glTF scene at `path` (its first), to spawn as a model; its materials are swapped for ink as
+/// it appears.
+pub fn scene(assets: &AssetServer, path: impl Into<AssetPath<'static>>) -> WorldAssetRoot {
+    WorldAssetRoot(assets.load(GltfAssetLabel::Scene(0).from_asset(path)))
+}
 
 /// Ink materials already made from a model's own (and its carving, if any), so every tower shares
 /// them.

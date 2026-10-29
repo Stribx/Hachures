@@ -5,7 +5,8 @@ use bevy::prelude::*;
 use super::cells::Cell;
 use super::fields::fields;
 use super::grid::{Grid, Tile};
-use crate::look::{Hachure, InkMaterial};
+use super::props::merge;
+use crate::look::InkMaterial;
 
 /// The thread's colour: unbleached linen.
 const THREAD: Color = Color::srgb(0.9, 0.85, 0.68);
@@ -55,14 +56,8 @@ pub(super) fn spawn_seams(
                 .translated_by(at)
         })
     });
-    let Some(mesh) = stitches.reduce(|mut all, stitch| {
-        all.merge(&stitch).expect("stitches share their attributes");
-        all
-    }) else {
-        return;
-    };
-    let mut thread = crate::look::ink(THREAD);
-    thread.extension = Hachure::fine();
+    let Some(mesh) = merge(stitches) else { return };
+    let thread = crate::look::fine(THREAD);
     commands.spawn((Cell, Mesh3d(meshes.add(mesh)), MeshMaterial3d(materials.add(thread))));
 }
 

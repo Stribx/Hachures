@@ -7,7 +7,7 @@ use crate::combat::drill::sonde;
 use crate::combat::stand::{BASE_WOOD, TOWER_BASE, WEAPON_WOOD, weapon_model};
 use crate::combat::towers::Weapon;
 use crate::ink::{Act, TOOLS, Tool};
-use crate::look::{Hachure, InkMaterial, ink, varnished};
+use crate::look::{InkMaterial, fine, ink, scene, varnished};
 use crate::map;
 use crate::map::grid::Tile;
 use crate::map::props::prop;
@@ -57,11 +57,6 @@ fn spawn_piece(
     tool: &Tool,
     spot: &Spot,
 ) {
-    let fine = |color: Color| {
-        let mut paint = ink(color);
-        paint.extension = Hachure::fine();
-        paint
-    };
     let (at, layer) = (spot.at, &spot.layer);
     let parts = match tool.act {
         Act::Lay(tile) => prop(tile, 0),
@@ -72,19 +67,16 @@ fn spawn_piece(
         Act::Raise(weapon) => {
             // Every other weapon has its model; the Sonde was built just above.
             let Some(path) = weapon_model(weapon) else { return };
-            let scene = |path: &'static str| {
-                WorldAssetRoot(assets.load(GltfAssetLabel::Scene(0).from_asset(path)))
-            };
             commands.spawn((
                 StudioModel,
-                scene(TOWER_BASE),
+                scene(assets, TOWER_BASE),
                 BASE_WOOD,
                 Transform::from_translation(at),
                 layer.clone(),
             ));
             commands.spawn((
                 StudioModel,
-                scene(path),
+                scene(assets, path),
                 WEAPON_WOOD,
                 // Turned a little, so its shape shows rather than its front.
                 Transform::from_translation(at + Vec3::Y * 0.6)

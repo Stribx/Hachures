@@ -7,13 +7,13 @@ use bevy::prelude::*;
 use super::stand::Tower;
 use super::towers::Weapon;
 use crate::look::{InkMaterial, ink};
-use crate::map::props::PropPart;
+use crate::map::props::{PROP_WOOD, PropPart};
 
 /// Three wooden legs leaning in over an iron rod, its bit at the foot and a brass head on top; the
 /// tower's top at the origin.
 // ponytail: plain shapes stand in for the Sonde's carved piece; swap for a model when one is drawn.
 pub(crate) fn sonde() -> Vec<PropPart> {
-    let wood = Color::srgb(0.6, 0.44, 0.27);
+    let wood = PROP_WOOD;
     let mut parts: Vec<PropPart> = (0..3)
         .map(|k| {
             let around = Quat::from_rotation_y(k as f32 * TAU / 3.0);

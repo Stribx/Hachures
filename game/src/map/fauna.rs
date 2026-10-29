@@ -9,7 +9,7 @@ use super::fields::mix;
 use super::grid::Grid;
 use super::growth::{Crop, sprigs};
 use crate::level::Level;
-use crate::look::{Hachure, InkMaterial};
+use crate::look::InkMaterial;
 use crate::schedule::Screen;
 use crate::settings::Settings;
 use crate::theme::WORLD_INK;
@@ -80,12 +80,6 @@ fn wings(
     }
 }
 
-fn felt(color: Color) -> InkMaterial {
-    let mut material = crate::look::ink(color);
-    material.extension = Hachure::fine();
-    material
-}
-
 /// The board was redrawn or the settings changed: its butterflies are set out again over its
 /// flowers, none on Low (the one preset without shadows).
 pub(super) fn settle(
@@ -109,7 +103,7 @@ pub(super) fn settle(
     let wing = meshes.add(Cuboid::new(0.1, 0.006, 0.09));
     let biome = Biome::of(level.world);
     for (k, home) in butterfly_homes(level.terrain.grid(), biome).into_iter().enumerate() {
-        let colour = materials.add(felt(WINGS[k % WINGS.len()]));
+        let colour = materials.add(crate::look::fine(WINGS[k % WINGS.len()]));
         commands
             .spawn((
                 Butterfly { home, phase: k as f32 * 1.7 },
@@ -172,7 +166,8 @@ pub(super) fn launch(
     let heading = (roll >> 8 & 255) as f32 / 255.0 - 0.5 + 0.35f32.atan2(0.94);
     let way = Vec3::new(heading.cos(), 0.0, heading.sin());
     let across = Vec3::new(-way.z, 0.0, way.x) * ((roll >> 16 & 255) as f32 / 255.0 - 0.5) * 8.0;
-    let (wing, ink) = (meshes.add(Cuboid::new(0.16, 0.012, 0.05)), materials.add(felt(WORLD_INK)));
+    let (wing, ink) =
+        (meshes.add(Cuboid::new(0.16, 0.012, 0.05)), materials.add(crate::look::fine(WORLD_INK)));
     let flock = commands
         .spawn((
             Flock { velocity: way * 2.2, left: 40.0 / 2.2 },

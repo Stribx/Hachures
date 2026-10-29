@@ -10,7 +10,7 @@ use super::terrain::{EAST, NORTH, SOUTH, WATER, WEST, height, land_tiles, road_m
 use super::{OverworldRoot, camera, pawn};
 use crate::campaign::save::Save;
 use crate::level::Level;
-use crate::look::{InkMaterial, Swaying, ink, shore_image, water};
+use crate::look::{InkMaterial, Swaying, ink, scene, shore_image, water};
 
 /// How far a tree leans in the wind, per world unit of height squared: a canopy a few units up
 /// sways a few hundredths, its trunk not at all.
@@ -84,9 +84,7 @@ pub(super) fn spawn(
 
     for (model, transform) in props() {
         let mut prop = commands.spawn((
-            WorldAssetRoot(
-                assets.load(GltfAssetLabel::Scene(0).from_asset(format!("models/{model}.glb"))),
-            ),
+            scene(&assets, format!("models/{model}.glb")),
             transform,
             ChildOf(root),
         ));

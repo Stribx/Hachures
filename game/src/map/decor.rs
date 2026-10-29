@@ -74,8 +74,7 @@ pub(crate) fn palisade(shape: u8) -> Vec<PropPart> {
         wood.push(rail.translated_by(Vec3::new(0.0, y, 0.0)));
     }
     let paint = |parts: Vec<Mesh>, color| {
-        let mesh = merge(parts.into_iter().map(|m| m.rotated_by(turn)).collect())
-            .expect("a prop has parts");
+        let mesh = merge(parts.into_iter().map(|m| m.rotated_by(turn))).expect("a prop has parts");
         PropPart { mesh, color }
     };
     vec![paint(wood, Color::srgb(0.36, 0.26, 0.2)), paint(tips, Color::srgb(0.7, 0.2, 0.15))]

@@ -7,7 +7,7 @@ use bevy::ecs::system::SystemParam;
 use bevy::prelude::*;
 
 use super::grid::Tile;
-use crate::look::{self, Hachure, InkMaterial};
+use crate::look::{self, InkMaterial};
 use crate::settings::Settings;
 
 /// Light wood on wood: a barricade landing, and the settings page trying the effects volume.
@@ -78,8 +78,7 @@ impl Landing<'_, '_> {
             .fibre
             .get_or_insert_with(|| {
                 // Earth-coloured, to show on the pale ground.
-                let mut paper = look::ink(Color::srgb(0.55, 0.45, 0.33));
-                paper.extension = Hachure::fine();
+                let paper = look::fine(Color::srgb(0.55, 0.45, 0.33));
                 (self.meshes.add(Cuboid::from_length(0.035)), self.materials.add(paper))
             })
             .clone();

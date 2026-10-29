@@ -8,11 +8,19 @@ use bevy::prelude::*;
 use super::{Act, Selection, TOOLS, Verdict};
 use crate::campaign::skills::Skill;
 use crate::level::Level;
-use crate::look::{self, Hachure, InkMaterial};
+use crate::look::{self, InkMaterial};
 use crate::map;
 use crate::map::barricade::barricade_shape;
 use crate::map::grid::Tile;
-use crate::map::props::prop;
+use crate::map::props::{merge, prop};
+
+/// The ghost's paint: see-through, its colours on its vertices. The warmup makes the same, so the
+/// first ghost does not hitch on a pipeline built just then.
+pub(crate) fn ghost_ink() -> InkMaterial {
+    let mut pale = look::fine(Color::WHITE.with_alpha(0.45));
+    pale.base.alpha_mode = AlphaMode::Blend;
+    pale
+}
 
 /// The assets the ghost's piece is made of.
 #[derive(SystemParam)]
@@ -51,12 +59,9 @@ pub(super) fn ghost(
     let tile = if let Act::Lay(tile) = TOOLS[selection.tool].act { Some(tile) } else { None };
     let at = verdict.at.zip(tile).filter(|_| verdict.refusal.is_none());
     let entity = *held.ghost.get_or_insert_with(|| {
-        let mut pale = look::ink(Color::WHITE.with_alpha(0.45));
-        pale.base.alpha_mode = AlphaMode::Blend;
-        pale.extension = Hachure::fine();
         commands
             .spawn((
-                MeshMaterial3d(stock.materials.add(pale)),
+                MeshMaterial3d(stock.materials.add(ghost_ink())),
                 Transform::default(),
                 Visibility::Hidden,
             ))
@@ -89,10 +94,7 @@ pub(super) fn ghost(
                 vec![part.color.to_linear().to_f32_array(); n],
             )
         });
-        let whole = parts.reduce(|mut all, part| {
-            all.merge(&part).expect("the parts share their attributes");
-            all
-        });
+        let whole = merge(parts);
         stock.meshes.add(whole.expect("a tool's piece has parts"))
     });
     commands.entity(entity).insert(Mesh3d(mesh.clone()));

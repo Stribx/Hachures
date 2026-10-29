@@ -6,7 +6,7 @@ use std::f32::consts::{FRAC_PI_2, FRAC_PI_4, PI};
 use bevy::prelude::*;
 
 use super::grid::{Grid, Tile};
-use super::props::{PropPart, merge};
+use super::props::{PROP_PALE, PROP_WOOD, PropPart, merge};
 
 /// Shape bits of a barricade: an arm toward each barricade beside it, and the fascines once the
 /// skill is learnt.
@@ -131,14 +131,8 @@ pub(super) fn barricade(shape: u8) -> Vec<PropPart> {
     // Model-maker's stuff: whittled sticks of pale wood, cream string, the fascines in darker
     // twigs.
     let mut parts = vec![
-        PropPart {
-            mesh: merge(beams.wood).expect("a prop has parts"),
-            color: Color::srgb(0.6, 0.44, 0.27),
-        },
-        PropPart {
-            mesh: merge(beams.string).expect("a prop has parts"),
-            color: Color::srgb(0.88, 0.82, 0.68),
-        },
+        PropPart { mesh: merge(beams.wood).expect("a prop has parts"), color: PROP_WOOD },
+        PropPart { mesh: merge(beams.string).expect("a prop has parts"), color: PROP_PALE },
     ];
     if let Some(sticks) = merge(beams.sticks) {
         parts.push(PropPart { mesh: sticks, color: Color::srgb(0.4, 0.28, 0.16) });

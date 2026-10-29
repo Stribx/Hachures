@@ -7,7 +7,7 @@ use super::chain::{LINK_MAJOR, LINK_MINOR};
 use super::kit::{Form, Paint, Role, casts_shadow, parts};
 use super::spawn::FLOAT;
 use crate::level::Level;
-use crate::look::{Hachure, InkMaterial};
+use crate::look::InkMaterial;
 use crate::theme::{FELT, HIDE, IRON, LAMP, LIMESTONE, LINEN, SEAL, SEPIA, SLATE, WOOD};
 
 /// One part of a figurine, ready to spawn: its mesh, place, ink, role, side and whether it casts a
@@ -41,8 +41,7 @@ pub struct EnemyLook {
 
 /// Fine strokes, so a small piece does not turn to scribble; `gloss` for the varnished wood.
 fn figurine_ink(color: Color, gloss: f32) -> InkMaterial {
-    let mut material = crate::look::ink(color);
-    material.extension = Hachure::fine();
+    let mut material = crate::look::fine(color);
     material.extension.uniform.gloss = gloss;
     material
 }

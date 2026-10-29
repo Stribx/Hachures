@@ -17,8 +17,8 @@ use crate::theme::{AMBIENT, SHEET};
 #[cfg(not(target_arch = "wasm32"))]
 pub use camera::occlusion;
 pub use camera::{Frame, Sun, WorldCamera, lens};
-pub use material::{Hachure, InkMaterial, ink, shore_image, varnished, water};
-pub use models::{Carved, Swaying};
+pub use material::{Hachure, InkMaterial, fine, ink, shore_image, varnished, water, weighed};
+pub use models::{Carved, Swaying, scene};
 use models::{Inked, ink_models};
 pub use paper::Paper;
 pub use ready::PipelinesReady;

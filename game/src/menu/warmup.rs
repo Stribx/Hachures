@@ -7,8 +7,9 @@ use bevy::prelude::*;
 use crate::combat::figure::{EnemyLook, spawn_figure};
 use crate::combat::stand::{BASE_WOOD, TOWER_BASE, WEAPON_WOOD, weapon_model};
 use crate::combat::towers::Weapon;
+use crate::ink::ghost_ink;
 use crate::level::Level;
-use crate::look::{self, Hachure, InkMaterial};
+use crate::look::{InkMaterial, scene};
 use crate::map;
 use crate::schedule::Screen;
 use crate::theme::PANEL_SHADOW;
@@ -37,24 +38,25 @@ fn spawn(
     *done = true;
     let grid = level.terrain.grid();
     let at = map::cell_pos(grid, grid.tiles.len() / 2);
-    let scene =
-        |path: &'static str| WorldAssetRoot(assets.load(GltfAssetLabel::Scene(0).from_asset(path)));
-    commands.spawn((Warmup, scene(TOWER_BASE), BASE_WOOD, Transform::from_translation(at)));
+    commands.spawn((
+        Warmup,
+        scene(&assets, TOWER_BASE),
+        BASE_WOOD,
+        Transform::from_translation(at),
+    ));
     let models = [Weapon::Arbalete, Weapon::Mortier, Weapon::Harpon, Weapon::Lanterne]
         .into_iter()
         .filter_map(weapon_model);
     for path in models {
         let top = Transform::from_translation(at + Vec3::Y * 0.6);
-        commands.spawn((Warmup, scene(path), WEAPON_WOOD, top));
+        commands.spawn((Warmup, scene(&assets, path), WEAPON_WOOD, top));
     }
     for index in 0..look.figures.len() {
         let figure = spawn_figure(&mut commands, &look, index, at, 1.0);
         commands.entity(figure).insert(Warmup);
     }
-    // The ghost's piece: see-through, its colours on its vertices, as `ink::ghost` makes it.
-    let mut pale = look::ink(Color::WHITE.with_alpha(0.45));
-    pale.base.alpha_mode = AlphaMode::Blend;
-    pale.extension = Hachure::fine();
+    // The ghost's piece, its colours on its vertices.
+    let pale = ghost_ink();
     let cube = Mesh::from(Cuboid::from_length(0.3));
     let n = cube.count_vertices();
     let cube = cube.with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, vec![[1.0; 4]; n]);

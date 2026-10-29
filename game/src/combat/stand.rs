@@ -5,7 +5,7 @@ use bevy::prelude::*;
 use super::towers::Weapon;
 use crate::ink::{TowerBiffed, TowerInked};
 use crate::level::{Level, LevelEntity};
-use crate::look::Carved;
+use crate::look::{Carved, scene};
 use crate::map::grid::Grid;
 use crate::map::land::Land;
 
@@ -77,8 +77,6 @@ pub fn spawn_tower(
     weapon: Weapon,
 ) {
     let (x, z) = grid.coords(cell);
-    let scene =
-        |path: &'static str| WorldAssetRoot(assets.load(GltfAssetLabel::Scene(0).from_asset(path)));
     // Both land in the cell like the other pieces; the base makes the sound of a wooden figure set
     // down.
     let (base, top) = (
@@ -88,7 +86,7 @@ pub fn spawn_tower(
     commands.spawn((
         LevelEntity,
         TowerBase(cell),
-        scene(TOWER_BASE),
+        scene(assets, TOWER_BASE),
         BASE_WOOD,
         base,
         Land::new(base, Some("audio/sfx/impact/impactPlank_medium_000.ogg")),
@@ -101,6 +99,6 @@ pub fn spawn_tower(
         Land::new(top, None),
     ));
     if let Some(path) = weapon_model(weapon) {
-        tower.insert(scene(path));
+        tower.insert(scene(assets, path));
     }
 }

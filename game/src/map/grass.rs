@@ -7,10 +7,11 @@ use super::biome::Biome;
 use super::cells::Cell;
 use super::fields::ground;
 use super::growth::{Crop, Sprig, sprigs};
+use super::props::merge;
 use crate::level::Level;
-use crate::look::{Hachure, InkMaterial, ink};
+use crate::look::{InkMaterial, fine, weighed};
 use crate::settings::Settings;
-use crate::theme::{HEDGE, WHEAT};
+use crate::theme::{HEDGE, WHEAT, wheat_ear};
 
 /// The growth now on the board.
 #[derive(Component)]
@@ -68,14 +69,8 @@ pub(super) fn grow(
             .into_iter()
             .map(move |part| part.translated_by(foot))
     });
-    let Some(mesh) = pieces.reduce(|mut all, part| {
-        all.merge(&part).expect("the growth's parts share their attributes");
-        all
-    }) else {
-        return;
-    };
-    let mut felt = ink(Color::WHITE);
-    felt.extension = Hachure::fine();
+    let Some(mesh) = merge(pieces) else { return };
+    let mut felt = fine(Color::WHITE);
     felt.extension.uniform.wind = if settings.reduced_motion { 0.0 } else { GRASS_WIND };
     commands.spawn((Growth, Mesh3d(meshes.add(mesh)), MeshMaterial3d(materials.add(felt))));
 }
@@ -108,7 +103,7 @@ fn sprig_parts(sprig: &Sprig, wash: Color, biome: Biome) -> Vec<Mesh> {
         }
         Crop::Wheat => {
             let h = 0.17 + (roll >> 3 & 7) as f32 * 0.008;
-            let ear = WHEAT.mix(&Color::srgb(0.7, 0.55, 0.28), 0.4);
+            let ear = wheat_ear();
             vec![
                 stalk(h, 0.018, 0.05, WHEAT),
                 part(Vec3::new(0.034, 0.07, 0.034), h, turn, 0.05, ear),
@@ -123,12 +118,5 @@ fn part(size: Vec3, up: f32, turn: f32, tilt: f32, color: Color) -> Mesh {
     let mesh = Mesh::from(Cuboid::from_size(size))
         .translated_by(Vec3::Y * up)
         .rotated_by(Quat::from_rotation_y(turn) * Quat::from_rotation_x(tilt));
-    let [r, g, b, _] = color.to_linear().to_f32_array();
-    let Some(positions) = mesh.attribute(Mesh::ATTRIBUTE_POSITION).and_then(|p| p.as_float3())
-    else {
-        return mesh;
-    };
-    let colors: Vec<[f32; 4]> =
-        positions.iter().map(|p| [r, g, b, (p[1] / TALLEST).clamp(0.0, 1.0)]).collect();
-    mesh.with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, colors)
+    weighed(mesh, color, TALLEST)
 }

@@ -4,7 +4,7 @@ use std::f32::consts::FRAC_PI_2;
 
 use bevy::prelude::*;
 
-use super::props::PropPart;
+use super::props::{PROP_PALE, PROP_WOOD, PropPart};
 
 /// A wooden handle and a flat pale blade, lying diagonally on the block's top at the origin.
 pub(crate) fn scraper() -> Vec<PropPart> {
@@ -14,7 +14,7 @@ pub(crate) fn scraper() -> Vec<PropPart> {
         .translated_by(Vec3::new(-0.2, 0.05, 0.0));
     let blade = Mesh::from(Cuboid::new(0.4, 0.02, 0.14)).translated_by(Vec3::new(0.2, 0.03, 0.0));
     vec![
-        PropPart { mesh: handle.rotated_by(spin), color: Color::srgb(0.6, 0.44, 0.27) },
-        PropPart { mesh: blade.rotated_by(spin), color: Color::srgb(0.88, 0.82, 0.68) },
+        PropPart { mesh: handle.rotated_by(spin), color: PROP_WOOD },
+        PropPart { mesh: blade.rotated_by(spin), color: PROP_PALE },
     ]
 }

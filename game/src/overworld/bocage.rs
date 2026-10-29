@@ -7,8 +7,9 @@ use super::parcels::{WHEAT_WASH, openness, parcel, seam};
 use super::props::CLEAR;
 use super::terrain::{EAST, NORTH, SOUTH, WEST, hash, height, road_distance};
 use super::{OverworldRoot, SHEETS};
-use crate::look::{Hachure, InkMaterial, ink};
-use crate::theme::{HEDGE, WHEAT};
+use crate::look::{InkMaterial, fine, weighed};
+use crate::map::props::merge;
+use crate::theme::{HEDGE, WHEAT, wheat_ear};
 
 /// How far a hedge's top and a wheat ear lean in the wind (`Hachure::wind`), in world units.
 const HEDGE_WIND: f32 = 0.06;
@@ -58,8 +59,7 @@ pub(super) fn spawn_bocage(
     mut materials: ResMut<Assets<InkMaterial>>,
 ) {
     let material = |wind: f32, materials: &mut Assets<InkMaterial>| {
-        let mut felt = ink(Color::WHITE);
-        felt.extension = Hachure::fine();
+        let mut felt = fine(Color::WHITE);
         felt.extension.uniform.wind = wind;
         materials.add(felt)
     };
@@ -82,12 +82,7 @@ pub(super) fn spawn_bocage(
     }
     for (hedges, stalks) in parts {
         for (pieces, material) in [(hedges, &hedge), (stalks, &wheat)] {
-            let Some(mesh) = pieces.into_iter().reduce(|mut all, m| {
-                all.merge(&m).expect("the bocage's pieces share their attributes");
-                all
-            }) else {
-                continue;
-            };
+            let Some(mesh) = merge(pieces) else { continue };
             commands.spawn((
                 Mesh3d(meshes.add(mesh)),
                 MeshMaterial3d(material.clone()),
@@ -118,7 +113,7 @@ fn hedge_lumps(p: Vec2) -> Vec<Mesh> {
 
 /// A clump of wheat: a few tall stalks, each with its ear.
 fn wheat_stalks(p: Vec2) -> Vec<Mesh> {
-    let ear = WHEAT.mix(&Color::srgb(0.7, 0.55, 0.28), 0.4);
+    let ear = wheat_ear();
     (0..4)
         .flat_map(|k| {
             let at = Vec3::new(hash(p + k as f32) - 0.5, 0.0, hash(p - k as f32) - 0.5) * 0.6;
@@ -129,19 +124,6 @@ fn wheat_stalks(p: Vec2) -> Vec<Mesh> {
             [weighed(stalk, WHEAT, 0.7), weighed(head, ear, 0.7)]
         })
         .collect()
-}
-
-/// `mesh` coloured, its vertices' alpha the share of the wind they take: 0 at the ground, 1 at
-/// `tallest`.
-fn weighed(mesh: Mesh, color: Color, tallest: f32) -> Mesh {
-    let [r, g, b, _] = color.to_linear().to_f32_array();
-    let Some(positions) = mesh.attribute(Mesh::ATTRIBUTE_POSITION).and_then(|p| p.as_float3())
-    else {
-        return mesh;
-    };
-    let colors: Vec<[f32; 4]> =
-        positions.iter().map(|p| [r, g, b, (p[1] / tallest).clamp(0.0, 1.0)]).collect();
-    mesh.with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, colors)
 }
 
 #[cfg(test)]

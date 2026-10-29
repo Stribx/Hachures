@@ -10,7 +10,7 @@ use super::barricade::barricade;
 use super::decor::{palisade, rubble};
 use super::grid::Tile;
 use super::land::{Land, landing_sound};
-use crate::look::{self, Hachure, InkMaterial};
+use crate::look::{self, InkMaterial};
 
 /// One mesh of a prop and the colour it is inked in.
 pub(crate) struct PropPart {
@@ -38,12 +38,16 @@ pub(crate) fn prop(tile: Tile, shape: u8) -> Vec<PropPart> {
 }
 
 /// The meshes made into one, if there are any.
-pub(super) fn merge(parts: Vec<Mesh>) -> Option<Mesh> {
+pub(crate) fn merge(parts: impl IntoIterator<Item = Mesh>) -> Option<Mesh> {
     parts.into_iter().reduce(|mut all, part| {
         all.merge(&part).expect("primitive meshes share their attributes");
         all
     })
 }
+
+/// The wood of a small prop's handle or leg, and the pale of its string and blade.
+pub(crate) const PROP_WOOD: Color = Color::srgb(0.6, 0.44, 0.27);
+pub(crate) const PROP_PALE: Color = Color::srgb(0.88, 0.82, 0.68);
 
 /// Mud: two ripple rings on the sunken slab.
 fn mud() -> Vec<PropPart> {
@@ -109,11 +113,7 @@ pub(super) fn prop_parts(
         .or_insert_with(|| {
             prop(tile, shape)
                 .into_iter()
-                .map(|part| {
-                    let mut paint = look::ink(part.color);
-                    paint.extension = Hachure::fine();
-                    (meshes.add(part.mesh), materials.add(paint))
-                })
+                .map(|part| (meshes.add(part.mesh), materials.add(look::fine(part.color))))
                 .collect()
         })
         .clone()

@@ -106,6 +106,26 @@ pub fn ink(color: Color) -> InkMaterial {
     }
 }
 
+/// Ink in fine strokes, so a small piece does not turn to scribble.
+pub fn fine(color: Color) -> InkMaterial {
+    let mut material = ink(color);
+    material.extension = Hachure::fine();
+    material
+}
+
+/// `mesh` coloured, its vertices' alpha the share of the wind they take: 0 at the ground, 1 at
+/// `tallest` (`Hachure::wind`).
+pub fn weighed(mesh: Mesh, color: Color, tallest: f32) -> Mesh {
+    let [r, g, b, _] = color.to_linear().to_f32_array();
+    let Some(positions) = mesh.attribute(Mesh::ATTRIBUTE_POSITION).and_then(|p| p.as_float3())
+    else {
+        return mesh;
+    };
+    let colors: Vec<[f32; 4]> =
+        positions.iter().map(|p| [r, g, b, (p[1] / tallest).clamp(0.0, 1.0)]).collect();
+    mesh.with_inserted_attribute(Mesh::ATTRIBUTE_COLOR, colors)
+}
+
 /// Ink on a varnished surface: the plan-relief's resin water and waxed wood catch the sun in glints
 /// (drawn by the shader; to Bevy the surface stays matte).
 pub fn varnished(color: Color, gloss: f32) -> InkMaterial {
