@@ -10,7 +10,7 @@ use super::kit::BOSS_REAR;
 use super::look::EnemyLook;
 use super::spawn::FLOAT;
 use crate::combat::boss::Boss;
-use crate::level::LevelEntity;
+use crate::level::{Level, LevelEntity};
 
 /// Links in the chain, how far apart they lie, and the radius of the iron of one (`look`'s torus).
 const LINKS: usize = 20;
@@ -81,11 +81,15 @@ fn link_pose(road: &[Vec3], index: usize) -> Transform {
 /// Keeps each boss's road, lays its chain along it (spawning the links with the boss) and takes the
 /// chain away with a boss that is gone.
 pub fn drag_chain(
+    level: Res<Level>,
     look: Res<EnemyLook>,
     mut bosses: Query<(Entity, &Transform, Option<&mut Rope>), With<Boss>>,
     mut links: Query<(Entity, &Link, &mut Transform), Without<Boss>>,
     mut commands: Commands,
 ) {
+    if !level.world().boss.as_ref().is_some_and(|b| b.chain) {
+        return;
+    }
     for (boss, at, rope) in &mut bosses {
         // The back of the cart, behind the root along the heading.
         let rear = at.translation - at.rotation * Vec3::X * BOSS_REAR * at.scale.x;

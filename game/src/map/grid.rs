@@ -5,6 +5,7 @@ use std::collections::HashMap;
 use serde::Deserialize;
 
 use super::species::{Goal, Species};
+use super::terrain::Edit;
 use crate::i18n::n_;
 use crate::level::world::Event;
 
@@ -73,6 +74,8 @@ pub struct Grid {
     pub bornes: Vec<usize>,
     /// Towers covering each cell (weighted), for the species that read l'Ombre.
     pub cover: Vec<f32>,
+    /// Ice thawed back to water (Renommer, the Dégel): the world event under way passes them by.
+    pub thawed: Vec<usize>,
 }
 
 impl Grid {
@@ -97,6 +100,7 @@ impl Grid {
             goals: HashMap::new(),
             bornes: Vec::new(),
             cover: vec![0.0; width * rows.len()],
+            thawed: Vec::new(),
         };
         for (i, c) in rows.concat().chars().enumerate() {
             let tile = match c {
@@ -138,13 +142,30 @@ impl Grid {
 
     /// Whether the world event changes cell `i`.
     pub fn hit_by(&self, event: &Event, i: usize) -> bool {
-        event.cells.contains(&self.map[i])
+        event.cells.contains(&self.map[i]) && !self.thawed.contains(&i)
     }
 
     /// Whether Gratter has something to take off cell `i`: an imperial borne, an Éboulis or a
     /// Palissade.
     pub fn scrapable(&self, i: usize) -> bool {
         self.bornes.contains(&i) || matches!(self.tiles[i], Tile::Eboulis | Tile::Palissade)
+    }
+
+    /// What Renommer makes of cell `i` on the map as walked: dry ground turns to water, water to
+    /// Sol, and ice the world event froze thaws. Nothing on ink, a tower, a marker or firm ground.
+    pub fn renamed(&self, i: usize) -> Option<Edit> {
+        let marked = self.spawns.contains(&i)
+            || self.fuyard_spawns.contains(&i)
+            || self.goals.values().any(|&g| g == i)
+            || self.bornes.contains(&i);
+        match (self.map[i], self.tiles[i]) {
+            _ if marked => None,
+            (Tile::Eau, Tile::Glace) => Some(Edit::Thaw),
+            (map, tile) if map != tile => None,
+            (Tile::Sol | Tile::SolBas | Tile::Boue, _) => Some(Edit::Land(Tile::Eau)),
+            (Tile::Eau | Tile::Gue, _) => Some(Edit::Land(Tile::Sol)),
+            _ => None,
+        }
     }
 
     /// The map while the world event lasts: its cells turn to `event.becomes`, unless inked with

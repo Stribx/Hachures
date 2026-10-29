@@ -5,6 +5,7 @@ mod ghost;
 mod inking;
 pub mod overlay;
 mod passage;
+mod rename;
 pub mod selection;
 mod tools;
 pub mod verdict;

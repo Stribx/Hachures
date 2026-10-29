@@ -5,12 +5,11 @@ use bevy::prelude::*;
 use super::Enemy;
 use super::boss::{Borne, Boss};
 use super::figure::{EnemyLook, ExitKind, Stride, leave, spawn_figure};
+use super::trail::{Trail, lay};
 use crate::level::story::Trigger;
 use crate::level::{Level, LevelEntity, Walker};
 use crate::map;
-use crate::map::grid::Tile;
 use crate::map::species::Goal;
-use crate::map::terrain::Edit;
 use crate::settings::Settings;
 
 /// Speed factor of an enemy the Lanterne blinds.
@@ -99,16 +98,6 @@ pub fn spawn_enemies(
     }
 }
 
-/// What the walkers leave for after the walk: the road and bornes the boss lays, and whether a Name
-/// was saved.
-#[derive(Default)]
-struct Trail {
-    chaussee: Vec<usize>,
-    /// (cell, species of the boss planting it)
-    bornes: Vec<(usize, usize)>,
-    saved: bool,
-}
-
 /// An enemy of `species` stands at its goal: it costs Rôle, or keeps a Name if it is an ally.
 fn reach_goal(level: &mut Level, species: usize, is_boss: bool, trail: &mut Trail) {
     let loss = if is_boss { level.boss_file().breach } else { 1 };
@@ -141,7 +130,9 @@ fn step(
     if enemy.pinned > 0.0 {
         enemy.pinned -= dt;
     } else if let Some(next) = enemy.next {
-        let step = species.speed * slow / species.cost(level.terrain.grid().tiles[enemy.cell]) * dt;
+        // Off a cell that turned impassable under it (the Dégel), it wades out at a plain pace.
+        let cost = species.cost(level.terrain.grid().tiles[enemy.cell]);
+        let step = species.speed * slow / if cost.is_finite() { cost } else { 1.0 } * dt;
         let to = map::cell_pos(level.terrain.grid(), next) - transform.translation;
         if to.length() <= step {
             transform.translation += to;
@@ -154,6 +145,9 @@ fn step(
                 if phase.chaussee_every > 0 && boss.cells % phase.chaussee_every == 0 {
                     trail.chaussee.push(left);
                 }
+                if phase.freeze_every > 0 && boss.cells % phase.freeze_every == 0 {
+                    trail.sights.push((left, next));
+                }
                 if boss.planted < phase.bornes && boss.cells % 2 == 0 {
                     boss.planted += 1;
                     trail.bornes.push((left, enemy.species));
@@ -162,44 +156,6 @@ fn step(
         } else {
             transform.translation += to.normalize() * step;
         }
-    }
-}
-
-/// Lays what the boss left on the way: the road, the bornes; the map is inked again if it changed.
-fn lay(level: &mut Level, look: &EnemyLook, commands: &mut Commands, trail: Trail) {
-    // [T] Le Levé: the imperial road.
-    let mut batch: Vec<(usize, Edit)> = trail
-        .chaussee
-        .iter()
-        .filter(|&&cell| level.terrain.base().tiles[cell].buildable())
-        .map(|&cell| (cell, Edit::Ink(Tile::Chaussee)))
-        .collect();
-    // [S] Le Bornage: every borne is one more target for the Jalonneurs.
-    for &(cell, species) in &trail.bornes {
-        batch.push((cell, Edit::PlantBorne));
-        commands
-            .spawn((
-                LevelEntity,
-                Borne,
-                Enemy::new(species, level.hp(level.boss_file().borne_hp), cell),
-                Transform::from_translation(map::cell_pos(level.terrain.grid(), cell)),
-                Visibility::default(),
-            ))
-            .with_children(|borne| {
-                for piece in &look.borne {
-                    borne.spawn((
-                        Mesh3d(piece.mesh.clone()),
-                        MeshMaterial3d(piece.material.clone()),
-                        piece.at,
-                    ));
-                }
-            });
-    }
-    if !batch.is_empty() {
-        level.alter(batch);
-    }
-    if trail.saved {
-        level.note(Trigger::FuyardSaved);
     }
 }
 

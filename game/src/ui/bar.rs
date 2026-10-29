@@ -133,7 +133,7 @@ fn spawn_card(
         .observe(move |_: On<Activate>, mut selection: ResMut<Selection>| selection.tool = index)
         .with_children(|card| {
             card.spawn((
-                text(assets, (index + 1).to_string(), SMALL_SIZE),
+                text(assets, TOOLS[index].digit(), SMALL_SIZE),
                 Node {
                     position_type: PositionType::Absolute,
                     top: px(2),

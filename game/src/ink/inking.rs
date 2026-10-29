@@ -73,8 +73,7 @@ impl Level {
         if !self.used.contains(&tool) {
             self.used.push(tool);
         }
-        // Gratter never costs a Name (docs, section 7).
-        if let (Some(_), Some(p)) = (act.lays(), self.place_at(cell)) {
+        if let (true, Some(p)) = (act.names(), self.place_at(cell)) {
             self.erased.push(p);
             self.names -= 1;
             let line = n_("note.erased").to_string();
@@ -95,6 +94,7 @@ impl Level {
             Act::Lay(tile) => Edit::Ink(tile),
             Act::Raise(weapon) => Edit::Raise(weapon),
             Act::Scrape => Edit::Scrape,
+            Act::Rename => self.rename_edit(cell),
             Act::Biffer => Edit::Unink(
                 self.stroke(cell).map_or(self.terrain.base().tiles[cell], |s| self.inked[s].under),
             ),

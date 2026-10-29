@@ -15,3 +15,5 @@ level.2-2.name                     oui     3    -1       7     21
     Rôle lost (wave, lost): [(3, 1), (5, 2), (6, 1), (8, 2), (9, 2), (10, 2), (11, 3), (12, 4)]
 level.2-3.name                     oui     4    20       7     32
     Rôle lost (wave, lost): [(5, 2), (6, 2), (8, 2), (9, 2), (10, 3), (11, 2), (12, 3)]
+level.2-4.name                     oui     4    -1       7     42
+    Rôle lost (wave, lost): [(3, 3), (6, 2), (7, 3), (8, 8)]

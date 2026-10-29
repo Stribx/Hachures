@@ -1,0 +1,60 @@
+// Monde 2, boss (docs, section 6): Le Théodolite de Givre, commanded by Ombeline Sarre, comes for the
+// Refuge Sarre across the lake. A rock-walled gully sets it walking east, into the lens's axis: its
+// Visée freezes the lake ahead into a road; its masts call the Jalonneurs to the Borne-Mère.
+// Map: . sol  ~ eau  ^ roc   S spawn  M the Refuge Sarre (the Cible)  B the Borne-Mère
+(
+    world: 2,
+    // Where the sheet lies on the Marches: world position of its cell (0, 0) (`overworld`).
+    at: (214.0, -10.0),
+    name: "level.2-4.name",
+    // Above 2-3: the boss crosses the lake on its own ice, past the towers set for the land
+    // (set with the balance bot).
+    sepia: 210,
+    tools: ["barricade", "boue", "ronces", "arbalète", "mortier", "harpon", "lanterne"],
+    // Winning the boss earns Renommer for good: it joins every level's tools.
+    grants: ["renommer"],
+    // Le Gel lasts two waves: 3-4 and 6-7. The boss comes after it, on open water.
+    events: [3, 6],
+    // The masts must be shot down: Gratter would scrape them off.
+    challenge: Some((text: "level.2-4.challenge", rule: Without("gratter"))),
+    // Notes: see 1-1.ron. Ombeline's two lines are from the docs; the others are drafts.
+    notes: [
+        (on: Start, text: "note.2-4.trois_points_tenir_montagne"),
+        (on: Start, when: Some("deserteurs=escorter"), text: "note.2-4.deserteurs_passes_sarre"),
+        (on: Start, when: Some("deserteurs=livrer"), text: "note.2-4.corentin_parole_legion"),
+        (on: Event, text: "note.2-4.gel_lac_route_tous"),
+        (on: Boss("boss.theodolite.visee"), text: "note.2-4.lentille_chante_ligne_gele"),
+        (on: Boss("boss.theodolite.triangulation"), text: "note.2-4.deux_mats_trois_points"),
+        (on: Boss("boss.theodolite.degel"), text: "note.2-4.lentille_fele_tour_enlise"),
+        (on: Won, text: "note.2-4.chanceliere_attend_combes"),
+        (on: Won, text: "note.2-4.rien_signe_dessine"),
+    ],
+    // Named places: inking any of their cells scratches the name out of the Rôle (docs, section 2).
+    // The Combe aux Sonnailles is from the docs; the cairn is a draft.
+    places: [
+        (name: "place.combe_aux_sonnailles", at: [(7, 7), (8, 7), (9, 7), (10, 7)]),
+        (name: "place.cairn_des_passeurs", at: [(14, 6), (15, 6)]),
+    ],
+    map: [
+        "^^^^^^^^^^^^^^^^^^",
+        "^.....~~~~~~.....^",
+        "^.....~~~~~~...B.^",
+        "^^^^^.~~~~~~.....^",
+        "S.....~~~~~~....M^",
+        "^^^^^.~~~~~~.....^",
+        "^.....~~~~~~.....^",
+        "^................^",
+        "^......^^^^......^",
+        "^^^^^^^^^^^^^^^^^^",
+    ],
+    waves: [
+        [("chaineur", 6), ("gens_du_col", 3)],
+        [("jalonneur", 5), ("chaineur", 4)],
+        [("harde", 2), ("gens_du_col", 4)],
+        [("chaineur", 8), ("jalonneur", 4)],
+        [("gens_du_col", 5), ("harde", 2), ("chaineur", 4)],
+        [("jalonneur", 6), ("gens_du_col", 5)],
+        [("harde", 3), ("chaineur", 8), ("gens_du_col", 4)],
+        [("theodolite", 1), ("jalonneur", 6), ("gens_du_col", 4), ("chaineur", 4)],
+    ],
+)

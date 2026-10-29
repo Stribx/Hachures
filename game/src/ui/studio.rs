@@ -149,9 +149,9 @@ fn spawn_piece(
     };
     let parts = match tool.act {
         Act::Lay(tile) => prop(tile, 0),
-        // ponytail: Biffer borrows Gratter's scraper; its own piece (a quill striking out) when the
-        // art is drawn.
-        Act::Scrape | Act::Biffer => scraper(),
+        // ponytail: Renommer and Biffer borrow Gratter's scraper; their own pieces (a quill
+        // rewriting, one striking out) when the art is drawn.
+        Act::Scrape | Act::Rename | Act::Biffer => scraper(),
         Act::Raise(weapon) => {
             let scene = |path: &'static str| {
                 WorldAssetRoot(assets.load(GltfAssetLabel::Scene(0).from_asset(path)))

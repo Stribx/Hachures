@@ -32,6 +32,20 @@ pub struct Phase {
     /// Whether a harpoon holds it.
     #[serde(default)]
     pub pinnable: bool,
+    /// Freezes the Eau ahead of it, in the axis it moves along, on every n-th cell it leaves (0:
+    /// never).
+    #[serde(default)]
+    pub freeze_every: u32,
+    /// Seconds its bornes and itself must all stand for the col to be sealed and the level lost
+    /// (0: never).
+    #[serde(default)]
+    pub seal: f32,
+    /// All the ice thaws back to water as the phase begins.
+    #[serde(default)]
+    pub thaw: bool,
+    /// While the Lanterne lights it, every tower hits it twice as hard.
+    #[serde(default)]
+    pub cracked: bool,
 }
 
 #[derive(Deserialize)]
@@ -41,6 +55,9 @@ pub struct BossFile {
     /// Rôle lost when it reaches the Cible.
     pub breach: u32,
     pub borne_hp: f32,
+    /// Whether it drags an arpentage chain behind it.
+    #[serde(default)]
+    pub chain: bool,
     pub phases: Vec<Phase>,
 }
 
@@ -63,6 +80,8 @@ pub struct Boss {
     /// Arbalète hits towards the next stun.
     pub hits: u32,
     pub planted: u32,
+    /// Seconds its bornes and itself have all stood, towards the seal.
+    pub held: f32,
 }
 
 /// An imperial borne planted by the boss: shot down like an enemy, but it doesn't walk.
@@ -100,6 +119,9 @@ pub fn boss_phases(mut level: ResMut<Level>, mut bosses: Query<(&mut Enemy, &mut
             enemy.species = index_of(&level.species, &phase.species)
                 .unwrap_or_else(|| panic!("boss: unknown species {:?}", phase.species));
             enemy.next = None;
+            if phase.thaw {
+                level.thaw_all();
+            }
             level.boss = Some(phase.name.clone());
             level.note(Trigger::Boss(phase.name.clone()));
         }

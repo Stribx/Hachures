@@ -22,6 +22,8 @@
         breach: 5,
         // HP of a borne, relative to the Chaîneur's 100.
         borne_hp: 1.5,
+        // It drags its arpentage chain.
+        chain: true,
         phases: [
             (
                 name: "boss.grande_chaine.leve",

@@ -81,8 +81,10 @@ fn strike(
     let weak = if species.weak_to == Some(weapon) { WEAKNESS } else { 1.0 };
     let counter_sight =
         boss.is_some() && weapon == Weapon::Mortier && level.has(Skill::ContreVisee);
-    enemy.hp -= stats.damage * weak * if counter_sight { 1.25 } else { 1.0 };
     let phase = boss.as_ref().map(|b| &level.boss_file().phases[b.phase]);
+    // La fêlure: the Lanterne's light shows where to hit.
+    let crack = if phase.is_some_and(|p| p.cracked) && enemy.slowed > 0.0 { 2.0 } else { 1.0 };
+    enemy.hp -= stats.damage * weak * crack * if counter_sight { 1.25 } else { 1.0 };
     if phase.is_none_or(|p| p.pinnable) {
         enemy.pinned = enemy.pinned.max(stats.pin);
     }

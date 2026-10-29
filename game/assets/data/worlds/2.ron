@@ -1,4 +1,4 @@
-// Monde 2 : Les Cols de Verre (docs, section 6). Level 2-1 so far.
+// Monde 2 : Les Cols de Verre (docs, section 6). Levels 2-1 to 2-4.
 (
     name: "world.2.name",
     defends: "world.2.defends",
@@ -13,6 +13,40 @@
         refuse_after: "world.2.refuse_after",
         color: (0.75, 0.9, 1.0),
     ),
-    // Le Théodolite de Givre comes with level 2-4.
-    boss: None,
+    // Le Théodolite de Givre, commanded by Ombeline Sarre: a tower on runners with a great lens.
+    // Phases as for La Grande Chaîne (worlds/1.ron); HP, speed and loot are in species.ron.
+    boss: Some((
+        name: "boss.theodolite.name",
+        // Rôle lost if it reaches the Refuge Sarre.
+        breach: 5,
+        // HP of a signal mast, relative to the Chaîneur's 100.
+        borne_hp: 1.5,
+        phases: [
+            (
+                name: "boss.theodolite.visee",
+                until: 0.66,
+                species: "theodolite",
+                // A line of Eau freezes in the lens's axis, every third cell it leaves [T].
+                freeze_every: 3,
+            ),
+            (
+                name: "boss.theodolite.triangulation",
+                until: 0.33,
+                species: "theodolite",
+                // Two signal masts draw the Jalonneurs [S]; held with the tower for a wave's
+                // length (not in the docs: tune with the balance bot), they seal the col.
+                bornes: 2,
+                seal: 40.0,
+            ),
+            (
+                name: "boss.theodolite.degel",
+                until: 0.0,
+                // The cracked lens heats up: all the ice turns back to water [T] and the tower
+                // sinks in. The Lanterne shows the crack: every tower hits it twice as hard.
+                species: "theodolite_enlise",
+                thaw: true,
+                cracked: true,
+            ),
+        ],
+    )),
 )

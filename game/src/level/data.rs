@@ -7,7 +7,7 @@ use crate::map::grid::Tile;
 use crate::map::terrain::Edit;
 
 /// The campaign, in order.
-pub const LEVELS: [&str; 8] = [
+pub const LEVELS: [&str; 9] = [
     include_str!("../../assets/data/levels/0-0.ron"),
     include_str!("../../assets/data/levels/1-1.ron"),
     include_str!("../../assets/data/levels/1-2.ron"),
@@ -16,6 +16,7 @@ pub const LEVELS: [&str; 8] = [
     include_str!("../../assets/data/levels/2-1.ron"),
     include_str!("../../assets/data/levels/2-2.ron"),
     include_str!("../../assets/data/levels/2-3.ron"),
+    include_str!("../../assets/data/levels/2-4.ron"),
 ];
 
 /// Enemies reaching the Cible or the Borne-Mère before the Rôle is lost (not in the docs; set with

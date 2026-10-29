@@ -115,10 +115,10 @@ fn price(level: &Level, verdict: &Verdict, act: Act) -> Option<String> {
     match verdict.refusal {
         Some(why) => Some(t(why).to_string()),
         None if act == Act::Biffer => level.refund(i).map(|r| tf("places.refund", &[&r])),
-        // Only a tool that lays a tile scratches a name out; Gratter never does (docs, section 7).
         None => act
-            .lays()
-            .and(level.place_at(i))
+            .names()
+            .then(|| level.place_at(i))
+            .flatten()
             .map(|p| tf("places.erases", &[&t(&level.places[p].name)])),
     }
 }

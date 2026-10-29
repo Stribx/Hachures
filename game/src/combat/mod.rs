@@ -8,10 +8,12 @@ pub mod figure;
 mod noted;
 mod range;
 mod shards;
+mod sighting;
 pub mod stand;
 #[cfg(test)]
 mod tests;
 pub mod towers;
+mod trail;
 
 use bevy::prelude::*;
 
@@ -32,6 +34,7 @@ pub fn plugin(app: &mut App) {
                 enemies::walk,
                 towers::fire,
                 boss::boss_phases,
+                sighting::seal_col,
                 shards::shards,
             )
                 .chain()

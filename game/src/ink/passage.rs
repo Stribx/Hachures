@@ -11,8 +11,10 @@ impl Level {
     /// Why `tool` can't be inked at `cell`, if it can't.
     #[must_use]
     pub fn refusal(&self, cell: usize, tool: usize) -> Option<&'static str> {
-        if TOOLS[tool].act == Act::Biffer {
-            return self.biffer_refusal(cell);
+        match TOOLS[tool].act {
+            Act::Biffer => return self.biffer_refusal(cell),
+            Act::Rename => return self.rename_refusal(cell, tool),
+            _ => {}
         }
         let Some(tile) = TOOLS[tool].act.lays() else {
             // Scraping leaves plain Sol, which every species walks: it can lengthen a route, never
@@ -38,7 +40,7 @@ impl Level {
 
     /// Le Droit de Passage: why `tile` at `cell` would close the map, now or around the world
     /// event.
-    fn closes(&self, cell: usize, tile: Tile) -> Option<&'static str> {
+    pub(super) fn closes(&self, cell: usize, tile: Tile) -> Option<&'static str> {
         let event = &self.world().event;
         if self.changes.iter().any(|c| c.cells(self.terrain.base().width).any(|n| n == cell)) {
             Some(n_("refusal.relief_changes"))

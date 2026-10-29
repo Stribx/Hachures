@@ -11,6 +11,7 @@ use super::figure::exit::Exit;
 use super::figure::kit::BOSS_REAR;
 use super::figure::{EnemyLook, ExitKind, Stride, animate, exits, spawn_figure};
 use super::shards::Shard;
+use super::sighting::seal_col;
 use super::stand::Tower;
 use super::towers::{Weapon, fire};
 use super::{Enemy, Shots};
@@ -27,7 +28,7 @@ use crate::map::terrain::Edit;
 const BALANCE: &str = "tests/balance.txt";
 
 /// Headless app running the combat systems on `level`, 50 ms per update.
-fn app_with(level: Level) -> App {
+pub(super) fn app_with(level: Level) -> App {
     let mut app = App::new();
     app.add_plugins(MinimalPlugins)
         .insert_resource(TimeUpdateStrategy::ManualDuration(Duration::from_millis(50)))
@@ -39,7 +40,7 @@ fn app_with(level: Level) -> App {
 }
 
 /// An enemy of `species` standing on the first spawn.
-fn walker(level: &Level, species: &str, hp: f32) -> (Enemy, Transform) {
+pub(super) fn walker(level: &Level, species: &str, hp: f32) -> (Enemy, Transform) {
     let species = index_of(&level.species, species).unwrap();
     let cell = level.terrain.grid().spawns[0];
     (
@@ -48,7 +49,7 @@ fn walker(level: &Level, species: &str, hp: f32) -> (Enemy, Transform) {
     )
 }
 
-fn run(app: &mut App, seconds: u32) {
+pub(super) fn run(app: &mut App, seconds: u32) {
     (0..seconds * 20).for_each(|_| app.update());
 }
 
@@ -222,7 +223,7 @@ fn balance() {
         let level = Level::load(index, &save);
         let waves = level.waves.len();
         let mut app = app_with(level);
-        app.add_systems(Update, spawn_enemies.before(walk));
+        app.add_systems(Update, (spawn_enemies.before(walk), seal_col.after(boss_phases)));
 
         let mut towers = 0;
         // (wave, Rôle lost)

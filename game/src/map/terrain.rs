@@ -26,6 +26,9 @@ pub enum Edit {
     Scrape,
     /// Biffer: Nève's ink comes off, a tower with it, and the cell is the tile it was before.
     Unink(Tile),
+    /// Renommer, the Dégel: ice thaws back to the water drawn there, and the world event under way
+    /// passes the cell by.
+    Thaw,
     /// La Grande Chaîne plants a borne on the cell.
     PlantBorne,
     /// The borne on the cell falls, shot down.
@@ -103,6 +106,10 @@ impl Terrain {
 
     /// The world event under way, or none: the map as walked follows.
     pub fn set_event(&mut self, event: Option<&'static Event>, species: &[Species]) {
+        // A thaw lasts as long as the event it thawed.
+        if self.event.map(std::ptr::from_ref) != event.map(std::ptr::from_ref) {
+            self.base.thawed.clear();
+        }
         self.event = event;
         self.settle(species);
     }
@@ -116,6 +123,8 @@ impl Terrain {
     /// `base` once `edits` have fallen, for the maps to come: no shadow, no event, no fields.
     pub fn ahead(&self, edits: impl IntoIterator<Item = (usize, Edit)>) -> Grid {
         let (mut base, mut towers) = (self.base.clone(), self.towers.clone());
+        // A thaw lasts until the event under way ends: the next one freezes the cells again.
+        base.thawed.clear();
         for (i, edit) in edits {
             apply(&mut base, &mut towers, i, edit);
         }
@@ -194,6 +203,10 @@ fn apply(base: &mut Grid, towers: &mut Vec<(usize, Weapon)>, i: usize, edit: Edi
         Edit::Unink(tile) => {
             base.tiles[i] = tile;
             towers.retain(|t| t.0 != i);
+        }
+        Edit::Thaw => {
+            base.tiles[i] = base.map[i];
+            base.thawed.push(i);
         }
         Edit::PlantBorne => base.bornes.push(i),
         Edit::DropBorne => base.bornes.retain(|&b| b != i),

@@ -169,6 +169,18 @@ mod tests {
         assert!(Level::load(later, &save).tools.contains(&gratter), "once the boss is beaten");
     }
 
+    /// Winning the world-2 boss earns Renommer for good: a level replayed has it in hand too.
+    #[test]
+    fn winning_the_theodolite_earns_renommer() {
+        let renommer = tool_index("renommer").unwrap();
+        let boss = (0..LEVELS.len()).find(|&k| LevelData::of(k).name == "level.2-4.name").unwrap();
+        let earlier = (0..LEVELS.len()).find(|&k| LevelData::of(k).world == 2).unwrap();
+        assert!(!Level::load(boss, &Save::default()).tools.contains(&renommer), "not before");
+        let mut save = Save::default();
+        *save.record_mut(boss) = Record { won: true, ..Default::default() };
+        assert!(Level::load(earlier, &save).tools.contains(&renommer), "once the boss is beaten");
+    }
+
     /// Biffer is in every level's hand, last on the bar.
     #[test]
     fn every_level_has_biffer_last() {
