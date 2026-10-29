@@ -35,6 +35,21 @@ pub const LEVELS: [&str; 25] = [
     include_str!("../../assets/data/levels/6-4.ron"),
 ];
 
+/// Post-game sheets unlocked by the corresponding power.
+pub const BONUS_LEVELS: [&str; 7] = [
+    include_str!("../../assets/data/bonus/1-moulin.ron"),
+    include_str!("../../assets/data/bonus/1-moulin-inside.ron"),
+    include_str!("../../assets/data/bonus/2-refuge.ron"),
+    include_str!("../../assets/data/bonus/3-premiers-plans.ron"),
+    include_str!("../../assets/data/bonus/4-saline.ron"),
+    include_str!("../../assets/data/bonus/5-ville-basse.ron"),
+    include_str!("../../assets/data/bonus/6-salle-vaux.ron"),
+];
+
+pub fn bonus(index: usize) -> LevelData {
+    ron::from_str(BONUS_LEVELS[index]).expect("invalid bonus level file")
+}
+
 /// Enemies reaching the Cible or the Borne-Mère before the Rôle is lost (not in the docs; set with
 /// the balance bot).
 pub const START_LIVES: u32 = 20;
@@ -169,5 +184,14 @@ mod tests {
         data.map = vec!["R.W".into()];
         assert_eq!(data.map_text(Refuge::Usual), "R..");
         assert_eq!(data.map_text(Refuge::Moved), "..R");
+    }
+
+    #[test]
+    fn bonus_sheets_are_valid_level_documents() {
+        for index in 0..BONUS_LEVELS.len() {
+            let level = bonus(index);
+            assert!(level.name.starts_with("bonus."));
+            assert_eq!(level.map.len(), 1);
+        }
     }
 }

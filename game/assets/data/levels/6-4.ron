@@ -5,6 +5,15 @@
     sepia: 330,
     tools: ["barricade", "boue", "ronces", "arbalète", "mortier", "harpon", "lanterne"],
     grants: ["signer"],
+    choice: Some((
+        id: "ending",
+        prompt: "choice.ending.prompt",
+        options: [
+            ("trait_unique", "choice.ending.trait_unique"),
+            ("feuille_brulee", "choice.ending.feuille_brulee"),
+            ("legende_commune", "choice.ending.legende_commune"),
+        ],
+    )),
     events: [4],
     vanne_schedule: [(1, false), (3, true), (6, false)],
     notes: [

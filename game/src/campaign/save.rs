@@ -6,6 +6,7 @@ use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
+use super::endings::{self, Ending};
 use super::skills::Skill;
 use crate::i18n::french_key;
 use crate::ink::TOOLS;
@@ -44,11 +45,13 @@ pub struct Save {
     /// What Nève has met on a sheet, for the Lexique: the label keys of tools and species
     /// (`tool.arbalete`).
     pub seen: BTreeSet<String>,
+    /// Heroic mode was used for the final victory.
+    pub heroic: bool,
 }
 
 /// The save's layout: 1 counts the prologue as level 0; 2 keeps the names scratched out by key, not
 /// in French; 3 remembers what was seen, for the Lexique.
-const VERSION: u32 = 3;
+const VERSION: u32 = 4;
 
 impl Default for Save {
     fn default() -> Save {
@@ -59,6 +62,7 @@ impl Default for Save {
             skills: Vec::new(),
             choices: BTreeMap::new(),
             seen: BTreeSet::new(),
+            heroic: false,
         }
     }
 }
@@ -120,6 +124,14 @@ impl Save {
     /// The Rôle des Noms over the whole campaign.
     pub fn names(&self) -> i32 {
         self.levels.iter().map(|r| r.names).sum()
+    }
+
+    pub fn campaign_won(&self) -> bool {
+        self.levels.get(LEVELS.len() - 1).is_some_and(|r| r.won)
+    }
+
+    pub fn ending(&self) -> Option<Ending> {
+        endings::determine(self)
     }
 
     pub fn record_mut(&mut self, level: usize) -> &mut Record {
@@ -217,7 +229,7 @@ mod tests {
             ron::from_str("(version: 2, reached: 2, levels: [(won: true, challenge: false, names: 0), (won: true, challenge: false, names: 0), (won: false, challenge: false, names: 0)])")
                 .unwrap();
         let old = old.upgrade();
-        assert_eq!(old.version, 3);
+        assert_eq!(old.version, 4);
         for id in ["tool.arbalete", "tool.barricade", "species.chaineur", "species.echassier"] {
             assert!(old.seen.contains(id), "{id} was on level 1-1");
         }

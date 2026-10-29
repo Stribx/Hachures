@@ -1,0 +1,4 @@
+(
+    world: 5, name: "bonus.ville_basse", sepia: 180, tools: ["barricade"], grants: [],
+    events: [], map: ["S..M"], waves: [[("harde", 1)]],
+)

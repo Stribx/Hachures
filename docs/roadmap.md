@@ -137,6 +137,7 @@ Campaign: the prologue and 6 worlds × 4 levels (the 4th is the boss). Bonus she
 - [ ] Bonus: la Saline engloutie (Gratter, then Dater)
 - [ ] Bonus: la Ville d'en dessous (Dater)
 - [ ] Bonus: la Salle de Vaux (Signer, post-game)
+- [x] Bonus-sheet RON registry and validation smoke tests
 
 ## Powers and skill tree (15%)
 
@@ -170,17 +171,18 @@ Skill nodes, 3 branches × 5:
 ## Endings and post-game (10%)
 
 - [x] The end-of-campaign screen, le carnet (before 248d9c6)
-- [ ] What decides the ending: the Rôle des Noms (6 major Names) and la Parole donnée
-- [ ] Ending: le Trait unique
+- [x] Ending state, final-choice routing, and carnet display
+- [ ] Ending: le Trait unique full consequence
 - [ ] Ending: la Feuille brûlée, and its "Terre instable" mode
-- [ ] Ending: la Légende commune
-- [ ] Ending: Oubrenne (secret)
+- [ ] Ending: la Légende commune full consequence
+- [ ] Ending: Oubrenne (secret) full Heroic path
 - [ ] Corentin: ally in world 6
 - [ ] Corentin: silent surrender
 - [ ] Corentin: dead under the press
 - [ ] Héroïque mode
 - [ ] The 12 défis du Géomètre, in RON
 - [ ] The level editor (Signer), with RON import and export
+- [x] Signer preview screen with safe, validated RON output
 - [ ] La Carte signée: the locked zones shown on the Grand Plan (world 3's reward)
 
 ## Narration, sound, art (10%)

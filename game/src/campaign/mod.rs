@@ -1,5 +1,6 @@
 //! The campaign: the save, and loading a level.
 
+pub mod endings;
 pub mod lexique;
 pub mod save;
 pub mod skills;

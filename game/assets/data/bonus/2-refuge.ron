@@ -1,0 +1,4 @@
+(
+    world: 2, name: "bonus.refuge", sepia: 120, tools: ["barricade"], grants: [],
+    events: [], map: ["S..M"], waves: [[("harde", 1)]],
+)

@@ -1,0 +1,4 @@
+(
+    world: 6, name: "bonus.salle_vaux", sepia: 200, tools: ["barricade"], grants: [],
+    events: [], map: ["S..M"], waves: [[("harde", 1)]],
+)

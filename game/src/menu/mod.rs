@@ -5,6 +5,7 @@ mod backdrop;
 mod carnet;
 mod controls;
 mod credits;
+mod editor;
 mod lexique;
 mod pause;
 mod sceaux;
@@ -37,6 +38,7 @@ pub fn plugin(app: &mut App) {
         carnet::plugin,
         controls::plugin,
         credits::plugin,
+        editor::plugin,
         warmup::plugin,
     ))
     .add_systems(OnEnter(Screen::Playing), reset_input)
@@ -176,6 +178,7 @@ fn escape(
         | Screen::Sceaux
         | Screen::Lexique
         | Screen::Carnet
+        | Screen::Editor
         | Screen::Controls
         | Screen::Credits => next.set(from.map_or(Screen::Title, |f| f.0)),
         Screen::ConfirmNew | Screen::Plan => next.set(Screen::Title),
