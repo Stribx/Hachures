@@ -8,15 +8,26 @@ walls of towers: you turn them aside by redrawing the relief, because every peop
 slope, by the shadow, by its goal). But every stroke has a price, a name scratched off the land. Under one rule: the
 map may never be closed (*le Droit de Passage*).
 
+![Level 1-1: a paper map, the legions' road in ink, and a warning that this stroke would erase "le Pré-Commun".](website/assets/jeu-prix.jpg)
+
 A 3D low-poly tower defense built on path diversion, one Dijkstra flow field per species, written in Rust with
 [Bevy](https://bevyengine.org) for the desktop and the browser.
 
+| | |
+|---|---|
+| ![A column of Chaîneurs follows the driest road along a hedge.](website/assets/jeu-vague.jpg) | ![The Calque in the Hesse pass: a sepia arrow on each cell shows where the column goes.](website/assets/jeu-calque.jpg) |
+
 ## Play
 
-- In the browser: build the web version (below) and serve `website/`.
-- On the desktop: `cargo run --release -p game`. Asset paths are detected automatically for local runs and release archives.
+- Each [GitHub release](../../releases) has desktop packages for Linux x86_64, macOS (Apple Silicon and
+  Intel) and Windows x86_64. Unpack the archive and run `Hachures`; keep the `assets/` folder beside it.
+- In the browser: unpack `Hachures-web.tar.gz` from the release on any static web server, or build the web
+  version (below) and serve `website/`.
+- From source: `cargo run --release -p game`. Asset paths are detected automatically for local runs and
+  release archives.
 
-Mouse only; keys are listed in the game's *Controls* page. The game is in French and English (settings).
+The game is played with the mouse; the few keyboard shortcuts are on the *Controls* page. It is in French and
+English (settings).
 
 ## Build
 
@@ -74,15 +85,13 @@ must describe the current state, intended change, regression coverage, and any p
 
 ## Project overview
 
-For the full explanation of the project's goal, development process, Rust/Bevy, graphics and shader work,
-CI/CD, testing, AI-agent rules, hard skills, and soft skills, read
-[`docs/project-overview.md`](docs/project-overview.md).
+How the game and the code fit together, in a page: [`docs/project-overview.md`](docs/project-overview.md).
 
 ## Project
 
 - `game/src/` — the game, one folder per feature; `game/assets/` — data, models, sounds, fonts, shaders, art.
 - `docs/` — the design: `bible.md` (the game design and story, in French), `roadmap.md` (what is done and what
-  comes next), the art direction, the 3D asset rules and the prompts for the 2D art.
+  comes next), the art direction and the 3D asset rules.
 - `AGENTS.md` — the code rules (checked by CI) and the conventions; `docs/agents/map.md` — where everything lives.
 
 ## Licence
