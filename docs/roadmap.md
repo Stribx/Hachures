@@ -55,7 +55,7 @@ Not counted in the %: these decisions are recorded in the bible before their dep
   and data representation remain part of the world-5 implementation.
 - The Chaîneur d'élite gets a distinct world-5 profile and a dedicated bestiary row; its exact statistics remain
   part of the world-5 balance pass.
-- The art direction is an illuminated engraving with watercolor washes. `docs/art-prompts.md` must be aligned
+- The art direction is an illuminated engraving with watercolor washes. `docs/art/prompts.md` must be aligned
   with that direction before new generated art is produced.
 - Answered: the Étayeur mends "bornes endommagées", and bornes now have HP (28a6517).
 
