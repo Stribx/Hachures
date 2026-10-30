@@ -92,6 +92,7 @@ How the game and the code fit together, in a page: [`docs/project-overview.md`](
 - `game/src/` — the game, one folder per feature; `game/assets/` — data, models, sounds, fonts, shaders, art.
 - `docs/` — the design: `bible.md` (the game design and story, in French), `roadmap.md` (what is done and what
   comes next), the art direction and the 3D asset rules.
+- `docs/portfolio-review.md` — an honest review of the project as a portfolio piece: skills, weak points, fix plan.
 - `AGENTS.md` — the code rules (checked by CI) and the conventions; `docs/agents/map.md` — where everything lives.
 
 ## Licence
