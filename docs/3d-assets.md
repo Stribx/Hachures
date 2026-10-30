@@ -24,7 +24,7 @@ Pour voir les décors : `HACHURES_SHOT=out.png HACHURES_LEVEL=2 HACHURES_DEMO=1 
 ## Le pipeline asset
 
 ### 1. Image (MOSS)
-Mêmes réglages que dans `docs/art-prompts.md` (activateur de prompt actif, cfg 2,5, 1,0 MP), avec :
+Mêmes réglages que dans `docs/art/prompts.md` (activateur de prompt actif, cfg 2,5, 1,0 MP), avec :
 - **Ratio** 1:1 ;
 - **retrait du fond : désactivé.** L'outil 3D préfère un fond uni à un fond transparent ;
 - `ref_image` : vide pour le premier modèle, puis le rendu d'un modèle déjà validé, pour que la famille reste cohérente.
@@ -94,4 +94,4 @@ Aujourd'hui, la cible est une simple case brune. Un vrai bâtiment dit au joueur
 ---
 
 ## Ensuite
-Les icônes de ces tours se font **après** leur modèle, à partir d'une capture du modèle en jeu, en suivant `docs/art-prompts.md` §1.
+Les icônes de ces tours se font **après** leur modèle, à partir d'une capture du modèle en jeu, en suivant `docs/art/prompts.md` §1.

@@ -12,8 +12,8 @@
 | `audio/ambient/river.ogg` | River, stream, creek, sound of waves (looped, levelled) | kentspublicdomain | CC0 | https://freesound.org/people/kentspublicdomain/sounds/325182/ |
 | `audio/ambient/snow-wind.ogg` | Wind__Artic__Cold (looped, levelled) | cobratronik | CC0 | https://freesound.org/people/cobratronik/sounds/117136/ |
 | `fonts/IMFellEnglish-*.ttf` | IM FELL English Roman / Italic | Igino Marini | SIL OFL 1.1 (`fonts/OFL.txt`) | https://github.com/google/fonts/tree/main/ofl/imfellenglish |
-| `ui/icon-*.png` | The counter icons (sépia, Cible, Names, wave) | Drawn for Hachures (vector; sources in the asset library's `ui/`) | CC0 | `docs/art-prompts.md`, section 2 |
-| `ui/cloud-*.png` | The travel clouds | AI-generated for Hachures | CC0 | Prompts in `docs/art-prompts.md` |
+| `ui/icon-*.png` | The counter icons (sépia, Cible, Names, wave) | Drawn for Hachures (vector; sources in the asset library's `ui/`) | CC0 | `docs/art/prompts.md`, section 2 |
+| `ui/cloud-*.png` | The travel clouds | AI-generated for Hachures | CC0 | Prompts in `docs/art/prompts.md` |
 | `fonts/AtkinsonHyperlegibleNext-*.ttf` | Atkinson Hyperlegible Next (the readable font setting) | Braille Institute, Applied Design Works | SIL OFL 1.1 (`fonts/OFL-AtkinsonHyperlegibleNext.txt`) | https://github.com/google/fonts/tree/main/ofl/atkinsonhyperlegiblenext |
 
 CC0 needs no attribution; it is given anyway. The OFL requires shipping `OFL.txt` with the font and not selling the font on its own.

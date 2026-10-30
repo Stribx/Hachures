@@ -114,7 +114,7 @@ pub(crate) struct Primary;
 #[derive(Component)]
 pub(crate) struct Panel;
 
-/// A drawn image (`docs/art-prompts.md`) that takes over a node's flat paper once it has loaded,
+/// A drawn image (`docs/art/prompts.md`) that takes over a node's flat paper once it has loaded,
 /// 9-sliced `slice` px in from its edges (zero: stretched whole). Until then, or if it never comes,
 /// the flat paper stays.
 #[derive(Component)]

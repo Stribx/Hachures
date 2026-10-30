@@ -8,7 +8,7 @@ generated browser output in `website/play/` (never edit it, nor `target/`).
 
 `docs/bible.md` (French) is the game design. **When the code and the bible disagree, the code has a
 bug.** A rule changes in the bible first, and only with the owner's say; comments cite it as "docs,
-section N". Art: `docs/direction-artistique.md`, `docs/3d-assets.md`, `docs/art-prompts.md`.
+section N". Art: `docs/direction-artistique.md`, `docs/3d-assets.md`, `docs/art/prompts.md`.
 
 ## Commands
 
