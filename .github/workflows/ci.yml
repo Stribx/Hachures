@@ -25,9 +25,9 @@ env:
 jobs:
   quality:
     name: Linux quality and web check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
@@ -48,7 +48,7 @@ jobs:
       # The browser build: the save goes through localStorage there.
       - name: Cache wasm-bindgen CLI
         id: wasm-bindgen-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cargo/bin/wasm-bindgen
           key: wasm-bindgen-cli-0.2.129-${{ runner.os }}-${{ runner.arch }}
@@ -74,7 +74,7 @@ jobs:
           - os: windows-latest
             platform: windows-x86_64
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - if: runner.os == 'Linux'
         run: |

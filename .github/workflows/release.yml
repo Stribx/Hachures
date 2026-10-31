@@ -33,7 +33,7 @@ jobs:
           - os: windows-latest
             platform: windows-x86_64
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - if: runner.os == 'Linux'
         run: |
@@ -64,7 +64,7 @@ jobs:
           Copy-Item -Recurse -Force "game/assets/*" "$package/assets/"
           Compress-Archive -Path "$package" -DestinationPath "$package.zip"
           python scripts/check-native-package.py "$package.zip"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: native-${{ matrix.platform }}
           path: |
@@ -74,9 +74,9 @@ jobs:
 
   web:
     name: Package web build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
@@ -85,7 +85,7 @@ jobs:
           workspaces: ". -> target"
       - name: Cache wasm-bindgen CLI
         id: wasm-bindgen-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cargo/bin/wasm-bindgen
           key: wasm-bindgen-cli-0.2.129-${{ runner.os }}-${{ runner.arch }}
@@ -95,7 +95,7 @@ jobs:
       - run: ./scripts/build-web.sh
       - run: python3 scripts/check-web-package.py website/play
       - run: tar -czf Hachures-web.tar.gz -C website/play .
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: web
           path: Hachures-web.tar.gz
@@ -103,16 +103,16 @@ jobs:
 
   publish:
     name: Publish GitHub release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [native, web]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           pattern: "*"
           path: dist
           merge-multiple: true
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           files: dist/*
           body_path: docs/releases/${{ github.ref_name }}-notes.md
